@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCUser_basic(t *testing.T) {
 	t.Parallel()
 
 	random := acctest.RandString(t, 8)
-	email := fmt.Sprintf("tf-acc-user-%s@example.com", random)
+	email := fmt.Sprintf("example-user-%s@example.com", random)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCUser_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "John", "Doe"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "Jane", "Roe"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCUser_withFirstNameTransition(t *testing.T) {
 	t.Parallel()
 
 	random := acctest.RandString(t, 8)
-	email := fmt.Sprintf("tf-acc-user-%s@example.com", random)
+	email := fmt.Sprintf("example-user-%s@example.com", random)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCUser_withFirstNameTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "Alpha", "FixedLast"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "Beta", "FixedLast"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCUser_withLastNameTransition(t *testing.T) {
 	t.Parallel()
 
 	random := acctest.RandString(t, 8)
-	email := fmt.Sprintf("tf-acc-user-%s@example.com", random)
+	email := fmt.Sprintf("example-user-%s@example.com", random)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCUser_withLastNameTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "FixedFirst", "AlphaLast"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "FixedFirst", "BetaLast"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCUser_withNamespaceTransition(t *testing.T) {
 	t.Parallel()
 
 	random := acctest.RandString(t, 8)
-	email := fmt.Sprintf("tf-acc-user-%s@example.com", random)
+	email := fmt.Sprintf("example-user-%s@example.com", random)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCUser_withNamespaceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserConfig_basic(email, "Name", "NoNamespace"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserConfig_withNamespace(email, "Name", "WithNamespace", "system"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 		},
@@ -168,9 +168,9 @@ func TestAccResourceAutoF5XCUser_full(t *testing.T) {
 	t.Parallel()
 
 	random := acctest.RandString(t, 8)
-	email := fmt.Sprintf("tf-acc-user-%s@example.com", random)
+	email := fmt.Sprintf("example-user-%s@example.com", random)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckUserDestroyProducer(t),
@@ -183,10 +183,10 @@ func TestAccResourceAutoF5XCUser_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserConfig_full(email, "FirstA", "LastA", "USER"),
 			},
 			{
-				ResourceName:                         "f5xc_user.test",
+				ResourceName:                         "f5xc_user.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user.example"),
 				ImportStateVerifyIdentifierAttribute: "email",
 			},
 			// Note: Steps 3-4 (update + re-import) are intentionally omitted.
@@ -195,7 +195,11 @@ func TestAccResourceAutoF5XCUser_full(t *testing.T) {
 			// first_name, last_name, or type would require delete + re-create,
 			// which is a separate code-generator enhancement.
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCUserConfig_full("example-user@example.com", "Example", "User", "USER"),
+		})
 }
 
 func testAccCheckUserDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -204,7 +208,7 @@ func testAccCheckUserDestroyProducer(t *testing.T) func(*terraform.State) error 
 
 func testAccResourceAutoF5XCUserConfig_basic(email, firstName, lastName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user" "test" {
+resource "f5xc_user" "example" {
   email      = %q
   first_name = %q
   last_name  = %q
@@ -214,7 +218,7 @@ resource "f5xc_user" "test" {
 
 func testAccResourceAutoF5XCUserConfig_withNamespace(email, firstName, lastName, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user" "test" {
+resource "f5xc_user" "example" {
   email      = %q
   first_name = %q
   last_name  = %q
@@ -225,7 +229,7 @@ resource "f5xc_user" "test" {
 
 func testAccResourceAutoF5XCUserConfig_full(email, firstName, lastName, userType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user" "test" {
+resource "f5xc_user" "example" {
   email      = %q
   first_name = %q
   last_name  = %q

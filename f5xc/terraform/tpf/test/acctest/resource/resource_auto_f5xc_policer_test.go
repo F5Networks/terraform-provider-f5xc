@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCPolicer_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-policer-" + testAccRunSuffix(t)
+	name := "example-policer-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckPolicerDestroyProducer(t),
@@ -39,30 +39,34 @@ func TestAccResourceAutoF5XCPolicer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicerConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCPolicerConfig_basic("example-policer", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCPolicer_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-policer-" + testAccRunSuffix(t)
+	name := "example-policer-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCPolicer_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicerConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicerConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +101,7 @@ func TestAccResourceAutoF5XCPolicer_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCPolicer_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-policer-" + testAccRunSuffix(t)
+	name := "example-policer-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCPolicer_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicerConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicerConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +136,7 @@ func TestAccResourceAutoF5XCPolicer_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCPolicer_withSharedMode(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-policer-" + testAccRunSuffix(t)
+	name := "example-policer-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +148,20 @@ func TestAccResourceAutoF5XCPolicer_withSharedMode(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicerConfig_withSharedMode(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicerConfig_withSharedModeUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,10 +171,10 @@ func TestAccResourceAutoF5XCPolicer_withSharedMode(t *testing.T) {
 func TestAccResourceAutoF5XCPolicer_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-policer-" + testAccRunSuffix(t)
+	name := "example-policer-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckPolicerDestroyProducer(t),
@@ -179,24 +183,28 @@ func TestAccResourceAutoF5XCPolicer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicerConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicerConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_policer.test",
+				ResourceName:                         "f5xc_policer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCPolicerConfig_full("example-policer", "default"),
+		})
 }
 
 func testAccCheckPolicerDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -205,42 +213,42 @@ func testAccCheckPolicerDestroyProducer(t *testing.T) func(*terraform.State) err
 
 func testAccResourceAutoF5XCPolicerConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Basic policer example"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCPolicerConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer updated"
-  committed_information_rate = 20000
-  burst_size                = 20000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Updated basic policer example"
+  committed_information_rate  = 20000
+  burst_size                  = 20000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCPolicerConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer with labels"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Policer example with labels"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -248,16 +256,16 @@ resource "f5xc_policer" "test" {
 
 func testAccResourceAutoF5XCPolicerConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer with labels"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Policer example with labels"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "shared"
   }
 }
@@ -266,13 +274,13 @@ resource "f5xc_policer" "test" {
 
 func testAccResourceAutoF5XCPolicerConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer with annotations"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Policer example with annotations"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 
   annotations = {
     owner = "platform-team"
@@ -283,16 +291,16 @@ resource "f5xc_policer" "test" {
 
 func testAccResourceAutoF5XCPolicerConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Acceptance test policer with annotations"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Policer example with annotations"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 
   annotations = {
-    owner = "infra-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)
@@ -300,42 +308,42 @@ resource "f5xc_policer" "test" {
 
 func testAccResourceAutoF5XCPolicerConfig_withSharedMode(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Shared policer"
-  committed_information_rate = 50000
-  burst_size                = 50000
-  policer_mode              = ["POLICER_MODE_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Shared policer example"
+  committed_information_rate  = 50000
+  burst_size                  = 50000
+  policer_mode                = ["POLICER_MODE_SHARED"]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCPolicerConfig_withSharedModeUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Shared policer updated"
-  committed_information_rate = 100000
-  burst_size                = 100000
-  policer_mode              = ["POLICER_MODE_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Updated shared policer example"
+  committed_information_rate  = 100000
+  burst_size                  = 100000
+  policer_mode                = ["POLICER_MODE_SHARED"]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCPolicerConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Full policer"
-  committed_information_rate = 10000
-  burst_size                = 10000
-  policer_mode              = ["POLICER_MODE_NOT_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Full policer example"
+  committed_information_rate  = 10000
+  burst_size                  = 10000
+  policer_mode                = ["POLICER_MODE_NOT_SHARED"]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -347,21 +355,21 @@ resource "f5xc_policer" "test" {
 
 func testAccResourceAutoF5XCPolicerConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policer" "test" {
-  name                      = "%s"
-  namespace                 = "%s"
-  description               = "Full policer updated"
-  committed_information_rate = 20000
-  burst_size                = 20000
-  policer_mode              = ["POLICER_MODE_SHARED"]
+resource "f5xc_policer" "example" {
+  name                        = %q
+  namespace                   = %q
+  description                 = "Updated full policer example"
+  committed_information_rate  = 20000
+  burst_size                  = 20000
+  policer_mode                = ["POLICER_MODE_SHARED"]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "shared"
   }
 
   annotations = {
-    owner = "infra-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)

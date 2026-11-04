@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -25,7 +26,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -35,12 +39,23 @@ import (
 
 	"gopkg.volterra.us/stdlib/codec"
 	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
+	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_api_credential "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_credential"
 )
 
 // ResourceF5XCApiCredential defines the resource implementation.
 type ResourceF5XCApiCredential struct {
 	client *client.APIClient
+}
+
+type ApiCredentialSelfCredentialChoice struct {
+	ApiCertificate types.Object `tfsdk:"api_certificate"`
+	ApiToken       types.Bool   `tfsdk:"api_token"`
+}
+
+type ApiCredentialApiCert struct {
+	Password types.String `tfsdk:"password"`
 }
 
 type ApiCredentialCustomCreateSpecType struct {
@@ -52,13 +67,14 @@ type ApiCredentialCustomCreateSpecType struct {
 
 // ResourceF5XCApiCredentialModel describes the resource data model.
 type ResourceF5XCApiCredentialModel struct {
-	ExpirationDays types.Int64    `tfsdk:"expiration_days"`
-	Name           types.String   `tfsdk:"name"`
-	Namespace      types.String   `tfsdk:"namespace"`
-	Spec           types.Object   `tfsdk:"spec"`
-	CredentialName types.String   `tfsdk:"credential_name"`
-	RenewTrigger   types.Bool     `tfsdk:"renew_trigger"`
-	Timeouts       timeouts.Value `tfsdk:"timeouts"`
+	ExpirationDays       types.Int64    `tfsdk:"expiration_days"`
+	Name                 types.String   `tfsdk:"name"`
+	Namespace            types.String   `tfsdk:"namespace"`
+	SelfCredentialChoice types.Object   `tfsdk:"self_credential_choice"`
+	Spec                 types.Object   `tfsdk:"spec"`
+	CredentialName       types.String   `tfsdk:"credential_name"`
+	RenewTrigger         types.Bool     `tfsdk:"renew_trigger"`
+	Timeouts             timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -71,6 +87,21 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for OneOfField --> SelfCredentialChoice
+var ApiCredentialSelfCredentialChoiceModelAttributeMap = map[string]attr.Type{
+
+	"api_certificate": types.ObjectType{
+		AttrTypes: ApiCredentialSelfCredentialChoiceApiCertificateModelAttributeMap,
+	},
+	"api_token": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> ApiCertificate
+var ApiCredentialSelfCredentialChoiceApiCertificateModelAttributeMap = map[string]attr.Type{
+
+	"password": types.StringType,
+}
+
 // Attribute map for PointerField --> Spec
 var ApiCredentialSpecModelAttributeMap = map[string]attr.Type{
 
@@ -93,8 +124,8 @@ func (r *ResourceF5XCApiCredential) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Create API credential user can request 3 types of credential for themselves. API_TOKEN, API_CERTIFICATE and KUBE_CONFIG. an API_TOKEN is an easy to use secret that can be send part of HTTP request header Authorization: APIToken <value> in the create request expiry can be set additionally. F5XC also supports renew and revoke of API_TOKENs. an API_CERTIFICATE is a password protected P12 certificate bundle document and can be used as client certificate. when sending create request, user can request with an expiry and password. F5XC Identity Authority (IA) mints new certificate with required credentials and is shared in the response as API Certificate. a virtual K8s kubeconfig can be generate with type KUBE_CONFIG. Create request can specify cluster, namespace and expiry with embedded user access with client certificate. request can specify name, expiry and type of credential required. since this credential inherits the creator's RBAC service will determine the user from request context.",
-		Description:         "Create API credential user can request 3 types of credential for themselves. API_TOKEN, API_CERTIFICATE and KUBE_CONFIG. an API_TOKEN is an easy to use secret that can be send part of HTTP request header Authorization: APIToken <value> in the create request expiry can be set additionally. F5XC also supports renew and revoke of API_TOKENs. an API_CERTIFICATE is a password protected P12 certificate bundle document and can be used as client certificate. when sending create request, user can request with an expiry and password. F5XC Identity Authority (IA) mints new certificate with required credentials and is shared in the response as API Certificate. a virtual K8s kubeconfig can be generate with type KUBE_CONFIG. Create request can specify cluster, namespace and expiry with embedded user access with client certificate. request can specify name, expiry and type of credential required. since this credential inherits the creator's RBAC service will determine the user from request context.",
+		MarkdownDescription: "Object keeps track of various object credentials downloaded by users.",
+		Description:         "Object keeps track of various object credentials downloaded by users.",
 
 		Attributes: map[string]schema.Attribute{
 			"expiration_days": schema.Int64Attribute{
@@ -121,10 +152,55 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 				Optional:            true,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"self_credential_choice": schema.SingleNestedAttribute{
+				Description:         "API Credential Spec The credential specification can be one of the following types: - API token - API certificate",
+				MarkdownDescription: "API Credential Spec The credential specification can be one of the following types: - API token - API certificate",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.ExactlyOneOf(
+						"api_certificate",
+						"api_token",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"api_certificate": schema.SingleNestedAttribute{
+						Description:         "api_certificate API certificate parameters.",
+						MarkdownDescription: "api_certificate API certificate parameters.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"password": schema.StringAttribute{
+								Description:         "Password for API certificate Password is used for generating an API certificate P12 bundle user can use to protect access to it. this password will not be saved/persisted anywhere in the system. Applicable for credential type API_CERTIFICATE Users have to use this password when they use the certificate, e.g. in curl or while adding to key chain.",
+								MarkdownDescription: "Password for API certificate Password is used for generating an API certificate P12 bundle user can use to protect access to it. this password will not be saved/persisted anywhere in the system. Applicable for credential type API_CERTIFICATE Users have to use this password when they use the certificate, e.g. in curl or while adding to key chain.",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Sensitive:           true,
+								Validators: []validator.String{
+									bytesvalidator.BytesBetween(6, 50),
+								},
+							},
+						},
+					},
+					"api_token": schema.BoolAttribute{
+						Description:         "api_token API token parameters.",
+						MarkdownDescription: "api_token API token parameters.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
@@ -133,6 +209,7 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
+				DeprecationMessage:  "This field is deprecated and will be removed in future release.",
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.RequiresReplace(),
 				},
@@ -143,6 +220,7 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
+						Sensitive:           true,
 						Validators: []validator.String{
 							bytesvalidator.BytesBetween(6, 50),
 							requiredifvalidator.RequiredIf("type", "API_CERTIFICATE"),
@@ -258,9 +336,17 @@ func (r *ResourceF5XCApiCredential) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCApiCredential) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCApiCredentialModel
 
 	// Read Terraform plan data into the model
@@ -306,6 +392,41 @@ func (r *ResourceF5XCApiCredential) Create(ctx context.Context, request resource
 	// resource modelToSpecRoot StringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		req.Namespace = string(data.Namespace.ValueString())
+	}
+
+	// resource modelToSpecRoot OneOfField --> SelfCredentialChoice
+	if !data.SelfCredentialChoice.IsNull() && !data.SelfCredentialChoice.IsUnknown() {
+		selfCredentialChoiceModel := ApiCredentialSelfCredentialChoice{}
+		response.Diagnostics.Append(data.SelfCredentialChoice.As(ctx, &selfCredentialChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ApiCertificate
+		if !selfCredentialChoiceModel.ApiCertificate.IsNull() && !selfCredentialChoiceModel.ApiCertificate.IsUnknown() {
+			var apiCredentialApiCertModel ApiCredentialApiCert
+			response.Diagnostics.Append(selfCredentialChoiceModel.ApiCertificate.As(ctx, &apiCredentialApiCertModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			apiCertificateOneOfSpec := &ves_io_schema_api_credential.CreateRequest_ApiCertificate{}
+			apiCertificateOneOfSpec.ApiCertificate = &ves_io_schema_api_credential.ApiCertificateType{}
+			req.SelfCredentialChoice = apiCertificateOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> Password
+			if !apiCredentialApiCertModel.Password.IsNull() && !apiCredentialApiCertModel.Password.IsUnknown() {
+				apiCertificateOneOfSpec.ApiCertificate.Password = string(apiCredentialApiCertModel.Password.ValueString())
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ApiToken
+		if !selfCredentialChoiceModel.ApiToken.IsNull() && !selfCredentialChoiceModel.ApiToken.IsUnknown() {
+			apiTokenSpecBool := &ves_io_schema_api_credential.CreateRequest_ApiToken{}
+			apiTokenSpecBool.ApiToken = &ves_io_schema.Empty{}
+			req.SelfCredentialChoice = apiTokenSpecBool
+		}
+
 	}
 
 	{
@@ -382,7 +503,7 @@ func (r *ResourceF5XCApiCredential) Create(ctx context.Context, request resource
 	createRespMsg, err := r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "api_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "api_credential", err),
 		)
 		return
 	}
@@ -448,6 +569,8 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
+	priorSelfCredentialChoice := data.SelfCredentialChoice
+	priorSpec := data.Spec
 
 	// CustomAPI Read (IsCustomAPIOnly): List
 	customReadRPCFQN := "ves.io.schema.api_credential.CustomAPI.List"
@@ -456,7 +579,7 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "api_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_credential", err),
 		)
 		return
 	}
@@ -492,6 +615,17 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 		data.Namespace = types.StringNull()
 	}
 
+	// Restore prior state for SelfCredentialChoice. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorSelfCredentialChoice.IsNull() && !priorSelfCredentialChoice.IsUnknown() {
+		data.SelfCredentialChoice = priorSelfCredentialChoice
+	}
+	// Restore prior state for Spec. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorSpec.IsNull() && !priorSpec.IsUnknown() {
+		data.Spec = priorSpec
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -501,6 +635,12 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCApiCredential) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCApiCredentialModel
@@ -558,6 +698,41 @@ func (r *ResourceF5XCApiCredential) Update(ctx context.Context, request resource
 	// resource modelToSpecRoot StringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		req.Namespace = string(data.Namespace.ValueString())
+	}
+
+	// resource modelToSpecRoot OneOfField --> SelfCredentialChoice
+	if !data.SelfCredentialChoice.IsNull() && !data.SelfCredentialChoice.IsUnknown() {
+		selfCredentialChoiceModel := ApiCredentialSelfCredentialChoice{}
+		response.Diagnostics.Append(data.SelfCredentialChoice.As(ctx, &selfCredentialChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ApiCertificate
+		if !selfCredentialChoiceModel.ApiCertificate.IsNull() && !selfCredentialChoiceModel.ApiCertificate.IsUnknown() {
+			var apiCredentialApiCertModel ApiCredentialApiCert
+			response.Diagnostics.Append(selfCredentialChoiceModel.ApiCertificate.As(ctx, &apiCredentialApiCertModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			apiCertificateOneOfSpec := &ves_io_schema_api_credential.CreateRequest_ApiCertificate{}
+			apiCertificateOneOfSpec.ApiCertificate = &ves_io_schema_api_credential.ApiCertificateType{}
+			req.SelfCredentialChoice = apiCertificateOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> Password
+			if !apiCredentialApiCertModel.Password.IsNull() && !apiCredentialApiCertModel.Password.IsUnknown() {
+				apiCertificateOneOfSpec.ApiCertificate.Password = string(apiCredentialApiCertModel.Password.ValueString())
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ApiToken
+		if !selfCredentialChoiceModel.ApiToken.IsNull() && !selfCredentialChoiceModel.ApiToken.IsUnknown() {
+			apiTokenSpecBool := &ves_io_schema_api_credential.CreateRequest_ApiToken{}
+			apiTokenSpecBool.ApiToken = &ves_io_schema.Empty{}
+			req.SelfCredentialChoice = apiTokenSpecBool
+		}
+
 	}
 
 	{
@@ -697,7 +872,7 @@ func (r *ResourceF5XCApiCredential) Delete(ctx context.Context, request resource
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "api_credential", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "api_credential", err),
 			)
 			return
 		}
@@ -713,7 +888,7 @@ func (r *ResourceF5XCApiCredential) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "api_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "api_credential", err),
 		)
 		return
 	}

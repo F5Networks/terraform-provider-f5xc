@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	ves_io_schema_user_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/user_group"
 )
@@ -56,8 +57,8 @@ func (d *DataSourceF5XCUserGroup) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCUserGroup) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a user_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a user_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_group) etc. can be fetched",
+		MarkdownDescription: "Represents group for a given tenant",
+		Description:         "Represents group for a given tenant",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -174,7 +175,7 @@ func (d *DataSourceF5XCUserGroup) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_user_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "user_group", err))
 		return
 	}
 
@@ -228,20 +229,12 @@ func (d *DataSourceF5XCUserGroup) Read(ctx context.Context, request datasource.R
 	}
 
 	// data SpecToModelRoot StringField --> DisplayName
-	if specData.GetDisplayName() != "" {
-		data.DisplayName = types.StringValue(specData.GetDisplayName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.DisplayName = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.DisplayName = types.StringValue(specData.GetDisplayName())
 
 	// data SpecToModelRoot StringField --> SyncId
-	if specData.GetSyncId() != "" {
-		data.SyncId = types.StringValue(specData.GetSyncId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SyncId = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.SyncId = types.StringValue(specData.GetSyncId())
 
 	// data SpecToModelRoot EnumField --> SyncMode
 	{

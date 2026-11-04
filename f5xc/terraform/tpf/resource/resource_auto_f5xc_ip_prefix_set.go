@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
@@ -110,8 +111,8 @@ func (r *ResourceF5XCIpPrefixSet) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCIpPrefixSet) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ip_prefix_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ip_prefix_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ip_prefix_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ip_prefix_set) etc. can be fetched",
+		MarkdownDescription: "An ip prefix set contains an unordered list of IP prefixes. It can can be used to whitelist or blacklist specific IP prefixes via network policy or service policy.",
+		Description:         "An ip prefix set contains an unordered list of IP prefixes. It can can be used to whitelist or blacklist specific IP prefixes via network policy or service policy.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -246,7 +247,7 @@ func (r *ResourceF5XCIpPrefixSet) Schema(ctx context.Context, request resource.S
 							Computed:            false,
 							Validators: []validator.String{
 								stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+									regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 									"must be a valid IPv6 prefix (CIDR notation)",
 								),
 								stringvalidator.LengthAtLeast(1),
@@ -317,9 +318,17 @@ func (r *ResourceF5XCIpPrefixSet) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCIpPrefixSet) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCIpPrefixSetModel
 
 	// Read Terraform plan data into the model
@@ -465,7 +474,7 @@ func (r *ResourceF5XCIpPrefixSet) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -488,7 +497,7 @@ func (r *ResourceF5XCIpPrefixSet) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_ip_prefix_set.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "ip_prefix_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "ip_prefix_set", err),
 		)
 		return
 	}
@@ -650,14 +659,12 @@ func (r *ResourceF5XCIpPrefixSet) Create(ctx context.Context, request resource.C
 			AttrTypes: IpPrefixSetIpv4PrefixesModelAttributeMap,
 		}
 		nullIpv4PrefixesList := basetypes.NewListNull(ipv4PrefixesObjectType)
-		var priorValIpv4Prefixes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ipv4_prefixes"), &priorValIpv4Prefixes)
-		if !priorValIpv4Prefixes.IsNull() && !priorValIpv4Prefixes.IsUnknown() {
-			data.Ipv4Prefixes = priorValIpv4Prefixes
+		if !data.Ipv4Prefixes.IsNull() && !data.Ipv4Prefixes.IsUnknown() && len(data.Ipv4Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv4Prefixes = basetypes.NewListValueMust(ipv4PrefixesObjectType, nil)
 		} else {
 			data.Ipv4Prefixes = nullIpv4PrefixesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Ipv6Prefixes
@@ -704,14 +711,12 @@ func (r *ResourceF5XCIpPrefixSet) Create(ctx context.Context, request resource.C
 			AttrTypes: IpPrefixSetIpv6PrefixesModelAttributeMap,
 		}
 		nullIpv6PrefixesList := basetypes.NewListNull(ipv6PrefixesObjectType)
-		var priorValIpv6Prefixes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ipv6_prefixes"), &priorValIpv6Prefixes)
-		if !priorValIpv6Prefixes.IsNull() && !priorValIpv6Prefixes.IsUnknown() {
-			data.Ipv6Prefixes = priorValIpv6Prefixes
+		if !data.Ipv6Prefixes.IsNull() && !data.Ipv6Prefixes.IsUnknown() && len(data.Ipv6Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv6Prefixes = basetypes.NewListValueMust(ipv6PrefixesObjectType, nil)
 		} else {
 			data.Ipv6Prefixes = nullIpv6PrefixesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -764,7 +769,7 @@ func (r *ResourceF5XCIpPrefixSet) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_ip_prefix_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "ip_prefix_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "ip_prefix_set", err),
 		)
 		return
 	}
@@ -926,14 +931,12 @@ func (r *ResourceF5XCIpPrefixSet) Read(ctx context.Context, request resource.Rea
 			AttrTypes: IpPrefixSetIpv4PrefixesModelAttributeMap,
 		}
 		nullIpv4PrefixesList := basetypes.NewListNull(ipv4PrefixesObjectType)
-		var priorValIpv4Prefixes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("ipv4_prefixes"), &priorValIpv4Prefixes)
-		if !priorValIpv4Prefixes.IsNull() && !priorValIpv4Prefixes.IsUnknown() {
-			data.Ipv4Prefixes = priorValIpv4Prefixes
+		if !data.Ipv4Prefixes.IsNull() && !data.Ipv4Prefixes.IsUnknown() && len(data.Ipv4Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv4Prefixes = basetypes.NewListValueMust(ipv4PrefixesObjectType, nil)
 		} else {
 			data.Ipv4Prefixes = nullIpv4PrefixesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Ipv6Prefixes
@@ -980,14 +983,12 @@ func (r *ResourceF5XCIpPrefixSet) Read(ctx context.Context, request resource.Rea
 			AttrTypes: IpPrefixSetIpv6PrefixesModelAttributeMap,
 		}
 		nullIpv6PrefixesList := basetypes.NewListNull(ipv6PrefixesObjectType)
-		var priorValIpv6Prefixes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("ipv6_prefixes"), &priorValIpv6Prefixes)
-		if !priorValIpv6Prefixes.IsNull() && !priorValIpv6Prefixes.IsUnknown() {
-			data.Ipv6Prefixes = priorValIpv6Prefixes
+		if !data.Ipv6Prefixes.IsNull() && !data.Ipv6Prefixes.IsUnknown() && len(data.Ipv6Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv6Prefixes = basetypes.NewListValueMust(ipv6PrefixesObjectType, nil)
 		} else {
 			data.Ipv6Prefixes = nullIpv6PrefixesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -999,6 +1000,12 @@ func (r *ResourceF5XCIpPrefixSet) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCIpPrefixSetModel
@@ -1164,7 +1171,7 @@ func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1180,7 +1187,7 @@ func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_ip_prefix_set.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "ip_prefix_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "ip_prefix_set", err),
 		)
 		return
 	}
@@ -1189,7 +1196,7 @@ func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_ip_prefix_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "ip_prefix_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "ip_prefix_set", err),
 		)
 		return
 	}
@@ -1350,14 +1357,12 @@ func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.U
 			AttrTypes: IpPrefixSetIpv4PrefixesModelAttributeMap,
 		}
 		nullIpv4PrefixesList := basetypes.NewListNull(ipv4PrefixesObjectType)
-		var priorValIpv4Prefixes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ipv4_prefixes"), &priorValIpv4Prefixes)
-		if !priorValIpv4Prefixes.IsNull() && !priorValIpv4Prefixes.IsUnknown() {
-			data.Ipv4Prefixes = priorValIpv4Prefixes
+		if !data.Ipv4Prefixes.IsNull() && !data.Ipv4Prefixes.IsUnknown() && len(data.Ipv4Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv4Prefixes = basetypes.NewListValueMust(ipv4PrefixesObjectType, nil)
 		} else {
 			data.Ipv4Prefixes = nullIpv4PrefixesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Ipv6Prefixes
@@ -1404,14 +1409,12 @@ func (r *ResourceF5XCIpPrefixSet) Update(ctx context.Context, request resource.U
 			AttrTypes: IpPrefixSetIpv6PrefixesModelAttributeMap,
 		}
 		nullIpv6PrefixesList := basetypes.NewListNull(ipv6PrefixesObjectType)
-		var priorValIpv6Prefixes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ipv6_prefixes"), &priorValIpv6Prefixes)
-		if !priorValIpv6Prefixes.IsNull() && !priorValIpv6Prefixes.IsUnknown() {
-			data.Ipv6Prefixes = priorValIpv6Prefixes
+		if !data.Ipv6Prefixes.IsNull() && !data.Ipv6Prefixes.IsUnknown() && len(data.Ipv6Prefixes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Ipv6Prefixes = basetypes.NewListValueMust(ipv6PrefixesObjectType, nil)
 		} else {
 			data.Ipv6Prefixes = nullIpv6PrefixesList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1486,7 +1489,7 @@ func (r *ResourceF5XCIpPrefixSet) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "ip_prefix_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "ip_prefix_set", err),
 		)
 		return
 	}

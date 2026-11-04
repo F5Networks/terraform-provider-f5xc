@@ -29,15 +29,15 @@ type DataSourceF5XCNatPolicy struct {
 	client *client.APIClient
 }
 
-type NatPolicyGlobalSpecTypeAppliesToChoice struct {
+type NatPolicyAppliesToChoice struct {
 	Site types.Object `tfsdk:"site"`
 }
 
-type NatPolicyGlobalSpecTypeSite struct {
+type NatPolicySite struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
-type NatPolicyNatPolicyRuleType struct {
+type NatPolicyRuleType struct {
 	Action       types.Object `tfsdk:"action"`
 	Criteria     types.Object `tfsdk:"criteria"`
 	EnableChoice types.Object `tfsdk:"enable_choice"`
@@ -45,53 +45,53 @@ type NatPolicyNatPolicyRuleType struct {
 	ScopeChoice  types.Object `tfsdk:"scope_choice"`
 }
 
-type NatPolicyNatPolicyActionType struct {
+type NatPolicyActionType struct {
 	SourceNatChoice types.Object `tfsdk:"source_nat_choice"`
 }
 
-type NatPolicyActionTypeSourceNatChoice struct {
+type NatPolicySrcNatChoice struct {
 	Dynamic     types.Object `tfsdk:"dynamic"`
 	VirtualCidr types.String `tfsdk:"virtual_cidr"`
 }
 
-type NatPolicyActionTypeDynamic struct {
+type NatPolicyDynamic struct {
 	PoolChoice types.Object `tfsdk:"pool_choice"`
 }
 
-type NatPolicyDynamicPoolPoolChoice struct {
+type NatPolicyPoolChoice struct {
 	ElasticIps types.Object `tfsdk:"elastic_ips"`
 	Pools      types.Object `tfsdk:"pools"`
 }
 
-type NatPolicyDynamicPoolElasticIps struct {
+type NatPolicyElasticIps struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
-type NatPolicyDynamicPoolPools struct {
+type NatPolicyPools struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type NatPolicyNatPolicyMatchCriteriaType struct {
+type NatPolicyMatchCriteriaType struct {
 	DestinationCidr types.List   `tfsdk:"destination_cidr"`
 	NetworkChoice   types.Object `tfsdk:"network_choice"`
 	ProtocolChoice  types.Object `tfsdk:"protocol_choice"`
 	SourceCidr      types.List   `tfsdk:"source_cidr"`
 }
 
-type NatPolicyMatchCriteriaTypeNetworkChoice struct {
+type NatPolicyNetChoice struct {
 	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
 }
 
-type NatPolicyMatchCriteriaTypeProtocolChoice struct {
+type NatPolicyProtoChoice struct {
 	Any  types.Bool   `tfsdk:"any"`
 	Icmp types.Bool   `tfsdk:"icmp"`
 	Tcp  types.Object `tfsdk:"tcp"`
 	Udp  types.Object `tfsdk:"udp"`
 }
 
-type NatPolicyMatchCriteriaTypeTcp struct {
+type NatPolicyTcp struct {
 	DestinationPort types.Object `tfsdk:"destination_port"`
 	SourcePort      types.Object `tfsdk:"source_port"`
 }
@@ -100,46 +100,47 @@ type NatPolicyPortMatcherType struct {
 	PortMatchChoice types.Object `tfsdk:"port_match_choice"`
 }
 
-type NatPolicyPortMatcherTypePortMatchChoice struct {
+type NatPolicyPortMatchChoice struct {
 	NoPortMatch types.Bool   `tfsdk:"no_port_match"`
 	Port        types.Int64  `tfsdk:"port"`
 	PortRanges  types.String `tfsdk:"port_ranges"`
 }
 
-type NatPolicyMatchCriteriaTypeUdp struct {
+type NatPolicyUdp struct {
 	DestinationPort types.Object `tfsdk:"destination_port"`
 	SourcePort      types.Object `tfsdk:"source_port"`
 }
 
-type NatPolicyRuleTypeEnableChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+type NatPolicyEnableChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
-type NatPolicyRuleTypeScopeChoice struct {
+type NatPolicyScopeChoice struct {
 	CloudConnect   types.Object `tfsdk:"cloud_connect"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 	Segment        types.Object `tfsdk:"segment"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 }
 
-type NatPolicyRuleTypeCloudConnect struct {
+type NatPolicyCloudConnect struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
-type NatPolicyRuleTypeNodeInterface struct {
+type NatPolicyNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type NatPolicyNodeInterfaceInfo struct {
+type NatPolicyNodeIfaceInfo struct {
 	Interface types.List   `tfsdk:"interface"`
 	Node      types.String `tfsdk:"node"`
 }
 
-type NatPolicyRuleTypeSegment struct {
+type NatPolicySegment struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
-type NatPolicyRuleTypeVirtualNetwork struct {
+type NatPolicyVirtualNet struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
@@ -415,7 +416,8 @@ var NatPolicyRulesCriteriaProtocolChoiceUdpSourcePortPortMatchModelAttributeMap 
 // Attribute map for RequiredOneOfField --> EnableChoice
 var NatPolicyRulesEnableChoiceModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ScopeChoice
@@ -541,8 +543,8 @@ func (d *DataSourceF5XCNatPolicy) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a nat_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nat_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a nat_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nat_policy) etc. can be fetched",
+		MarkdownDescription: "NAT Policy object represents the configuration of Network Address Translation parameters on<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br>Site where the NAT objects are applicable<br>Ingress points where the NAT policies need to be applied<br>Match criteria of the packet to apply NAT Policy<br>Action to take if the Match criteria passes",
+		Description:         "NAT Policy object represents the configuration of Network Address Translation parameters on F5XC Customer Edge sites. The following properties can be configured in this object: Site where the NAT objects are applicable Ingress points where the NAT policies need to be applied Match criteria of the packet to apply NAT Policy Action to take if the Match criteria passes",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -950,6 +952,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
+								"disable": schema.BoolAttribute{
+									Description: "disable Disables the rule",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
 								"enable": schema.BoolAttribute{
 									Description: "enable Enables the rule",
 									Required:    false,
@@ -1192,7 +1200,7 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "nat_policy", err))
 		return
 	}
 
@@ -1263,7 +1271,7 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 		appliesToChoiceChoices := specData.GetAppliesToChoice()
 
 		// The model struct that will be populated by the nested template.
-		var appliesToChoiceChoicesModel = &NatPolicyGlobalSpecTypeAppliesToChoice{}
+		var appliesToChoiceChoicesModel = &NatPolicyAppliesToChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1359,15 +1367,15 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Rules
-	rulesElementsSpectToModel := make([]NatPolicyNatPolicyRuleType, 0, len(specData.GetRules()))
+	rulesElementsSpectToModel := make([]NatPolicyRuleType, 0, len(specData.GetRules()))
 
 	for _, rulesElement := range specData.GetRules() {
-		natPolicyNatPolicyRuleTypeModel := NatPolicyNatPolicyRuleType{}
+		natPolicyRuleTypeModel := NatPolicyRuleType{}
 
 		// data specToModelNested RequiredPointerField --> Action
 		if rulesElement.GetAction() != nil {
 			// Create the nested Go struct
-			natPolicyNatPolicyActionTypeModel := &NatPolicyNatPolicyActionType{}
+			natPolicyActionTypeModel := &NatPolicyActionType{}
 			actionElement := rulesElement.GetAction()
 
 			// Recursively populate the nested struct
@@ -1574,19 +1582,19 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				natPolicyNatPolicyActionTypeModel.SourceNatChoice = finalObj
+				natPolicyActionTypeModel.SourceNatChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				natPolicyNatPolicyActionTypeModel.SourceNatChoice = types.ObjectNull(NatPolicyRulesActionSourceNatChoiceModelAttributeMap)
+				natPolicyActionTypeModel.SourceNatChoice = types.ObjectNull(NatPolicyRulesActionSourceNatChoiceModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			natPolicyNatPolicyActionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NatPolicyRulesActionModelAttributeMap, natPolicyNatPolicyActionTypeModel)
+			natPolicyActionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NatPolicyRulesActionModelAttributeMap, natPolicyActionTypeModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			natPolicyNatPolicyRuleTypeModel.Action = natPolicyNatPolicyActionTypeModelObj
+			natPolicyRuleTypeModel.Action = natPolicyActionTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -1595,13 +1603,13 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			// here because the API may always return a non-nil struct (with REDACTED values) for this
 			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			natPolicyNatPolicyRuleTypeModel.Action = types.ObjectNull(NatPolicyRulesActionModelAttributeMap)
+			natPolicyRuleTypeModel.Action = types.ObjectNull(NatPolicyRulesActionModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> Criteria
 		if rulesElement.GetCriteria() != nil {
 			// Create the nested Go struct
-			natPolicyNatPolicyMatchCriteriaTypeModel := &NatPolicyNatPolicyMatchCriteriaType{}
+			natPolicyMatchCriteriaTypeModel := &NatPolicyMatchCriteriaType{}
 			criteriaElement := rulesElement.GetCriteria()
 
 			// Recursively populate the nested struct
@@ -1613,9 +1621,9 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				if response.Diagnostics.HasError() {
 					return
 				}
-				natPolicyNatPolicyMatchCriteriaTypeModel.DestinationCidr = listValue
+				natPolicyMatchCriteriaTypeModel.DestinationCidr = listValue
 			} else {
-				natPolicyNatPolicyMatchCriteriaTypeModel.DestinationCidr = types.ListNull(types.StringType)
+				natPolicyMatchCriteriaTypeModel.DestinationCidr = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested OneOfField --> NetworkChoice
@@ -1660,10 +1668,10 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				natPolicyNatPolicyMatchCriteriaTypeModel.NetworkChoice = finalObj
+				natPolicyMatchCriteriaTypeModel.NetworkChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				natPolicyNatPolicyMatchCriteriaTypeModel.NetworkChoice = types.ObjectNull(NatPolicyRulesCriteriaNetworkChoiceModelAttributeMap)
+				natPolicyMatchCriteriaTypeModel.NetworkChoice = types.ObjectNull(NatPolicyRulesCriteriaNetworkChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested OneOfField --> ProtocolChoice
@@ -2090,10 +2098,10 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				natPolicyNatPolicyMatchCriteriaTypeModel.ProtocolChoice = finalObj
+				natPolicyMatchCriteriaTypeModel.ProtocolChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				natPolicyNatPolicyMatchCriteriaTypeModel.ProtocolChoice = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceModelAttributeMap)
+				natPolicyMatchCriteriaTypeModel.ProtocolChoice = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested ArrayOfStringField --> SourceCidr
@@ -2103,18 +2111,18 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				if response.Diagnostics.HasError() {
 					return
 				}
-				natPolicyNatPolicyMatchCriteriaTypeModel.SourceCidr = listValue
+				natPolicyMatchCriteriaTypeModel.SourceCidr = listValue
 			} else {
-				natPolicyNatPolicyMatchCriteriaTypeModel.SourceCidr = types.ListNull(types.StringType)
+				natPolicyMatchCriteriaTypeModel.SourceCidr = types.ListNull(types.StringType)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			natPolicyNatPolicyMatchCriteriaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NatPolicyRulesCriteriaModelAttributeMap, natPolicyNatPolicyMatchCriteriaTypeModel)
+			natPolicyMatchCriteriaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NatPolicyRulesCriteriaModelAttributeMap, natPolicyMatchCriteriaTypeModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			natPolicyNatPolicyRuleTypeModel.Criteria = natPolicyNatPolicyMatchCriteriaTypeModelObj
+			natPolicyRuleTypeModel.Criteria = natPolicyMatchCriteriaTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -2123,7 +2131,7 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			natPolicyNatPolicyRuleTypeModel.Criteria = types.ObjectNull(NatPolicyRulesCriteriaModelAttributeMap)
+			natPolicyRuleTypeModel.Criteria = types.ObjectNull(NatPolicyRulesCriteriaModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> EnableChoice
@@ -2137,6 +2145,15 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			rulesenableChoiceChoices := rulesElement.GetEnableChoice()
 
 			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Disable)
+
+			if isDisable {
+				rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+			}
 
 			// data specToModelNested BoolOfOneOfPointerField --> Enable
 			_, isEnable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Enable)
@@ -2160,18 +2177,18 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			natPolicyNatPolicyRuleTypeModel.EnableChoice = finalObj
+			natPolicyRuleTypeModel.EnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			natPolicyNatPolicyRuleTypeModel.EnableChoice = types.ObjectNull(NatPolicyRulesEnableChoiceModelAttributeMap)
+			natPolicyRuleTypeModel.EnableChoice = types.ObjectNull(NatPolicyRulesEnableChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredStringField --> Name
 		if rulesElement.GetName() != "" {
-			natPolicyNatPolicyRuleTypeModel.Name = types.StringValue(rulesElement.GetName())
+			natPolicyRuleTypeModel.Name = types.StringValue(rulesElement.GetName())
 		} else {
 			// Empty string, set to null
-			natPolicyNatPolicyRuleTypeModel.Name = types.StringNull()
+			natPolicyRuleTypeModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested RequiredOneOfField --> ScopeChoice
@@ -2271,9 +2288,9 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 					if len(nodeInterfaceElement.GetList()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						listElements := make([]NatPolicyNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+						listElements := make([]NatPolicyNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 						for _, listElement := range nodeInterfaceElement.GetList() {
-							natPolicyNodeInterfaceInfoModel := NatPolicyNodeInterfaceInfo{}
+							natPolicyNodeIfaceInfoModel := NatPolicyNodeIfaceInfo{}
 
 							// data specToModelNested ArrayOfPointerField --> Interface
 							if len(listElement.GetInterface()) > 0 {
@@ -2316,24 +2333,24 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 								if response.Diagnostics.HasError() {
 									return
 								}
-								natPolicyNodeInterfaceInfoModel.Interface = interfaceListValue
+								natPolicyNodeIfaceInfoModel.Interface = interfaceListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								natPolicyNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap})
+								natPolicyNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap})
 							}
 
 							// data specToModelNested StringField --> Node
 							if listElement.GetNode() != "" {
-								natPolicyNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+								natPolicyNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 							} else {
 								// Empty string, set to null
-								natPolicyNodeInterfaceInfoModel.Node = types.StringNull()
+								natPolicyNodeIfaceInfoModel.Node = types.StringNull()
 							}
 
-							listElements = append(listElements, natPolicyNodeInterfaceInfoModel)
+							listElements = append(listElements, natPolicyNodeIfaceInfoModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2517,13 +2534,13 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			natPolicyNatPolicyRuleTypeModel.ScopeChoice = finalObj
+			natPolicyRuleTypeModel.ScopeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			natPolicyNatPolicyRuleTypeModel.ScopeChoice = types.ObjectNull(NatPolicyRulesScopeChoiceModelAttributeMap)
+			natPolicyRuleTypeModel.ScopeChoice = types.ObjectNull(NatPolicyRulesScopeChoiceModelAttributeMap)
 		}
 
-		rulesElementsSpectToModel = append(rulesElementsSpectToModel, natPolicyNatPolicyRuleTypeModel)
+		rulesElementsSpectToModel = append(rulesElementsSpectToModel, natPolicyRuleTypeModel)
 	}
 
 	{

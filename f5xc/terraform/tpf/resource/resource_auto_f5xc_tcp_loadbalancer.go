@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -40,6 +41,8 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/statusfieldmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -79,43 +82,18 @@ type TcpLoadbalancerWhereType struct {
 }
 
 type TcpLoadbalancerChoice struct {
-	AdvertiseDualstackOnPublic types.Object `tfsdk:"advertise_dualstack_on_public"`
-	AdvertiseOnPublic          types.Object `tfsdk:"advertise_on_public"`
-	AdvertiseV6OnPublic        types.Object `tfsdk:"advertise_v6_on_public"`
-	CloudEdgeSegment           types.Object `tfsdk:"cloud_edge_segment"`
-	Segment                    types.Object `tfsdk:"segment"`
-	Site                       types.Object `tfsdk:"site"`
-	SiteSegment                types.Object `tfsdk:"site_segment"`
-	VirtualNetwork             types.Object `tfsdk:"virtual_network"`
-	VirtualSite                types.Object `tfsdk:"virtual_site"`
-	VirtualSiteSegment         types.Object `tfsdk:"virtual_site_segment"`
-	VirtualSiteWithVip         types.Object `tfsdk:"virtual_site_with_vip"`
-	Vk8SService                types.Object `tfsdk:"vk8s_service"`
-}
-
-type TcpLoadbalancerAdvertiseDualstackOnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
+	AdvertiseOnPublic  types.Object `tfsdk:"advertise_on_public"`
+	Site               types.Object `tfsdk:"site"`
+	SiteSegment        types.Object `tfsdk:"site_segment"`
+	VirtualNetwork     types.Object `tfsdk:"virtual_network"`
+	VirtualSite        types.Object `tfsdk:"virtual_site"`
+	VirtualSiteSegment types.Object `tfsdk:"virtual_site_segment"`
+	VirtualSiteWithVip types.Object `tfsdk:"virtual_site_with_vip"`
+	Vk8SService        types.Object `tfsdk:"vk8s_service"`
 }
 
 type TcpLoadbalancerAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type TcpLoadbalancerAdvertiseV6OnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type TcpLoadbalancerCloudEdgeSegment struct {
-	CloudEdge types.Object `tfsdk:"cloud_edge"`
-	Ip        types.String `tfsdk:"ip"`
-	Ipv6      types.String `tfsdk:"ipv6"`
-	Segment   types.Object `tfsdk:"segment"`
-}
-
-type TcpLoadbalancerSegment struct {
-	Ipv4Vip types.String `tfsdk:"ipv4_vip"`
-	Ipv6Vip types.String `tfsdk:"ipv6_vip"`
-	Segment types.Object `tfsdk:"segment"`
 }
 
 type TcpLoadbalancerSite struct {
@@ -192,6 +170,7 @@ type TcpLoadbalancerAutoCertInfoType struct {
 	AutoCertState   types.List        `tfsdk:"auto_cert_state"`
 	AutoCertSubject types.String      `tfsdk:"auto_cert_subject"`
 	DnsRecords      types.List        `tfsdk:"dns_records"`
+	DnsZones        types.List        `tfsdk:"dns_zones"`
 }
 
 type TcpLoadbalancerDNSRecord struct {
@@ -279,7 +258,6 @@ type TcpLoadbalancerUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
 type TcpLoadbalancerCrlChoice struct {
@@ -290,15 +268,6 @@ type TcpLoadbalancerCrlChoice struct {
 type TcpLoadbalancerTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
-}
-
-type TcpLoadbalancerXfccHeaderChoice struct {
-	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
-	XfccOptions  types.Object `tfsdk:"xfcc_options"`
-}
-
-type TcpLoadbalancerXfccOptions struct {
-	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
 }
 
 type TcpLoadbalancerTlsConfig struct {
@@ -333,7 +302,6 @@ type TcpLoadbalancerDownstreamTlsParamsTypeUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
 type TcpLoadbalancerTlsCertType struct {
@@ -360,6 +328,7 @@ type TcpLoadbalancerSecretType struct {
 type TcpLoadbalancerSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type TcpLoadbalancerBlindfoldSecretInfo struct {
@@ -387,7 +356,6 @@ type TcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
 type TcpLoadbalancerOriginPoolWithWeight struct {
@@ -505,20 +473,8 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap
 // Attribute map for RequiredOneOfField --> Choice
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap = map[string]attr.Type{
 
-	"advertise_dualstack_on_public": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap,
-	},
 	"advertise_on_public": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap,
-	},
-	"advertise_v6_on_public": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap,
-	},
-	"cloud_edge_segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap,
-	},
-	"segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap,
 	},
 	"site": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap,
@@ -543,24 +499,6 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttrib
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> AdvertiseDualstackOnPublic
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Attribute map for PointerOfOneOfField --> AdvertiseOnPublic
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap = map[string]attr.Type{
 	"public_ip": types.ObjectType{
@@ -573,77 +511,6 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOn
 
 // Attribute map for RequiredPointerField --> PublicIp
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> AdvertiseV6OnPublic
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CloudEdgeSegment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap = map[string]attr.Type{
-	"cloud_edge": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> CloudEdge
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap = map[string]attr.Type{
-
-	"ipv4_vip": types.StringType,
-	"ipv6_vip": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"namespace": types.StringType,
@@ -901,6 +768,16 @@ var TcpLoadbalancerAutoCertInfoModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
+	"dns_zones": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
 }
 
 // Attribute map for ArrayOfPointerField --> DnsRecords
@@ -909,6 +786,14 @@ var TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap = map[string]attr.Typ
 	"name":  types.StringType,
 	"type":  types.StringType,
 	"value": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> DnsZones
+var TcpLoadbalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> ClusterRetractChoice
@@ -1121,9 +1006,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1158,23 +1040,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -1259,9 +1124,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsC
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1296,23 +1158,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsC
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -1365,6 +1210,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1447,9 +1293,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttribute
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1484,23 +1327,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoic
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -1583,7 +1409,7 @@ var TcpLoadbalancerPortChoiceModelAttributeMap = map[string]attr.Type{
 	"port_ranges": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ServicePolicyChoice
+// Attribute map for OneOfField --> ServicePolicyChoice
 var TcpLoadbalancerServicePolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_service_policies": types.ObjectType{
@@ -1635,8 +1461,8 @@ func (r *ResourceF5XCTcpLoadbalancer) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
+		MarkdownDescription: "TCP load balancer view defines a required parameters that can be used in CRUD, to create and manage TCP load balancer.<br>It can be used to create TCP load balancer and TCP load balancer with SNI.<br><br>View will create following child objects.<br><br>* Virtual-host<br>* default route<br>* clusters<br>* endpoints<br>* advertise policy",
+		Description:         "TCP load balancer view defines a required parameters that can be used in CRUD, to create and manage TCP load balancer. It can be used to create TCP load balancer and TCP load balancer with SNI. View will create following child objects. Virtual-host default route clusters endpoints advertise policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1744,11 +1570,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											Computed:            false,
 											Validators: []validator.Object{
 												exactlyoneofvalidator.RequiredExactlyOneOf(
-													"advertise_dualstack_on_public",
 													"advertise_on_public",
-													"advertise_v6_on_public",
-													"cloud_edge_segment",
-													"segment",
 													"site",
 													"site_segment",
 													"virtual_network",
@@ -1759,48 +1581,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												),
 											},
 											Attributes: map[string]schema.Attribute{
-												"advertise_dualstack_on_public": schema.SingleNestedAttribute{
-													Description:         "Advertise DualStack On Public Advertise this load balancer with Dualstack VIP on public network",
-													MarkdownDescription: "Advertise DualStack On Public Advertise this load balancer with Dualstack VIP on public network",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description:         "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															MarkdownDescription: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            false,
-																	Optional:            false,
-																	Computed:            true,
-																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
-																	},
-																},
-															},
-														},
-													},
-												},
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description:         "Advertise On Public Advertise this load balancer on public network",
 													MarkdownDescription: "Advertise On Public Advertise this load balancer on public network",
@@ -1836,218 +1616,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
-																	},
-																},
-															},
-														},
-													},
-												},
-												"advertise_v6_on_public": schema.SingleNestedAttribute{
-													Description:         "Advertise IPv6 On Public Advertise this load balancer with IPv6 VIP on public network",
-													MarkdownDescription: "Advertise IPv6 On Public Advertise this load balancer with IPv6 VIP on public network",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description:         "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															MarkdownDescription: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            false,
-																	Optional:            false,
-																	Computed:            true,
-																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
-																	},
-																},
-															},
-														},
-													},
-												},
-												"cloud_edge_segment": schema.SingleNestedAttribute{
-													Description:         "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
-													MarkdownDescription: "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"cloud_edge": schema.SingleNestedAttribute{
-															Description:         "Site",
-															MarkdownDescription: "Site",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            false,
-																	Optional:            false,
-																	Computed:            true,
-																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
-																	},
-																},
-															},
-														},
-														"ip": schema.StringAttribute{
-															Description:         "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
-															MarkdownDescription: "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-																	"must be a valid IPv4 address",
-																),
-															},
-														},
-														"ipv6": schema.StringAttribute{
-															Description:         "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
-															MarkdownDescription: "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																	"must be a valid IPv6 address",
-																),
-															},
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description:         "Segment",
-															MarkdownDescription: "Segment",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            false,
-																	Optional:            false,
-																	Computed:            true,
-																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
-																	},
-																},
-															},
-														},
-													},
-												},
-												"segment": schema.SingleNestedAttribute{
-													Description:         "Segment Advertise on a segment",
-													MarkdownDescription: "Segment Advertise on a segment",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"ipv4_vip": schema.StringAttribute{
-															Description:         "IPv4 VIP Configure IPV4 VIP address",
-															MarkdownDescription: "IPv4 VIP Configure IPV4 VIP address",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-																	"must be a valid IPv4 address",
-																),
-															},
-														},
-														"ipv6_vip": schema.StringAttribute{
-															Description:         "IPv6 VIP Configure IPV6 VIP address",
-															MarkdownDescription: "IPv6 VIP Configure IPV6 VIP address",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																	"must be a valid IPv6 address",
-																),
-															},
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description:         "Segment",
-															MarkdownDescription: "Segment",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            false,
-																	Optional:            false,
-																	Computed:            true,
-																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2127,7 +1696,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2195,7 +1764,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2228,7 +1797,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2346,7 +1915,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2400,7 +1969,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2468,7 +2037,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2501,7 +2070,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2581,7 +2150,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2636,7 +2205,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -2669,7 +2238,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -2767,7 +2336,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -2802,21 +2371,24 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					statusfieldmodifier.UseStateUnlessDependencyChangesObject(path.Root("loadbalancer_type_choice")),
+				},
 				Attributes: map[string]schema.Attribute{
 					"auto_cert_expiry": schema.StringAttribute{
 						Description:         "Auto Cert Expiry Timestamp Auto certificate expiry timestamp",
 						MarkdownDescription: "Auto Cert Expiry Timestamp Auto certificate expiry timestamp",
 						CustomType:          timetypes.RFC3339Type{},
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
+						Optional:            false,
+						Computed:            true,
 					},
 					"auto_cert_issuer": schema.StringAttribute{
 						Description:         "Auto Cert Issuer Issuer of the auto certificate",
 						MarkdownDescription: "Auto Cert Issuer Issuer of the auto certificate",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
+						Optional:            false,
+						Computed:            true,
 					},
 					"auto_cert_state": schema.ListAttribute{
 						Description:         "Auto Cert State State of auto certificate generation.",
@@ -2825,46 +2397,77 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 						Required:            false,
 						Optional:            false,
 						Computed:            true,
-						Validators: []validator.List{
-							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AutoCertAccountRateLimited", "AutoCertDisabled", "AutoCertDomainRateLimited", "AutoCertError", "AutoCertFinalize", "AutoCertGenerationRetry", "AutoCertInitialize", "AutoCertNotApplicable", "AutoCertRateLimited", "AutoCertStarted", "CertificateExpired", "CertificateInvalid", "CertificateValid", "DnsDomainVerification", "DomainChallengePending", "DomainChallengeStarted", "DomainChallengeVerified", "PreDomainChallengePending"}...)),
-							listvalidator.SizeAtMost(1),
-						},
 					},
 					"auto_cert_subject": schema.StringAttribute{
 						Description:         "Auto Cert Subject Subject of the auto certificate",
 						MarkdownDescription: "Auto Cert Subject Subject of the auto certificate",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
+						Optional:            false,
+						Computed:            true,
 					},
 					"dns_records": schema.ListNestedAttribute{
 						Description:         "DNS Records DNS Records that are to be added by user in their DNS domain. Currently, this will be populated when auto certificates are desired but DNS delegation is not enabled.",
 						MarkdownDescription: "DNS Records DNS Records that are to be added by user in their DNS domain. Currently, this will be populated when auto certificates are desired but DNS delegation is not enabled.",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
+						Optional:            false,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
 									Description:         "Name Name of the DNS record",
 									MarkdownDescription: "Name Name of the DNS record",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"type": schema.StringAttribute{
 									Description:         "Type Type of the DNS record",
 									MarkdownDescription: "Type Type of the DNS record",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"value": schema.StringAttribute{
 									Description:         "Value DNS record Value",
 									MarkdownDescription: "Value DNS record Value",
 									Required:            false,
-									Optional:            true,
+									Optional:            false,
+									Computed:            true,
+								},
+							},
+						},
+					},
+					"dns_zones": schema.ListNestedAttribute{
+						Description:         "DNS Zone References DNS Zone references in use by this object",
+						MarkdownDescription: "DNS Zone References DNS Zone references in use by this object",
+						Required:            false,
+						Optional:            false,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Required:            true,
+									Optional:            false,
 									Computed:            false,
+								},
+								"namespace": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+								},
+								"tenant": schema.StringAttribute{
+									Description:         "",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            false,
+									Computed:            true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseNonNullStateForUnknown(),
+									},
 								},
 							},
 						},
@@ -2924,33 +2527,24 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					statusfieldmodifier.UseStateUnlessDependencyChangesList(path.Root("advertise_choice")),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"ip_address": schema.StringAttribute{
 							Description:         "IP address IP address associated with virtual host",
 							MarkdownDescription: "IP address IP address associated with virtual host",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.RegexMatches(
-									regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$)|(^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)`),
-									"must be a valid IP address (IPv4 or IPv6)",
-								),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"ipv6_address": schema.StringAttribute{
 							Description:         "IPv6 address IPv6 address associated with virtual host",
 							MarkdownDescription: "IPv6 address IPv6 address associated with virtual host",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-									"must be a valid IPv6 address",
-								),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 					},
 				},
@@ -3042,6 +2636,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					statusfieldmodifier.UseStateUnlessDependencyChangesString(path.Root("advertise_choice")),
+				},
 			},
 			"idle_timeout": schema.Int64Attribute{
 				Description:         "Idle timeout The amount of time that a stream can exist without upstream or downstream activity, in milliseconds.",
@@ -3058,129 +2655,124 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Description:         "Internet VIP Info Internet VIP Info",
 				MarkdownDescription: "Internet VIP Info Internet VIP Info",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"site_name": schema.StringAttribute{
 							Description:         "Site Name Site Name where Internet VIP is installed",
 							MarkdownDescription: "Site Name Site Name where Internet VIP is installed",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"site_network_type": schema.ListAttribute{
 							Description:         "Site Network Type Network Type of the site where Internet VIP is installed",
-							MarkdownDescription: "Site Network Type Network Type of the site where Internet VIP is installed<br>**Allowed Values (choose one):** `['SITE_NETWORK_INSIDE', 'SITE_NETWORK_INSIDE_AND_OUTSIDE', 'SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP', 'SITE_NETWORK_OUTSIDE', 'SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP', 'SITE_NETWORK_SERVICE']`<br>**Default:** `SITE_NETWORK_INSIDE_AND_OUTSIDE`",
+							MarkdownDescription: "Site Network Type Network Type of the site where Internet VIP is installed<br>**Allowed Values (choose one):** `['SITE_NETWORK_INSIDE', 'SITE_NETWORK_INSIDE_AND_OUTSIDE', 'SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP', 'SITE_NETWORK_OUTSIDE', 'SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP', 'SITE_NETWORK_SERVICE']`",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
+							Optional:            false,
 							Computed:            true,
-							Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("SITE_NETWORK_INSIDE_AND_OUTSIDE")),
-							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SITE_NETWORK_INSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE"}...)),
-								listvalidator.SizeAtMost(1),
-							},
 						},
 						"status": schema.SingleNestedAttribute{
 							Description:         "Internet VIP Status Detailed status for internet VIP",
 							MarkdownDescription: "Internet VIP Status Detailed status for internet VIP",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 								"arn": schema.StringAttribute{
 									Description:         "ARN ARN",
 									MarkdownDescription: "ARN ARN",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
 									Description:         "Name Name",
 									MarkdownDescription: "Name Name",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"nlb_cname": schema.StringAttribute{
 									Description:         "NLB CNAME NLB CNAME",
 									MarkdownDescription: "NLB CNAME NLB CNAME",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"nlb_status": schema.StringAttribute{
 									Description:         "NLB Status NLB Status",
 									MarkdownDescription: "NLB Status NLB Status",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"reason": schema.StringAttribute{
 									Description:         "Reason Reason",
 									MarkdownDescription: "Reason Reason",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 								},
 								"target_group_status": schema.ListNestedAttribute{
 									Description:         "Target Group Status Target Group Status",
 									MarkdownDescription: "Target Group Status Target Group Status",
 									Required:            false,
-									Optional:            true,
-									Computed:            false,
+									Optional:            false,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"arn": schema.StringAttribute{
 												Description:         "ARN ARN",
 												MarkdownDescription: "ARN ARN",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 											},
 											"listener_status": schema.ListNestedAttribute{
 												Description:         "Listener status Listener status",
 												MarkdownDescription: "Listener status Listener status",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
 														"arn": schema.StringAttribute{
 															Description:         "Name Name",
 															MarkdownDescription: "Name Name",
 															Required:            false,
-															Optional:            true,
-															Computed:            false,
+															Optional:            false,
+															Computed:            true,
 														},
 														"port": schema.Int64Attribute{
 															Description:         "Port Port",
 															MarkdownDescription: "Port Port",
 															Required:            false,
-															Optional:            true,
-															Computed:            false,
+															Optional:            false,
+															Computed:            true,
 														},
 														"protocol": schema.StringAttribute{
 															Description:         "Protocol Protocol",
 															MarkdownDescription: "Protocol Protocol",
 															Required:            false,
-															Optional:            true,
-															Computed:            false,
+															Optional:            false,
+															Computed:            true,
 														},
 														"reason": schema.StringAttribute{
 															Description:         "Reason Reason",
 															MarkdownDescription: "Reason Reason",
 															Required:            false,
-															Optional:            true,
-															Computed:            false,
+															Optional:            false,
+															Computed:            true,
 														},
 														"status": schema.StringAttribute{
 															Description:         "Status Status",
 															MarkdownDescription: "Status Status",
 															Required:            false,
-															Optional:            true,
-															Computed:            false,
+															Optional:            false,
+															Computed:            true,
 														},
 													},
 												},
@@ -3189,29 +2781,29 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Description:         "Name Name",
 												MarkdownDescription: "Name Name",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 											},
 											"protocol": schema.StringAttribute{
 												Description:         "Protocol Protocol",
 												MarkdownDescription: "Protocol Protocol",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 											},
 											"reason": schema.StringAttribute{
 												Description:         "Reason Reason",
 												MarkdownDescription: "Reason Reason",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 											},
 											"status": schema.StringAttribute{
 												Description:         "Status Status",
 												MarkdownDescription: "Status Status",
 												Required:            false,
-												Optional:            true,
-												Computed:            false,
+												Optional:            false,
+												Computed:            true,
 											},
 										},
 									},
@@ -3305,7 +2897,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -3390,7 +2982,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -3448,7 +3040,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -3461,51 +3053,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																		Computed:            false,
 																		Validators: []validator.String{
 																			bytesvalidator.BytesBetween(1, 131072),
-																		},
-																	},
-																},
-															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description:         "xfcc header Whether to add the XFCC header with information about the client certificate",
-																MarkdownDescription: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Object{
-																	exactlyoneofvalidator.ExactlyOneOf(
-																		"xfcc_disabled",
-																		"xfcc_options",
-																	),
-																},
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description:         "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		MarkdownDescription: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Validators: []validator.Bool{
-																			boolvalidator.Equals(true),
-																		},
-																	},
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description:         "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		MarkdownDescription: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description:         "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				MarkdownDescription: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests<br>**Valid Options:** `['XFCC_CERT', 'XFCC_CHAIN', 'XFCC_DNS', 'XFCC_NONE', 'XFCC_SUBJECT', 'XFCC_URI']` (Multiple selection allowed)",
-																				ElementType:         types.StringType,
-																				Required:            true,
-																				Optional:            false,
-																				Computed:            false,
-																				Validators: []validator.List{
-																					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"XFCC_CERT", "XFCC_CHAIN", "XFCC_DNS", "XFCC_NONE", "XFCC_SUBJECT", "XFCC_URI"}...)),
-																				},
-																			},
 																		},
 																	},
 																},
@@ -3545,7 +3092,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"cipher_suites": schema.ListAttribute{
 																		Description:         "cipher_suites The TLS listener will only support the specified cipher list.",
-																		MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.",
+																		MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 																		ElementType:         types.StringType,
 																		Required:            true,
 																		Optional:            false,
@@ -3705,7 +3252,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -3763,7 +3310,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -3776,51 +3323,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																		Computed:            false,
 																		Validators: []validator.String{
 																			bytesvalidator.BytesBetween(1, 131072),
-																		},
-																	},
-																},
-															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description:         "xfcc header Whether to add the XFCC header with information about the client certificate",
-																MarkdownDescription: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Object{
-																	exactlyoneofvalidator.ExactlyOneOf(
-																		"xfcc_disabled",
-																		"xfcc_options",
-																	),
-																},
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description:         "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		MarkdownDescription: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Validators: []validator.Bool{
-																			boolvalidator.Equals(true),
-																		},
-																	},
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description:         "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		MarkdownDescription: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description:         "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				MarkdownDescription: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests<br>**Valid Options:** `['XFCC_CERT', 'XFCC_CHAIN', 'XFCC_DNS', 'XFCC_NONE', 'XFCC_SUBJECT', 'XFCC_URI']` (Multiple selection allowed)",
-																				ElementType:         types.StringType,
-																				Required:            true,
-																				Optional:            false,
-																				Computed:            false,
-																				Validators: []validator.List{
-																					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"XFCC_CERT", "XFCC_CHAIN", "XFCC_DNS", "XFCC_NONE", "XFCC_SUBJECT", "XFCC_URI"}...)),
-																				},
-																			},
 																		},
 																	},
 																},
@@ -3891,6 +3393,8 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+																				listvalidator.SizeBetween(1, 4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																	},
@@ -3934,6 +3438,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																		exactlyoneofvalidator.RequiredExactlyOneOf(
 																			"blindfold_secret_info",
 																			"clear_secret_info",
+																			"none",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
@@ -3957,6 +3462,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
+																					WriteOnly:           true,
 																					Validators: []validator.String{
 																						stringvalidator.RegexMatches(
 																							regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4011,6 +3517,16 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																				},
 																			},
 																		},
+																		"none": schema.BoolAttribute{
+																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																			Validators: []validator.Bool{
+																				boolvalidator.Equals(true),
+																			},
+																		},
 																	},
 																},
 															},
@@ -4049,7 +3565,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"cipher_suites": schema.ListAttribute{
 																		Description:         "cipher_suites The TLS listener will only support the specified cipher list.",
-																		MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.",
+																		MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 																		ElementType:         types.StringType,
 																		Required:            true,
 																		Optional:            false,
@@ -4213,7 +3729,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -4271,7 +3787,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -4284,51 +3800,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 														Computed:            false,
 														Validators: []validator.String{
 															bytesvalidator.BytesBetween(1, 131072),
-														},
-													},
-												},
-											},
-											"xfcc_header_choice": schema.SingleNestedAttribute{
-												Description:         "xfcc header Whether to add the XFCC header with information about the client certificate",
-												MarkdownDescription: "xfcc header Whether to add the XFCC header with information about the client certificate",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Object{
-													exactlyoneofvalidator.ExactlyOneOf(
-														"xfcc_disabled",
-														"xfcc_options",
-													),
-												},
-												Attributes: map[string]schema.Attribute{
-													"xfcc_disabled": schema.BoolAttribute{
-														Description:         "No XFCC header No X-Forwarded-Client-Cert header will be added",
-														MarkdownDescription: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-														Validators: []validator.Bool{
-															boolvalidator.Equals(true),
-														},
-													},
-													"xfcc_options": schema.SingleNestedAttribute{
-														Description:         "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-														MarkdownDescription: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-														Attributes: map[string]schema.Attribute{
-															"xfcc_header_elements": schema.ListAttribute{
-																Description:         "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																MarkdownDescription: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests<br>**Valid Options:** `['XFCC_CERT', 'XFCC_CHAIN', 'XFCC_DNS', 'XFCC_NONE', 'XFCC_SUBJECT', 'XFCC_URI']` (Multiple selection allowed)",
-																ElementType:         types.StringType,
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-																Validators: []validator.List{
-																	listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"XFCC_CERT", "XFCC_CHAIN", "XFCC_DNS", "XFCC_NONE", "XFCC_SUBJECT", "XFCC_URI"}...)),
-																},
-															},
 														},
 													},
 												},
@@ -4368,7 +3839,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Attributes: map[string]schema.Attribute{
 													"cipher_suites": schema.ListAttribute{
 														Description:         "cipher_suites The TLS listener will only support the specified cipher list.",
-														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.",
+														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 														ElementType:         types.StringType,
 														Required:            true,
 														Optional:            false,
@@ -4512,7 +3983,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -4545,7 +4016,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -4616,15 +4087,18 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			"service_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
 				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"active_service_policies",
 						"no_service_policies",
 						"service_policies_from_namespace",
 					),
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"active_service_policies": schema.SingleNestedAttribute{
@@ -4667,7 +4141,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -4805,9 +4279,17 @@ func (r *ResourceF5XCTcpLoadbalancer) ModifyPlan(ctx context.Context, req resour
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTcpLoadbalancerModel
 
 	// Read Terraform plan data into the model
@@ -4815,6 +4297,17 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCTcpLoadbalancerModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.LoadbalancerTypeChoice.IsNull() && !configData.LoadbalancerTypeChoice.IsUnknown() {
+		data.LoadbalancerTypeChoice = configData.LoadbalancerTypeChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -4935,42 +4428,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 							return
 						}
 
-						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-						if !advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.IsUnknown() {
-							var tcpLoadbalancerAdvertiseDualstackOnPublicModel TcpLoadbalancerAdvertiseDualstackOnPublic
-							response.Diagnostics.Append(advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.As(ctx, &tcpLoadbalancerAdvertiseDualstackOnPublicModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							advertiseDualstackOnPublicOneOfSpec := &ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic{}
-							advertiseDualstackOnPublicOneOfSpec.AdvertiseDualstackOnPublic = &ves_io_schema_views.AdvertisePublic{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = advertiseDualstackOnPublicOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> PublicIp
-							if !tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.IsNull() && !tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.IsUnknown() {
-								var publicIpModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.As(ctx, &publicIpModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								publicIpSpec := &ves_io_schema_views.ObjectRefType{}
-								advertiseDualstackOnPublicOneOfSpec.AdvertiseDualstackOnPublic.PublicIp = publicIpSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !publicIpModel.Name.IsNull() && !publicIpModel.Name.IsUnknown() {
-									publicIpSpec.Name = string(publicIpModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
-									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
 						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseOnPublic
 						if !advertiseWhereChoiceModel.AdvertiseOnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseOnPublic.IsUnknown() {
 							var tcpLoadbalancerAdvertiseOnPublicModel TcpLoadbalancerAdvertiseOnPublic
@@ -5001,157 +4458,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 								// resource modelToSpecNested RequiredStringField --> Namespace
 								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
 									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseV6OnPublic
-						if !advertiseWhereChoiceModel.AdvertiseV6OnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseV6OnPublic.IsUnknown() {
-							var tcpLoadbalancerAdvertiseV6OnPublicModel TcpLoadbalancerAdvertiseV6OnPublic
-							response.Diagnostics.Append(advertiseWhereChoiceModel.AdvertiseV6OnPublic.As(ctx, &tcpLoadbalancerAdvertiseV6OnPublicModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							advertiseV6OnPublicOneOfSpec := &ves_io_schema_views.WhereType_AdvertiseV6OnPublic{}
-							advertiseV6OnPublicOneOfSpec.AdvertiseV6OnPublic = &ves_io_schema_views.AdvertisePublic{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = advertiseV6OnPublicOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> PublicIp
-							if !tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.IsNull() && !tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.IsUnknown() {
-								var publicIpModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.As(ctx, &publicIpModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								publicIpSpec := &ves_io_schema_views.ObjectRefType{}
-								advertiseV6OnPublicOneOfSpec.AdvertiseV6OnPublic.PublicIp = publicIpSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !publicIpModel.Name.IsNull() && !publicIpModel.Name.IsUnknown() {
-									publicIpSpec.Name = string(publicIpModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
-									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> CloudEdgeSegment
-						if !advertiseWhereChoiceModel.CloudEdgeSegment.IsNull() && !advertiseWhereChoiceModel.CloudEdgeSegment.IsUnknown() {
-							var tcpLoadbalancerCloudEdgeSegmentModel TcpLoadbalancerCloudEdgeSegment
-							response.Diagnostics.Append(advertiseWhereChoiceModel.CloudEdgeSegment.As(ctx, &tcpLoadbalancerCloudEdgeSegmentModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cloudEdgeSegmentOneOfSpec := &ves_io_schema_views.WhereType_CloudEdgeSegment{}
-							cloudEdgeSegmentOneOfSpec.CloudEdgeSegment = &ves_io_schema_views.WhereCloudEdgeSegment{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = cloudEdgeSegmentOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> CloudEdge
-							if !tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.IsUnknown() {
-								var cloudEdgeModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.As(ctx, &cloudEdgeModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								cloudEdgeSpec := &ves_io_schema_views.ObjectRefType{}
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.CloudEdge = cloudEdgeSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !cloudEdgeModel.Name.IsNull() && !cloudEdgeModel.Name.IsUnknown() {
-									cloudEdgeSpec.Name = string(cloudEdgeModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !cloudEdgeModel.Namespace.IsNull() && !cloudEdgeModel.Namespace.IsUnknown() {
-									cloudEdgeSpec.Namespace = string(cloudEdgeModel.Namespace.ValueString())
-								}
-
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Ip
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Ip.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Ip.IsUnknown() {
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Ip = string(tcpLoadbalancerCloudEdgeSegmentModel.Ip.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.IsUnknown() {
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Ipv6 = string(tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredPointerField --> Segment
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Segment.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Segment.IsUnknown() {
-								var segmentModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerCloudEdgeSegmentModel.Segment.As(ctx, &segmentModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								segmentSpec := &ves_io_schema_views.ObjectRefType{}
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Segment = segmentSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !segmentModel.Name.IsNull() && !segmentModel.Name.IsUnknown() {
-									segmentSpec.Name = string(segmentModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !segmentModel.Namespace.IsNull() && !segmentModel.Namespace.IsUnknown() {
-									segmentSpec.Namespace = string(segmentModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> Segment
-						if !advertiseWhereChoiceModel.Segment.IsNull() && !advertiseWhereChoiceModel.Segment.IsUnknown() {
-							var tcpLoadbalancerSegmentModel TcpLoadbalancerSegment
-							response.Diagnostics.Append(advertiseWhereChoiceModel.Segment.As(ctx, &tcpLoadbalancerSegmentModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							segmentOneOfSpec := &ves_io_schema_views.WhereType_Segment{}
-							segmentOneOfSpec.Segment = &ves_io_schema_views.WhereSegment{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = segmentOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Ipv4Vip
-							if !tcpLoadbalancerSegmentModel.Ipv4Vip.IsNull() && !tcpLoadbalancerSegmentModel.Ipv4Vip.IsUnknown() {
-								segmentOneOfSpec.Segment.Ipv4Vip = string(tcpLoadbalancerSegmentModel.Ipv4Vip.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6Vip
-							if !tcpLoadbalancerSegmentModel.Ipv6Vip.IsNull() && !tcpLoadbalancerSegmentModel.Ipv6Vip.IsUnknown() {
-								segmentOneOfSpec.Segment.Ipv6Vip = string(tcpLoadbalancerSegmentModel.Ipv6Vip.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredPointerField --> Segment
-							if !tcpLoadbalancerSegmentModel.Segment.IsNull() && !tcpLoadbalancerSegmentModel.Segment.IsUnknown() {
-								var segmentModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerSegmentModel.Segment.As(ctx, &segmentModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								segmentSpec := &ves_io_schema_views.ObjectRefType{}
-								segmentOneOfSpec.Segment.Segment = segmentSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !segmentModel.Name.IsNull() && !segmentModel.Name.IsUnknown() {
-									segmentSpec.Name = string(segmentModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !segmentModel.Namespace.IsNull() && !segmentModel.Namespace.IsUnknown() {
-									segmentSpec.Namespace = string(segmentModel.Namespace.ValueString())
 								}
 
 							}
@@ -5923,6 +5229,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 							}
 							useMtlsOneOfSpec := &ves_io_schema_views.DownstreamTLSCertsParams_UseMtls{}
 							useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+							useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+								XfccDisabled: &ves_io_schema.Empty{},
+							}
 							tlsCertParamsOneOfSpec.TlsCertParams.MtlsChoice = useMtlsOneOfSpec
 
 							// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -6008,59 +5317,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 									trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 									trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 									useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-								}
-
-							}
-
-							// resource modelToSpecNested OneOfField --> XfccHeader
-							if !tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-								useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-								response.Diagnostics.Append(tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-								if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-									xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-									xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-								}
-
-								// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-								if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-									var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-									response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-									xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-									// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-									// 1. Get raw string elements
-									xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-									diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Iterate and Convert using Proto Value Map
-									xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-									for _, raw := range xfccHeaderElementsRaw {
-										if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-											xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-										} else {
-											response.Diagnostics.AddError(
-												"Invalid Enum Value",
-												fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-											)
-										}
-									}
-									xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 								}
 
 							}
@@ -6222,6 +5478,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 							}
 							useMtlsOneOfSpec := &ves_io_schema_views.DownstreamTlsParamsType_UseMtls{}
 							useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+							useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+								XfccDisabled: &ves_io_schema.Empty{},
+							}
 							tlsParametersOneOfSpec.TlsParameters.MtlsChoice = useMtlsOneOfSpec
 
 							// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -6307,59 +5566,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 									trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 									trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 									useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-								}
-
-							}
-
-							// resource modelToSpecNested OneOfField --> XfccHeader
-							if !tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-								useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-								response.Diagnostics.Append(tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-								if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-									xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-									xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-								}
-
-								// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-								if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-									var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-									response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-									xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-									// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-									// 1. Get raw string elements
-									xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-									diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Iterate and Convert using Proto Value Map
-									xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-									for _, raw := range xfccHeaderElementsRaw {
-										if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-											xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-										} else {
-											response.Diagnostics.AddError(
-												"Invalid Enum Value",
-												fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-											)
-										}
-									}
-									xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 								}
 
 							}
@@ -6528,6 +5734,13 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -6692,6 +5905,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 					}
 					useMtlsOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_UseMtls{}
 					useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+					useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+						XfccDisabled: &ves_io_schema.Empty{},
+					}
 					tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.MtlsChoice = useMtlsOneOfSpec
 
 					// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -6777,59 +5993,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 							trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 							trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 							useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-						}
-
-					}
-
-					// resource modelToSpecNested OneOfField --> XfccHeader
-					if !tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-						useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-						response.Diagnostics.Append(tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-						if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-							xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-							xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-							useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-						if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-							var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-							response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-							xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-							useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-							// 1. Get raw string elements
-							xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-							diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// 2. Iterate and Convert using Proto Value Map
-							xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-							for _, raw := range xfccHeaderElementsRaw {
-								if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-									xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-								} else {
-									response.Diagnostics.AddError(
-										"Invalid Enum Value",
-										fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-									)
-								}
-							}
-							xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 						}
 
 					}
@@ -7073,7 +6236,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource modelToSpecRoot OneOfField --> ServicePolicyChoice
 	if !data.ServicePolicyChoice.IsNull() && !data.ServicePolicyChoice.IsUnknown() {
 		servicePolicyChoiceModel := TcpLoadbalancerSvcPolicyChoice{}
 		response.Diagnostics.Append(data.ServicePolicyChoice.As(ctx, &servicePolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7141,6 +6304,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			spec.ServicePolicyChoice = servicePoliciesFromNamespaceSpecBool
 		}
 
+	} else {
+		spec.ServicePolicyChoice = &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_NoServicePolicies{
+			NoServicePolicies: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SniDefaultLbChoice
@@ -7176,7 +6343,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7199,7 +6366,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "tcp_loadbalancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "tcp_loadbalancer", err),
 		)
 		return
 	}
@@ -7359,77 +6526,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-							// GlobalSpecType
-							// false
-							{
-								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
-								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
-									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
-								}
-							}
-
 							// resource specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 							// GlobalSpecType
 							// false
@@ -7498,301 +6594,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = advertiseOnPublicObj
 								} else {
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
-							// GlobalSpecType
-							// false
-							{
-								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
-								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
-									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseV6OnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> CloudEdgeSegment
-							// GlobalSpecType
-							// false
-							{
-								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
-									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
-
-									// resource specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// resource specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentElement.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentElement.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
-									}
-
-									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> Segment
-							// GlobalSpecType
-							// false
-							{
-								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
-
-								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
-									segmentElement := segmentOptionsWrapper.Segment
-
-									// resource specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentElement.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6Vip
-									if segmentElement.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if segmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
-									}
-
-									segmentObj, segmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(segmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
@@ -8983,6 +7784,56 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			tcpLoadbalancerAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> DnsZones
+		if len(autoCertInfoElement.GetDnsZones()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			dnsZonesElements := make([]ObjectRefTypeModel, 0, len(autoCertInfoElement.GetDnsZones()))
+			for _, dnsZonesElement := range autoCertInfoElement.GetDnsZones() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if dnsZonesElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if dnsZonesElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if dnsZonesElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			dnsZonesListValue, dnsZonesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap}, dnsZonesElements)
+			response.Diagnostics.Append(dnsZonesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = dnsZonesListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap})
+		}
+
 		autoCertInfoObj, autoCertInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			TcpLoadbalancerAutoCertInfoModelAttributeMap,
@@ -9111,14 +7962,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerDnsInfoModelAttributeMap,
 		}
 		nullDnsInfoList := basetypes.NewListNull(dnsInfoObjectType)
-		var priorValDnsInfo types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_info"), &priorValDnsInfo)
-		if !priorValDnsInfo.IsNull() && !priorValDnsInfo.IsUnknown() {
-			data.DnsInfo = priorValDnsInfo
+		if !data.DnsInfo.IsNull() && !data.DnsInfo.IsUnknown() && len(data.DnsInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsInfo = basetypes.NewListValueMust(dnsInfoObjectType, nil)
 		} else {
 			data.DnsInfo = nullDnsInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot BoolField --> DnsVolterraManaged
@@ -9134,7 +7983,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			}
 			data.Domains = listValue
 		} else {
-			data.Domains = types.ListNull(types.StringType)
+			if !data.Domains.IsNull() && !data.Domains.IsUnknown() && len(data.Domains.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Domains = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Domains = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -9221,7 +8075,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 	idleTimeoutValue := specData.GetIdleTimeout()
 	if idleTimeoutValue > 0 {
 		data.IdleTimeout = types.Int64Value(int64(idleTimeoutValue))
-	} else {
+	} else if data.IdleTimeout.IsNull() || data.IdleTimeout.IsUnknown() {
 		data.IdleTimeout = types.Int64Null()
 	}
 
@@ -9470,14 +8324,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerInternetVipInfoModelAttributeMap,
 		}
 		nullInternetVipInfoList := basetypes.NewListNull(internetVipInfoObjectType)
-		var priorValInternetVipInfo types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("internet_vip_info"), &priorValInternetVipInfo)
-		if !priorValInternetVipInfo.IsNull() && !priorValInternetVipInfo.IsUnknown() {
-			data.InternetVipInfo = priorValInternetVipInfo
+		if !data.InternetVipInfo.IsNull() && !data.InternetVipInfo.IsUnknown() && len(data.InternetVipInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.InternetVipInfo = basetypes.NewListValueMust(internetVipInfoObjectType, nil)
 		} else {
 			data.InternetVipInfo = nullInternetVipInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
@@ -9782,85 +8634,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-										}
-
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// GlobalSpecType
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
 										}
 
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
@@ -10265,85 +9038,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// GlobalSpecType
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -10586,6 +9280,15 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 												} else {
 													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -11046,85 +9749,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested OneOfField --> XfccHeader
-							if useMtlsElement.GetXfccHeader() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-								if isXfccDisabled {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-								} else {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-								}
-
-								// resource specToModelNested PointerOfOneOfField --> XfccOptions
-								// GlobalSpecType
-								// false
-								{
-									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-										// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-										{
-											if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-												xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-												for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-													if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-														xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-													}
-												}
-												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-												response.Diagnostics.Append(listDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-											} else {
-												xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-											}
-										}
-
-										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-										response.Diagnostics.Append(xfccOptionsObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-									} else {
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-							}
-
 							useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 							response.Diagnostics.Append(useMtlsObjDiags...)
 							if response.Diagnostics.HasError() {
@@ -11514,14 +10138,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerOriginPoolsWeightsModelAttributeMap,
 		}
 		nullOriginPoolsWeightsList := basetypes.NewListNull(originPoolsWeightsObjectType)
-		var priorValOriginPoolsWeights types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("origin_pools_weights"), &priorValOriginPoolsWeights)
-		if !priorValOriginPoolsWeights.IsNull() && !priorValOriginPoolsWeights.IsUnknown() {
-			data.OriginPoolsWeights = priorValOriginPoolsWeights
+		if !data.OriginPoolsWeights.IsNull() && !data.OriginPoolsWeights.IsUnknown() && len(data.OriginPoolsWeights.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.OriginPoolsWeights = basetypes.NewListValueMust(originPoolsWeightsObjectType, nil)
 		} else {
 			data.OriginPoolsWeights = nullOriginPoolsWeightsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PortChoice
@@ -11579,7 +10201,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -11698,8 +10320,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
@@ -11816,7 +10436,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "tcp_loadbalancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "tcp_loadbalancer", err),
 		)
 		return
 	}
@@ -11976,77 +10596,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-							// <no value>
-							// false
-							{
-								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
-								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
-									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
-								}
-							}
-
 							// resource specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 							// <no value>
 							// false
@@ -12115,301 +10664,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = advertiseOnPublicObj
 								} else {
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
-							// <no value>
-							// false
-							{
-								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
-								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
-									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseV6OnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> CloudEdgeSegment
-							// <no value>
-							// false
-							{
-								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
-									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
-
-									// resource specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// resource specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentElement.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentElement.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
-									}
-
-									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> Segment
-							// <no value>
-							// false
-							{
-								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
-
-								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
-									segmentElement := segmentOptionsWrapper.Segment
-
-									// resource specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentElement.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6Vip
-									if segmentElement.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if segmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
-									}
-
-									segmentObj, segmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(segmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
@@ -13363,7 +11617,11 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 							tcpLoadbalancerWhereTypeModel.PortChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							tcpLoadbalancerWhereTypeModel.PortChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap)
+							tcpLoadbalancerWhereTypeModel.PortChoice = types.ObjectValueMust(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap, map[string]attr.Value{
+								"port":             types.Int64Null(),
+								"port_ranges":      types.StringNull(),
+								"use_default_port": types.BoolValue(true),
+							})
 						}
 
 						advertiseWhereElements = append(advertiseWhereElements, tcpLoadbalancerWhereTypeModel)
@@ -13503,7 +11761,15 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.AdvertiseChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceModelAttributeMap)
+
+		if data.AdvertiseChoice.IsNull() || data.AdvertiseChoice.IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsUnknown())) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsUnknown())))) && (data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["do_not_advertise"].IsNull() || data.AdvertiseChoice.Attributes()["do_not_advertise"].IsUnknown())) {
+			data.AdvertiseChoice = types.ObjectValueMust(TcpLoadbalancerAdvertiseChoiceModelAttributeMap, map[string]attr.Value{
+				"advertise_custom":                types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomModelAttributeMap),
+				"advertise_on_public":             types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap),
+				"advertise_on_public_default_vip": types.BoolValue(true),
+				"do_not_advertise":                types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> AutoCertInfo
@@ -13600,6 +11866,56 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			tcpLoadbalancerAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> DnsZones
+		if len(autoCertInfoElement.GetDnsZones()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			dnsZonesElements := make([]ObjectRefTypeModel, 0, len(autoCertInfoElement.GetDnsZones()))
+			for _, dnsZonesElement := range autoCertInfoElement.GetDnsZones() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if dnsZonesElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if dnsZonesElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if dnsZonesElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			dnsZonesListValue, dnsZonesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap}, dnsZonesElements)
+			response.Diagnostics.Append(dnsZonesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = dnsZonesListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap})
+		}
+
 		autoCertInfoObj, autoCertInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			TcpLoadbalancerAutoCertInfoModelAttributeMap,
@@ -13681,7 +11997,13 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.ClusterRetractChoice = types.ObjectNull(TcpLoadbalancerClusterRetractChoiceModelAttributeMap)
+
+		if data.ClusterRetractChoice.IsNull() || data.ClusterRetractChoice.IsUnknown() || ((data.ClusterRetractChoice.Attributes()["do_not_retract_cluster"].IsNull() || data.ClusterRetractChoice.Attributes()["do_not_retract_cluster"].IsUnknown()) && (data.ClusterRetractChoice.Attributes()["retract_cluster"].IsNull() || data.ClusterRetractChoice.Attributes()["retract_cluster"].IsUnknown())) {
+			data.ClusterRetractChoice = types.ObjectValueMust(TcpLoadbalancerClusterRetractChoiceModelAttributeMap, map[string]attr.Value{
+				"do_not_retract_cluster": types.BoolNull(),
+				"retract_cluster":        types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> DnsInfo
@@ -13728,14 +12050,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			AttrTypes: TcpLoadbalancerDnsInfoModelAttributeMap,
 		}
 		nullDnsInfoList := basetypes.NewListNull(dnsInfoObjectType)
-		var priorValDnsInfo types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_info"), &priorValDnsInfo)
-		if !priorValDnsInfo.IsNull() && !priorValDnsInfo.IsUnknown() {
-			data.DnsInfo = priorValDnsInfo
+		if !data.DnsInfo.IsNull() && !data.DnsInfo.IsUnknown() && len(data.DnsInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsInfo = basetypes.NewListValueMust(dnsInfoObjectType, nil)
 		} else {
 			data.DnsInfo = nullDnsInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot BoolField --> DnsVolterraManaged
@@ -13751,7 +12071,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			}
 			data.Domains = listValue
 		} else {
-			data.Domains = types.ListNull(types.StringType)
+			if !data.Domains.IsNull() && !data.Domains.IsUnknown() && len(data.Domains.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Domains = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Domains = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -13823,7 +12148,15 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.HashPolicyChoice = types.ObjectNull(TcpLoadbalancerHashPolicyChoiceModelAttributeMap)
+
+		if data.HashPolicyChoice.IsNull() || data.HashPolicyChoice.IsUnknown() || ((data.HashPolicyChoice.Attributes()["hash_policy_choice_least_active"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_least_active"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsUnknown())) {
+			data.HashPolicyChoice = types.ObjectValueMust(TcpLoadbalancerHashPolicyChoiceModelAttributeMap, map[string]attr.Value{
+				"hash_policy_choice_least_active":         types.BoolNull(),
+				"hash_policy_choice_random":               types.BoolNull(),
+				"hash_policy_choice_round_robin":          types.BoolValue(true),
+				"hash_policy_choice_source_ip_stickiness": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot StringField --> HostName
@@ -13838,7 +12171,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 	idleTimeoutValue := specData.GetIdleTimeout()
 	if idleTimeoutValue > 0 {
 		data.IdleTimeout = types.Int64Value(int64(idleTimeoutValue))
-	} else {
+	} else if data.IdleTimeout.IsNull() || data.IdleTimeout.IsUnknown() {
 		data.IdleTimeout = types.Int64Null()
 	}
 
@@ -14087,14 +12420,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			AttrTypes: TcpLoadbalancerInternetVipInfoModelAttributeMap,
 		}
 		nullInternetVipInfoList := basetypes.NewListNull(internetVipInfoObjectType)
-		var priorValInternetVipInfo types.List
-		_ = request.State.GetAttribute(ctx, path.Root("internet_vip_info"), &priorValInternetVipInfo)
-		if !priorValInternetVipInfo.IsNull() && !priorValInternetVipInfo.IsUnknown() {
-			data.InternetVipInfo = priorValInternetVipInfo
+		if !data.InternetVipInfo.IsNull() && !data.InternetVipInfo.IsUnknown() && len(data.InternetVipInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.InternetVipInfo = basetypes.NewListValueMust(internetVipInfoObjectType, nil)
 		} else {
 			data.InternetVipInfo = nullInternetVipInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
@@ -14401,85 +12732,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -14507,7 +12759,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 								tlsCertParamsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsCertParamsAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap)
+								tlsCertParamsAttributeMap["mtls_choice"] = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"no_mtls":  types.BoolValue(true),
+									"use_mtls": types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested PointerField --> TlsConfig
@@ -14639,7 +12894,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 									tcpLoadbalancerTlsConfigModel.Choice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+										"custom_security":  types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap),
+										"default_security": types.BoolValue(true),
+										"low_security":     types.BoolNull(),
+										"medium_security":  types.BoolNull(),
+									})
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
@@ -14882,85 +13142,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -14988,7 +13169,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 								tlsParametersAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsParametersAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap)
+								tlsParametersAttributeMap["mtls_choice"] = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"no_mtls":  types.BoolValue(true),
+									"use_mtls": types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested RequiredArrayOfPointerField --> TlsCertificates
@@ -15205,6 +13389,15 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -15402,7 +13595,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 									tcpLoadbalancerTlsConfigModel.Choice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+										"custom_security":  types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap),
+										"default_security": types.BoolValue(true),
+										"low_security":     types.BoolNull(),
+										"medium_security":  types.BoolNull(),
+									})
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
@@ -15675,85 +13873,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested OneOfField --> XfccHeader
-							if useMtlsElement.GetXfccHeader() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-								if isXfccDisabled {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-								} else {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-								}
-
-								// resource specToModelNested PointerOfOneOfField --> XfccOptions
-								// <no value>
-								// false
-								{
-									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-										// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-										{
-											if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-												xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-												for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-													if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-														xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-													}
-												}
-												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-												response.Diagnostics.Append(listDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-											} else {
-												xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-											}
-										}
-
-										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-										response.Diagnostics.Append(xfccOptionsObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-									} else {
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-							}
-
 							useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 							response.Diagnostics.Append(useMtlsObjDiags...)
 							if response.Diagnostics.HasError() {
@@ -15781,7 +13900,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 					tlsTcpAutoCertAttributeMap["mtls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					tlsTcpAutoCertAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap)
+					tlsTcpAutoCertAttributeMap["mtls_choice"] = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_mtls":  types.BoolValue(true),
+						"use_mtls": types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> TlsConfig
@@ -15913,7 +14035,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 						tcpLoadbalancerTlsConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap)
+						tcpLoadbalancerTlsConfigModel.Choice = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+							"custom_security":  types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap),
+							"default_security": types.BoolValue(true),
+							"low_security":     types.BoolNull(),
+							"medium_security":  types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -15964,7 +14091,14 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LoadbalancerTypeChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeModelAttributeMap)
+
+		if data.LoadbalancerTypeChoice.IsNull() || data.LoadbalancerTypeChoice.IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tcp"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tcp"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).IsUnknown() || (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["certificates"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["certificates"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsUnknown()))))))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).IsUnknown() || (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_cert_params"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsUnknown())))))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsUnknown()))))))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_certificates"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_certificates"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).IsUnknown() || (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp"].(types.Object).Attributes()["tls_certificates_choice"].(types.Object).Attributes()["tls_parameters"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsUnknown()))))))))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["client_certificate_optional"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["crl"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["crl_choice"].(types.Object).Attributes()["no_crl"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsUnknown()))))))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).IsUnknown() || (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsUnknown() || ((data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsUnknown()))) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsUnknown()) && (data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["tls_tcp_auto_cert"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsUnknown()))))))) {
+			data.LoadbalancerTypeChoice = types.ObjectValueMust(TcpLoadbalancerLoadbalancerTypeModelAttributeMap, map[string]attr.Value{
+				"tcp":               types.BoolValue(true),
+				"tls_tcp":           types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpModelAttributeMap),
+				"tls_tcp_auto_cert": types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> OriginPoolsWeights
@@ -16143,14 +14277,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			AttrTypes: TcpLoadbalancerOriginPoolsWeightsModelAttributeMap,
 		}
 		nullOriginPoolsWeightsList := basetypes.NewListNull(originPoolsWeightsObjectType)
-		var priorValOriginPoolsWeights types.List
-		_ = request.State.GetAttribute(ctx, path.Root("origin_pools_weights"), &priorValOriginPoolsWeights)
-		if !priorValOriginPoolsWeights.IsNull() && !priorValOriginPoolsWeights.IsUnknown() {
-			data.OriginPoolsWeights = priorValOriginPoolsWeights
+		if !data.OriginPoolsWeights.IsNull() && !data.OriginPoolsWeights.IsUnknown() && len(data.OriginPoolsWeights.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.OriginPoolsWeights = basetypes.NewListValueMust(originPoolsWeightsObjectType, nil)
 		} else {
 			data.OriginPoolsWeights = nullOriginPoolsWeightsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PortChoice
@@ -16208,7 +14340,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -16327,8 +14459,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
@@ -16391,7 +14521,14 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.SniDefaultLbChoice = types.ObjectNull(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap)
+
+		if data.SniDefaultLbChoice.IsNull() || data.SniDefaultLbChoice.IsUnknown() || ((data.SniDefaultLbChoice.Attributes()["default_lb_with_sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["default_lb_with_sni"].IsUnknown()) && (data.SniDefaultLbChoice.Attributes()["no_sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["no_sni"].IsUnknown()) && (data.SniDefaultLbChoice.Attributes()["sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["sni"].IsUnknown())) {
+			data.SniDefaultLbChoice = types.ObjectValueMust(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap, map[string]attr.Value{
+				"default_lb_with_sni": types.BoolNull(),
+				"no_sni":              types.BoolValue(true),
+				"sni":                 types.BoolNull(),
+			})
+		}
 	}
 
 	// Restore prior state for LoadbalancerTypeChoice. The API redacts sensitive fields
@@ -16409,6 +14546,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 }
 
 func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTcpLoadbalancerModel
@@ -16418,6 +14561,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planLoadbalancerTypeChoice := data.LoadbalancerTypeChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -16437,7 +14581,11 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planLoadbalancerTypeChoice := data.LoadbalancerTypeChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.LoadbalancerTypeChoice.IsNull() && !configData.LoadbalancerTypeChoice.IsUnknown() {
+		data.LoadbalancerTypeChoice = configData.LoadbalancerTypeChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -16557,42 +14705,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 							return
 						}
 
-						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-						if !advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.IsUnknown() {
-							var tcpLoadbalancerAdvertiseDualstackOnPublicModel TcpLoadbalancerAdvertiseDualstackOnPublic
-							response.Diagnostics.Append(advertiseWhereChoiceModel.AdvertiseDualstackOnPublic.As(ctx, &tcpLoadbalancerAdvertiseDualstackOnPublicModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							advertiseDualstackOnPublicOneOfSpec := &ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic{}
-							advertiseDualstackOnPublicOneOfSpec.AdvertiseDualstackOnPublic = &ves_io_schema_views.AdvertisePublic{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = advertiseDualstackOnPublicOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> PublicIp
-							if !tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.IsNull() && !tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.IsUnknown() {
-								var publicIpModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerAdvertiseDualstackOnPublicModel.PublicIp.As(ctx, &publicIpModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								publicIpSpec := &ves_io_schema_views.ObjectRefType{}
-								advertiseDualstackOnPublicOneOfSpec.AdvertiseDualstackOnPublic.PublicIp = publicIpSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !publicIpModel.Name.IsNull() && !publicIpModel.Name.IsUnknown() {
-									publicIpSpec.Name = string(publicIpModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
-									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
 						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseOnPublic
 						if !advertiseWhereChoiceModel.AdvertiseOnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseOnPublic.IsUnknown() {
 							var tcpLoadbalancerAdvertiseOnPublicModel TcpLoadbalancerAdvertiseOnPublic
@@ -16623,157 +14735,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 								// resource modelToSpecNested RequiredStringField --> Namespace
 								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
 									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> AdvertiseV6OnPublic
-						if !advertiseWhereChoiceModel.AdvertiseV6OnPublic.IsNull() && !advertiseWhereChoiceModel.AdvertiseV6OnPublic.IsUnknown() {
-							var tcpLoadbalancerAdvertiseV6OnPublicModel TcpLoadbalancerAdvertiseV6OnPublic
-							response.Diagnostics.Append(advertiseWhereChoiceModel.AdvertiseV6OnPublic.As(ctx, &tcpLoadbalancerAdvertiseV6OnPublicModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							advertiseV6OnPublicOneOfSpec := &ves_io_schema_views.WhereType_AdvertiseV6OnPublic{}
-							advertiseV6OnPublicOneOfSpec.AdvertiseV6OnPublic = &ves_io_schema_views.AdvertisePublic{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = advertiseV6OnPublicOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> PublicIp
-							if !tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.IsNull() && !tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.IsUnknown() {
-								var publicIpModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerAdvertiseV6OnPublicModel.PublicIp.As(ctx, &publicIpModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								publicIpSpec := &ves_io_schema_views.ObjectRefType{}
-								advertiseV6OnPublicOneOfSpec.AdvertiseV6OnPublic.PublicIp = publicIpSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !publicIpModel.Name.IsNull() && !publicIpModel.Name.IsUnknown() {
-									publicIpSpec.Name = string(publicIpModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !publicIpModel.Namespace.IsNull() && !publicIpModel.Namespace.IsUnknown() {
-									publicIpSpec.Namespace = string(publicIpModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> CloudEdgeSegment
-						if !advertiseWhereChoiceModel.CloudEdgeSegment.IsNull() && !advertiseWhereChoiceModel.CloudEdgeSegment.IsUnknown() {
-							var tcpLoadbalancerCloudEdgeSegmentModel TcpLoadbalancerCloudEdgeSegment
-							response.Diagnostics.Append(advertiseWhereChoiceModel.CloudEdgeSegment.As(ctx, &tcpLoadbalancerCloudEdgeSegmentModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cloudEdgeSegmentOneOfSpec := &ves_io_schema_views.WhereType_CloudEdgeSegment{}
-							cloudEdgeSegmentOneOfSpec.CloudEdgeSegment = &ves_io_schema_views.WhereCloudEdgeSegment{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = cloudEdgeSegmentOneOfSpec
-
-							// resource modelToSpecNested RequiredPointerField --> CloudEdge
-							if !tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.IsUnknown() {
-								var cloudEdgeModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerCloudEdgeSegmentModel.CloudEdge.As(ctx, &cloudEdgeModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								cloudEdgeSpec := &ves_io_schema_views.ObjectRefType{}
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.CloudEdge = cloudEdgeSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !cloudEdgeModel.Name.IsNull() && !cloudEdgeModel.Name.IsUnknown() {
-									cloudEdgeSpec.Name = string(cloudEdgeModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !cloudEdgeModel.Namespace.IsNull() && !cloudEdgeModel.Namespace.IsUnknown() {
-									cloudEdgeSpec.Namespace = string(cloudEdgeModel.Namespace.ValueString())
-								}
-
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Ip
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Ip.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Ip.IsUnknown() {
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Ip = string(tcpLoadbalancerCloudEdgeSegmentModel.Ip.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.IsUnknown() {
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Ipv6 = string(tcpLoadbalancerCloudEdgeSegmentModel.Ipv6.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredPointerField --> Segment
-							if !tcpLoadbalancerCloudEdgeSegmentModel.Segment.IsNull() && !tcpLoadbalancerCloudEdgeSegmentModel.Segment.IsUnknown() {
-								var segmentModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerCloudEdgeSegmentModel.Segment.As(ctx, &segmentModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								segmentSpec := &ves_io_schema_views.ObjectRefType{}
-								cloudEdgeSegmentOneOfSpec.CloudEdgeSegment.Segment = segmentSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !segmentModel.Name.IsNull() && !segmentModel.Name.IsUnknown() {
-									segmentSpec.Name = string(segmentModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !segmentModel.Namespace.IsNull() && !segmentModel.Namespace.IsUnknown() {
-									segmentSpec.Namespace = string(segmentModel.Namespace.ValueString())
-								}
-
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> Segment
-						if !advertiseWhereChoiceModel.Segment.IsNull() && !advertiseWhereChoiceModel.Segment.IsUnknown() {
-							var tcpLoadbalancerSegmentModel TcpLoadbalancerSegment
-							response.Diagnostics.Append(advertiseWhereChoiceModel.Segment.As(ctx, &tcpLoadbalancerSegmentModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							segmentOneOfSpec := &ves_io_schema_views.WhereType_Segment{}
-							segmentOneOfSpec.Segment = &ves_io_schema_views.WhereSegment{}
-							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].Choice = segmentOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Ipv4Vip
-							if !tcpLoadbalancerSegmentModel.Ipv4Vip.IsNull() && !tcpLoadbalancerSegmentModel.Ipv4Vip.IsUnknown() {
-								segmentOneOfSpec.Segment.Ipv4Vip = string(tcpLoadbalancerSegmentModel.Ipv4Vip.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6Vip
-							if !tcpLoadbalancerSegmentModel.Ipv6Vip.IsNull() && !tcpLoadbalancerSegmentModel.Ipv6Vip.IsUnknown() {
-								segmentOneOfSpec.Segment.Ipv6Vip = string(tcpLoadbalancerSegmentModel.Ipv6Vip.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredPointerField --> Segment
-							if !tcpLoadbalancerSegmentModel.Segment.IsNull() && !tcpLoadbalancerSegmentModel.Segment.IsUnknown() {
-								var segmentModel ObjectRefTypeModel
-								response.Diagnostics.Append(tcpLoadbalancerSegmentModel.Segment.As(ctx, &segmentModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								segmentSpec := &ves_io_schema_views.ObjectRefType{}
-								segmentOneOfSpec.Segment.Segment = segmentSpec
-
-								// resource modelToSpecNested RequiredStringField --> Name
-								if !segmentModel.Name.IsNull() && !segmentModel.Name.IsUnknown() {
-									segmentSpec.Name = string(segmentModel.Name.ValueString())
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Namespace
-								if !segmentModel.Namespace.IsNull() && !segmentModel.Namespace.IsUnknown() {
-									segmentSpec.Namespace = string(segmentModel.Namespace.ValueString())
 								}
 
 							}
@@ -17545,6 +15506,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 							}
 							useMtlsOneOfSpec := &ves_io_schema_views.DownstreamTLSCertsParams_UseMtls{}
 							useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+							useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+								XfccDisabled: &ves_io_schema.Empty{},
+							}
 							tlsCertParamsOneOfSpec.TlsCertParams.MtlsChoice = useMtlsOneOfSpec
 
 							// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -17630,59 +15594,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 									trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 									trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 									useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-								}
-
-							}
-
-							// resource modelToSpecNested OneOfField --> XfccHeader
-							if !tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-								useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-								response.Diagnostics.Append(tcpLoadbalancerUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-								if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-									xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-									xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-								}
-
-								// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-								if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-									var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-									response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-									xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-									// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-									// 1. Get raw string elements
-									xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-									diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Iterate and Convert using Proto Value Map
-									xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-									for _, raw := range xfccHeaderElementsRaw {
-										if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-											xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-										} else {
-											response.Diagnostics.AddError(
-												"Invalid Enum Value",
-												fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-											)
-										}
-									}
-									xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 								}
 
 							}
@@ -17844,6 +15755,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 							}
 							useMtlsOneOfSpec := &ves_io_schema_views.DownstreamTlsParamsType_UseMtls{}
 							useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+							useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+								XfccDisabled: &ves_io_schema.Empty{},
+							}
 							tlsParametersOneOfSpec.TlsParameters.MtlsChoice = useMtlsOneOfSpec
 
 							// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -17929,59 +15843,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 									trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 									trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 									useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-								}
-
-							}
-
-							// resource modelToSpecNested OneOfField --> XfccHeader
-							if !tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-								useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-								response.Diagnostics.Append(tcpLoadbalancerDownstreamTlsParamsTypeUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-								if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-									xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-									xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-								}
-
-								// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-								if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-									var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-									response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-									xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-									useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-									// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-									// 1. Get raw string elements
-									xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-									diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Iterate and Convert using Proto Value Map
-									xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-									for _, raw := range xfccHeaderElementsRaw {
-										if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-											xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-										} else {
-											response.Diagnostics.AddError(
-												"Invalid Enum Value",
-												fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-											)
-										}
-									}
-									xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 								}
 
 							}
@@ -18150,6 +16011,13 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -18314,6 +16182,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 					}
 					useMtlsOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_UseMtls{}
 					useMtlsOneOfSpec.UseMtls = &ves_io_schema_views.DownstreamTlsValidationContext{}
+					useMtlsOneOfSpec.UseMtls.XfccHeader = &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{
+						XfccDisabled: &ves_io_schema.Empty{},
+					}
 					tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.MtlsChoice = useMtlsOneOfSpec
 
 					// resource modelToSpecNested BoolField --> ClientCertificateOptional
@@ -18399,59 +16270,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 							trustedCaUrlSpecStr := &ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl{}
 							trustedCaUrlSpecStr.TrustedCaUrl = string(useMtlsTrustedCaChoiceModel.TrustedCaUrl.ValueString())
 							useMtlsOneOfSpec.UseMtls.TrustedCaChoice = trustedCaUrlSpecStr
-						}
-
-					}
-
-					// resource modelToSpecNested OneOfField --> XfccHeader
-					if !tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.IsNull() && !tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.IsUnknown() {
-						useMtlsXfccHeaderChoiceModel := TcpLoadbalancerXfccHeaderChoice{}
-						response.Diagnostics.Append(tcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtlsModel.XfccHeaderChoice.As(ctx, &useMtlsXfccHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> XfccDisabled
-						if !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccDisabled.IsUnknown() {
-							xfccDisabledSpecBool := &ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled{}
-							xfccDisabledSpecBool.XfccDisabled = &ves_io_schema.Empty{}
-							useMtlsOneOfSpec.UseMtls.XfccHeader = xfccDisabledSpecBool
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> XfccOptions
-						if !useMtlsXfccHeaderChoiceModel.XfccOptions.IsNull() && !useMtlsXfccHeaderChoiceModel.XfccOptions.IsUnknown() {
-							var tcpLoadbalancerXfccOptionsModel TcpLoadbalancerXfccOptions
-							response.Diagnostics.Append(useMtlsXfccHeaderChoiceModel.XfccOptions.As(ctx, &tcpLoadbalancerXfccOptionsModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							xfccOptionsOneOfSpec := &ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions{}
-							xfccOptionsOneOfSpec.XfccOptions = &ves_io_schema_views.XfccHeaderKeys{}
-							useMtlsOneOfSpec.UseMtls.XfccHeader = xfccOptionsOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfEnumField --> XfccHeaderElements
-							// 1. Get raw string elements
-							xfccHeaderElementsRaw := make([]types.String, 0, len(tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.Elements()))
-							diags = tcpLoadbalancerXfccOptionsModel.XfccHeaderElements.ElementsAs(ctx, &xfccHeaderElementsRaw, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// 2. Iterate and Convert using Proto Value Map
-							xfccHeaderElementsSpec := make([]ves_io_schema.XfccElement, 0, len(xfccHeaderElementsRaw))
-							for _, raw := range xfccHeaderElementsRaw {
-								if v, ok := ves_io_schema.XfccElement_value[raw.ValueString()]; ok {
-									xfccHeaderElementsSpec = append(xfccHeaderElementsSpec, ves_io_schema.XfccElement(v))
-								} else {
-									response.Diagnostics.AddError(
-										"Invalid Enum Value",
-										fmt.Sprintf("Value '%s' is not a valid member for XfccHeaderElements", raw.ValueString()),
-									)
-								}
-							}
-							xfccOptionsOneOfSpec.XfccOptions.XfccHeaderElements = xfccHeaderElementsSpec
-
 						}
 
 					}
@@ -18695,7 +16513,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource modelToSpecRoot OneOfField --> ServicePolicyChoice
 	if !data.ServicePolicyChoice.IsNull() && !data.ServicePolicyChoice.IsUnknown() {
 		servicePolicyChoiceModel := TcpLoadbalancerSvcPolicyChoice{}
 		response.Diagnostics.Append(data.ServicePolicyChoice.As(ctx, &servicePolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18763,6 +16581,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			spec.ServicePolicyChoice = servicePoliciesFromNamespaceSpecBool
 		}
 
+	} else {
+		spec.ServicePolicyChoice = &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_NoServicePolicies{
+			NoServicePolicies: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SniDefaultLbChoice
@@ -18798,7 +16620,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -18814,7 +16636,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "tcp_loadbalancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "tcp_loadbalancer", err),
 		)
 		return
 	}
@@ -18823,7 +16645,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "tcp_loadbalancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "tcp_loadbalancer", err),
 		)
 		return
 	}
@@ -18982,77 +16804,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-							// GlobalSpecType
-							// false
-							{
-								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
-								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
-									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
-								}
-							}
-
 							// resource specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 							// GlobalSpecType
 							// false
@@ -19121,301 +16872,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = advertiseOnPublicObj
 								} else {
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
-							// GlobalSpecType
-							// false
-							{
-								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
-								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
-									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
-
-									// resource specToModelNested RequiredPointerField --> PublicIp
-									if advertiseV6OnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> CloudEdgeSegment
-							// GlobalSpecType
-							// false
-							{
-								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
-									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
-
-									// resource specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// resource specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentElement.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentElement.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
-									}
-
-									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
-								}
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> Segment
-							// GlobalSpecType
-							// false
-							{
-								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
-
-								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
-									segmentElement := segmentOptionsWrapper.Segment
-
-									// resource specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentElement.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6Vip
-									if segmentElement.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredPointerField --> Segment
-									if segmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
-									}
-
-									segmentObj, segmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(segmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
@@ -20606,6 +18062,56 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			tcpLoadbalancerAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> DnsZones
+		if len(autoCertInfoElement.GetDnsZones()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			dnsZonesElements := make([]ObjectRefTypeModel, 0, len(autoCertInfoElement.GetDnsZones()))
+			for _, dnsZonesElement := range autoCertInfoElement.GetDnsZones() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if dnsZonesElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if dnsZonesElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if dnsZonesElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			dnsZonesListValue, dnsZonesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap}, dnsZonesElements)
+			response.Diagnostics.Append(dnsZonesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = dnsZonesListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap})
+		}
+
 		autoCertInfoObj, autoCertInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			TcpLoadbalancerAutoCertInfoModelAttributeMap,
@@ -20734,14 +18240,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerDnsInfoModelAttributeMap,
 		}
 		nullDnsInfoList := basetypes.NewListNull(dnsInfoObjectType)
-		var priorValDnsInfo types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_info"), &priorValDnsInfo)
-		if !priorValDnsInfo.IsNull() && !priorValDnsInfo.IsUnknown() {
-			data.DnsInfo = priorValDnsInfo
+		if !data.DnsInfo.IsNull() && !data.DnsInfo.IsUnknown() && len(data.DnsInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsInfo = basetypes.NewListValueMust(dnsInfoObjectType, nil)
 		} else {
 			data.DnsInfo = nullDnsInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot BoolField --> DnsVolterraManaged
@@ -20757,7 +18261,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			}
 			data.Domains = listValue
 		} else {
-			data.Domains = types.ListNull(types.StringType)
+			if !data.Domains.IsNull() && !data.Domains.IsUnknown() && len(data.Domains.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Domains = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Domains = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -20844,7 +18353,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	idleTimeoutValue := specData.GetIdleTimeout()
 	if idleTimeoutValue > 0 {
 		data.IdleTimeout = types.Int64Value(int64(idleTimeoutValue))
-	} else {
+	} else if data.IdleTimeout.IsNull() || data.IdleTimeout.IsUnknown() {
 		data.IdleTimeout = types.Int64Null()
 	}
 
@@ -21093,14 +18602,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerInternetVipInfoModelAttributeMap,
 		}
 		nullInternetVipInfoList := basetypes.NewListNull(internetVipInfoObjectType)
-		var priorValInternetVipInfo types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("internet_vip_info"), &priorValInternetVipInfo)
-		if !priorValInternetVipInfo.IsNull() && !priorValInternetVipInfo.IsUnknown() {
-			data.InternetVipInfo = priorValInternetVipInfo
+		if !data.InternetVipInfo.IsNull() && !data.InternetVipInfo.IsUnknown() && len(data.InternetVipInfo.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.InternetVipInfo = basetypes.NewListValueMust(internetVipInfoObjectType, nil)
 		} else {
 			data.InternetVipInfo = nullInternetVipInfoList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
@@ -21405,85 +18912,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-										}
-
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// GlobalSpecType
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
 										}
 
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
@@ -21888,85 +19316,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// resource specToModelNested PointerOfOneOfField --> XfccOptions
-											// GlobalSpecType
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													{
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -22209,6 +19558,15 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 												} else {
 													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -22669,85 +20027,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested OneOfField --> XfccHeader
-							if useMtlsElement.GetXfccHeader() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-								if isXfccDisabled {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-								} else {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-								}
-
-								// resource specToModelNested PointerOfOneOfField --> XfccOptions
-								// GlobalSpecType
-								// false
-								{
-									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-										// resource SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-										{
-											if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-												xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-												for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-													if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-														xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-													}
-												}
-												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-												response.Diagnostics.Append(listDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-											} else {
-												xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-											}
-										}
-
-										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-										response.Diagnostics.Append(xfccOptionsObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-									} else {
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-							}
-
 							useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 							response.Diagnostics.Append(useMtlsObjDiags...)
 							if response.Diagnostics.HasError() {
@@ -23137,14 +20416,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			AttrTypes: TcpLoadbalancerOriginPoolsWeightsModelAttributeMap,
 		}
 		nullOriginPoolsWeightsList := basetypes.NewListNull(originPoolsWeightsObjectType)
-		var priorValOriginPoolsWeights types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("origin_pools_weights"), &priorValOriginPoolsWeights)
-		if !priorValOriginPoolsWeights.IsNull() && !priorValOriginPoolsWeights.IsUnknown() {
-			data.OriginPoolsWeights = priorValOriginPoolsWeights
+		if !data.OriginPoolsWeights.IsNull() && !data.OriginPoolsWeights.IsUnknown() && len(data.OriginPoolsWeights.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.OriginPoolsWeights = basetypes.NewListValueMust(originPoolsWeightsObjectType, nil)
 		} else {
 			data.OriginPoolsWeights = nullOriginPoolsWeightsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PortChoice
@@ -23202,7 +20479,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -23321,8 +20598,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
@@ -23415,7 +20690,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	}
 	// Restore plan value for LoadbalancerTypeChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.LoadbalancerTypeChoice = planLoadbalancerTypeChoice
+	data.LoadbalancerTypeChoice = utils.ResolveUnknowns(planLoadbalancerTypeChoice, data.LoadbalancerTypeChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -23463,7 +20738,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Delete(ctx context.Context, request resour
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "tcp_loadbalancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "tcp_loadbalancer", err),
 		)
 		return
 	}

@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -43,6 +44,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_segment "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/segment"
 )
@@ -61,7 +63,8 @@ type SegmentAttachmentType struct {
 }
 
 type SegmentInternetConnChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 // ResourceF5XCSegmentModel describes the resource data model.
@@ -100,7 +103,8 @@ var SegmentAttachmentsModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> InternetConnectionChoice
 var SegmentInternetConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 func NewResourceF5XCSegment() resource.Resource {
@@ -114,8 +118,8 @@ func (r *ResourceF5XCSegment) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a segment This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a segment This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment) etc. can be fetched",
+		MarkdownDescription: "Network Segment.",
+		Description:         "Network Segment.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -171,7 +175,7 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -241,10 +245,21 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 				Computed:            false,
 				Validators: []validator.Object{
 					exactlyoneofvalidator.ExactlyOneOf(
+						"disable",
 						"enable",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
+					"disable": schema.BoolAttribute{
+						Description:         "Disable connections to internet",
+						MarkdownDescription: "Disable connections to internet",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 					"enable": schema.BoolAttribute{
 						Description:         "Enable connections to internet",
 						MarkdownDescription: "Enable connections to internet",
@@ -319,9 +334,17 @@ func (r *ResourceF5XCSegment) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCSegmentModel
 
 	// Read Terraform plan data into the model
@@ -410,6 +433,13 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 			return
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+		if !internetConnectionChoiceModel.Disable.IsNull() && !internetConnectionChoiceModel.Disable.IsUnknown() {
+			disableSpecBool := &ves_io_schema_segment.CreateSpecType_Disable{}
+			disableSpecBool.Disable = &ves_io_schema.Empty{}
+			spec.InternetConnectionChoice = disableSpecBool
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 		if !internetConnectionChoiceModel.Enable.IsNull() && !internetConnectionChoiceModel.Enable.IsUnknown() {
 			enableSpecBool := &ves_io_schema_segment.CreateSpecType_Enable{}
@@ -422,7 +452,7 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -445,7 +475,7 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_segment.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "segment", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "segment", err),
 		)
 		return
 	}
@@ -631,14 +661,12 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 			AttrTypes: SegmentAttachmentsModelAttributeMap,
 		}
 		nullAttachmentsList := basetypes.NewListNull(attachmentsObjectType)
-		var priorValAttachments types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("attachments"), &priorValAttachments)
-		if !priorValAttachments.IsNull() && !priorValAttachments.IsUnknown() {
-			data.Attachments = priorValAttachments
+		if !data.Attachments.IsNull() && !data.Attachments.IsUnknown() && len(data.Attachments.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Attachments = basetypes.NewListValueMust(attachmentsObjectType, nil)
 		} else {
 			data.Attachments = nullAttachmentsList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> InternetConnectionChoice
@@ -653,6 +681,15 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 		var internetConnectionChoiceChoicesModel = &SegmentInternetConnChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disable
+		_, isDisable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Disable)
+
+		if isDisable {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolValue(true)
+		} else {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolNull()
+		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Enable
 		_, isEnable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Enable)
@@ -733,7 +770,7 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "segment", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "segment", err),
 		)
 		return
 	}
@@ -919,14 +956,12 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: SegmentAttachmentsModelAttributeMap,
 		}
 		nullAttachmentsList := basetypes.NewListNull(attachmentsObjectType)
-		var priorValAttachments types.List
-		_ = request.State.GetAttribute(ctx, path.Root("attachments"), &priorValAttachments)
-		if !priorValAttachments.IsNull() && !priorValAttachments.IsUnknown() {
-			data.Attachments = priorValAttachments
+		if !data.Attachments.IsNull() && !data.Attachments.IsUnknown() && len(data.Attachments.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Attachments = basetypes.NewListValueMust(attachmentsObjectType, nil)
 		} else {
 			data.Attachments = nullAttachmentsList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> InternetConnectionChoice
@@ -941,6 +976,15 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 		var internetConnectionChoiceChoicesModel = &SegmentInternetConnChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disable
+		_, isDisable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Disable)
+
+		if isDisable {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolValue(true)
+		} else {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolNull()
+		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Enable
 		_, isEnable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Enable)
@@ -980,6 +1024,12 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCSegmentModel
@@ -1088,6 +1138,13 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 			return
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+		if !internetConnectionChoiceModel.Disable.IsNull() && !internetConnectionChoiceModel.Disable.IsUnknown() {
+			disableSpecBool := &ves_io_schema_segment.ReplaceSpecType_Disable{}
+			disableSpecBool.Disable = &ves_io_schema.Empty{}
+			spec.InternetConnectionChoice = disableSpecBool
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 		if !internetConnectionChoiceModel.Enable.IsNull() && !internetConnectionChoiceModel.Enable.IsUnknown() {
 			enableSpecBool := &ves_io_schema_segment.ReplaceSpecType_Enable{}
@@ -1100,7 +1157,7 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1116,7 +1173,7 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 	err = r.client.ReplaceObject(ctx, ves_io_schema_segment.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "segment", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "segment", err),
 		)
 		return
 	}
@@ -1125,7 +1182,7 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "segment", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "segment", err),
 		)
 		return
 	}
@@ -1310,14 +1367,12 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 			AttrTypes: SegmentAttachmentsModelAttributeMap,
 		}
 		nullAttachmentsList := basetypes.NewListNull(attachmentsObjectType)
-		var priorValAttachments types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("attachments"), &priorValAttachments)
-		if !priorValAttachments.IsNull() && !priorValAttachments.IsUnknown() {
-			data.Attachments = priorValAttachments
+		if !data.Attachments.IsNull() && !data.Attachments.IsUnknown() && len(data.Attachments.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Attachments = basetypes.NewListValueMust(attachmentsObjectType, nil)
 		} else {
 			data.Attachments = nullAttachmentsList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> InternetConnectionChoice
@@ -1332,6 +1387,15 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 		var internetConnectionChoiceChoicesModel = &SegmentInternetConnChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disable
+		_, isDisable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Disable)
+
+		if isDisable {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolValue(true)
+		} else {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolNull()
+		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Enable
 		_, isEnable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Enable)
@@ -1434,7 +1498,7 @@ func (r *ResourceF5XCSegment) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "segment", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "segment", err),
 		)
 		return
 	}

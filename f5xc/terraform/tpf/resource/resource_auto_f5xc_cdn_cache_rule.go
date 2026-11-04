@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -578,8 +579,8 @@ func (r *ResourceF5XCCdnCacheRule) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
-		Description:         "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
+		MarkdownDescription: "CDN cache rule view defines a required parameters that can be used in CRUD, to create and manage CDN cache rule.<br>It can be used to create CDN cache rule.",
+		Description:         "CDN cache rule view defines a required parameters that can be used in CRUD, to create and manage CDN cache rule. It can be used to create CDN cache rule.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1365,9 +1366,17 @@ func (r *ResourceF5XCCdnCacheRule) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCdnCacheRuleModel
 
 	// Read Terraform plan data into the model
@@ -2088,7 +2097,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2111,7 +2120,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cdn_cache_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cdn_cache_rule", err),
 		)
 		return
 	}
@@ -3246,7 +3255,7 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cdn_cache_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cdn_cache_rule", err),
 		)
 		return
 	}
@@ -3526,7 +3535,10 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectValueMust(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, map[string]attr.Value{
+				"cache_bypass":       types.BoolValue(true),
+				"eligible_for_cache": types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
@@ -4340,6 +4352,12 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCdnCacheRuleModel
@@ -5080,7 +5098,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -5096,7 +5114,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	err = r.client.ReplaceObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cdn_cache_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cdn_cache_rule", err),
 		)
 		return
 	}
@@ -5105,7 +5123,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cdn_cache_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cdn_cache_rule", err),
 		)
 		return
 	}
@@ -6261,7 +6279,7 @@ func (r *ResourceF5XCCdnCacheRule) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "cdn_cache_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "cdn_cache_rule", err),
 		)
 		return
 	}

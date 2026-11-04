@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -21,6 +23,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -34,47 +38,47 @@ type DataSourceF5XCVirtualNetwork struct {
 	client *client.APIClient
 }
 
-type VirtualNetworkCreateSpecTypeNetworkChoice struct {
+type VirtualNetNetChoice struct {
 	GlobalNetwork          types.Bool `tfsdk:"global_network"`
 	LegacyType             types.List `tfsdk:"legacy_type"`
 	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
 }
 
-type VirtualNetworkVirtualNetworkStaticRouteViewType struct {
+type VirtualNetStaticRouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
 }
 
-type VirtualNetworkStaticRouteViewTypeNextHopChoice struct {
+type VirtualNetNextHopChoice struct {
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type VirtualNetworkStaticRouteViewTypeNodeInterface struct {
+type VirtualNetNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type VirtualNetworkNodeInterfaceInfo struct {
+type VirtualNetNodeIfaceInfo struct {
 	Interface types.List   `tfsdk:"interface"`
 	Node      types.String `tfsdk:"node"`
 }
 
-type VirtualNetworkVirtualNetworkStaticV6RouteViewType struct {
+type VirtualNetStaticV6RouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
 }
 
-type VirtualNetworkStaticV6RouteViewTypeNextHopChoice struct {
+type VirtualNetStaticV6RouteViewTypeNextHopChoice struct {
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type VirtualNetworkStaticV6RouteViewTypeNodeInterface struct {
+type VirtualNetStaticV6RouteViewTypeNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
@@ -252,8 +256,8 @@ func (d *DataSourceF5XCVirtualNetwork) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
+		MarkdownDescription: "Virtual network is an isolated L3 network. A virtual network can contain<br>one or more IP Subnets. Network elements in a virtual network (interface,<br>host, listener etc...) can talk to each other directly.<br><br>Two virtual networks can have overlapping ip address space. If two networks<br>are connected directly then they will have to guarantee unique ip addressing.<br><br>List of sites where virtual network configuration needs to be present can<br>be configured.",
+		Description:         "Virtual network is an isolated L3 network. A virtual network can contain one or more IP Subnets. Network elements in a virtual network (interface, host, listener etc...) can talk to each other directly. Two virtual networks can have overlapping ip address space. If two networks are connected directly then they will have to guarantee unique ip addressing. List of sites where virtual network configuration needs to be present can be configured.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -574,9 +578,15 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_network", err))
 		return
 	}
 
@@ -584,7 +594,41 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_virtual_network.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -607,8 +651,14 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -617,6 +667,7 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -705,10 +756,15 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 	if oneofNetworkChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		networkChoiceChoices := rawSpecMap["network_choice"]
+		var networkChoiceChoices interface{}
+		if v := rawSpecMap["network_choice"]; v != nil {
+			networkChoiceChoices = v
+		} else {
+			networkChoiceChoices = specData.GetNetworkChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var networkChoiceChoicesModel = &VirtualNetworkCreateSpecTypeNetworkChoice{}
+		var networkChoiceChoicesModel = &VirtualNetNetChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -841,10 +897,10 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot ArrayOfPointerField --> StaticRoutes
 	if len(specData.GetStaticRoutes()) > 0 {
-		staticRoutesElements := make([]VirtualNetworkVirtualNetworkStaticRouteViewType, 0, len(specData.GetStaticRoutes()))
+		staticRoutesElements := make([]VirtualNetStaticRouteViewType, 0, len(specData.GetStaticRoutes()))
 
 		for _, staticRoutesElement := range specData.GetStaticRoutes() {
-			virtualNetworkVirtualNetworkStaticRouteViewTypeModel := VirtualNetworkVirtualNetworkStaticRouteViewType{}
+			virtualNetStaticRouteViewTypeModel := VirtualNetStaticRouteViewType{}
 
 			// data SpecToModelNested ArrayOfEnumField --> Attrs
 			if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -859,9 +915,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				if response.Diagnostics.HasError() {
 					return
 				}
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+				virtualNetStaticRouteViewTypeModel.Attrs = listValue
 			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+				virtualNetStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -871,9 +927,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				if response.Diagnostics.HasError() {
 					return
 				}
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+				virtualNetStaticRouteViewTypeModel.IpPrefixes = listValue
 			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+				virtualNetStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -935,9 +991,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 						if len(nodeInterfaceElement.GetList()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+							listElements := make([]VirtualNetNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 							for _, listElement := range nodeInterfaceElement.GetList() {
-								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
+								virtualNetNodeIfaceInfoModel := VirtualNetNodeIfaceInfo{}
 
 								// data specToModelNested ArrayOfPointerField --> Interface
 								if len(listElement.GetInterface()) > 0 {
@@ -980,24 +1036,24 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 									if response.Diagnostics.HasError() {
 										return
 									}
-									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
+									virtualNetNodeIfaceInfoModel.Interface = interfaceListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
+									virtualNetNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
 								}
 
 								// data specToModelNested StringField --> Node
 								if listElement.GetNode() != "" {
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+									virtualNetNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 								} else {
 									// Empty string, set to null
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
+									virtualNetNodeIfaceInfoModel.Node = types.StringNull()
 								}
 
-								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
+								listElements = append(listElements, virtualNetNodeIfaceInfoModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1039,12 +1095,12 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+				virtualNetStaticRouteViewTypeModel.NextHopChoice = finalObj
 			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
+				virtualNetStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
 			}
 
-			staticRoutesElements = append(staticRoutesElements, virtualNetworkVirtualNetworkStaticRouteViewTypeModel)
+			staticRoutesElements = append(staticRoutesElements, virtualNetStaticRouteViewTypeModel)
 		}
 
 		{
@@ -1071,10 +1127,10 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
 	if len(specData.GetStaticV6Routes()) > 0 {
-		staticV6RoutesElements := make([]VirtualNetworkVirtualNetworkStaticV6RouteViewType, 0, len(specData.GetStaticV6Routes()))
+		staticV6RoutesElements := make([]VirtualNetStaticV6RouteViewType, 0, len(specData.GetStaticV6Routes()))
 
 		for _, staticV6RoutesElement := range specData.GetStaticV6Routes() {
-			virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel := VirtualNetworkVirtualNetworkStaticV6RouteViewType{}
+			virtualNetStaticV6RouteViewTypeModel := VirtualNetStaticV6RouteViewType{}
 
 			// data SpecToModelNested ArrayOfEnumField --> Attrs
 			if len(staticV6RoutesElement.GetAttrs()) > 0 {
@@ -1089,9 +1145,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				if response.Diagnostics.HasError() {
 					return
 				}
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
+				virtualNetStaticV6RouteViewTypeModel.Attrs = listValue
 			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+				virtualNetStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -1101,9 +1157,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				if response.Diagnostics.HasError() {
 					return
 				}
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
+				virtualNetStaticV6RouteViewTypeModel.IpPrefixes = listValue
 			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+				virtualNetStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -1165,9 +1221,9 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 						if len(nodeInterfaceElement.GetList()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+							listElements := make([]VirtualNetNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 							for _, listElement := range nodeInterfaceElement.GetList() {
-								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
+								virtualNetNodeIfaceInfoModel := VirtualNetNodeIfaceInfo{}
 
 								// data specToModelNested ArrayOfPointerField --> Interface
 								if len(listElement.GetInterface()) > 0 {
@@ -1210,24 +1266,24 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 									if response.Diagnostics.HasError() {
 										return
 									}
-									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
+									virtualNetNodeIfaceInfoModel.Interface = interfaceListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
+									virtualNetNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
 								}
 
 								// data specToModelNested StringField --> Node
 								if listElement.GetNode() != "" {
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+									virtualNetNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 								} else {
 									// Empty string, set to null
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
+									virtualNetNodeIfaceInfoModel.Node = types.StringNull()
 								}
 
-								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
+								listElements = append(listElements, virtualNetNodeIfaceInfoModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1269,12 +1325,12 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
+				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
+				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
 			}
 
-			staticV6RoutesElements = append(staticV6RoutesElements, virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel)
+			staticV6RoutesElements = append(staticV6RoutesElements, virtualNetStaticV6RouteViewTypeModel)
 		}
 
 		{

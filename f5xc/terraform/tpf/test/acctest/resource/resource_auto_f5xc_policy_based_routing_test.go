@@ -27,11 +27,11 @@ import (
 func TestAccResourceAutoF5XCPolicyBasedRouting_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckPolicyBasedRoutingDestroyProducer(t),
@@ -40,32 +40,36 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_basic(name, namespace, fwdClass),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withDescription(name, namespace, fwdClass, "policy based routing basic updated"),
+				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withDescription(name, namespace, fwdClass, "Updated basic policy based routing example"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCPolicyBasedRoutingConfig_basic("example-pbr", namespace, "example-fc"),
+		})
 }
 
 func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrSourceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,20 +80,20 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrSourceTransition(t 
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrSourceAny(name, namespace, fwdClass),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrSourcePrefix(name, namespace, fwdClass, "[\"10.0.0.0/8\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -99,9 +103,9 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrSourceTransition(t 
 func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrRulesTrafficTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -112,20 +116,20 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrRulesTrafficTransit
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleTraffic(name, namespace, fwdClass, "all_tcp_traffic"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleTraffic(name, namespace, fwdClass, "all_udp_traffic"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -135,9 +139,9 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrRulesTrafficTransit
 func TestAccResourceAutoF5XCPolicyBasedRouting_withPolicyTypeTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -148,20 +152,20 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withPolicyTypeTransition(t *testi
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_basic(name, namespace, fwdClass),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withForwardProxyPbr(name, namespace, fwdClass),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -171,9 +175,9 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withPolicyTypeTransition(t *testi
 func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrDestinationTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -184,20 +188,20 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrDestinationTransiti
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleDestination(name, namespace, fwdClass, "any"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleDestination(name, namespace, fwdClass, "prefix_list"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -207,37 +211,41 @@ func TestAccResourceAutoF5XCPolicyBasedRouting_withNetworkPbrDestinationTransiti
 func TestAccResourceAutoF5XCPolicyBasedRouting_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-pbr-" + acctest.RandString(t, 8)
+	name := "example-pbr-" + acctest.RandString(t, 8)
 	namespace := "default"
-	fwdClass := "tf-acc-fc-" + acctest.RandString(t, 8)
+	fwdClass := "example-fc-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckPolicyBasedRoutingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_full(name, namespace, fwdClass, "policy based routing full", "team-a"),
+				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_full(name, namespace, fwdClass, "Full policy based routing example", "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_full(name, namespace, fwdClass, "policy based routing full updated", "team-b"),
+				Config: testAccResourceAutoF5XCPolicyBasedRoutingConfig_full(name, namespace, fwdClass, "Updated full policy based routing example", "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_policy_based_routing.test",
+				ResourceName:                         "f5xc_policy_based_routing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_policy_based_routing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCPolicyBasedRoutingConfig_full("example-pbr", namespace, "example-fc", "Full policy based routing example", "example-team"),
+		})
 }
 
 func testAccCheckPolicyBasedRoutingDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -246,7 +254,7 @@ func testAccCheckPolicyBasedRoutingDestroyProducer(t *testing.T) func(*terraform
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_basic(name, namespace, fwdClass string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -264,7 +272,7 @@ resource "f5xc_policy_based_routing" "test" {
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withDescription(name, namespace, fwdClass, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -283,7 +291,7 @@ resource "f5xc_policy_based_routing" "test" {
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrSourceAny(name, namespace, fwdClass string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -305,7 +313,7 @@ resource "f5xc_policy_based_routing" "test" {
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrSourcePrefix(name, namespace, fwdClass, prefixes string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -334,7 +342,7 @@ func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleTraffic(n
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -345,7 +353,7 @@ resource "f5xc_policy_based_routing" "test" {
       }
       network_pbr_rules = [{
         metadata = {
-          name = "rule-1"
+          name = "example-rule"
         }
         forwarding_class_list = [{
           name      = %q
@@ -378,7 +386,7 @@ func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withNetworkPbrRuleDestinati
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -389,7 +397,7 @@ resource "f5xc_policy_based_routing" "test" {
       }
       network_pbr_rules = [{
         metadata = {
-          name = "rule-1"
+          name = "example-rule"
         }
         forwarding_class_list = [{
           name      = %q
@@ -415,7 +423,7 @@ resource "f5xc_policy_based_routing" "test" {
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_withForwardProxyPbr(name, namespace, fwdClass string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name      = %q
   namespace = %q
 
@@ -433,18 +441,18 @@ resource "f5xc_policy_based_routing" "test" {
 
 func testAccResourceAutoF5XCPolicyBasedRoutingConfig_full(name, namespace, fwdClass, description, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_policy_based_routing" "test" {
+resource "f5xc_policy_based_routing" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   labels = {
-    env  = "acceptance"
+    env  = "example"
     team = %q
   }
 
   annotations = {
-    owner = "network"
+    owner = "network-team"
   }
 
   policy_choice = {

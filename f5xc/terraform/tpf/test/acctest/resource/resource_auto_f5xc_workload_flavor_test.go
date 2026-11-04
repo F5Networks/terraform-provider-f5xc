@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCWorkloadFlavor_basic(t *testing.T) {
 
 	namespace := "shared"
-	name := "tf-acc-workload-flavor-" + acctest.RandString(t, 8)
+	name := "example-workload-flavor-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,20 +38,20 @@ func TestAccResourceAutoF5XCWorkloadFlavor_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withDescription(name, namespace, "workload flavor basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -61,7 +61,7 @@ func TestAccResourceAutoF5XCWorkloadFlavor_basic(t *testing.T) {
 func TestAccResourceAutoF5XCWorkloadFlavor_memoryTransition(t *testing.T) {
 
 	namespace := "shared"
-	name := "tf-acc-workload-flavor-" + acctest.RandString(t, 8)
+	name := "example-workload-flavor-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,20 +72,20 @@ func TestAccResourceAutoF5XCWorkloadFlavor_memoryTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withMemory(name, namespace, 512),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withMemory(name, namespace, 2048),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -95,7 +95,7 @@ func TestAccResourceAutoF5XCWorkloadFlavor_memoryTransition(t *testing.T) {
 func TestAccResourceAutoF5XCWorkloadFlavor_vcpusTransition(t *testing.T) {
 
 	namespace := "shared"
-	name := "tf-acc-workload-flavor-" + acctest.RandString(t, 8)
+	name := "example-workload-flavor-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -106,20 +106,20 @@ func TestAccResourceAutoF5XCWorkloadFlavor_vcpusTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withVcpus(name, namespace, 0.5),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withVcpus(name, namespace, 2.0),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -129,7 +129,7 @@ func TestAccResourceAutoF5XCWorkloadFlavor_vcpusTransition(t *testing.T) {
 func TestAccResourceAutoF5XCWorkloadFlavor_ephemeralStorageTransition(t *testing.T) {
 
 	namespace := "shared"
-	name := "tf-acc-workload-flavor-" + acctest.RandString(t, 8)
+	name := "example-workload-flavor-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -140,20 +140,20 @@ func TestAccResourceAutoF5XCWorkloadFlavor_ephemeralStorageTransition(t *testing
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withEphemeralStorage(name, namespace, 200),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_withEphemeralStorage(name, namespace, 1000),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -163,35 +163,39 @@ func TestAccResourceAutoF5XCWorkloadFlavor_ephemeralStorageTransition(t *testing
 func TestAccResourceAutoF5XCWorkloadFlavor_full(t *testing.T) {
 
 	namespace := "shared"
-	name := "tf-acc-workload-flavor-" + acctest.RandString(t, 8)
+	name := "example-workload-flavor-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkloadFlavorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_full(name, namespace, 1024, 1.0, 500, "team-a"),
+				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_full(name, namespace, 1024, 1.0, 500, "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_full(name, namespace, 4096, 4.0, 1500, "team-b"),
+				Config: testAccResourceAutoF5XCWorkloadFlavorConfig_full(name, namespace, 4096, 4.0, 1500, "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_workload_flavor.test",
+				ResourceName:                         "f5xc_workload_flavor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload_flavor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCWorkloadFlavorConfig_full("example-workload-flavor", "shared", 1024, 1.0, 500, "example-team"),
+		})
 }
 
 func testAccCheckWorkloadFlavorDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -200,7 +204,7 @@ func testAccCheckWorkloadFlavorDestroyProducer(t *testing.T) func(*terraform.Sta
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name      = %q
   namespace = %q
 }
@@ -209,7 +213,7 @@ resource "f5xc_workload_flavor" "test" {
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -219,7 +223,7 @@ resource "f5xc_workload_flavor" "test" {
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_withMemory(name, namespace string, memory int) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name      = %q
   namespace = %q
   memory    = %d
@@ -229,7 +233,7 @@ resource "f5xc_workload_flavor" "test" {
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_withVcpus(name, namespace string, vcpus float64) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name      = %q
   namespace = %q
   vcpus     = %g
@@ -239,7 +243,7 @@ resource "f5xc_workload_flavor" "test" {
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_withEphemeralStorage(name, namespace string, ephemeralStorage int) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name              = %q
   namespace         = %q
   ephemeral_storage = %d
@@ -249,17 +253,17 @@ resource "f5xc_workload_flavor" "test" {
 
 func testAccResourceAutoF5XCWorkloadFlavorConfig_full(name, namespace string, memory int, vcpus float64, ephemeralStorage int, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload_flavor" "test" {
+resource "f5xc_workload_flavor" "example" {
   name              = %q
   namespace         = %q
-  description       = "workload flavor full"
+  description       = "Workload flavor full example"
   memory            = %d
   vcpus             = %g
   ephemeral_storage = %d
 
   labels = {
     team = %q
-    env  = "test"
+    env  = "example"
   }
 
   annotations = {

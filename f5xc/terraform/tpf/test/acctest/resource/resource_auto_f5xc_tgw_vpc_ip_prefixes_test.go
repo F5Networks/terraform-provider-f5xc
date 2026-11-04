@@ -27,7 +27,7 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +48,7 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_withMultiplePrefixes(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -69,7 +69,7 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_withMapKeyTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -90,7 +90,7 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_withUpdateCycle(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,9 +111,9 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpc-prefixes-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_tgw_vpc_ip_prefixes", "", "tgw vpc ip prefixes"),
@@ -125,14 +125,18 @@ func TestAccResourceAutoF5XCTgwVpcIpPrefixes_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_withAltMapKey(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_full(name, namespace),
+		})
 }
 
 func testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpc_ip_prefixes" "test" {
+resource "f5xc_tgw_vpc_ip_prefixes" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -149,7 +153,7 @@ func testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_withMultiplePrefixes(name, na
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpc_ip_prefixes" "test" {
+resource "f5xc_tgw_vpc_ip_prefixes" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -166,7 +170,7 @@ func testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_withPrefixTransition(name, na
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpc_ip_prefixes" "test" {
+resource "f5xc_tgw_vpc_ip_prefixes" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -183,7 +187,7 @@ func testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_withAltMapKey(name, namespace
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpc_ip_prefixes" "test" {
+resource "f5xc_tgw_vpc_ip_prefixes" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -200,7 +204,7 @@ func testAccResourceAutoF5XCTgwVpcIpPrefixesConfig_full(name, namespace string) 
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpc_ip_prefixes" "test" {
+resource "f5xc_tgw_vpc_ip_prefixes" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 

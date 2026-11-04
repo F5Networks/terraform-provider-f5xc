@@ -31,7 +31,7 @@ type DataSourceF5XCCluster struct {
 	client *client.APIClient
 }
 
-type ClusterClusterCircuitBreaker struct {
+type ClusterCircuitBreaker struct {
 	ConnectionLimit types.Int64 `tfsdk:"connection_limit"`
 	MaxRequests     types.Int64 `tfsdk:"max_requests"`
 	PendingRequests types.Int64 `tfsdk:"pending_requests"`
@@ -39,17 +39,17 @@ type ClusterClusterCircuitBreaker struct {
 	Retries         types.Int64 `tfsdk:"retries"`
 }
 
-type ClusterClusterEndpointSubsetSelectorType struct {
+type ClusterEndpointSubsetSelectorType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type ClusterGlobalSpecTypeHttpProtocolTypeChoice struct {
+type ClusterHttpProtoTypeChoice struct {
 	AutoHttpConfig types.Bool   `tfsdk:"auto_http_config"`
 	Http1Config    types.Object `tfsdk:"http1_config"`
 	Http2Options   types.Object `tfsdk:"http2_options"`
 }
 
-type ClusterGlobalSpecTypeHttp1Config struct {
+type ClusterHttp1Config struct {
 	HeaderTransformation types.Object `tfsdk:"header_transformation"`
 }
 
@@ -57,28 +57,28 @@ type ClusterHeaderTransformationType struct {
 	HeaderTransformationChoice types.Object `tfsdk:"header_transformation_choice"`
 }
 
-type ClusterHeaderTransformationTypeHeaderTransformationChoice struct {
+type ClusterHeaderTransformationChoice struct {
 	DefaultHeaderTransformation      types.Bool `tfsdk:"default_header_transformation"`
 	LegacyHeaderTransformation       types.Bool `tfsdk:"legacy_header_transformation"`
 	PreserveCaseHeaderTransformation types.Bool `tfsdk:"preserve_case_header_transformation"`
 	ProperCaseHeaderTransformation   types.Bool `tfsdk:"proper_case_header_transformation"`
 }
 
-type ClusterGlobalSpecTypeHttp2Options struct {
+type ClusterHttp2Options struct {
 	Enabled types.Bool `tfsdk:"enabled"`
 }
 
-type ClusterGlobalSpecTypeLbSourceIpPersistanceChoice struct {
+type ClusterLbSrcIpPersistanceChoice struct {
 	DisableLbSourceIpPersistance types.Bool `tfsdk:"disable_lb_source_ip_persistance"`
 	EnableLbSourceIpPersistance  types.Bool `tfsdk:"enable_lb_source_ip_persistance"`
 }
 
-type ClusterGlobalSpecTypeMaxRequestsPerConnectionChoice struct {
+type ClusterMaxRequestsPerConnChoice struct {
 	MaxRequestsPerConnection    types.Int64 `tfsdk:"max_requests_per_connection"`
 	NoRequestLimitPerConnection types.Bool  `tfsdk:"no_request_limit_per_connection"`
 }
 
-type ClusterClusterOutlierDetectionType struct {
+type ClusterOutlierDetectionType struct {
 	BaseEjectionTime          types.Int64 `tfsdk:"base_ejection_time"`
 	Consecutive_5Xx           types.Int64 `tfsdk:"consecutive_5xx"`
 	ConsecutiveGatewayFailure types.Int64 `tfsdk:"consecutive_gateway_failure"`
@@ -86,12 +86,12 @@ type ClusterClusterOutlierDetectionType struct {
 	MaxEjectionPercent        types.Int64 `tfsdk:"max_ejection_percent"`
 }
 
-type ClusterGlobalSpecTypePanicThresholdTypeChoice struct {
+type ClusterPanicThresholdTypeChoice struct {
 	NoPanicThreshold types.Bool  `tfsdk:"no_panic_threshold"`
 	PanicThreshold   types.Int64 `tfsdk:"panic_threshold"`
 }
 
-type ClusterGlobalSpecTypeProxyProtocolTypeChoice struct {
+type ClusterProxyProtoTypeChoice struct {
 	DisableProxyProtocol types.Bool `tfsdk:"disable_proxy_protocol"`
 	ProxyProtocolV1      types.Bool `tfsdk:"proxy_protocol_v1"`
 	ProxyProtocolV2      types.Bool `tfsdk:"proxy_protocol_v2"`
@@ -103,24 +103,24 @@ type ClusterUpstreamTlsParamsType struct {
 	TlsParamsChoice          types.Object `tfsdk:"tls_params_choice"`
 }
 
-type ClusterUpstreamTlsParamsTypeMaxSessionKeysTypeChoice struct {
+type ClusterMaxSessionKeysTypeChoice struct {
 	DefaultSessionKeyCaching types.Bool  `tfsdk:"default_session_key_caching"`
 	DisableSessionKeyCaching types.Bool  `tfsdk:"disable_session_key_caching"`
 	MaxSessionKeys           types.Int64 `tfsdk:"max_session_keys"`
 }
 
-type ClusterUpstreamTlsParamsTypeSniChoice struct {
+type ClusterSniChoice struct {
 	DisableSni         types.Bool   `tfsdk:"disable_sni"`
 	Sni                types.String `tfsdk:"sni"`
 	UseHostHeaderAsSni types.Bool   `tfsdk:"use_host_header_as_sni"`
 }
 
-type ClusterUpstreamTlsParamsTypeTlsParamsChoice struct {
+type ClusterTlsParamsChoice struct {
 	CertParams   types.Object `tfsdk:"cert_params"`
 	CommonParams types.Object `tfsdk:"common_params"`
 }
 
-type ClusterUpstreamTlsParamsTypeCertParams struct {
+type ClusterCertParams struct {
 	Certificates           types.List   `tfsdk:"certificates"`
 	CipherSuites           types.List   `tfsdk:"cipher_suites"`
 	MaximumProtocolVersion types.List   `tfsdk:"maximum_protocol_version"`
@@ -128,28 +128,28 @@ type ClusterUpstreamTlsParamsTypeCertParams struct {
 	ServerValidationChoice types.Object `tfsdk:"server_validation_choice"`
 }
 
-type ClusterUpstreamCertificateParamsTypeServerValidationChoice struct {
+type ClusterServerValChoice struct {
 	SkipServerVerification types.Bool   `tfsdk:"skip_server_verification"`
 	TlsValidationParams    types.Object `tfsdk:"tls_validation_params"`
 	VolterraTrustedCa      types.Bool   `tfsdk:"volterra_trusted_ca"`
 }
 
-type ClusterUpstreamCertificateParamsTypeTlsValidationParams struct {
+type ClusterTlsValParams struct {
 	SkipHostnameVerification types.Bool   `tfsdk:"skip_hostname_verification"`
 	TrustedCaChoice          types.Object `tfsdk:"trusted_ca_choice"`
 	VerifySubjectAltNames    types.List   `tfsdk:"verify_subject_alt_names"`
 }
 
-type ClusterTlsValidationParamsTypeTrustedCaChoice struct {
+type ClusterTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type ClusterTlsValidationParamsTypeTrustedCa struct {
+type ClusterTrustedCa struct {
 	TrustedCaList types.List `tfsdk:"trusted_ca_list"`
 }
 
-type ClusterUpstreamTlsParamsTypeCommonParams struct {
+type ClusterCommonParams struct {
 	CipherSuites           types.List   `tfsdk:"cipher_suites"`
 	MaximumProtocolVersion types.List   `tfsdk:"maximum_protocol_version"`
 	MinimumProtocolVersion types.List   `tfsdk:"minimum_protocol_version"`
@@ -157,20 +157,20 @@ type ClusterUpstreamTlsParamsTypeCommonParams struct {
 	ValidationParams       types.Object `tfsdk:"validation_params"`
 }
 
-type ClusterTlsCertificateType struct {
+type ClusterTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type ClusterTlsCertificateTypeOcspStaplingChoice struct {
+type ClusterOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type ClusterTlsCertificateTypeCustomHashAlgorithms struct {
+type ClusterCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -178,23 +178,24 @@ type ClusterSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type ClusterSecretTypeSecretInfoChoice struct {
+type ClusterSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type ClusterSecretTypeBlindfoldSecretInfo struct {
+type ClusterBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type ClusterSecretTypeClearSecretInfo struct {
+type ClusterClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type ClusterTlsValidationParamsType struct {
+type ClusterTlsValParamsType struct {
 	SkipHostnameVerification types.Bool   `tfsdk:"skip_hostname_verification"`
 	TrustedCaChoice          types.Object `tfsdk:"trusted_ca_choice"`
 	VerifySubjectAltNames    types.List   `tfsdk:"verify_subject_alt_names"`
@@ -204,7 +205,7 @@ type ClusterUpstreamConnPoolReuseType struct {
 	MapDownstreamToUpstreamConnPoolTypeChoice types.Object `tfsdk:"map_downstream_to_upstream_conn_pool_type_choice"`
 }
 
-type ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoice struct {
+type ClusterMapDownstreamToUpstreamConnPoolTypeChoice struct {
 	DisableConnPoolReuse types.Bool `tfsdk:"disable_conn_pool_reuse"`
 	EnableConnPoolReuse  types.Bool `tfsdk:"enable_conn_pool_reuse"`
 }
@@ -581,6 +582,7 @@ var ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -663,8 +665,8 @@ func (d *DataSourceF5XCCluster) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCCluster) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
-		Description:         "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
+		MarkdownDescription: "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host<br>Cluster has list of references to Endpoint which forms the set<br>Cluster has common properties for this collection<br>* Reference to healthcheck object<br>* load balancer algorithm<br>* Circuit breaker based on<br>* Number of concurrent connections<br>* Outstanding requests<br>* Number of retries<br>* Subset of endpoints<br>* TLS parameter for the endpoints<br>* Protocol Timeouts",
+		Description:         "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host Cluster has list of references to Endpoint which forms the set Cluster has common properties for this collection Reference to healthcheck object load balancer algorithm Circuit breaker based on Number of concurrent connections Outstanding requests Number of retries Subset of endpoints TLS parameter for the endpoints Protocol Timeouts",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1419,8 +1421,15 @@ func (r *DataSourceF5XCCluster) Schema(ctx context.Context, request datasource.S
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
+																			Sensitive:   true,
 																		},
 																	},
+																},
+																"none": schema.BoolAttribute{
+																	Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
 																},
 															},
 														},
@@ -1591,7 +1600,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "cluster", err))
 		return
 	}
 
@@ -1654,17 +1663,17 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot PointerField --> CircuitBreaker
 	if specData.GetCircuitBreaker() != nil {
-		var clusterClusterCircuitBreakerModel = &ClusterClusterCircuitBreaker{}
+		var clusterCircuitBreakerModel = &ClusterCircuitBreaker{}
 		circuitBreakerElement := specData.GetCircuitBreaker()
 
 		// data specToModelNested UintField --> ConnectionLimit
-		clusterClusterCircuitBreakerModel.ConnectionLimit = types.Int64Value(int64(circuitBreakerElement.GetConnectionLimit()))
+		clusterCircuitBreakerModel.ConnectionLimit = types.Int64Value(int64(circuitBreakerElement.GetConnectionLimit()))
 
 		// data specToModelNested UintField --> MaxRequests
-		clusterClusterCircuitBreakerModel.MaxRequests = types.Int64Value(int64(circuitBreakerElement.GetMaxRequests()))
+		clusterCircuitBreakerModel.MaxRequests = types.Int64Value(int64(circuitBreakerElement.GetMaxRequests()))
 
 		// data specToModelNested UintField --> PendingRequests
-		clusterClusterCircuitBreakerModel.PendingRequests = types.Int64Value(int64(circuitBreakerElement.GetPendingRequests()))
+		clusterCircuitBreakerModel.PendingRequests = types.Int64Value(int64(circuitBreakerElement.GetPendingRequests()))
 
 		// data specToModelNested EnumField --> Priority
 		if circuitBreakerElement.GetPriority().String() != "" {
@@ -1675,18 +1684,18 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 			if response.Diagnostics.HasError() {
 				return
 			}
-			clusterClusterCircuitBreakerModel.Priority = listValue
+			clusterCircuitBreakerModel.Priority = listValue
 		} else {
-			clusterClusterCircuitBreakerModel.Priority = types.ListNull(types.StringType)
+			clusterCircuitBreakerModel.Priority = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested UintField --> Retries
-		clusterClusterCircuitBreakerModel.Retries = types.Int64Value(int64(circuitBreakerElement.GetRetries()))
+		clusterCircuitBreakerModel.Retries = types.Int64Value(int64(circuitBreakerElement.GetRetries()))
 
 		circuitBreakerObj, circuitBreakerDiags := utils.GoStructToObjectValue(
 			ctx,
 			ClusterCircuitBreakerModelAttributeMap,
-			clusterClusterCircuitBreakerModel,
+			clusterCircuitBreakerModel,
 		)
 		response.Diagnostics.Append(circuitBreakerDiags...)
 		data.CircuitBreaker = circuitBreakerObj
@@ -1695,12 +1704,8 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 	}
 
 	// data SpecToModelRoot UintField --> ConnectionTimeout
-	connectionTimeoutValue := specData.GetConnectionTimeout()
-	if connectionTimeoutValue > 0 {
-		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
-		data.ConnectionTimeout = types.Int64Null()
-	}
+	// The resource defaults this field to 0, so API 0 must stay 0 to match it.
+	data.ConnectionTimeout = types.Int64Value(int64(specData.GetConnectionTimeout()))
 
 	// data SpecToModelRoot MapOfStringField --> DefaultSubset
 	if specData.GetDefaultSubset() != nil {
@@ -1765,10 +1770,10 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot ArrayOfPointerField --> EndpointSubsets
 	if len(specData.GetEndpointSubsets()) > 0 {
-		endpointSubsetsElements := make([]ClusterClusterEndpointSubsetSelectorType, 0, len(specData.GetEndpointSubsets()))
+		endpointSubsetsElements := make([]ClusterEndpointSubsetSelectorType, 0, len(specData.GetEndpointSubsets()))
 
 		for _, endpointSubsetsElement := range specData.GetEndpointSubsets() {
-			clusterClusterEndpointSubsetSelectorTypeModel := ClusterClusterEndpointSubsetSelectorType{}
+			clusterEndpointSubsetSelectorTypeModel := ClusterEndpointSubsetSelectorType{}
 
 			// data specToModelNested RequiredArrayOfStringField --> Keys
 			if len(endpointSubsetsElement.GetKeys()) > 0 {
@@ -1777,12 +1782,12 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 				if response.Diagnostics.HasError() {
 					return
 				}
-				clusterClusterEndpointSubsetSelectorTypeModel.Keys = listValue
+				clusterEndpointSubsetSelectorTypeModel.Keys = listValue
 			} else {
-				clusterClusterEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
+				clusterEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
 			}
 
-			endpointSubsetsElements = append(endpointSubsetsElements, clusterClusterEndpointSubsetSelectorTypeModel)
+			endpointSubsetsElements = append(endpointSubsetsElements, clusterEndpointSubsetSelectorTypeModel)
 		}
 
 		{
@@ -1937,12 +1942,8 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 	}
 
 	// data SpecToModelRoot UintField --> HttpIdleTimeout
-	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
-	if httpIdleTimeoutValue > 0 {
-		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
-		data.HttpIdleTimeout = types.Int64Null()
-	}
+	// The resource defaults this field to 0, so API 0 must stay 0 to match it.
+	data.HttpIdleTimeout = types.Int64Value(int64(specData.GetHttpIdleTimeout()))
 
 	// data SpecToModelRoot OneOfField --> HttpProtocolType
 	// false
@@ -1954,7 +1955,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 		httpProtocolTypeChoiceChoices := specData.GetHttpProtocolType()
 
 		// The model struct that will be populated by the nested template.
-		var httpProtocolTypeChoiceChoicesModel = &ClusterGlobalSpecTypeHttpProtocolTypeChoice{}
+		var httpProtocolTypeChoiceChoicesModel = &ClusterHttpProtoTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2135,7 +2136,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 		lbSourceIpPersistanceChoiceChoices := specData.GetLbSourceIpPersistanceChoice()
 
 		// The model struct that will be populated by the nested template.
-		var lbSourceIpPersistanceChoiceChoicesModel = &ClusterGlobalSpecTypeLbSourceIpPersistanceChoice{}
+		var lbSourceIpPersistanceChoiceChoicesModel = &ClusterLbSrcIpPersistanceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2204,7 +2205,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 		maxRequestsPerConnectionChoiceChoices := specData.GetMaxRequestsPerConnectionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var maxRequestsPerConnectionChoiceChoicesModel = &ClusterGlobalSpecTypeMaxRequestsPerConnectionChoice{}
+		var maxRequestsPerConnectionChoiceChoicesModel = &ClusterMaxRequestsPerConnChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2249,28 +2250,28 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot PointerField --> OutlierDetection
 	if specData.GetOutlierDetection() != nil {
-		var clusterClusterOutlierDetectionTypeModel = &ClusterClusterOutlierDetectionType{}
+		var clusterOutlierDetectionTypeModel = &ClusterOutlierDetectionType{}
 		outlierDetectionElement := specData.GetOutlierDetection()
 
 		// data specToModelNested UintField --> BaseEjectionTime
-		clusterClusterOutlierDetectionTypeModel.BaseEjectionTime = types.Int64Value(int64(outlierDetectionElement.GetBaseEjectionTime()))
+		clusterOutlierDetectionTypeModel.BaseEjectionTime = types.Int64Value(int64(outlierDetectionElement.GetBaseEjectionTime()))
 
 		// data specToModelNested UintField --> Consecutive_5Xx
-		clusterClusterOutlierDetectionTypeModel.Consecutive_5Xx = types.Int64Value(int64(outlierDetectionElement.GetConsecutive_5Xx()))
+		clusterOutlierDetectionTypeModel.Consecutive_5Xx = types.Int64Value(int64(outlierDetectionElement.GetConsecutive_5Xx()))
 
 		// data specToModelNested UintField --> ConsecutiveGatewayFailure
-		clusterClusterOutlierDetectionTypeModel.ConsecutiveGatewayFailure = types.Int64Value(int64(outlierDetectionElement.GetConsecutiveGatewayFailure()))
+		clusterOutlierDetectionTypeModel.ConsecutiveGatewayFailure = types.Int64Value(int64(outlierDetectionElement.GetConsecutiveGatewayFailure()))
 
 		// data specToModelNested UintField --> Interval
-		clusterClusterOutlierDetectionTypeModel.Interval = types.Int64Value(int64(outlierDetectionElement.GetInterval()))
+		clusterOutlierDetectionTypeModel.Interval = types.Int64Value(int64(outlierDetectionElement.GetInterval()))
 
 		// data specToModelNested UintField --> MaxEjectionPercent
-		clusterClusterOutlierDetectionTypeModel.MaxEjectionPercent = types.Int64Value(int64(outlierDetectionElement.GetMaxEjectionPercent()))
+		clusterOutlierDetectionTypeModel.MaxEjectionPercent = types.Int64Value(int64(outlierDetectionElement.GetMaxEjectionPercent()))
 
 		outlierDetectionObj, outlierDetectionDiags := utils.GoStructToObjectValue(
 			ctx,
 			ClusterOutlierDetectionModelAttributeMap,
-			clusterClusterOutlierDetectionTypeModel,
+			clusterOutlierDetectionTypeModel,
 		)
 		response.Diagnostics.Append(outlierDetectionDiags...)
 		data.OutlierDetection = outlierDetectionObj
@@ -2288,7 +2289,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 		panicThresholdTypeChoiceChoices := specData.GetPanicThresholdType()
 
 		// The model struct that will be populated by the nested template.
-		var panicThresholdTypeChoiceChoicesModel = &ClusterGlobalSpecTypePanicThresholdTypeChoice{}
+		var panicThresholdTypeChoiceChoicesModel = &ClusterPanicThresholdTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2341,7 +2342,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 		proxyProtocolTypeChoiceChoices := specData.GetProxyProtocolType()
 
 		// The model struct that will be populated by the nested template.
-		var proxyProtocolTypeChoiceChoicesModel = &ClusterGlobalSpecTypeProxyProtocolTypeChoice{}
+		var proxyProtocolTypeChoiceChoicesModel = &ClusterProxyProtoTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2888,24 +2889,24 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 					if len(commonParamsElement.GetTlsCertificates()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						tlsCertificatesElements := make([]ClusterTlsCertificateType, 0, len(commonParamsElement.GetTlsCertificates()))
+						tlsCertificatesElements := make([]ClusterTlsCertType, 0, len(commonParamsElement.GetTlsCertificates()))
 						for _, tlsCertificatesElement := range commonParamsElement.GetTlsCertificates() {
-							clusterTlsCertificateTypeModel := ClusterTlsCertificateType{}
+							clusterTlsCertTypeModel := ClusterTlsCertType{}
 
 							// data specToModelNested RequiredStringField --> CertificateUrl
 							if tlsCertificatesElement.GetCertificateUrl() != "" {
-								clusterTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+								clusterTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 							} else {
 								// Empty string, set to null
-								clusterTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+								clusterTlsCertTypeModel.CertificateUrl = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Description
 							if tlsCertificatesElement.GetDescription() != "" {
-								clusterTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+								clusterTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								clusterTlsCertificateTypeModel.Description = types.StringNull()
+								clusterTlsCertTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -2989,10 +2990,10 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								clusterTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+								clusterTlsCertTypeModel.OcspStaplingChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								clusterTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+								clusterTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredPointerField --> PrivateKey
@@ -3097,6 +3098,15 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -3134,7 +3144,7 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 								if response.Diagnostics.HasError() {
 									return
 								}
-								clusterTlsCertificateTypeModel.PrivateKey = clusterSecretTypeModelObj
+								clusterTlsCertTypeModel.PrivateKey = clusterSecretTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -3143,10 +3153,10 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								clusterTlsCertificateTypeModel.PrivateKey = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeyModelAttributeMap)
+								clusterTlsCertTypeModel.PrivateKey = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeyModelAttributeMap)
 							}
 
-							tlsCertificatesElements = append(tlsCertificatesElements, clusterTlsCertificateTypeModel)
+							tlsCertificatesElements = append(tlsCertificatesElements, clusterTlsCertTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3167,13 +3177,13 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 					// data specToModelNested PointerField --> ValidationParams
 					if commonParamsElement.GetValidationParams() != nil {
 						// Create the nested Go struct
-						clusterTlsValidationParamsTypeModel := &ClusterTlsValidationParamsType{}
+						clusterTlsValParamsTypeModel := &ClusterTlsValParamsType{}
 						validationParamsElement := commonParamsElement.GetValidationParams()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested BoolField --> SkipHostnameVerification
-						clusterTlsValidationParamsTypeModel.SkipHostnameVerification = types.BoolValue(bool(validationParamsElement.GetSkipHostnameVerification()))
+						clusterTlsValParamsTypeModel.SkipHostnameVerification = types.BoolValue(bool(validationParamsElement.GetSkipHostnameVerification()))
 
 						// data specToModelNested RequiredOneOfField --> TrustedCaChoice
 						// <no value>
@@ -3281,10 +3291,10 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							clusterTlsValidationParamsTypeModel.TrustedCaChoice = finalObj
+							clusterTlsValParamsTypeModel.TrustedCaChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							clusterTlsValidationParamsTypeModel.TrustedCaChoice = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsValidationParamsTrustedCaChoiceModelAttributeMap)
+							clusterTlsValParamsTypeModel.TrustedCaChoice = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsValidationParamsTrustedCaChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested ArrayOfStringField --> VerifySubjectAltNames
@@ -3294,18 +3304,18 @@ func (d *DataSourceF5XCCluster) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							clusterTlsValidationParamsTypeModel.VerifySubjectAltNames = listValue
+							clusterTlsValParamsTypeModel.VerifySubjectAltNames = listValue
 						} else {
-							clusterTlsValidationParamsTypeModel.VerifySubjectAltNames = types.ListNull(types.StringType)
+							clusterTlsValParamsTypeModel.VerifySubjectAltNames = types.ListNull(types.StringType)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						clusterTlsValidationParamsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ClusterTlsParametersTlsParamsChoiceCommonParamsValidationParamsModelAttributeMap, clusterTlsValidationParamsTypeModel)
+						clusterTlsValParamsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ClusterTlsParametersTlsParamsChoiceCommonParamsValidationParamsModelAttributeMap, clusterTlsValParamsTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						commonParamsAttributeMap["validation_params"] = clusterTlsValidationParamsTypeModelObj
+						commonParamsAttributeMap["validation_params"] = clusterTlsValParamsTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).

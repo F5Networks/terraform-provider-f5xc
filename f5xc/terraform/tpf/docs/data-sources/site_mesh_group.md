@@ -14,14 +14,23 @@
 page_title: "f5xc_site_mesh_group Data Source - F5 XC Distributed Cloud"
 subcategory: "Cloud & Infrastructure Sites"
 description: |-
-  Site mesh group Site mesh group is a configuration tool to provide Site to Site connectivity Set of sites in a site mesh group are defined by a virtual site. The site mesh groups can be of type HUB or SPOKE. Where, - SITE_MESH_GROUP_TYPE_HUB_FULL_MESH 'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group A HUB Site will route traffic between all its Spoke Sites. Current release can support only a single site in Site Mesh Group of this type - SITE_MESH_GROUP_TYPE_SPOKE 'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is routed thru Hub Sites. 'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the Hub Sites - SITE_MESH_GROUP_TYPE_FULL_MESH 'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that are member of virtual_site NOTE : - The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs' - The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only - A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
+  Site mesh group is a configuration tool to provide Site to Site<br>connectivity<br><br>Set of sites in a site mesh group are defined by a virtual site.<br><br>The site mesh groups can be of type HUB or SPOKE. Where,<br>- SITE_MESH_GROUP_TYPE_HUB_FULL_MESH<br>'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group<br>A HUB Site will route traffic between all its Spoke Sites.<br><br>Current release can support only a single site in Site Mesh Group of this type<br><br>- SITE_MESH_GROUP_TYPE_SPOKE<br>'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is<br>routed thru Hub Sites.<br><br>'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group<br>gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the<br>Hub Sites<br><br>- SITE_MESH_GROUP_TYPE_FULL_MESH<br>'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that<br>are member of virtual_site<br><br>NOTE :<br>- The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs'<br>- The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only<br>- A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
 ---
 
 # f5xc_site_mesh_group (Data Source)
 
-Site mesh group Site mesh group is a configuration tool to provide Site to Site connectivity Set of sites in a site mesh group are defined by a virtual site. The site mesh groups can be of type HUB or SPOKE. Where, - SITE_MESH_GROUP_TYPE_HUB_FULL_MESH 'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group A HUB Site will route traffic between all its Spoke Sites. Current release can support only a single site in Site Mesh Group of this type - SITE_MESH_GROUP_TYPE_SPOKE 'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is routed thru Hub Sites. 'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the Hub Sites - SITE_MESH_GROUP_TYPE_FULL_MESH 'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that are member of virtual_site NOTE : - The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs' - The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only - A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
+Site mesh group is a configuration tool to provide Site to Site<br>connectivity<br><br>Set of sites in a site mesh group are defined by a virtual site.<br><br>The site mesh groups can be of type HUB or SPOKE. Where,<br>- SITE_MESH_GROUP_TYPE_HUB_FULL_MESH<br>'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group<br>A HUB Site will route traffic between all its Spoke Sites.<br><br>Current release can support only a single site in Site Mesh Group of this type<br><br>- SITE_MESH_GROUP_TYPE_SPOKE<br>'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is<br>routed thru Hub Sites.<br><br>'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group<br>gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the<br>Hub Sites<br><br>- SITE_MESH_GROUP_TYPE_FULL_MESH<br>'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that<br>are member of virtual_site<br><br>NOTE :<br>- The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs'<br>- The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only<br>- A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
 
+## Example Usage
 
+```terraform
+# Example: Site Mesh Group - Full
+
+data "f5xc_site_mesh_group" "example" {
+  name      = f5xc_site_mesh_group.example.name
+  namespace = f5xc_site_mesh_group.example.namespace
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -72,7 +81,7 @@ Read-Only:
 Read-Only:
 
 - `full_mesh` (Attributes) full_mesh Full mesh of tunnels are created between all sites (see [below for nested schema](#nestedatt--mesh_choice--full_mesh))
-- `hub_mesh` (Attributes) hub Mesh of Type Hub (see [below for nested schema](#nestedatt--mesh_choice--hub_mesh))
+- `hub_mesh` (Boolean) hub Mesh of Type Hub
 - `spoke_mesh` (Attributes) spoke Mesh of Type Spoke (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh))
 
 <a id="nestedatt--mesh_choice--full_mesh"></a>
@@ -92,30 +101,12 @@ Read-Only:
 
 
 
-<a id="nestedatt--mesh_choice--hub_mesh"></a>
-### Nested Schema for `mesh_choice.hub_mesh`
-
-Read-Only:
-
-- `hub_full_mesh_choice` (Attributes) Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh (see [below for nested schema](#nestedatt--mesh_choice--hub_mesh--hub_full_mesh_choice))
-
-<a id="nestedatt--mesh_choice--hub_mesh--hub_full_mesh_choice"></a>
-### Nested Schema for `mesh_choice.hub_mesh.hub_full_mesh_choice`
-
-Read-Only:
-
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites
-- `data_plane_mesh` (Boolean) Data Plane Mesh Hub Full Mesh of data plane tunnels across sites
-
-
-
 <a id="nestedatt--mesh_choice--spoke_mesh"></a>
 ### Nested Schema for `mesh_choice.spoke_mesh`
 
 Read-Only:
 
 - `hub_mesh_group` (Attributes) hub_mesh_group 'hub_mesh_group' refers to a Site Mesh Group of 'type' Hub. Spoke sites will connect to all the member sites of Hub Site Mesh Group (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh--hub_mesh_group))
-- `spoke_hub_mesh_choice` (Attributes) Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh--spoke_hub_mesh_choice))
 
 <a id="nestedatt--mesh_choice--spoke_mesh--hub_mesh_group"></a>
 ### Nested Schema for `mesh_choice.spoke_mesh.hub_mesh_group`
@@ -125,15 +116,6 @@ Read-Only:
 - `name` (String)
 - `namespace` (String)
 - `tenant` (String)
-
-
-<a id="nestedatt--mesh_choice--spoke_mesh--spoke_hub_mesh_choice"></a>
-### Nested Schema for `mesh_choice.spoke_mesh.spoke_hub_mesh_choice`
-
-Read-Only:
-
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s
-- `data_plane_mesh` (Boolean) Data Plane Mesh Mesh of data plane tunnels to the hub site/s
 
 
 

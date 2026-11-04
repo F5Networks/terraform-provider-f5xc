@@ -29,7 +29,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-vip-info-" + testAccRunSuffix(t)
+	name := "example-aws-vpc-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -50,7 +50,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_withAzTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-vip-info-" + testAccRunSuffix(t)
+	name := "example-aws-vpc-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -71,7 +71,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_withIPv6AndCname(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-vip-info-" + testAccRunSuffix(t)
+	name := "example-aws-vpc-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -92,7 +92,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_withMultipleAzEntries(t *testin
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-vip-info-" + testAccRunSuffix(t)
+	name := "example-aws-vpc-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,9 +113,9 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-vip-info-" + testAccRunSuffix(t)
+	name := "example-aws-vpc-vip-info-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAwsVpcSiteSetVipInfoDestroyProducer(t),
@@ -127,7 +127,11 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetVipInfo_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withIPv6AndCname(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_full(name, namespace),
+		})
 }
 
 func testAccCheckAwsVpcSiteSetVipInfoDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -221,7 +225,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_basic(name, namespace str
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -238,7 +242,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withVipTransition(name, n
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -255,7 +259,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withAzA(name, namespace s
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -272,7 +276,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withAzB(name, namespace s
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -289,7 +293,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withIPv6AndCname(name, na
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -310,7 +314,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_withMultipleAz(name, name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -334,7 +338,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetVipInfoConfig_full(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_vip_info" "test" {
+resource "f5xc_aws_vpc_site_set_vip_info" "example" {
 	name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 

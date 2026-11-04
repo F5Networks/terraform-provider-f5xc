@@ -30,7 +30,7 @@ import (
 func TestAccResourceAutoF5XCTrustedCaList_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -41,29 +41,29 @@ func TestAccResourceAutoF5XCTrustedCaList_basic(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_basic(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "namespace", namespace),
-					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.test", "uid"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "namespace", namespace),
+					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.example", "uid"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_basicUpdated(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Acceptance test trusted CA list updated"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Acceptance test trusted CA list updated"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -75,7 +75,7 @@ func TestAccResourceAutoF5XCTrustedCaList_basic(t *testing.T) {
 func TestAccResourceAutoF5XCTrustedCaList_withTrustedCaUrl(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	// Minimal self-signed CA cert PEM for acceptance testing (not a real CA).
@@ -109,16 +109,16 @@ m4Fdve+FplhZa3LvCvidQgM=
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withTrustedCaUrl(name, namespace, caURL),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "name", name),
-					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.test", "uid"),
-					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.test", "trusted_ca_url"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "name", name),
+					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.example", "uid"),
+					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.example", "trusted_ca_url"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -129,7 +129,7 @@ m4Fdve+FplhZa3LvCvidQgM=
 func TestAccResourceAutoF5XCTrustedCaList_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -140,30 +140,30 @@ func TestAccResourceAutoF5XCTrustedCaList_withLabels(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withLabels(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.env", "test"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.tier", "shared"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.env", "example"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.tier", "shared"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withLabelsUpdated(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.env", "test"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.tier", "shared"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Labels update step"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.env", "example"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.tier", "shared"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Labels update step"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -175,7 +175,7 @@ func TestAccResourceAutoF5XCTrustedCaList_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCTrustedCaList_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -186,14 +186,14 @@ func TestAccResourceAutoF5XCTrustedCaList_withAnnotations(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withAnnotations(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "annotations.owner", "acc-test"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "annotations.owner", "acc-test"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -205,7 +205,7 @@ func TestAccResourceAutoF5XCTrustedCaList_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCTrustedCaList_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -216,33 +216,33 @@ func TestAccResourceAutoF5XCTrustedCaList_full(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_full(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "namespace", namespace),
-					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.test", "uid"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Full acceptance test trusted CA list"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.env", "test"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "labels.managed-by", "terraform"),
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "annotations.owner", "acc-test"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "namespace", namespace),
+					resource.TestCheckResourceAttrSet("f5xc_trusted_ca_list.example", "uid"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Full acceptance test trusted CA list"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.env", "example"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "labels.managed-by", "terraform"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "annotations.owner", "acc-test"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_fullUpdated(name, namespace),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Full acceptance test trusted CA list updated"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Full acceptance test trusted CA list updated"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -254,7 +254,7 @@ func TestAccResourceAutoF5XCTrustedCaList_full(t *testing.T) {
 func TestAccResourceAutoF5XCTrustedCaList_descriptionUpdate(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-tcl-" + testAccRunSuffix(t)
+	name := "example-tcl-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -265,27 +265,27 @@ func TestAccResourceAutoF5XCTrustedCaList_descriptionUpdate(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withDescription(name, namespace, "Initial description"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Initial description"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Initial description"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTrustedCaListConfig_withDescription(name, namespace, "Updated description for CA list"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.test", "description", "Updated description for CA list"),
+					resource.TestCheckResourceAttr("f5xc_trusted_ca_list.example", "description", "Updated description for CA list"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_trusted_ca_list.test",
+				ResourceName:                         "f5xc_trusted_ca_list.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_trusted_ca_list.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -300,7 +300,7 @@ func testAccCheckTrustedCaListDestroyProducer(t *testing.T) func(*terraform.Stat
 
 func testAccResourceAutoF5XCTrustedCaListConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name      = %q
   namespace = %q
 }
@@ -309,7 +309,7 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name        = %q
   namespace   = %q
   description = "Acceptance test trusted CA list updated"
@@ -319,7 +319,7 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_withTrustedCaUrl(name, namespace, caPem string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name           = %q
   namespace      = %q
   description    = "Trusted CA list with CA URL"
@@ -330,12 +330,12 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name      = %q
   namespace = %q
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 }
@@ -344,12 +344,12 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name      = %q
   namespace = %q
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
@@ -360,7 +360,7 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name      = %q
   namespace = %q
 
@@ -373,7 +373,7 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -383,13 +383,13 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name        = %q
   namespace   = %q
   description = "Full acceptance test trusted CA list"
 
   labels = {
-    env        = "test"
+    env        = "example"
     managed-by = "terraform"
   }
 
@@ -402,13 +402,13 @@ resource "f5xc_trusted_ca_list" "test" {
 
 func testAccResourceAutoF5XCTrustedCaListConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_trusted_ca_list" "test" {
+resource "f5xc_trusted_ca_list" "example" {
   name        = %q
   namespace   = %q
   description = "Full acceptance test trusted CA list updated"
 
   labels = {
-    env        = "test"
+    env        = "example"
     managed-by = "terraform"
   }
 

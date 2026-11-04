@@ -31,14 +31,17 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_shape_client_side_defense_mitigated_domain "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/client_side_defense/mitigated_domain"
 )
@@ -66,6 +69,7 @@ var (
 	_ resource.Resource                   = &ResourceF5XCMitigatedDomain{}
 	_ resource.ResourceWithConfigure      = &ResourceF5XCMitigatedDomain{}
 	_ resource.ResourceWithModifyPlan     = &ResourceF5XCMitigatedDomain{}
+	_ resource.ResourceWithImportState    = &ResourceF5XCMitigatedDomain{}
 	_ resource.ResourceWithValidateConfig = &ResourceF5XCMitigatedDomain{}
 )
 
@@ -82,8 +86,8 @@ func (r *ResourceF5XCMitigatedDomain) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCMitigatedDomain) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a mitigated_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of mitigated_domain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a mitigated_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of mitigated_domain) etc. can be fetched",
+		MarkdownDescription: "Mitigated Domain Object defines which domains will be mitigated by Client-Side Defense.<br>Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages<br>Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
+		Description:         "Mitigated Domain Object defines which domains will be mitigated by Client-Side Defense. Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -147,7 +151,7 @@ func (r *ResourceF5XCMitigatedDomain) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -254,9 +258,17 @@ func (r *ResourceF5XCMitigatedDomain) ModifyPlan(ctx context.Context, req resour
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCMitigatedDomain) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCMitigatedDomainModel
 
 	// Read Terraform plan data into the model
@@ -343,7 +355,7 @@ func (r *ResourceF5XCMitigatedDomain) Create(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -366,7 +378,7 @@ func (r *ResourceF5XCMitigatedDomain) Create(ctx context.Context, request resour
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_shape_client_side_defense_mitigated_domain.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "mitigated_domain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "mitigated_domain", err),
 		)
 		return
 	}
@@ -659,9 +671,36 @@ func (r *ResourceF5XCMitigatedDomain) Delete(ctx context.Context, request resour
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "mitigated_domain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "mitigated_domain", err),
 		)
 		return
 	}
 
+}
+func (r *ResourceF5XCMitigatedDomain) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	// Import ID format: namespace/mitigated_domain
+	parts := strings.Split(req.ID, "/")
+	if len(parts) != 2 {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/mitigated_domain, got: %s", req.ID),
+		)
+		return
+	}
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/mitigated_domain, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/mitigated_domain, got: %s (mitigated_domain is empty)", req.ID),
+		)
+		return
+	}
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("mitigated_domain"), parts[1])...)
 }

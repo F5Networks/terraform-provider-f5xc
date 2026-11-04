@@ -6,18 +6,11 @@
 package data
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"reflect"
-	"regexp"
-	"strings"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -25,18 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	ves_io_schema_discovery "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/discovery"
-)
-
-var (
-	_ = bytes.Buffer{}
-	_ = json.Unmarshal
-	_ = reflect.TypeOf
-	_ = regexp.MustCompile
-	_ = strings.TrimSpace
-	_ = jsonpb.Marshaler{}
-	_ proto.Message
 )
 
 // DataSourceF5XCDiscoveryDownloadCertificates defines the data source implementation.
@@ -46,14 +30,10 @@ type DataSourceF5XCDiscoveryDownloadCertificates struct {
 
 // DataSourceF5XCDiscoveryDownloadCertificatesModel describes the resource data model.
 type DataSourceF5XCDiscoveryDownloadCertificatesModel struct {
-	Annotations types.Map      `tfsdk:"annotations"`
-	Description types.String   `tfsdk:"description"`
-	Labels      types.Map      `tfsdk:"labels"`
-	Name        types.String   `tfsdk:"name"`
-	Namespace   types.String   `tfsdk:"namespace"`
-	Uid         types.String   `tfsdk:"uid"`
-	Data        types.String   `tfsdk:"data_discovery_download_certificates"`
-	Timeouts    timeouts.Value `tfsdk:"timeouts"`
+	Name      types.String   `tfsdk:"name"`
+	Namespace types.String   `tfsdk:"namespace"`
+	Data      types.String   `tfsdk:"data_discovery_download_certificates"`
+	Timeouts  timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
@@ -72,30 +52,10 @@ func (d *DataSourceF5XCDiscoveryDownloadCertificates) Metadata(ctx context.Conte
 func (r *DataSourceF5XCDiscoveryDownloadCertificates) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "DownloadCertificates Download the cerificates files for the Log Collerctor In order to establish connection from the third party application server to the Log Colletor the user should download a zip file with the certificates files: - client.crt - client.key - server_ca.crt",
-		Description:         "DownloadCertificates Download the cerificates files for the Log Collerctor In order to establish connection from the third party application server to the Log Colletor the user should download a zip file with the certificates files: - client.crt - client.key - server_ca.crt",
+		MarkdownDescription: "Service discovery in F5XC performs following<br><br>Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster<br>Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
+		Description:         "Service discovery in F5XC performs following Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -104,12 +64,6 @@ func (r *DataSourceF5XCDiscoveryDownloadCertificates) Schema(ctx context.Context
 			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
@@ -181,7 +135,7 @@ func (d *DataSourceF5XCDiscoveryDownloadCertificates) Read(ctx context.Context, 
 
 	readRespMsg, err := d.client.CustomAPI(ctx, "POST", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "discovery_download_certificates", err))
 		return
 	}
 	// Cast the proto.Message to the concrete read response type
@@ -193,25 +147,6 @@ func (d *DataSourceF5XCDiscoveryDownloadCertificates) Read(ctx context.Context, 
 	specData := readResp
 
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
@@ -225,13 +160,6 @@ func (d *DataSourceF5XCDiscoveryDownloadCertificates) Read(ctx context.Context, 
 	// were set from the request config and must not be overwritten with an empty string).
 	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
 		data.Namespace = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
 	}
 
 	// data SpecToModelRoot StringField --> Data

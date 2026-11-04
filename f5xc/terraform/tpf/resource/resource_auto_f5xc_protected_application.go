@@ -42,6 +42,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -566,31 +567,11 @@ type ProtectedAppAuth struct {
 }
 
 type ProtectedAppBotDefenseFlowLabelAuthChoiceTypeLabelChoice struct {
-	Login        types.Object `tfsdk:"login"`
-	LoginMfa     types.Bool   `tfsdk:"login_mfa"`
-	LoginPartner types.Bool   `tfsdk:"login_partner"`
-	Logout       types.Bool   `tfsdk:"logout"`
-	TokenRefresh types.Bool   `tfsdk:"token_refresh"`
-}
-
-type ProtectedAppLogin struct {
-	TransactionResultChoice types.Object `tfsdk:"transaction_result_choice"`
-}
-
-type ProtectedAppTransactionResultChoice struct {
-	DisableTransactionResult types.Bool   `tfsdk:"disable_transaction_result"`
-	TransactionResult        types.Object `tfsdk:"transaction_result"`
-}
-
-type ProtectedAppTransactionResult struct {
-	FailureConditions types.List `tfsdk:"failure_conditions"`
-	SuccessConditions types.List `tfsdk:"success_conditions"`
-}
-
-type ProtectedAppBotDefenseTransactionResultCondition struct {
-	Name        types.String `tfsdk:"name"`
-	RegexValues types.List   `tfsdk:"regex_values"`
-	Status      types.List   `tfsdk:"status"`
+	Login        types.Bool `tfsdk:"login"`
+	LoginMfa     types.Bool `tfsdk:"login_mfa"`
+	LoginPartner types.Bool `tfsdk:"login_partner"`
+	Logout       types.Bool `tfsdk:"logout"`
+	TokenRefresh types.Bool `tfsdk:"token_refresh"`
 }
 
 type ProtectedAppFinancialServices struct {
@@ -1992,87 +1973,11 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabel
 // Attribute map for RequiredOneOfField --> LabelChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap = map[string]attr.Type{
 
-	"login": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap,
-	},
+	"login":         types.BoolType,
 	"login_mfa":     types.BoolType,
 	"login_partner": types.BoolType,
 	"logout":        types.BoolType,
 	"token_refresh": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Login
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap = map[string]attr.Type{
-
-	"transaction_result_choice": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> TransactionResultChoice
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_transaction_result": types.BoolType,
-	"transaction_result": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TransactionResult
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap = map[string]attr.Type{
-
-	"failure_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"success_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> FailureConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> SuccessConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> FinancialServices
@@ -2240,8 +2145,8 @@ func (r *ResourceF5XCProtectedApplication) Metadata(ctx context.Context, request
 func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
+		MarkdownDescription: "Configures application protected by Bot Defense",
+		Description:         "Configures application protected by Bot Defense",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -3598,6 +3503,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"METHOD_ANY", "METHOD_DELETE", "METHOD_GET", "METHOD_GET_DOCUMENT", "METHOD_PATCH", "METHOD_POST", "METHOD_PUT"}...)),
+												listvalidator.SizeBetween(1, 4),
+												listvalidator.UniqueValues(),
 											},
 										},
 										"metadata": schema.SingleNestedAttribute{
@@ -3794,7 +3701,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 															"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 														),
 													},
@@ -5235,8 +5142,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5279,8 +5186,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5294,155 +5201,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				),
 																			},
 																			Attributes: map[string]schema.Attribute{
-																				"login": schema.SingleNestedAttribute{
+																				"login": schema.BoolAttribute{
 																					Description:         "Login",
 																					MarkdownDescription: "Login",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
-																					Attributes: map[string]schema.Attribute{
-																						"transaction_result_choice": schema.SingleNestedAttribute{
-																							Description:         "Transaction result Transaction Result",
-																							MarkdownDescription: "Transaction result Transaction Result",
-																							Required:            false,
-																							Optional:            true,
-																							Computed:            false,
-																							Validators: []validator.Object{
-																								exactlyoneofvalidator.ExactlyOneOf(
-																									"disable_transaction_result",
-																									"transaction_result",
-																								),
-																							},
-																							Attributes: map[string]schema.Attribute{
-																								"disable_transaction_result": schema.BoolAttribute{
-																									Description:         "Disable Disable collection of transaction result.",
-																									MarkdownDescription: "Disable Disable collection of transaction result.",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Validators: []validator.Bool{
-																										boolvalidator.Equals(true),
-																									},
-																								},
-																								"transaction_result": schema.SingleNestedAttribute{
-																									Description:         "Transaction result Collect transaction result.",
-																									MarkdownDescription: "Transaction result Collect transaction result.",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"failure_conditions": schema.ListNestedAttribute{
-																											Description:         "Failure Conditions Failure Conditions",
-																											MarkdownDescription: "Failure Conditions Failure Conditions",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.List{
-																												listvalidator.SizeAtMost(3),
-																												listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-																											},
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description:         "name A case-insensitive HTTP header name.",
-																														MarkdownDescription: "name A case-insensitive HTTP header name.",
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.String{
-																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
-																																"must be a valid HTTP header field name",
-																															),
-																															bytesvalidator.BytesAtMost(256),
-																														},
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description:         "regex values A list of regular expressions to match the input against.",
-																														MarkdownDescription: "regex values A list of regular expressions to match the input against.",
-																														ElementType:         types.StringType,
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.SizeAtMost(16),
-																															listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
-																															listvalidator.UniqueValues(),
-																														},
-																													},
-																													"status": schema.ListAttribute{
-																														Description:         "HTTP Status code for response HTTP Status code",
-																														MarkdownDescription: "HTTP Status code for response HTTP Status code<br>**Allowed Values (choose one):** `['Accepted', 'AlreadyReported', 'BadGateway', 'BadRequest', 'Conflict', 'Continue', 'Created', 'EmptyStatusCode', 'ExpectationFailed', 'FailedDependency', 'Forbidden', 'Found', 'GatewayTimeout', 'Gone', 'HTTPVersionNotSupported', 'IMUsed', 'InsufficientStorage', 'InternalServerError', 'LengthRequired', 'Locked', 'LoopDetected', 'MethodNotAllowed', 'MisdirectedRequest', 'MovedPermanently', 'MultiStatus', 'MultipleChoices', 'NetworkAuthenticationRequired', 'NoContent', 'NonAuthoritativeInformation', 'NotAcceptable', 'NotExtended', 'NotFound', 'NotImplemented', 'NotModified', 'OK', 'PartialContent', 'PayloadTooLarge', 'PaymentRequired', 'PermanentRedirect', 'PreconditionFailed', 'PreconditionRequired', 'ProxyAuthenticationRequired', 'RangeNotSatisfiable', 'RequestHeaderFieldsTooLarge', 'RequestTimeout', 'ResetContent', 'SeeOther', 'ServiceUnavailable', 'TemporaryRedirect', 'TooManyRequests', 'URITooLong', 'Unauthorized', 'UnprocessableEntity', 'UnsupportedMediaType', 'UpgradeRequired', 'UseProxy', 'VariantAlsoNegotiates']`",
-																														ElementType:         types.StringType,
-																														Required:            true,
-																														Optional:            false,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Accepted", "AlreadyReported", "BadGateway", "BadRequest", "Conflict", "Continue", "Created", "EmptyStatusCode", "ExpectationFailed", "FailedDependency", "Forbidden", "Found", "GatewayTimeout", "Gone", "HTTPVersionNotSupported", "IMUsed", "InsufficientStorage", "InternalServerError", "LengthRequired", "Locked", "LoopDetected", "MethodNotAllowed", "MisdirectedRequest", "MovedPermanently", "MultiStatus", "MultipleChoices", "NetworkAuthenticationRequired", "NoContent", "NonAuthoritativeInformation", "NotAcceptable", "NotExtended", "NotFound", "NotImplemented", "NotModified", "OK", "PartialContent", "PayloadTooLarge", "PaymentRequired", "PermanentRedirect", "PreconditionFailed", "PreconditionRequired", "ProxyAuthenticationRequired", "RangeNotSatisfiable", "RequestHeaderFieldsTooLarge", "RequestTimeout", "ResetContent", "SeeOther", "ServiceUnavailable", "TemporaryRedirect", "TooManyRequests", "URITooLong", "Unauthorized", "UnprocessableEntity", "UnsupportedMediaType", "UpgradeRequired", "UseProxy", "VariantAlsoNegotiates"}...)),
-																															listvalidator.SizeAtMost(1),
-																														},
-																													},
-																												},
-																											},
-																										},
-																										"success_conditions": schema.ListNestedAttribute{
-																											Description:         "Success Conditions Success Conditions",
-																											MarkdownDescription: "Success Conditions Success Conditions",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.List{
-																												listvalidator.SizeAtMost(3),
-																												listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-																											},
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description:         "name A case-insensitive HTTP header name.",
-																														MarkdownDescription: "name A case-insensitive HTTP header name.",
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.String{
-																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
-																																"must be a valid HTTP header field name",
-																															),
-																															bytesvalidator.BytesAtMost(256),
-																														},
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description:         "regex values A list of regular expressions to match the input against.",
-																														MarkdownDescription: "regex values A list of regular expressions to match the input against.",
-																														ElementType:         types.StringType,
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.SizeAtMost(16),
-																															listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
-																															listvalidator.UniqueValues(),
-																														},
-																													},
-																													"status": schema.ListAttribute{
-																														Description:         "HTTP Status code for response HTTP Status code",
-																														MarkdownDescription: "HTTP Status code for response HTTP Status code<br>**Allowed Values (choose one):** `['Accepted', 'AlreadyReported', 'BadGateway', 'BadRequest', 'Conflict', 'Continue', 'Created', 'EmptyStatusCode', 'ExpectationFailed', 'FailedDependency', 'Forbidden', 'Found', 'GatewayTimeout', 'Gone', 'HTTPVersionNotSupported', 'IMUsed', 'InsufficientStorage', 'InternalServerError', 'LengthRequired', 'Locked', 'LoopDetected', 'MethodNotAllowed', 'MisdirectedRequest', 'MovedPermanently', 'MultiStatus', 'MultipleChoices', 'NetworkAuthenticationRequired', 'NoContent', 'NonAuthoritativeInformation', 'NotAcceptable', 'NotExtended', 'NotFound', 'NotImplemented', 'NotModified', 'OK', 'PartialContent', 'PayloadTooLarge', 'PaymentRequired', 'PermanentRedirect', 'PreconditionFailed', 'PreconditionRequired', 'ProxyAuthenticationRequired', 'RangeNotSatisfiable', 'RequestHeaderFieldsTooLarge', 'RequestTimeout', 'ResetContent', 'SeeOther', 'ServiceUnavailable', 'TemporaryRedirect', 'TooManyRequests', 'URITooLong', 'Unauthorized', 'UnprocessableEntity', 'UnsupportedMediaType', 'UpgradeRequired', 'UseProxy', 'VariantAlsoNegotiates']`",
-																														ElementType:         types.StringType,
-																														Required:            true,
-																														Optional:            false,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Accepted", "AlreadyReported", "BadGateway", "BadRequest", "Conflict", "Continue", "Created", "EmptyStatusCode", "ExpectationFailed", "FailedDependency", "Forbidden", "Found", "GatewayTimeout", "Gone", "HTTPVersionNotSupported", "IMUsed", "InsufficientStorage", "InternalServerError", "LengthRequired", "Locked", "LoopDetected", "MethodNotAllowed", "MisdirectedRequest", "MovedPermanently", "MultiStatus", "MultipleChoices", "NetworkAuthenticationRequired", "NoContent", "NonAuthoritativeInformation", "NotAcceptable", "NotExtended", "NotFound", "NotImplemented", "NotModified", "OK", "PartialContent", "PayloadTooLarge", "PaymentRequired", "PermanentRedirect", "PreconditionFailed", "PreconditionRequired", "ProxyAuthenticationRequired", "RangeNotSatisfiable", "RequestHeaderFieldsTooLarge", "RequestTimeout", "ResetContent", "SeeOther", "ServiceUnavailable", "TemporaryRedirect", "TooManyRequests", "URITooLong", "Unauthorized", "UnprocessableEntity", "UnsupportedMediaType", "UpgradeRequired", "UseProxy", "VariantAlsoNegotiates"}...)),
-																															listvalidator.SizeAtMost(1),
-																														},
-																													},
-																												},
-																											},
-																										},
-																									},
-																								},
-																							},
-																						},
+																					Validators: []validator.Bool{
+																						boolvalidator.Equals(true),
 																					},
 																				},
 																				"login_mfa": schema.BoolAttribute{
@@ -5497,8 +5263,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5541,8 +5307,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5574,8 +5340,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5629,8 +5395,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5695,8 +5461,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5866,6 +5632,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"METHOD_ANY", "METHOD_DELETE", "METHOD_GET", "METHOD_GET_DOCUMENT", "METHOD_PATCH", "METHOD_POST", "METHOD_PUT"}...)),
+												listvalidator.SizeBetween(1, 4),
+												listvalidator.UniqueValues(),
 											},
 										},
 										"metadata": schema.SingleNestedAttribute{
@@ -6045,7 +5813,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 															"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 														),
 													},
@@ -6199,9 +5967,17 @@ func (r *ResourceF5XCProtectedApplication) ModifyPlan(ctx context.Context, req r
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCProtectedApplicationModel
 
 	// Read Terraform plan data into the model
@@ -8940,177 +8716,14 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											return
 										}
 
-										// resource modelToSpecNested PointerOfOneOfField --> Login
+										// resource modelToSpecNested BoolOfOneOfPointerField --> Login
 										if !authenticationLabelChoiceModel.Login.IsNull() && !authenticationLabelChoiceModel.Login.IsUnknown() {
-											var protectedAppLoginModel ProtectedAppLogin
-											response.Diagnostics.Append(authenticationLabelChoiceModel.Login.As(ctx, &protectedAppLoginModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
+											loginSpecBool := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
+											loginSpecBool.Login = &ves_io_schema.BotDefenseTransactionResult{}
+											loginSpecBool.Login.TransactionResultChoice = &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{
+												DisableTransactionResult: &ves_io_schema.Empty{},
 											}
-											loginOneOfSpec := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
-											loginOneOfSpec.Login = &ves_io_schema.BotDefenseTransactionResult{}
-											authenticationOneOfSpec.Authentication.LabelChoice = loginOneOfSpec
-
-											// resource modelToSpecNested OneOfField --> TransactionResultChoice
-											if !protectedAppLoginModel.TransactionResultChoice.IsNull() && !protectedAppLoginModel.TransactionResultChoice.IsUnknown() {
-												loginTransactionResultChoiceModel := ProtectedAppTransactionResultChoice{}
-												response.Diagnostics.Append(protectedAppLoginModel.TransactionResultChoice.As(ctx, &loginTransactionResultChoiceModel, basetypes.ObjectAsOptions{})...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// resource modelToSpecNested BoolOfOneOfPointerField --> DisableTransactionResult
-												if !loginTransactionResultChoiceModel.DisableTransactionResult.IsNull() && !loginTransactionResultChoiceModel.DisableTransactionResult.IsUnknown() {
-													disableTransactionResultSpecBool := &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{}
-													disableTransactionResultSpecBool.DisableTransactionResult = &ves_io_schema.Empty{}
-													loginOneOfSpec.Login.TransactionResultChoice = disableTransactionResultSpecBool
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> TransactionResult
-												if !loginTransactionResultChoiceModel.TransactionResult.IsNull() && !loginTransactionResultChoiceModel.TransactionResult.IsUnknown() {
-													var protectedAppTransactionResultModel ProtectedAppTransactionResult
-													response.Diagnostics.Append(loginTransactionResultChoiceModel.TransactionResult.As(ctx, &protectedAppTransactionResultModel, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													transactionResultOneOfSpec := &ves_io_schema.BotDefenseTransactionResult_TransactionResult{}
-													transactionResultOneOfSpec.TransactionResult = &ves_io_schema.BotDefenseTransactionResultType{}
-													loginOneOfSpec.Login.TransactionResultChoice = transactionResultOneOfSpec
-
-													// resource modelToSpecNested ArrayOfPointerField --> FailureConditions
-													if !protectedAppTransactionResultModel.FailureConditions.IsNull() && !protectedAppTransactionResultModel.FailureConditions.IsUnknown() && len(protectedAppTransactionResultModel.FailureConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var failureConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.FailureConditions.ElementsAs(ctx, &failureConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														failureConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(failureConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.FailureConditions = failureConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, failureConditionsElement := range failureConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.FailureConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !failureConditionsElement.Name.IsNull() && !failureConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].Name = string(failureConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !failureConditionsElement.RegexValues.IsNull() && !failureConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(failureConditionsElement.RegexValues.Elements()))
-																	diags = failureConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !failureConditionsElement.Status.IsNull() && !failureConditionsElement.Status.IsUnknown() && len(failureConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = failureConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		failureConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-													// resource modelToSpecNested ArrayOfPointerField --> SuccessConditions
-													if !protectedAppTransactionResultModel.SuccessConditions.IsNull() && !protectedAppTransactionResultModel.SuccessConditions.IsUnknown() && len(protectedAppTransactionResultModel.SuccessConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var successConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.SuccessConditions.ElementsAs(ctx, &successConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														successConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(successConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.SuccessConditions = successConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, successConditionsElement := range successConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !successConditionsElement.Name.IsNull() && !successConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].Name = string(successConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !successConditionsElement.RegexValues.IsNull() && !successConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(successConditionsElement.RegexValues.Elements()))
-																	diags = successConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !successConditionsElement.Status.IsNull() && !successConditionsElement.Status.IsUnknown() && len(successConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = successConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		successConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-												}
-
-											}
-
+											authenticationOneOfSpec.Authentication.LabelChoice = loginSpecBool
 										}
 
 										// resource modelToSpecNested BoolOfOneOfPointerField --> LoginMfa
@@ -9674,7 +9287,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -9697,7 +9310,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "protected_application", err),
 		)
 		return
 	}
@@ -10171,6 +9784,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -10200,6 +9814,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -10311,6 +9926,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -10485,6 +10101,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -10514,6 +10131,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -10617,6 +10235,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -10693,6 +10312,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -10828,6 +10448,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -10893,6 +10514,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -11074,6 +10696,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11103,6 +10726,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -11274,6 +10898,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11348,6 +10973,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -11519,6 +11145,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11548,6 +11175,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -11698,6 +11326,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11772,6 +11401,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -11801,6 +11431,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -11906,6 +11537,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -11935,6 +11567,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -12160,6 +11793,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -12217,6 +11851,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -12422,6 +12057,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -12592,6 +12228,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -12621,6 +12258,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -12732,6 +12370,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -12922,6 +12561,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -12951,6 +12591,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -13054,6 +12695,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -13146,6 +12788,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -13281,6 +12924,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -13346,6 +12990,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -13527,6 +13172,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -13556,6 +13202,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -13727,6 +13374,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -13801,6 +13449,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -13972,6 +13621,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -14001,6 +13651,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -14151,6 +13802,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -14225,6 +13877,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -14254,6 +13907,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -14359,6 +14013,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -14388,6 +14043,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -14508,6 +14164,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -14545,226 +14202,26 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -14870,6 +14327,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -14966,6 +14424,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -15040,6 +14499,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
 												}
 
@@ -15158,6 +14618,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -15297,6 +14758,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -15612,6 +15074,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -15641,6 +15104,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -15692,6 +15156,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -15888,6 +15353,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -15945,6 +15411,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -16178,7 +15645,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "protected_application", err),
 		)
 		return
 	}
@@ -16646,6 +16113,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -16675,7 +16143,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -16786,6 +16258,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -16960,6 +16433,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -16989,7 +16463,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -17092,6 +16570,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -17168,6 +16647,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -17303,6 +16783,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -17368,7 +16849,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
-					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_mobile_sdk": types.BoolValue(true),
+						"mobile_sdk_config":  types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> ProtectedEndpoints
@@ -17549,6 +17034,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -17578,6 +17064,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -17749,6 +17236,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -17823,6 +17311,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -17994,6 +17483,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -18023,6 +17513,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -18173,6 +17664,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -18247,6 +17739,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -18276,6 +17769,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -18381,6 +17875,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -18410,6 +17905,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -18635,6 +18131,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -18692,6 +18189,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -18897,6 +18395,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -19067,6 +18566,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -19096,7 +18596,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -19207,6 +18711,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -19397,6 +18902,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -19426,7 +18932,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -19529,6 +19039,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -19621,6 +19132,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -19756,6 +19268,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -19821,7 +19334,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
-					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_mobile_sdk": types.BoolValue(true),
+						"mobile_sdk_config":  types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> ProtectedEndpoints
@@ -20002,6 +19519,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20031,6 +19549,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -20202,6 +19721,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20276,6 +19796,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -20447,6 +19968,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20476,6 +19998,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -20626,6 +20149,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20700,6 +20224,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -20729,6 +20254,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -20834,6 +20360,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -20863,6 +20390,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -20983,6 +20511,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -21020,226 +20549,26 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -21345,6 +20674,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -21441,6 +20771,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -21515,7 +20846,10 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
-													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
+													flightAttributeMap["label_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap, map[string]attr.Value{
+														"checkin": types.BoolValue(true),
+													})
 												}
 
 												flightObj, flightObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightModelAttributeMap, flightAttributeMap)
@@ -21633,6 +20967,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -21772,6 +21107,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -22087,6 +21423,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -22116,6 +21453,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -22167,6 +21505,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -22363,6 +21702,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -22420,6 +21760,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -22577,7 +21918,18 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.ConnectorTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceModelAttributeMap)
+
+		if data.ConnectorTypeChoice.IsNull() || data.ConnectorTypeChoice.IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["adobe_commerce_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["adobe_commerce_connector"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["big_ip_iapp"].IsNull() || data.ConnectorTypeChoice.Attributes()["big_ip_iapp"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsUnknown())))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["loglevel"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["loglevel"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["protected_endpoints"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["protected_endpoints"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["timeout"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["timeout"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["trusted_clients"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["trusted_clients"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).Attributes()["ids"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).Attributes()["ids"].IsUnknown())) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).Attributes()["tags"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).Attributes()["tags"].IsUnknown())) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["disable_aws_configuration"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["disable_aws_configuration"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["data_sample"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["data_sample"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_mode"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_mode"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["javascript_mode"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["javascript_mode"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["loglevel"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["loglevel"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["protected_endpoints"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["protected_endpoints"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["timeout"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["timeout"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["trusted_clients"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["trusted_clients"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["custom_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["custom_connector"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["f5_big_ip"].IsNull() || data.ConnectorTypeChoice.Attributes()["f5_big_ip"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["salesforce_commerce_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["salesforce_commerce_connector"].IsUnknown())) {
+			data.ConnectorTypeChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceModelAttributeMap, map[string]attr.Value{
+				"adobe_commerce_connector":      types.BoolNull(),
+				"big_ip_iapp":                   types.BoolValue(true),
+				"cloudflare":                    types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareModelAttributeMap),
+				"cloudfront":                    types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontModelAttributeMap),
+				"custom_connector":              types.BoolNull(),
+				"f5_big_ip":                     types.BoolNull(),
+				"salesforce_commerce_connector": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> Region
@@ -22606,6 +21958,12 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 }
 
 func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCProtectedApplicationModel
@@ -25364,177 +24722,14 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											return
 										}
 
-										// resource modelToSpecNested PointerOfOneOfField --> Login
+										// resource modelToSpecNested BoolOfOneOfPointerField --> Login
 										if !authenticationLabelChoiceModel.Login.IsNull() && !authenticationLabelChoiceModel.Login.IsUnknown() {
-											var protectedAppLoginModel ProtectedAppLogin
-											response.Diagnostics.Append(authenticationLabelChoiceModel.Login.As(ctx, &protectedAppLoginModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
+											loginSpecBool := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
+											loginSpecBool.Login = &ves_io_schema.BotDefenseTransactionResult{}
+											loginSpecBool.Login.TransactionResultChoice = &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{
+												DisableTransactionResult: &ves_io_schema.Empty{},
 											}
-											loginOneOfSpec := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
-											loginOneOfSpec.Login = &ves_io_schema.BotDefenseTransactionResult{}
-											authenticationOneOfSpec.Authentication.LabelChoice = loginOneOfSpec
-
-											// resource modelToSpecNested OneOfField --> TransactionResultChoice
-											if !protectedAppLoginModel.TransactionResultChoice.IsNull() && !protectedAppLoginModel.TransactionResultChoice.IsUnknown() {
-												loginTransactionResultChoiceModel := ProtectedAppTransactionResultChoice{}
-												response.Diagnostics.Append(protectedAppLoginModel.TransactionResultChoice.As(ctx, &loginTransactionResultChoiceModel, basetypes.ObjectAsOptions{})...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// resource modelToSpecNested BoolOfOneOfPointerField --> DisableTransactionResult
-												if !loginTransactionResultChoiceModel.DisableTransactionResult.IsNull() && !loginTransactionResultChoiceModel.DisableTransactionResult.IsUnknown() {
-													disableTransactionResultSpecBool := &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{}
-													disableTransactionResultSpecBool.DisableTransactionResult = &ves_io_schema.Empty{}
-													loginOneOfSpec.Login.TransactionResultChoice = disableTransactionResultSpecBool
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> TransactionResult
-												if !loginTransactionResultChoiceModel.TransactionResult.IsNull() && !loginTransactionResultChoiceModel.TransactionResult.IsUnknown() {
-													var protectedAppTransactionResultModel ProtectedAppTransactionResult
-													response.Diagnostics.Append(loginTransactionResultChoiceModel.TransactionResult.As(ctx, &protectedAppTransactionResultModel, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													transactionResultOneOfSpec := &ves_io_schema.BotDefenseTransactionResult_TransactionResult{}
-													transactionResultOneOfSpec.TransactionResult = &ves_io_schema.BotDefenseTransactionResultType{}
-													loginOneOfSpec.Login.TransactionResultChoice = transactionResultOneOfSpec
-
-													// resource modelToSpecNested ArrayOfPointerField --> FailureConditions
-													if !protectedAppTransactionResultModel.FailureConditions.IsNull() && !protectedAppTransactionResultModel.FailureConditions.IsUnknown() && len(protectedAppTransactionResultModel.FailureConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var failureConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.FailureConditions.ElementsAs(ctx, &failureConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														failureConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(failureConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.FailureConditions = failureConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, failureConditionsElement := range failureConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.FailureConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !failureConditionsElement.Name.IsNull() && !failureConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].Name = string(failureConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !failureConditionsElement.RegexValues.IsNull() && !failureConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(failureConditionsElement.RegexValues.Elements()))
-																	diags = failureConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !failureConditionsElement.Status.IsNull() && !failureConditionsElement.Status.IsUnknown() && len(failureConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = failureConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		failureConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-													// resource modelToSpecNested ArrayOfPointerField --> SuccessConditions
-													if !protectedAppTransactionResultModel.SuccessConditions.IsNull() && !protectedAppTransactionResultModel.SuccessConditions.IsUnknown() && len(protectedAppTransactionResultModel.SuccessConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var successConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.SuccessConditions.ElementsAs(ctx, &successConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														successConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(successConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.SuccessConditions = successConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, successConditionsElement := range successConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !successConditionsElement.Name.IsNull() && !successConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].Name = string(successConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !successConditionsElement.RegexValues.IsNull() && !successConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(successConditionsElement.RegexValues.Elements()))
-																	diags = successConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !successConditionsElement.Status.IsNull() && !successConditionsElement.Status.IsUnknown() && len(successConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = successConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		successConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-												}
-
-											}
-
+											authenticationOneOfSpec.Authentication.LabelChoice = loginSpecBool
 										}
 
 										// resource modelToSpecNested BoolOfOneOfPointerField --> LoginMfa
@@ -26073,7 +25268,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -26089,7 +25284,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protected_application", err),
 		)
 		return
 	}
@@ -26104,7 +25299,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protected_application", err),
 		)
 		return
 	}
@@ -26210,34 +25405,27 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -26266,17 +25454,23 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -26572,6 +25766,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -26601,6 +25796,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -26712,6 +25908,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -26886,6 +26083,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -26915,6 +26113,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -27018,6 +26217,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -27094,6 +26294,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -27229,6 +26430,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -27294,6 +26496,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -27475,6 +26678,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27504,6 +26708,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -27675,6 +26880,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27749,6 +26955,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -27920,6 +27127,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27949,6 +27157,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -28099,6 +27308,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -28173,6 +27383,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -28202,6 +27413,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -28307,6 +27519,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -28336,6 +27549,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -28561,6 +27775,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -28618,6 +27833,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -28823,6 +28039,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -28993,6 +28210,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -29022,6 +28240,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -29133,6 +28352,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -29323,6 +28543,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -29352,6 +28573,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -29455,6 +28677,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -29547,6 +28770,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -29682,6 +28906,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -29747,6 +28972,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -29928,6 +29154,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -29957,6 +29184,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -30128,6 +29356,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30202,6 +29431,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -30373,6 +29603,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30402,6 +29633,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -30552,6 +29784,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30626,6 +29859,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -30655,6 +29889,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -30760,6 +29995,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -30789,6 +30025,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -30909,6 +30146,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -30946,226 +30184,26 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -31271,6 +30309,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -31367,6 +30406,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -31441,6 +30481,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
 												}
 
@@ -31559,6 +30600,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -31698,6 +30740,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -32013,6 +31056,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -32042,6 +31086,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -32093,6 +31138,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -32289,6 +31335,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -32346,6 +31393,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -32595,7 +31643,7 @@ func (r *ResourceF5XCProtectedApplication) Delete(ctx context.Context, request r
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "protected_application", err),
 		)
 		return
 	}

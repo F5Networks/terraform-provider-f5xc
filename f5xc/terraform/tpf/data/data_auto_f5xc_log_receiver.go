@@ -30,48 +30,48 @@ type DataSourceF5XCLogReceiver struct {
 	client *client.APIClient
 }
 
-type LogReceiverGlobalSpecTypeLogReceiverChoice struct {
+type LogReceiverLogReceiverChoice struct {
 	Syslog types.Object `tfsdk:"syslog"`
 }
 
-type LogReceiverGlobalSpecTypeSyslog struct {
+type LogReceiverSyslog struct {
 	FormatChoice types.Object `tfsdk:"format_choice"`
 	ModeChoice   types.Object `tfsdk:"mode_choice"`
 }
 
-type LogReceiverSyslogReceiverFormatChoice struct {
+type LogReceiverFormatChoice struct {
 	SyslogRfc5424 types.Int64 `tfsdk:"syslog_rfc5424"`
 }
 
-type LogReceiverSyslogReceiverModeChoice struct {
+type LogReceiverModeChoice struct {
 	TcpServer types.Object `tfsdk:"tcp_server"`
 	TlsServer types.Object `tfsdk:"tls_server"`
 	UdpServer types.Object `tfsdk:"udp_server"`
 }
 
-type LogReceiverSyslogReceiverTcpServer struct {
+type LogReceiverTcpServer struct {
 	Port       types.Int64  `tfsdk:"port"`
 	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverSyslogReceiverTlsServer struct {
+type LogReceiverTlsServer struct {
 	CaChoice   types.Object `tfsdk:"ca_choice"`
 	MtlsChoice types.Object `tfsdk:"mtls_choice"`
 	PortChoice types.Object `tfsdk:"port_choice"`
 	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverTLSConfigTypeCaChoice struct {
+type LogReceiverCaChoice struct {
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 	VolterraCa   types.Bool   `tfsdk:"volterra_ca"`
 }
 
-type LogReceiverTLSConfigTypeMtlsChoice struct {
+type LogReceiverMtlsChoice struct {
 	MtlsDisabled types.Bool   `tfsdk:"mtls_disabled"`
 	MtlsEnable   types.Object `tfsdk:"mtls_enable"`
 }
 
-type LogReceiverTLSConfigTypeMtlsEnable struct {
+type LogReceiverMtlsEnable struct {
 	Certificate types.String `tfsdk:"certificate"`
 	KeyUrl      types.Object `tfsdk:"key_url"`
 }
@@ -80,34 +80,35 @@ type LogReceiverSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type LogReceiverSecretTypeSecretInfoChoice struct {
+type LogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type LogReceiverSecretTypeBlindfoldSecretInfo struct {
+type LogReceiverBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type LogReceiverSecretTypeClearSecretInfo struct {
+type LogReceiverClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type LogReceiverTLSConfigTypePortChoice struct {
+type LogReceiverPortChoice struct {
 	DefaultHttpsPort     types.Bool  `tfsdk:"default_https_port"`
 	DefaultSyslogTlsPort types.Bool  `tfsdk:"default_syslog_tls_port"`
 	Port                 types.Int64 `tfsdk:"port"`
 }
 
-type LogReceiverSyslogReceiverUdpServer struct {
+type LogReceiverUdpServer struct {
 	Port       types.Int64  `tfsdk:"port"`
 	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverGlobalSpecTypeWhereChoice struct {
+type LogReceiverWhereChoice struct {
 	SiteLocal types.Bool `tfsdk:"site_local"`
 }
 
@@ -230,6 +231,7 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -282,8 +284,8 @@ func (d *DataSourceF5XCLogReceiver) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCLogReceiver) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
+		MarkdownDescription: "Log Receiver is used to specify a receiver (syslog, splunk, datadog etc.,) to send the log. Log receiver need to be reachable on site local network.",
+		Description:         "Log Receiver is used to specify a receiver (syslog, splunk, datadog etc.,) to send the log. Log receiver need to be reachable on site local network.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -481,8 +483,15 @@ func (r *DataSourceF5XCLogReceiver) Schema(ctx context.Context, request datasour
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -623,7 +632,7 @@ func (d *DataSourceF5XCLogReceiver) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "log_receiver", err))
 		return
 	}
 
@@ -694,7 +703,7 @@ func (d *DataSourceF5XCLogReceiver) Read(ctx context.Context, request datasource
 		logReceiverChoiceChoices := specData.GetLogReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logReceiverChoiceChoicesModel = &LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		var logReceiverChoiceChoicesModel = &LogReceiverLogReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -994,6 +1003,15 @@ func (d *DataSourceF5XCLogReceiver) Read(ctx context.Context, request datasource
 													}
 												}
 
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -1243,7 +1261,7 @@ func (d *DataSourceF5XCLogReceiver) Read(ctx context.Context, request datasource
 		whereChoiceChoices := specData.GetWhereChoice()
 
 		// The model struct that will be populated by the nested template.
-		var whereChoiceChoicesModel = &LogReceiverGlobalSpecTypeWhereChoice{}
+		var whereChoiceChoicesModel = &LogReceiverWhereChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

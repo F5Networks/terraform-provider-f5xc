@@ -29,26 +29,26 @@ type DataSourceF5XCAppApiGroup struct {
 	client *client.APIClient
 }
 
-type AppApiGroupApiGroupElementGlobalSpecType struct {
+type AppApiGroupGst struct {
 	Methods   types.List   `tfsdk:"methods"`
 	PathRegex types.String `tfsdk:"path_regex"`
 }
 
-type AppApiGroupGlobalSpecTypeScopeChoice struct {
+type AppApiGroupScopeChoice struct {
 	BigipVirtualServer types.Object `tfsdk:"bigip_virtual_server"`
 	CdnLoadbalancer    types.Object `tfsdk:"cdn_loadbalancer"`
 	HttpLoadbalancer   types.Object `tfsdk:"http_loadbalancer"`
 }
 
-type AppApiGroupGlobalSpecTypeBigipVirtualServer struct {
+type AppApiGroupBigipVirtualServer struct {
 	BigipVirtualServer types.Object `tfsdk:"bigip_virtual_server"`
 }
 
-type AppApiGroupGlobalSpecTypeCdnLoadbalancer struct {
+type AppApiGroupCdnLoadbalancer struct {
 	CdnLoadbalancer types.Object `tfsdk:"cdn_loadbalancer"`
 }
 
-type AppApiGroupGlobalSpecTypeHttpLoadbalancer struct {
+type AppApiGroupHttpLoadbalancer struct {
 	HttpLoadbalancer types.Object `tfsdk:"http_loadbalancer"`
 }
 
@@ -158,8 +158,8 @@ func (d *DataSourceF5XCAppApiGroup) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCAppApiGroup) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a app_api_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of app_api_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a app_api_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of app_api_group) etc. can be fetched",
+		MarkdownDescription: "The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order<br>to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for<br>internal use by data path and other services.<br><br>An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all<br>elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it<br>matches at least one element in the api group.<br><br>The App API Group may be created using API Group Builder which defines path filter and label selectors to match<br>API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled<br>then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members.<br><br>The view creates the following child objects:<br>* api_group",
+		Description:         "The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for internal use by data path and other services. An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it matches at least one element in the api group. The App API Group may be created using API Group Builder which defines path filter and label selectors to match API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members. The view creates the following child objects: api_group",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -396,7 +396,7 @@ func (d *DataSourceF5XCAppApiGroup) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "app_api_group", err))
 		return
 	}
 
@@ -466,10 +466,10 @@ func (d *DataSourceF5XCAppApiGroup) Read(ctx context.Context, request datasource
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Elements
-	elementsElementsSpectToModel := make([]AppApiGroupApiGroupElementGlobalSpecType, 0, len(specData.GetElements()))
+	elementsElementsSpectToModel := make([]AppApiGroupGst, 0, len(specData.GetElements()))
 
 	for _, elementsElement := range specData.GetElements() {
-		appApiGroupApiGroupElementGlobalSpecTypeModel := AppApiGroupApiGroupElementGlobalSpecType{}
+		appApiGroupGstModel := AppApiGroupGst{}
 
 		// data SpecToModelNested RequiredArrayOfEnumField --> Methods
 		if len(elementsElement.GetMethods()) > 0 {
@@ -484,20 +484,20 @@ func (d *DataSourceF5XCAppApiGroup) Read(ctx context.Context, request datasource
 			if response.Diagnostics.HasError() {
 				return
 			}
-			appApiGroupApiGroupElementGlobalSpecTypeModel.Methods = listValue
+			appApiGroupGstModel.Methods = listValue
 		} else {
-			appApiGroupApiGroupElementGlobalSpecTypeModel.Methods = types.ListNull(types.StringType)
+			appApiGroupGstModel.Methods = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredStringField --> PathRegex
 		if elementsElement.GetPathRegex() != "" {
-			appApiGroupApiGroupElementGlobalSpecTypeModel.PathRegex = types.StringValue(elementsElement.GetPathRegex())
+			appApiGroupGstModel.PathRegex = types.StringValue(elementsElement.GetPathRegex())
 		} else {
 			// Empty string, set to null
-			appApiGroupApiGroupElementGlobalSpecTypeModel.PathRegex = types.StringNull()
+			appApiGroupGstModel.PathRegex = types.StringNull()
 		}
 
-		elementsElementsSpectToModel = append(elementsElementsSpectToModel, appApiGroupApiGroupElementGlobalSpecTypeModel)
+		elementsElementsSpectToModel = append(elementsElementsSpectToModel, appApiGroupGstModel)
 	}
 
 	{
@@ -525,7 +525,7 @@ func (d *DataSourceF5XCAppApiGroup) Read(ctx context.Context, request datasource
 		scopeChoiceChoices := specData.GetScopeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var scopeChoiceChoicesModel = &AppApiGroupGlobalSpecTypeScopeChoice{}
+		var scopeChoiceChoicesModel = &AppApiGroupScopeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

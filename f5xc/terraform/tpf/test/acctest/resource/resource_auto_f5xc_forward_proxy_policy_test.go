@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckForwardProxyPolicyDestroyProducer(t),
@@ -39,31 +39,35 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCForwardProxyPolicyConfig_basic("example-forward-proxy-policy", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCForwardProxyPolicy_withProxyChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,30 +78,30 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withProxyChoiceTransition(t *test
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withProxyChoice(name, namespace, "any_proxy"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withProxyLabelSelector(name, namespace, "app == proxy"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withProxyChoice(name, namespace, "any_proxy"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -108,7 +112,7 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withRuleChoiceTransition(t *testi
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -119,30 +123,30 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withRuleChoiceTransition(t *testi
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withRuleChoice(name, namespace, "allow_all"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withAllowList(name, namespace, "default_action_allow"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withDenyList(name, namespace, "default_action_deny"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -153,7 +157,7 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withDefaultActionTransition(t *te
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -164,30 +168,30 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withDefaultActionTransition(t *te
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withAllowList(name, namespace, "default_action_allow"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withAllowList(name, namespace, "default_action_next_policy"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withAllowList(name, namespace, "default_action_deny"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -198,7 +202,7 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withRuleListActionTransition(t *t
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -209,20 +213,20 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_withRuleListActionTransition(t *t
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withRuleListAction(name, namespace, "ALLOW"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_withRuleListAction(name, namespace, "DENY"),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -233,9 +237,9 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fpp-" + acctest.RandString(t, 8)
+	name := "example-fpp-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckForwardProxyPolicyDestroyProducer(t),
@@ -244,24 +248,28 @@ func TestAccResourceAutoF5XCForwardProxyPolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCForwardProxyPolicyConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_forward_proxy_policy.test",
+				ResourceName:                         "f5xc_forward_proxy_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_forward_proxy_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCForwardProxyPolicyConfig_full("example-forward-proxy-policy", namespace),
+		})
 }
 
 func testAccCheckForwardProxyPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -270,7 +278,7 @@ func testAccCheckForwardProxyPolicyDestroyProducer(t *testing.T) func(*terraform
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -287,13 +295,13 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "forward proxy policy updated"
+  description = "Updated forward proxy policy example"
 
   proxy_choice = {
-	    any_proxy = true
+    any_proxy = true
   }
 
   rule_choice = {
@@ -305,7 +313,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withProxyChoice(name, namespace, choice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -322,7 +330,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withProxyLabelSelector(name, namespace, expression string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -341,7 +349,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withRuleChoice(name, namespace, choice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -358,7 +366,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withAllowList(name, namespace, defaultAction string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -386,7 +394,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withDenyList(name, namespace, defaultAction string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -414,7 +422,7 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_withRuleListAction(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -427,7 +435,7 @@ resource "f5xc_forward_proxy_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "rule-1"
+            name        = "example-rule"
             description = "forward proxy rule"
           }
 
@@ -454,13 +462,13 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "forward proxy policy full"
+  description = "Full forward proxy policy example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -478,7 +486,7 @@ resource "f5xc_forward_proxy_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "rule-full"
+            name        = "example-rule-full"
             description = "allow all sources to http destinations"
           }
 
@@ -487,7 +495,7 @@ resource "f5xc_forward_proxy_policy" "test" {
           source_choice = {
             prefix_list = {
               prefixes      = ["10.0.0.0/8"]
-	              ipv6_prefixes = ["2001:0db8:0000:0000:0000:0000:0000:0000/64"]
+              ipv6_prefixes = ["2001:0db8:0000:0000:0000:0000:0000:0000/64"]
             }
           }
 
@@ -530,13 +538,13 @@ resource "f5xc_forward_proxy_policy" "test" {
 
 func testAccResourceAutoF5XCForwardProxyPolicyConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "test" {
+resource "f5xc_forward_proxy_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "forward proxy policy full updated"
+  description = "Updated full forward proxy policy example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {
@@ -544,7 +552,7 @@ resource "f5xc_forward_proxy_policy" "test" {
   }
 
   proxy_choice = {
-	    any_proxy = true
+    any_proxy = true
   }
 
   rule_choice = {

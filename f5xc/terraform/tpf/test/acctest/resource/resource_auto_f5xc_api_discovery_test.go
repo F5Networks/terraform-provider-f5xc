@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCApiDiscovery_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiDiscoveryDestroyProducer(t),
@@ -39,31 +39,35 @@ func TestAccResourceAutoF5XCApiDiscovery_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiDiscoveryConfig_basic("example-api-discovery", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCApiDiscovery_withDefaultBehaviorTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,30 +78,30 @@ func TestAccResourceAutoF5XCApiDiscovery_withDefaultBehaviorTransition(t *testin
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultInclusive(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultExclusiveIgnore(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultExclusiveArchive(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -108,7 +112,7 @@ func TestAccResourceAutoF5XCApiDiscovery_withPatternRule(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -119,20 +123,20 @@ func TestAccResourceAutoF5XCApiDiscovery_withPatternRule(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withPatternExclusionIgnore(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withPatternInclusion(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -143,7 +147,7 @@ func TestAccResourceAutoF5XCApiDiscovery_withHeaderRule(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -154,30 +158,30 @@ func TestAccResourceAutoF5XCApiDiscovery_withHeaderRule(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withHeaderRule(name, namespace, "content-type", "EXACT_MATCH", "application/json", "REQUEST"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withHeaderRule(name, namespace, "x-api-key", "SUBSTRING", "Bearer", "REQUEST"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withHeaderRule(name, namespace, "x-custom-header", "REGEX", "^v[0-9]+$", "RESPONSE"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -188,7 +192,7 @@ func TestAccResourceAutoF5XCApiDiscovery_withCustomAuthTypes(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -199,30 +203,30 @@ func TestAccResourceAutoF5XCApiDiscovery_withCustomAuthTypes(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withCustomAuth(name, namespace, "QUERY_PARAMETER", "api-token"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withCustomAuth(name, namespace, "HEADER", "x-auth-header"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_withCustomAuth(name, namespace, "COOKIE", "session-token"),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -233,9 +237,9 @@ func TestAccResourceAutoF5XCApiDiscovery_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-discovery-" + acctest.RandString(t, 8)
+	name := "example-api-discovery-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiDiscoveryDestroyProducer(t),
@@ -244,24 +248,28 @@ func TestAccResourceAutoF5XCApiDiscovery_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDiscoveryConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_discovery.test",
+				ResourceName:                         "f5xc_api_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiDiscoveryConfig_full("example-api-discovery", "default"),
+		})
 }
 
 func testAccCheckApiDiscoveryDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -272,7 +280,7 @@ func testAccCheckApiDiscoveryDestroyProducer(t *testing.T) func(*terraform.State
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -287,10 +295,10 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "API discovery updated"
+  description = "API discovery example updated"
 
   user_defined_api_discovery_policy = {
     default_behavior_choice = {
@@ -303,7 +311,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultInclusive(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -318,7 +326,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultExclusiveIgnore(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -337,7 +345,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withDefaultExclusiveArchive(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -356,7 +364,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withPatternExclusionIgnore(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -391,7 +399,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withPatternInclusion(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -425,7 +433,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withHeaderRule(name, namespace, fieldName, matchType, value, location string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -460,7 +468,7 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_withCustomAuth(name, namespace, paramType, paramName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name      = %q
   namespace = %q
 
@@ -482,13 +490,13 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "API discovery full"
+  description = "API discovery example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "appsec"
   }
 
@@ -556,10 +564,10 @@ resource "f5xc_api_discovery" "test" {
 
 func testAccResourceAutoF5XCApiDiscoveryConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_discovery" "test" {
+resource "f5xc_api_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "API discovery full updated"
+  description = "API discovery example updated"
 
   labels = {
     env  = "stage"

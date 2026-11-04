@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCSegment_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-segment-" + acctest.RandString(t, 8)
+	name := "example-segment-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCSegment_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSegmentConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSegmentConfig_withDescription(name, namespace, "segment basic updated"),
+				Config: testAccResourceAutoF5XCSegmentConfig_withDescription(name, namespace, "segment updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCSegment_withInternetConnectionChoiceTransition(t *te
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-segment-" + acctest.RandString(t, 8)
+	name := "example-segment-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCSegment_withInternetConnectionChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCSegmentConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSegmentConfig_withInternetEnabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,35 +98,39 @@ func TestAccResourceAutoF5XCSegment_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-segment-" + acctest.RandString(t, 8)
+	name := "example-segment-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSegmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSegmentConfig_full(name, namespace, "test", "platform", "owner-a"),
+				Config: testAccResourceAutoF5XCSegmentConfig_full(name, namespace, "example", "platform", "example-owner"),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSegmentConfig_full(name, namespace, "prod", "security", "owner-b"),
+				Config: testAccResourceAutoF5XCSegmentConfig_full(name, namespace, "example", "security", "example-owner-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_segment.test",
+				ResourceName:                         "f5xc_segment.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_segment.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSegmentConfig_full("example-segment", "system", "example", "platform", "example-owner"),
+		})
 }
 
 func testAccCheckSegmentDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -135,7 +139,7 @@ func testAccCheckSegmentDestroyProducer(t *testing.T) func(*terraform.State) err
 
 func testAccResourceAutoF5XCSegmentConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment" "test" {
+resource "f5xc_segment" "example" {
   name      = %q
   namespace = %q
 }
@@ -144,7 +148,7 @@ resource "f5xc_segment" "test" {
 
 func testAccResourceAutoF5XCSegmentConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment" "test" {
+resource "f5xc_segment" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -154,7 +158,7 @@ resource "f5xc_segment" "test" {
 
 func testAccResourceAutoF5XCSegmentConfig_withInternetEnabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment" "test" {
+resource "f5xc_segment" "example" {
   name      = %q
   namespace = %q
 
@@ -167,7 +171,7 @@ resource "f5xc_segment" "test" {
 
 func testAccResourceAutoF5XCSegmentConfig_full(name, namespace, env, team, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment" "test" {
+resource "f5xc_segment" "example" {
 	name        = %q
 	namespace   = %q
 	description = "segment full"

@@ -29,7 +29,7 @@ type DataSourceF5XCRoute struct {
 	client *client.APIClient
 }
 
-type RouteRouteRouteType struct {
+type RouteRouteType struct {
 	BotDefenseJavascriptInjectionChoice types.Object `tfsdk:"bot_defense_javascript_injection_choice"`
 	DisableLocationAdd                  types.Bool   `tfsdk:"disable_location_add"`
 	Match                               types.List   `tfsdk:"match"`
@@ -47,22 +47,22 @@ type RouteRouteRouteType struct {
 	WafType                             types.Object `tfsdk:"waf_type"`
 }
 
-type RouteRouteTypeBotDefenseJavascriptInjectionChoice struct {
+type RouteBotDefenseJavascriptInjectionChoice struct {
 	BotDefenseJavascriptInjection          types.Object `tfsdk:"bot_defense_javascript_injection"`
 	InheritedBotDefenseJavascriptInjection types.Bool   `tfsdk:"inherited_bot_defense_javascript_injection"`
 }
 
-type RouteRouteTypeBotDefenseJavascriptInjection struct {
+type RouteBotDefenseJavascriptInjection struct {
 	JavascriptLocation types.List `tfsdk:"javascript_location"`
 	JavascriptTags     types.List `tfsdk:"javascript_tags"`
 }
 
-type RouteRouteJavaScriptTag struct {
+type RouteJavaScriptTag struct {
 	JavascriptUrl types.String `tfsdk:"javascript_url"`
 	TagAttributes types.List   `tfsdk:"tag_attributes"`
 }
 
-type RouteRouteTagAttribute struct {
+type RouteTagAttr struct {
 	JavascriptTag types.List   `tfsdk:"javascript_tag"`
 	TagValue      types.String `tfsdk:"tag_value"`
 }
@@ -81,7 +81,7 @@ type RouteHeaderMatcherType struct {
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type RouteHeaderMatcherTypeValueMatchChoice struct {
+type RouteValueMatchChoice struct {
 	Exact    types.String `tfsdk:"exact"`
 	Presence types.Bool   `tfsdk:"presence"`
 	Regex    types.String `tfsdk:"regex"`
@@ -91,7 +91,7 @@ type RoutePortMatcherType struct {
 	PortMatchChoice types.Object `tfsdk:"port_match_choice"`
 }
 
-type RoutePortMatcherTypePortMatchChoice struct {
+type RoutePortMatchChoice struct {
 	NoPortMatch types.Bool   `tfsdk:"no_port_match"`
 	Port        types.Int64  `tfsdk:"port"`
 	PortRanges  types.String `tfsdk:"port_ranges"`
@@ -101,18 +101,18 @@ type RoutePathMatcherType struct {
 	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
 }
 
-type RoutePathMatcherTypePathMatchChoice struct {
+type RoutePathMatchChoice struct {
 	Path   types.String `tfsdk:"path"`
 	Prefix types.String `tfsdk:"prefix"`
 	Regex  types.String `tfsdk:"regex"`
 }
 
-type RouteQueryParameterMatcherType struct {
+type RouteQueryParamMatcherType struct {
 	Key              types.String `tfsdk:"key"`
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type RouteQueryParameterMatcherTypeValueMatchChoice struct {
+type RouteQueryParamMatcherTypeValueMatchChoice struct {
 	Exact types.String `tfsdk:"exact"`
 	Regex types.String `tfsdk:"regex"`
 }
@@ -123,27 +123,28 @@ type RouteCookieValueOption struct {
 	ValueChoice types.Object `tfsdk:"value_choice"`
 }
 
-type RouteCookieValueOptionValueChoice struct {
+type RouteValueChoice struct {
 	SecretValue types.Object `tfsdk:"secret_value"`
 	Value       types.String `tfsdk:"value"`
 }
 
-type RouteCookieValueOptionSecretValue struct {
+type RouteSecretValue struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type RouteSecretTypeSecretInfoChoice struct {
+type RouteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type RouteSecretTypeBlindfoldSecretInfo struct {
+type RouteBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type RouteSecretTypeClearSecretInfo struct {
+type RouteClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -177,44 +178,44 @@ type RouteSetCookieValueOption struct {
 	ValueChoice       types.Object `tfsdk:"value_choice"`
 }
 
-type RouteSetCookieValueOptionDomainChoice struct {
+type RouteDomainChoice struct {
 	AddDomain    types.String `tfsdk:"add_domain"`
 	IgnoreDomain types.Bool   `tfsdk:"ignore_domain"`
 }
 
-type RouteSetCookieValueOptionExpiryChoice struct {
+type RouteExpiryChoice struct {
 	AddExpiry    types.String `tfsdk:"add_expiry"`
 	IgnoreExpiry types.Bool   `tfsdk:"ignore_expiry"`
 }
 
-type RouteSetCookieValueOptionHttponlyChoice struct {
+type RouteHttponlyChoice struct {
 	AddHttponly    types.Bool `tfsdk:"add_httponly"`
 	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
 }
 
-type RouteSetCookieValueOptionMaxAgeChoice struct {
+type RouteMaxAgeChoice struct {
 	IgnoreMaxAge types.Bool  `tfsdk:"ignore_max_age"`
 	MaxAgeValue  types.Int32 `tfsdk:"max_age_value"`
 }
 
-type RouteSetCookieValueOptionPartitionedChoice struct {
+type RoutePartitionedChoice struct {
 	AddPartitioned    types.Bool `tfsdk:"add_partitioned"`
 	IgnorePartitioned types.Bool `tfsdk:"ignore_partitioned"`
 }
 
-type RouteSetCookieValueOptionPathChoice struct {
+type RoutePathChoice struct {
 	AddPath    types.String `tfsdk:"add_path"`
 	IgnorePath types.Bool   `tfsdk:"ignore_path"`
 }
 
-type RouteSetCookieValueOptionSamesiteChoice struct {
+type RouteSamesiteChoice struct {
 	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
 	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
 	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
 	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
 }
 
-type RouteSetCookieValueOptionSecureChoice struct {
+type RouteSecureChoice struct {
 	AddSecure    types.Bool `tfsdk:"add_secure"`
 	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
 }
@@ -229,13 +230,13 @@ type RouteSetCookieValueOptionSecretValue struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type RouteRouteTypeRouteActionChoice struct {
+type RouteRouteActionChoice struct {
 	RouteDestination    types.Object `tfsdk:"route_destination"`
 	RouteDirectResponse types.Object `tfsdk:"route_direct_response"`
 	RouteRedirect       types.Object `tfsdk:"route_redirect"`
 }
 
-type RouteRouteTypeRouteDestination struct {
+type RouteRouteDest struct {
 	BufferPolicy                  types.Object `tfsdk:"buffer_policy"`
 	ClusterRetractChoice          types.Object `tfsdk:"cluster_retract_choice"`
 	CorsPolicy                    types.Object `tfsdk:"cors_policy"`
@@ -259,7 +260,7 @@ type RouteBufferConfigType struct {
 	MaxRequestBytes types.Int64 `tfsdk:"max_request_bytes"`
 }
 
-type RouteRouteDestinationListClusterRetractChoice struct {
+type RouteClusterRetractChoice struct {
 	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
 	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
 }
@@ -279,35 +280,35 @@ type RouteCsrfPolicy struct {
 	AllowedDomainsChoice types.Object `tfsdk:"allowed_domains_choice"`
 }
 
-type RouteCsrfPolicyAllowedDomainsChoice struct {
+type RouteAllowedDomainsChoice struct {
 	AllLoadBalancerDomains types.Bool   `tfsdk:"all_load_balancer_domains"`
 	CustomDomainList       types.Object `tfsdk:"custom_domain_list"`
 	Disabled               types.Bool   `tfsdk:"disabled"`
 }
 
-type RouteCsrfPolicyCustomDomainList struct {
+type RouteCustomDomainList struct {
 	Domains types.List `tfsdk:"domains"`
 }
 
-type RouteRouteRouteDestination struct {
+type RouteRouteRouteDest struct {
 	Cluster         types.List  `tfsdk:"cluster"`
 	EndpointSubsets types.Map   `tfsdk:"endpoint_subsets"`
 	Priority        types.Int64 `tfsdk:"priority"`
 	Weight          types.Int64 `tfsdk:"weight"`
 }
 
-type RouteRouteHashPolicyType struct {
+type RouteHashPolicyType struct {
 	PolicySpecifierChoice types.Object `tfsdk:"policy_specifier_choice"`
 	Terminal              types.Bool   `tfsdk:"terminal"`
 }
 
-type RouteHashPolicyTypePolicySpecifierChoice struct {
+type RoutePolicySpecifierChoice struct {
 	Cookie     types.Object `tfsdk:"cookie"`
 	HeaderName types.String `tfsdk:"header_name"`
 	SourceIp   types.Bool   `tfsdk:"source_ip"`
 }
 
-type RouteHashPolicyTypeCookie struct {
+type RouteCookie struct {
 	HttponlyChoice types.Object `tfsdk:"httponly_choice"`
 	Name           types.String `tfsdk:"name"`
 	Path           types.String `tfsdk:"path"`
@@ -333,12 +334,12 @@ type RouteCookieForHashingSecureChoice struct {
 	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
 }
 
-type RouteRouteDestinationListHostRewriteParamsChoice struct {
+type RouteHostRewriteParamsChoice struct {
 	AutoHostRewrite types.Bool   `tfsdk:"auto_host_rewrite"`
 	HostRewrite     types.String `tfsdk:"host_rewrite"`
 }
 
-type RouteRouteMirrorPolicyType struct {
+type RouteMirrorPolicyType struct {
 	Cluster types.List   `tfsdk:"cluster"`
 	Percent types.Object `tfsdk:"percent"`
 }
@@ -348,11 +349,11 @@ type RouteFractionalPercent struct {
 	Numerator   types.Int64 `tfsdk:"numerator"`
 }
 
-type RouteRouteQueryParamsSimpleRoute struct {
+type RouteQueryParamsSimpleRoute struct {
 	QueryParamsChoice types.Object `tfsdk:"query_params_choice"`
 }
 
-type RouteQueryParamsSimpleRouteQueryParamsChoice struct {
+type RouteQueryParamsChoice struct {
 	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
 	ReplaceParams   types.String `tfsdk:"replace_params"`
 	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
@@ -371,30 +372,30 @@ type RouteRetryBackOff struct {
 	MaxInterval  types.Int64 `tfsdk:"max_interval"`
 }
 
-type RouteRouteDestinationListRouteDestinationRewriteChoice struct {
+type RouteRouteDestRewriteChoice struct {
 	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
 	RegexRewrite  types.Object `tfsdk:"regex_rewrite"`
 }
 
-type RouteRouteDestinationListRegexRewrite struct {
+type RouteRegexRewrite struct {
 	Pattern      types.String `tfsdk:"pattern"`
 	Substitution types.String `tfsdk:"substitution"`
 }
 
-type RouteRouteSpdyConfigType struct {
+type RouteSpdyConfigType struct {
 	UseSpdy types.Bool `tfsdk:"use_spdy"`
 }
 
-type RouteRouteWebsocketConfigType struct {
+type RouteWebsocketConfigType struct {
 	UseWebsocket types.Bool `tfsdk:"use_websocket"`
 }
 
-type RouteRouteTypeRouteDirectResponse struct {
+type RouteRouteDirectResp struct {
 	ResponseBodyEncoded types.String `tfsdk:"response_body_encoded"`
 	ResponseCode        types.Int64  `tfsdk:"response_code"`
 }
 
-type RouteRouteTypeRouteRedirect struct {
+type RouteRouteRedirect struct {
 	HostRedirect       types.String `tfsdk:"host_redirect"`
 	ProtoRedirect      types.String `tfsdk:"proto_redirect"`
 	QueryParamsChoice  types.Object `tfsdk:"query_params_choice"`
@@ -408,20 +409,20 @@ type RouteRouteRedirectQueryParamsChoice struct {
 	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
 }
 
-type RouteRouteRedirectRedirectPathChoice struct {
+type RouteRedirectPathChoice struct {
 	PathRedirect  types.String `tfsdk:"path_redirect"`
 	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
 }
 
-type RouteRouteServicePolicyInfo struct {
+type RouteSvcPolicyInfo struct {
 	ServicePolicyChoice types.Object `tfsdk:"service_policy_choice"`
 }
 
-type RouteServicePolicyInfoServicePolicyChoice struct {
+type RouteSvcPolicyChoice struct {
 	Disable types.Bool `tfsdk:"disable"`
 }
 
-type RouteRouteTypeWafExclusionChoice struct {
+type RouteWafExclusionChoice struct {
 	InheritedWafExclusion types.Bool   `tfsdk:"inherited_waf_exclusion"`
 	WafExclusionPolicy    types.Object `tfsdk:"waf_exclusion_policy"`
 }
@@ -430,13 +431,13 @@ type RouteWafType struct {
 	RefTypeChoice types.Object `tfsdk:"ref_type_choice"`
 }
 
-type RouteWafTypeRefTypeChoice struct {
+type RouteRefTypeChoice struct {
 	AppFirewall types.Object `tfsdk:"app_firewall"`
 	DisableWaf  types.Bool   `tfsdk:"disable_waf"`
 	InheritWaf  types.Bool   `tfsdk:"inherit_waf"`
 }
 
-type RouteWafTypeAppFirewall struct {
+type RouteAppFirewall struct {
 	AppFirewall types.List `tfsdk:"app_firewall"`
 }
 
@@ -810,6 +811,7 @@ var RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -863,6 +865,7 @@ var RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -999,6 +1002,7 @@ var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1052,6 +1056,7 @@ var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1574,8 +1579,8 @@ func (d *DataSourceF5XCRoute) Metadata(ctx context.Context, request datasource.M
 func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Cookie for hashing Two types of cookie affinity: 1. Passive. Takes a cookie that's present in the cookies header and hashes on its value. 2. Generated. Generates and sets a cookie with an expiration (TTL) on the first request from the client in its response to the client, based on the endpoint the request gets sent to. The client then presents this on the next and all subsequent requests. The hash of this is sufficient to ensure these requests get sent to the same endpoint. The cookie is generated by hashing the source and destination ports and addresses so that multiple independent HTTP2 streams on the same connection will independently receive the same cookie, even if they arrive simultaneously.",
-		Description:         "Cookie for hashing Two types of cookie affinity: 1. Passive. Takes a cookie that's present in the cookies header and hashes on its value. 2. Generated. Generates and sets a cookie with an expiration (TTL) on the first request from the client in its response to the client, based on the endpoint the request gets sent to. The client then presents this on the next and all subsequent requests. The hash of this is sufficient to ensure these requests get sent to the same endpoint. The cookie is generated by hashing the source and destination ports and addresses so that multiple independent HTTP2 streams on the same connection will independently receive the same cookie, even if they arrive simultaneously.",
+		MarkdownDescription: "route object is used to configuring L7 routing decision. route is made of three things<br>1. Match condition for incoming request<br>2. Actions to take if match is true<br>3. Whether custom java script processing is enabled for this route match.",
+		Description:         "route object is used to configuring L7 routing decision. route is made of three things 1. Match condition for incoming request 2. Actions to take if match is true 3. Whether custom java script processing is enabled for this route match.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1946,8 +1951,15 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -2051,8 +2063,15 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -2334,8 +2353,15 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -2439,8 +2465,15 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -3337,7 +3370,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_route.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "route", err))
 		return
 	}
 
@@ -3399,10 +3432,10 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Routes
-	routesElementsSpectToModel := make([]RouteRouteRouteType, 0, len(specData.GetRoutes()))
+	routesElementsSpectToModel := make([]RouteRouteType, 0, len(specData.GetRoutes()))
 
 	for _, routesElement := range specData.GetRoutes() {
-		routeRouteRouteTypeModel := RouteRouteRouteType{}
+		routeRouteTypeModel := RouteRouteType{}
 
 		// data specToModelNested OneOfField --> BotDefenseJavascriptInjectionChoice
 		if routesElement.GetBotDefenseJavascriptInjectionChoice() != nil {
@@ -3443,25 +3476,25 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					if len(botDefenseJavascriptInjectionElement.GetJavascriptTags()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						javascriptTagsElements := make([]RouteRouteJavaScriptTag, 0, len(botDefenseJavascriptInjectionElement.GetJavascriptTags()))
+						javascriptTagsElements := make([]RouteJavaScriptTag, 0, len(botDefenseJavascriptInjectionElement.GetJavascriptTags()))
 						for _, javascriptTagsElement := range botDefenseJavascriptInjectionElement.GetJavascriptTags() {
-							routeRouteJavaScriptTagModel := RouteRouteJavaScriptTag{}
+							routeJavaScriptTagModel := RouteJavaScriptTag{}
 
 							// data specToModelNested RequiredStringField --> JavascriptUrl
 							if javascriptTagsElement.GetJavascriptUrl() != "" {
-								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringValue(javascriptTagsElement.GetJavascriptUrl())
+								routeJavaScriptTagModel.JavascriptUrl = types.StringValue(javascriptTagsElement.GetJavascriptUrl())
 							} else {
 								// Empty string, set to null
-								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringNull()
+								routeJavaScriptTagModel.JavascriptUrl = types.StringNull()
 							}
 
 							// data specToModelNested ArrayOfPointerField --> TagAttributes
 							if len(javascriptTagsElement.GetTagAttributes()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								tagAttributesElements := make([]RouteRouteTagAttribute, 0, len(javascriptTagsElement.GetTagAttributes()))
+								tagAttributesElements := make([]RouteTagAttr, 0, len(javascriptTagsElement.GetTagAttributes()))
 								for _, tagAttributesElement := range javascriptTagsElement.GetTagAttributes() {
-									routeRouteTagAttributeModel := RouteRouteTagAttribute{}
+									routeTagAttrModel := RouteTagAttr{}
 
 									// data specToModelNested EnumField --> JavascriptTag
 									if tagAttributesElement.GetJavascriptTag().String() != "" {
@@ -3472,20 +3505,20 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 										if response.Diagnostics.HasError() {
 											return
 										}
-										routeRouteTagAttributeModel.JavascriptTag = listValue
+										routeTagAttrModel.JavascriptTag = listValue
 									} else {
-										routeRouteTagAttributeModel.JavascriptTag = types.ListNull(types.StringType)
+										routeTagAttrModel.JavascriptTag = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested StringField --> TagValue
 									if tagAttributesElement.GetTagValue() != "" {
-										routeRouteTagAttributeModel.TagValue = types.StringValue(tagAttributesElement.GetTagValue())
+										routeTagAttrModel.TagValue = types.StringValue(tagAttributesElement.GetTagValue())
 									} else {
 										// Empty string, set to null
-										routeRouteTagAttributeModel.TagValue = types.StringNull()
+										routeTagAttrModel.TagValue = types.StringNull()
 									}
 
-									tagAttributesElements = append(tagAttributesElements, routeRouteTagAttributeModel)
+									tagAttributesElements = append(tagAttributesElements, routeTagAttrModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3494,16 +3527,16 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 								if response.Diagnostics.HasError() {
 									return
 								}
-								routeRouteJavaScriptTagModel.TagAttributes = tagAttributesListValue
+								routeJavaScriptTagModel.TagAttributes = tagAttributesListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								routeRouteJavaScriptTagModel.TagAttributes = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap})
+								routeJavaScriptTagModel.TagAttributes = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap})
 							}
 
-							javascriptTagsElements = append(javascriptTagsElements, routeRouteJavaScriptTagModel)
+							javascriptTagsElements = append(javascriptTagsElements, routeJavaScriptTagModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3554,14 +3587,14 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = finalObj
+			routeRouteTypeModel.BotDefenseJavascriptInjectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap)
+			routeRouteTypeModel.BotDefenseJavascriptInjectionChoice = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested BoolField --> DisableLocationAdd
-		routeRouteRouteTypeModel.DisableLocationAdd = types.BoolValue(bool(routesElement.GetDisableLocationAdd()))
+		routeRouteTypeModel.DisableLocationAdd = types.BoolValue(bool(routesElement.GetDisableLocationAdd()))
 
 		// data specToModelNested ArrayOfPointerField --> Match
 		if len(routesElement.GetMatch()) > 0 {
@@ -3857,16 +3890,16 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 				if len(matchElement.GetQueryParams()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					queryParamsElements := make([]RouteQueryParameterMatcherType, 0, len(matchElement.GetQueryParams()))
+					queryParamsElements := make([]RouteQueryParamMatcherType, 0, len(matchElement.GetQueryParams()))
 					for _, queryParamsElement := range matchElement.GetQueryParams() {
-						routeQueryParameterMatcherTypeModel := RouteQueryParameterMatcherType{}
+						routeQueryParamMatcherTypeModel := RouteQueryParamMatcherType{}
 
 						// data specToModelNested RequiredStringField --> Key
 						if queryParamsElement.GetKey() != "" {
-							routeQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+							routeQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 						} else {
 							// Empty string, set to null
-							routeQueryParameterMatcherTypeModel.Key = types.StringNull()
+							routeQueryParamMatcherTypeModel.Key = types.StringNull()
 						}
 
 						// data specToModelNested OneOfField --> ValueMatch
@@ -3913,13 +3946,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							routeQueryParameterMatcherTypeModel.ValueMatchChoice = finalObj
+							routeQueryParamMatcherTypeModel.ValueMatchChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							routeQueryParameterMatcherTypeModel.ValueMatchChoice = types.ObjectNull(RouteRoutesMatchQueryParamsValueMatchModelAttributeMap)
+							routeQueryParamMatcherTypeModel.ValueMatchChoice = types.ObjectNull(RouteRoutesMatchQueryParamsValueMatchModelAttributeMap)
 						}
 
-						queryParamsElements = append(queryParamsElements, routeQueryParameterMatcherTypeModel)
+						queryParamsElements = append(queryParamsElements, routeQueryParamMatcherTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3946,13 +3979,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.Match = matchListValue
+			routeRouteTypeModel.Match = matchListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.Match = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesMatchModelAttributeMap})
+			routeRouteTypeModel.Match = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesMatchModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfPointerField --> RequestCookiesToAdd
@@ -4090,6 +4123,15 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 									}
 								}
 
+								// data specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -4158,13 +4200,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestCookiesToAdd = requestCookiesToAddListValue
+			routeRouteTypeModel.RequestCookiesToAdd = requestCookiesToAddListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.RequestCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRequestCookiesToAddModelAttributeMap})
+			routeRouteTypeModel.RequestCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRequestCookiesToAddModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfStringField --> RequestCookiesToRemove
@@ -4174,9 +4216,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestCookiesToRemove = listValue
+			routeRouteTypeModel.RequestCookiesToRemove = listValue
 		} else {
-			routeRouteRouteTypeModel.RequestCookiesToRemove = types.ListNull(types.StringType)
+			routeRouteTypeModel.RequestCookiesToRemove = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> RequestHeadersToAdd
@@ -4314,6 +4356,15 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 									}
 								}
 
+								// data specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -4382,13 +4433,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
+			routeRouteTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRequestHeadersToAddModelAttributeMap})
+			routeRouteTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRequestHeadersToAddModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfStringField --> RequestHeadersToRemove
@@ -4398,9 +4449,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestHeadersToRemove = listValue
+			routeRouteTypeModel.RequestHeadersToRemove = listValue
 		} else {
-			routeRouteRouteTypeModel.RequestHeadersToRemove = types.ListNull(types.StringType)
+			routeRouteTypeModel.RequestHeadersToRemove = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> ResponseCookiesToAdd
@@ -4952,6 +5003,15 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 									}
 								}
 
+								// data specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -5020,13 +5080,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ResponseCookiesToAdd = responseCookiesToAddListValue
+			routeRouteTypeModel.ResponseCookiesToAdd = responseCookiesToAddListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.ResponseCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesResponseCookiesToAddModelAttributeMap})
+			routeRouteTypeModel.ResponseCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesResponseCookiesToAddModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfStringField --> ResponseCookiesToRemove
@@ -5036,9 +5096,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ResponseCookiesToRemove = listValue
+			routeRouteTypeModel.ResponseCookiesToRemove = listValue
 		} else {
-			routeRouteRouteTypeModel.ResponseCookiesToRemove = types.ListNull(types.StringType)
+			routeRouteTypeModel.ResponseCookiesToRemove = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> ResponseHeadersToAdd
@@ -5176,6 +5236,15 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 									}
 								}
 
+								// data specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -5244,13 +5313,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
+			routeRouteTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesResponseHeadersToAddModelAttributeMap})
+			routeRouteTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesResponseHeadersToAddModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfStringField --> ResponseHeadersToRemove
@@ -5260,9 +5329,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ResponseHeadersToRemove = listValue
+			routeRouteTypeModel.ResponseHeadersToRemove = listValue
 		} else {
-			routeRouteRouteTypeModel.ResponseHeadersToRemove = types.ListNull(types.StringType)
+			routeRouteTypeModel.ResponseHeadersToRemove = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredOneOfField --> RouteAction
@@ -5562,9 +5631,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					if len(routeDestinationElement.GetDestinations()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						destinationsElements := make([]RouteRouteRouteDestination, 0, len(routeDestinationElement.GetDestinations()))
+						destinationsElements := make([]RouteRouteRouteDest, 0, len(routeDestinationElement.GetDestinations()))
 						for _, destinationsElement := range routeDestinationElement.GetDestinations() {
-							routeRouteRouteDestinationModel := RouteRouteRouteDestination{}
+							routeRouteRouteDestModel := RouteRouteRouteDest{}
 
 							// data specToModelNested RequiredArrayOfPointerField --> Cluster
 							if len(destinationsElement.GetCluster()) > 0 {
@@ -5607,13 +5676,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 								if response.Diagnostics.HasError() {
 									return
 								}
-								routeRouteRouteDestinationModel.Cluster = clusterListValue
+								routeRouteRouteDestModel.Cluster = clusterListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								routeRouteRouteDestinationModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
+								routeRouteRouteDestModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
 							}
 
 							// data specToModelNested MapOfStringField --> EndpointSubsets
@@ -5625,22 +5694,22 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 									return
 								}
 								// Assign the typed map to the model
-								routeRouteRouteDestinationModel.EndpointSubsets = endpointSubsetsMap
+								routeRouteRouteDestModel.EndpointSubsets = endpointSubsetsMap
 							} else {
 								// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 								// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 								// API returned nil (Protobuf omits empty maps). Set to null.
 								// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-								routeRouteRouteDestinationModel.EndpointSubsets = types.MapNull(types.StringType)
+								routeRouteRouteDestModel.EndpointSubsets = types.MapNull(types.StringType)
 							}
 
 							// data specToModelNested UintField --> Priority
-							routeRouteRouteDestinationModel.Priority = types.Int64Value(int64(destinationsElement.GetPriority()))
+							routeRouteRouteDestModel.Priority = types.Int64Value(int64(destinationsElement.GetPriority()))
 
 							// data specToModelNested UintField --> Weight
-							routeRouteRouteDestinationModel.Weight = types.Int64Value(int64(destinationsElement.GetWeight()))
+							routeRouteRouteDestModel.Weight = types.Int64Value(int64(destinationsElement.GetWeight()))
 
-							destinationsElements = append(destinationsElements, routeRouteRouteDestinationModel)
+							destinationsElements = append(destinationsElements, routeRouteRouteDestModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5680,9 +5749,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					if len(routeDestinationElement.GetHashPolicy()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						hashPolicyElements := make([]RouteRouteHashPolicyType, 0, len(routeDestinationElement.GetHashPolicy()))
+						hashPolicyElements := make([]RouteHashPolicyType, 0, len(routeDestinationElement.GetHashPolicy()))
 						for _, hashPolicyElement := range routeDestinationElement.GetHashPolicy() {
-							routeRouteHashPolicyTypeModel := RouteRouteHashPolicyType{}
+							routeHashPolicyTypeModel := RouteHashPolicyType{}
 
 							// data specToModelNested RequiredOneOfField --> PolicySpecifier
 							// <no value>
@@ -5930,16 +5999,16 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = finalObj
+								routeHashPolicyTypeModel.PolicySpecifierChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap)
+								routeHashPolicyTypeModel.PolicySpecifierChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap)
 							}
 
 							// data specToModelNested BoolField --> Terminal
-							routeRouteHashPolicyTypeModel.Terminal = types.BoolValue(bool(hashPolicyElement.GetTerminal()))
+							routeHashPolicyTypeModel.Terminal = types.BoolValue(bool(hashPolicyElement.GetTerminal()))
 
-							hashPolicyElements = append(hashPolicyElements, routeRouteHashPolicyTypeModel)
+							hashPolicyElements = append(hashPolicyElements, routeHashPolicyTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6010,7 +6079,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					// data specToModelNested PointerField --> MirrorPolicy
 					if routeDestinationElement.GetMirrorPolicy() != nil {
 						// Create the nested Go struct
-						routeRouteMirrorPolicyTypeModel := &RouteRouteMirrorPolicyType{}
+						routeMirrorPolicyTypeModel := &RouteMirrorPolicyType{}
 						mirrorPolicyElement := routeDestinationElement.GetMirrorPolicy()
 
 						// Recursively populate the nested struct
@@ -6056,13 +6125,13 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							if response.Diagnostics.HasError() {
 								return
 							}
-							routeRouteMirrorPolicyTypeModel.Cluster = clusterListValue
+							routeMirrorPolicyTypeModel.Cluster = clusterListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							routeRouteMirrorPolicyTypeModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
+							routeMirrorPolicyTypeModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
 						}
 
 						// data specToModelNested PointerField --> Percent
@@ -6096,7 +6165,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							if response.Diagnostics.HasError() {
 								return
 							}
-							routeRouteMirrorPolicyTypeModel.Percent = routeFractionalPercentModelObj
+							routeMirrorPolicyTypeModel.Percent = routeFractionalPercentModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -6105,16 +6174,16 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							routeRouteMirrorPolicyTypeModel.Percent = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap)
+							routeMirrorPolicyTypeModel.Percent = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteMirrorPolicyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap, routeRouteMirrorPolicyTypeModel)
+						routeMirrorPolicyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap, routeMirrorPolicyTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						routeDestinationAttributeMap["mirror_policy"] = routeRouteMirrorPolicyTypeModelObj
+						routeDestinationAttributeMap["mirror_policy"] = routeMirrorPolicyTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -6143,7 +6212,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					// data specToModelNested PointerField --> QueryParams
 					if routeDestinationElement.GetQueryParams() != nil {
 						// Create the nested Go struct
-						routeRouteQueryParamsSimpleRouteModel := &RouteRouteQueryParamsSimpleRoute{}
+						routeQueryParamsSimpleRouteModel := &RouteQueryParamsSimpleRoute{}
 						queryParamsElement := routeDestinationElement.GetQueryParams()
 
 						// Recursively populate the nested struct
@@ -6201,19 +6270,19 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = finalObj
+							routeQueryParamsSimpleRouteModel.QueryParamsChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap)
+							routeQueryParamsSimpleRouteModel.QueryParamsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteQueryParamsSimpleRouteModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap, routeRouteQueryParamsSimpleRouteModel)
+						routeQueryParamsSimpleRouteModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap, routeQueryParamsSimpleRouteModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						routeDestinationAttributeMap["query_params"] = routeRouteQueryParamsSimpleRouteModelObj
+						routeDestinationAttributeMap["query_params"] = routeQueryParamsSimpleRouteModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -6394,21 +6463,21 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					// data specToModelNested PointerField --> SpdyConfig
 					if routeDestinationElement.GetSpdyConfig() != nil {
 						// Create the nested Go struct
-						routeRouteSpdyConfigTypeModel := &RouteRouteSpdyConfigType{}
+						routeSpdyConfigTypeModel := &RouteSpdyConfigType{}
 						spdyConfigElement := routeDestinationElement.GetSpdyConfig()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested BoolField --> UseSpdy
-						routeRouteSpdyConfigTypeModel.UseSpdy = types.BoolValue(bool(spdyConfigElement.GetUseSpdy()))
+						routeSpdyConfigTypeModel.UseSpdy = types.BoolValue(bool(spdyConfigElement.GetUseSpdy()))
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteSpdyConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap, routeRouteSpdyConfigTypeModel)
+						routeSpdyConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap, routeSpdyConfigTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						routeDestinationAttributeMap["spdy_config"] = routeRouteSpdyConfigTypeModelObj
+						routeDestinationAttributeMap["spdy_config"] = routeSpdyConfigTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -6426,21 +6495,21 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					// data specToModelNested PointerField --> WebSocketConfig
 					if routeDestinationElement.GetWebSocketConfig() != nil {
 						// Create the nested Go struct
-						routeRouteWebsocketConfigTypeModel := &RouteRouteWebsocketConfigType{}
+						routeWebsocketConfigTypeModel := &RouteWebsocketConfigType{}
 						webSocketConfigElement := routeDestinationElement.GetWebSocketConfig()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested BoolField --> UseWebsocket
-						routeRouteWebsocketConfigTypeModel.UseWebsocket = types.BoolValue(bool(webSocketConfigElement.GetUseWebsocket()))
+						routeWebsocketConfigTypeModel.UseWebsocket = types.BoolValue(bool(webSocketConfigElement.GetUseWebsocket()))
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteWebsocketConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap, routeRouteWebsocketConfigTypeModel)
+						routeWebsocketConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap, routeWebsocketConfigTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						routeDestinationAttributeMap["web_socket_config"] = routeRouteWebsocketConfigTypeModelObj
+						routeDestinationAttributeMap["web_socket_config"] = routeWebsocketConfigTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -6656,16 +6725,16 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			routeRouteRouteTypeModel.RouteActionChoice = finalObj
+			routeRouteTypeModel.RouteActionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			routeRouteRouteTypeModel.RouteActionChoice = types.ObjectNull(RouteRoutesRouteActionModelAttributeMap)
+			routeRouteTypeModel.RouteActionChoice = types.ObjectNull(RouteRoutesRouteActionModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> ServicePolicy
 		if routesElement.GetServicePolicy() != nil {
 			// Create the nested Go struct
-			routeRouteServicePolicyInfoModel := &RouteRouteServicePolicyInfo{}
+			routeSvcPolicyInfoModel := &RouteSvcPolicyInfo{}
 			servicePolicyElement := routesElement.GetServicePolicy()
 
 			// Recursively populate the nested struct
@@ -6703,19 +6772,19 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				routeRouteServicePolicyInfoModel.ServicePolicyChoice = finalObj
+				routeSvcPolicyInfoModel.ServicePolicyChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				routeRouteServicePolicyInfoModel.ServicePolicyChoice = types.ObjectNull(RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap)
+				routeSvcPolicyInfoModel.ServicePolicyChoice = types.ObjectNull(RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			routeRouteServicePolicyInfoModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesServicePolicyModelAttributeMap, routeRouteServicePolicyInfoModel)
+			routeSvcPolicyInfoModelObj, objDiags := types.ObjectValueFrom(ctx, RouteRoutesServicePolicyModelAttributeMap, routeSvcPolicyInfoModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ServicePolicy = routeRouteServicePolicyInfoModelObj
+			routeRouteTypeModel.ServicePolicy = routeSvcPolicyInfoModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -6724,7 +6793,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			routeRouteRouteTypeModel.ServicePolicy = types.ObjectNull(RouteRoutesServicePolicyModelAttributeMap)
+			routeRouteTypeModel.ServicePolicy = types.ObjectNull(RouteRoutesServicePolicyModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> WafExclusionChoice
@@ -6804,10 +6873,10 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			routeRouteRouteTypeModel.WafExclusionChoice = finalObj
+			routeRouteTypeModel.WafExclusionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			routeRouteRouteTypeModel.WafExclusionChoice = types.ObjectNull(RouteRoutesWafExclusionChoiceModelAttributeMap)
+			routeRouteTypeModel.WafExclusionChoice = types.ObjectNull(RouteRoutesWafExclusionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> WafType
@@ -6944,7 +7013,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.WafType = routeWafTypeModelObj
+			routeRouteTypeModel.WafType = routeWafTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -6953,10 +7022,10 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			routeRouteRouteTypeModel.WafType = types.ObjectNull(RouteRoutesWafTypeModelAttributeMap)
+			routeRouteTypeModel.WafType = types.ObjectNull(RouteRoutesWafTypeModelAttributeMap)
 		}
 
-		routesElementsSpectToModel = append(routesElementsSpectToModel, routeRouteRouteTypeModel)
+		routesElementsSpectToModel = append(routesElementsSpectToModel, routeRouteTypeModel)
 	}
 
 	{

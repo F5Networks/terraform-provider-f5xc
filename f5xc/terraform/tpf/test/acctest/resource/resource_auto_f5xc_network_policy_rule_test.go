@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withDescription(name, namespace, "network policy rule basic updated"),
+				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withDescription(name, namespace, "Updated basic network policy rule example"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withActionTransition(t *testing.T)
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withActionTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withAction(name, namespace, "DENY"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withAction(name, namespace, "ALLOW"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withProtocolTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withProtocolTransition(t *testing.
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withProtocol(name, namespace, "TCP"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withProtocol(name, namespace, "UDP"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withRemoteEndpointPrefixTransition
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withRemoteEndpointPrefixTransition
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixEndpoint(name, namespace, []string{"10.10.0.0/16"}, nil),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixEndpoint(name, namespace, []string{"10.20.0.0/16", "10.30.0.0/16"}, nil),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withRemoteEndpointPrefixSelectorTr
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +179,20 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_withRemoteEndpointPrefixSelectorTr
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixSelector(name, namespace, "app == web", []string{"app"}),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixSelector(name, namespace, "site in (abc,xyz)", []string{"site"}),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,35 +203,39 @@ func TestAccResourceAutoF5XCNetworkPolicyRule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-network-policy-rule-" + testAccRunSuffix(t)
+	name := "example-network-policy-rule-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_full(name, namespace, "test", "platform", "owner-a", "ALLOW", "TCP", "LOG"),
+				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_full(name, namespace, "example", "platform", "example-owner", "ALLOW", "TCP", "LOG"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_full(name, namespace, "prod", "security", "owner-b", "DENY", "ICMP", "NOLOG"),
+				Config: testAccResourceAutoF5XCNetworkPolicyRuleConfig_full(name, namespace, "example", "security", "example-owner-alt", "DENY", "ICMP", "NOLOG"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_rule.test",
+				ResourceName:                         "f5xc_network_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkPolicyRuleConfig_full("example-network-policy-rule", namespace, "example", "platform", "example-owner", "ALLOW", "TCP", "LOG"),
+		})
 }
 
 func testAccCheckNetworkPolicyRuleDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,7 +244,7 @@ func testAccCheckNetworkPolicyRuleDestroyProducer(t *testing.T) func(*terraform.
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
 }
@@ -249,7 +253,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -259,7 +263,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_withAction(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
   action    = [%q]
@@ -269,7 +273,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_withProtocol(name, namespace, protocol string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
   protocol  = %q
@@ -280,7 +284,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixEndpoint(name, namespace string, ipv4Prefixes []string, ipv6Prefixes []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -296,7 +300,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_withPrefixSelector(name, namespace, expression string, keys []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -315,7 +319,7 @@ resource "f5xc_network_policy_rule" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyRuleConfig_full(name, namespace, env, team, owner, action, protocol, logAction string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_rule" "test" {
+resource "f5xc_network_policy_rule" "example" {
   name      = %q
   namespace = %q
 

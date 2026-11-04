@@ -29,9 +29,9 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-tcp-lb-" + acctest.RandString(t, 8)
+	name := "example-tcp-lb-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckTcpLoadbalancerDestroyProducer(t),
@@ -40,33 +40,38 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCTcpLoadbalancerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTcpLoadbalancerConfig_full(name, namespace, "service_policies_from_namespace = true"),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCTcpLoadbalancerConfig_full(name, namespace, "service_policies_from_namespace = true"),
+		},
+	)
 }
 
 func TestAccResourceAutoF5XCTcpLoadbalancer_withSniRandomAndRetractTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-tcp-lb-" + acctest.RandString(t, 8)
+	name := "example-tcp-lb-" + testAccRunSuffix(t)
 	listenPort := testAccTcpLoadbalancerListenPort(name, 20)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -89,11 +94,11 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withSniRandomAndRetractTransition(t 
 				),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
@@ -111,11 +116,11 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withSniRandomAndRetractTransition(t 
 				),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -126,7 +131,7 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withTlsTcpAutoCert(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-tcp-lb-" + acctest.RandString(t, 8)
+	name := "example-tcp-lb-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -137,11 +142,11 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withTlsTcpAutoCert(t *testing.T) {
 				Config: testAccResourceAutoF5XCTcpLoadbalancerConfig_withTlsTcpAutoCert(name, namespace, "no_mtls = true"),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnoreAutoCert(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -152,9 +157,9 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withAdvertiseHashAndServicePolicyTra
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-tcp-lb-" + acctest.RandString(t, 8)
+	name := "example-tcp-lb-" + testAccRunSuffix(t)
 	createPort := testAccTcpLoadbalancerListenPort(name, 40)
-	updatePort := testAccTcpLoadbalancerListenPort(name, 41)
+	updatePort := 8443
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -176,11 +181,11 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withAdvertiseHashAndServicePolicyTra
 				),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
@@ -188,7 +193,7 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withAdvertiseHashAndServicePolicyTra
 					name,
 					namespace,
 					fmt.Sprintf("listen_port = %d", updatePort),
-					"no_sni = true",
+					"sni = true",
 					"advertise_on_public_default_vip = true",
 					"hash_policy_choice_source_ip_stickiness = true",
 					"no_service_policies = true",
@@ -198,11 +203,11 @@ func TestAccResourceAutoF5XCTcpLoadbalancer_withAdvertiseHashAndServicePolicyTra
 				),
 			},
 			{
-				ResourceName:                         "f5xc_tcp_loadbalancer.test",
+				ResourceName:                         "f5xc_tcp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccTcpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_tcp_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -214,7 +219,7 @@ func testAccResourceAutoF5XCTcpLoadbalancerConfig_withTlsTcpAutoCert(name, names
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	return fmt.Sprintf(`
-resource "f5xc_origin_pool" "test" {
+resource "f5xc_origin_pool" "example" {
   name                   = %q
   namespace              = %q
   loadbalancer_algorithm = ["ROUND_ROBIN"]
@@ -237,9 +242,15 @@ resource "f5xc_origin_pool" "test" {
   tls_choice = {
     no_tls = true
   }
+
+  upstream_conn_pool_reuse_type = {
+    map_downstream_to_upstream_conn_pool_type_choice = {
+      disable_conn_pool_reuse = true
+    }
+  }
 }
 
-resource "f5xc_tcp_loadbalancer" "test" {
+resource "f5xc_tcp_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -248,8 +259,8 @@ resource "f5xc_tcp_loadbalancer" "test" {
     {
       pool_choice = {
         pool = {
-          name      = f5xc_origin_pool.test.name
-          namespace = f5xc_origin_pool.test.namespace
+          name      = f5xc_origin_pool.example.name
+          namespace = f5xc_origin_pool.example.namespace
         }
       }
     }
@@ -301,6 +312,8 @@ func testAccCheckTcpLoadbalancerDestroyProducer(t *testing.T) func(*terraform.St
 
 func testAccTcpLoadbalancerImportStateVerifyIgnore() []string {
 	return []string{
+		"labels.%",
+		"labels.ves.io/config-propagation-destination",
 		"host_name",
 		"dns_info",
 		// "dns_info.#",
@@ -344,14 +357,14 @@ func testAccResourceAutoF5XCTcpLoadbalancerConfig_full(name, namespace, serviceP
 		namespace,
 		fmt.Sprintf("port_ranges = %q", fmt.Sprintf("%d,%d", portRangeStart, portRangeEnd)),
 		"default_lb_with_sni = true",
-		"advertise_on_public_default_vip = true",
+		"do_not_advertise = true",
 		"hash_policy_choice_least_active = true",
 		servicePolicyChoice,
 		fmt.Sprintf("%q, %q", domain, altDomain),
 		"retract_cluster = true",
 		`description = "acceptance test tcp loadbalancer"
   labels = {
-    env  = "test"
+    env  = "example"
     team = "edge"
   }
   annotations = {
@@ -361,11 +374,9 @@ func testAccResourceAutoF5XCTcpLoadbalancerConfig_full(name, namespace, serviceP
 	)
 }
 
-func testAccResourceAutoF5XCTcpLoadbalancerConfig_withChoices(name, namespace, portChoice, sniChoice, advertiseChoice, hashChoice, servicePolicyChoice, domains, clusterRetractChoice, extra string) string {
-	originPoolName := fmt.Sprintf("%s-op", name)
-
+func testAccResourceAutoF5XCTcpLoadbalancerOriginPoolConfig(originPoolName, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_origin_pool" "test" {
+resource "f5xc_origin_pool" "example" {
   name                   = %q
   namespace              = %q
   loadbalancer_algorithm = ["ROUND_ROBIN"]
@@ -388,9 +399,23 @@ resource "f5xc_origin_pool" "test" {
   tls_choice = {
     no_tls = true
   }
+
+  upstream_conn_pool_reuse_type = {
+    map_downstream_to_upstream_conn_pool_type_choice = {
+      disable_conn_pool_reuse = true
+    }
+  }
 }
 
-resource "f5xc_tcp_loadbalancer" "test" {
+`, originPoolName, namespace)
+}
+
+func testAccResourceAutoF5XCTcpLoadbalancerConfig_withChoices(name, namespace, portChoice, sniChoice, advertiseChoice, hashChoice, servicePolicyChoice, domains, clusterRetractChoice, extra string) string {
+	originPoolName := fmt.Sprintf("%s-op", name)
+
+	return testAccResourceAutoF5XCTcpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
+
+resource "f5xc_tcp_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%s]
@@ -399,8 +424,8 @@ resource "f5xc_tcp_loadbalancer" "test" {
     {
       pool_choice = {
         pool = {
-          name      = f5xc_origin_pool.test.name
-          namespace = f5xc_origin_pool.test.namespace
+          name      = f5xc_origin_pool.example.name
+          namespace = f5xc_origin_pool.example.namespace
         }
       }
     }
@@ -436,7 +461,7 @@ resource "f5xc_tcp_loadbalancer" "test" {
 
   %s
 }
-`, originPoolName, namespace, name, namespace, domains, portChoice, sniChoice, advertiseChoice, hashChoice, clusterRetractChoice, servicePolicyChoice, extra)
+`, name, namespace, domains, portChoice, sniChoice, advertiseChoice, hashChoice, clusterRetractChoice, servicePolicyChoice, extra)
 }
 
 func testAccTcpLoadbalancerListenPort(name string, offset int) int {

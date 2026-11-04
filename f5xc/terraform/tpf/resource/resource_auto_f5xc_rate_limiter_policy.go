@@ -20,7 +20,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -36,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -47,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	ves_io_schema_service_policy_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/service_policy_rule"
@@ -108,7 +109,6 @@ type RateLimiterPolicyCountryChoice struct {
 
 type RateLimiterPolicyCountryList struct {
 	CountryCodes types.List `tfsdk:"country_codes"`
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
 }
 
 type RateLimiterPolicyMatcherTypeBasic struct {
@@ -167,18 +167,7 @@ type RateLimiterPolicyPathMatcherType struct {
 }
 
 type RateLimiterPolicySegmentPolicyType struct {
-	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
-}
-
-type RateLimiterPolicyDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-}
-
-type RateLimiterPolicyDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
 }
 
 type RateLimiterPolicySrcSegmentChoice struct {
@@ -278,9 +267,6 @@ var RateLimiterPolicyRulesModelAttributeMap = map[string]attr.Type{
 					}},
 			}, "segment_policy": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					"dst_segment_choice": types.ObjectType{
-						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-					},
 					"src_segment_choice": types.ObjectType{
 						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 					}},
@@ -356,9 +342,6 @@ var RateLimiterPolicyRulesSpecModelAttributeMap = map[string]attr.Type{
 			}},
 	}, "segment_policy": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"dst_segment_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-			},
 			"src_segment_choice": types.ObjectType{
 				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 			}},
@@ -441,7 +424,6 @@ var RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap = map[st
 	"country_codes": types.ListType{
 		ElemType: types.StringType,
 	},
-	"invert_match": types.BoolType,
 }
 
 // Attribute map for PointerField --> DomainMatcher
@@ -571,45 +553,9 @@ var RateLimiterPolicyRulesSpecPathModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerField --> SegmentPolicy
 var RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap = map[string]attr.Type{
 
-	"dst_segment_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-	},
 	"src_segment_choice": types.ObjectType{
 		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
-	},
-	"intra_segment": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"namespace": types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var RateLimiterPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> SrcSegmentChoice
@@ -636,6 +582,14 @@ var RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttri
 	},
 }
 
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var RateLimiterPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
 func NewResourceF5XCRateLimiterPolicy() resource.Resource {
 	return &ResourceF5XCRateLimiterPolicy{}
 }
@@ -647,8 +601,8 @@ func (r *ResourceF5XCRateLimiterPolicy) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a rate_limiter_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a rate_limiter_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter_policy) etc. can be fetched",
+		MarkdownDescription: "Rate limiter policy defines parameters that can be used for fine-grained control over requests for a http load balancer that are subjected to rate limiting.<br><br>It will create the following child objects.<br><br>* service_policy<br>* service_policy_rule",
+		Description:         "Rate limiter policy defines parameters that can be used for fine-grained control over requests for a http load balancer that are subjected to rate limiting. It will create the following child objects. service_policy service_policy_rule",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -704,8 +658,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.NoneOf([]string{"system"}...),
-					stringvalidator.OneOf([]string{"shared", "user"}...),
+					namespacetypevalidator.AllowedIn("shared", "user"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -831,7 +784,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -922,7 +875,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -971,15 +924,9 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 													Computed:            false,
 													Validators: []validator.List{
 														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"COUNTRY_AD", "COUNTRY_AE", "COUNTRY_AF", "COUNTRY_AG", "COUNTRY_AI", "COUNTRY_AL", "COUNTRY_AM", "COUNTRY_AN", "COUNTRY_AO", "COUNTRY_AQ", "COUNTRY_AR", "COUNTRY_AS", "COUNTRY_AT", "COUNTRY_AU", "COUNTRY_AW", "COUNTRY_AX", "COUNTRY_AZ", "COUNTRY_BA", "COUNTRY_BB", "COUNTRY_BD", "COUNTRY_BE", "COUNTRY_BF", "COUNTRY_BG", "COUNTRY_BH", "COUNTRY_BI", "COUNTRY_BJ", "COUNTRY_BL", "COUNTRY_BM", "COUNTRY_BN", "COUNTRY_BO", "COUNTRY_BQ", "COUNTRY_BR", "COUNTRY_BS", "COUNTRY_BT", "COUNTRY_BV", "COUNTRY_BW", "COUNTRY_BY", "COUNTRY_BZ", "COUNTRY_CA", "COUNTRY_CC", "COUNTRY_CD", "COUNTRY_CF", "COUNTRY_CG", "COUNTRY_CH", "COUNTRY_CI", "COUNTRY_CK", "COUNTRY_CL", "COUNTRY_CM", "COUNTRY_CN", "COUNTRY_CO", "COUNTRY_CR", "COUNTRY_CS", "COUNTRY_CU", "COUNTRY_CV", "COUNTRY_CW", "COUNTRY_CX", "COUNTRY_CY", "COUNTRY_CZ", "COUNTRY_DE", "COUNTRY_DJ", "COUNTRY_DK", "COUNTRY_DM", "COUNTRY_DO", "COUNTRY_DZ", "COUNTRY_EC", "COUNTRY_EE", "COUNTRY_EG", "COUNTRY_EH", "COUNTRY_ER", "COUNTRY_ES", "COUNTRY_ET", "COUNTRY_FI", "COUNTRY_FJ", "COUNTRY_FK", "COUNTRY_FM", "COUNTRY_FO", "COUNTRY_FR", "COUNTRY_GA", "COUNTRY_GB", "COUNTRY_GD", "COUNTRY_GE", "COUNTRY_GF", "COUNTRY_GG", "COUNTRY_GH", "COUNTRY_GI", "COUNTRY_GL", "COUNTRY_GM", "COUNTRY_GN", "COUNTRY_GP", "COUNTRY_GQ", "COUNTRY_GR", "COUNTRY_GS", "COUNTRY_GT", "COUNTRY_GU", "COUNTRY_GW", "COUNTRY_GY", "COUNTRY_HK", "COUNTRY_HM", "COUNTRY_HN", "COUNTRY_HR", "COUNTRY_HT", "COUNTRY_HU", "COUNTRY_ID", "COUNTRY_IE", "COUNTRY_IL", "COUNTRY_IM", "COUNTRY_IN", "COUNTRY_IO", "COUNTRY_IQ", "COUNTRY_IR", "COUNTRY_IS", "COUNTRY_IT", "COUNTRY_JE", "COUNTRY_JM", "COUNTRY_JO", "COUNTRY_JP", "COUNTRY_KE", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_KI", "COUNTRY_KM", "COUNTRY_KN", "COUNTRY_KP", "COUNTRY_KR", "COUNTRY_KW", "COUNTRY_KY", "COUNTRY_KZ", "COUNTRY_LA", "COUNTRY_LB", "COUNTRY_LC", "COUNTRY_LI", "COUNTRY_LK", "COUNTRY_LR", "COUNTRY_LS", "COUNTRY_LT", "COUNTRY_LU", "COUNTRY_LV", "COUNTRY_LY", "COUNTRY_MA", "COUNTRY_MC", "COUNTRY_MD", "COUNTRY_ME", "COUNTRY_MF", "COUNTRY_MG", "COUNTRY_MH", "COUNTRY_MK", "COUNTRY_ML", "COUNTRY_MM", "COUNTRY_MN", "COUNTRY_MO", "COUNTRY_MP", "COUNTRY_MQ", "COUNTRY_MR", "COUNTRY_MS", "COUNTRY_MT", "COUNTRY_MU", "COUNTRY_MV", "COUNTRY_MW", "COUNTRY_MX", "COUNTRY_MY", "COUNTRY_MZ", "COUNTRY_NA", "COUNTRY_NC", "COUNTRY_NE", "COUNTRY_NF", "COUNTRY_NG", "COUNTRY_NI", "COUNTRY_NL", "COUNTRY_NO", "COUNTRY_NONE", "COUNTRY_NP", "COUNTRY_NR", "COUNTRY_NU", "COUNTRY_NZ", "COUNTRY_OM", "COUNTRY_PA", "COUNTRY_PE", "COUNTRY_PF", "COUNTRY_PG", "COUNTRY_PH", "COUNTRY_PK", "COUNTRY_PL", "COUNTRY_PM", "COUNTRY_PN", "COUNTRY_PR", "COUNTRY_PS", "COUNTRY_PT", "COUNTRY_PW", "COUNTRY_PY", "COUNTRY_QA", "COUNTRY_RE", "COUNTRY_RO", "COUNTRY_RS", "COUNTRY_RU", "COUNTRY_RW", "COUNTRY_SA", "COUNTRY_SB", "COUNTRY_SC", "COUNTRY_SD", "COUNTRY_SE", "COUNTRY_SG", "COUNTRY_SH", "COUNTRY_SI", "COUNTRY_SJ", "COUNTRY_SK", "COUNTRY_SL", "COUNTRY_SM", "COUNTRY_SN", "COUNTRY_SO", "COUNTRY_SR", "COUNTRY_SS", "COUNTRY_ST", "COUNTRY_SV", "COUNTRY_SX", "COUNTRY_SY", "COUNTRY_SZ", "COUNTRY_TC", "COUNTRY_TD", "COUNTRY_TF", "COUNTRY_TG", "COUNTRY_TH", "COUNTRY_TJ", "COUNTRY_TK", "COUNTRY_TL", "COUNTRY_TM", "COUNTRY_TN", "COUNTRY_TO", "COUNTRY_TR", "COUNTRY_TT", "COUNTRY_TV", "COUNTRY_TW", "COUNTRY_TZ", "COUNTRY_UA", "COUNTRY_UG", "COUNTRY_UM", "COUNTRY_US", "COUNTRY_UY", "COUNTRY_UZ", "COUNTRY_VA", "COUNTRY_VC", "COUNTRY_VE", "COUNTRY_VG", "COUNTRY_VI", "COUNTRY_VN", "COUNTRY_VU", "COUNTRY_WF", "COUNTRY_WS", "COUNTRY_XK", "COUNTRY_XT", "COUNTRY_YE", "COUNTRY_YT", "COUNTRY_ZA", "COUNTRY_ZM", "COUNTRY_ZW"}...)),
+														listvalidator.SizeBetween(1, 64),
+														listvalidator.UniqueValues(),
 													},
-												},
-												"invert_match": schema.BoolAttribute{
-													Description:         "invert_matcher Invert the match result.",
-													MarkdownDescription: "invert_matcher Invert the match result.<br>**Default:** `false`",
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Default:             booldefault.StaticBool(false),
 												},
 											},
 										},
@@ -1113,14 +1060,15 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 															},
 															"transformers": schema.ListAttribute{
 																Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+																MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 																ElementType:         types.StringType,
 																Required:            false,
 																Optional:            true,
-																Computed:            true,
-																Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+																Computed:            false,
 																Validators: []validator.List{
 																	listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+																	listvalidator.SizeAtMost(9),
+																	listvalidator.UniqueValues(),
 																},
 															},
 														},
@@ -1161,14 +1109,15 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"methods": schema.ListAttribute{
 											Description:         "methods List of methods values to match against.",
-											MarkdownDescription: "methods List of methods values to match against.<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)<br>**Default:** `ANY`",
+											MarkdownDescription: "methods List of methods values to match against.<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ANY")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+												listvalidator.SizeAtMost(16),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -1244,7 +1193,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -1294,7 +1243,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 													Validators: []validator.List{
 														listvalidator.SizeAtMost(128),
 														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+															regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 															"must be a valid IPv6 prefix",
 														)),
 														listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
@@ -1394,14 +1343,15 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -1413,86 +1363,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
-										"dst_segment_choice": schema.SingleNestedAttribute{
-											Description:         "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-											MarkdownDescription: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.Object{
-												exactlyoneofvalidator.ExactlyOneOf(
-													"dst_any",
-													"dst_segments",
-													"intra_segment",
-												),
-											},
-											Attributes: map[string]schema.Attribute{
-												"dst_any": schema.BoolAttribute{
-													Description:         "Any segment Traffic is not matched against any segment",
-													MarkdownDescription: "Any segment Traffic is not matched against any segment",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.Bool{
-														boolvalidator.Equals(true),
-													},
-												},
-												"dst_segments": schema.SingleNestedAttribute{
-													Description:         "List of segments Traffic is matched against destination segment in selected segments",
-													MarkdownDescription: "List of segments Traffic is matched against destination segment in selected segments",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"segments": schema.ListNestedAttribute{
-															Description:         "Segments Select list of segments",
-															MarkdownDescription: "Segments Select list of segments",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-															NestedObject: schema.NestedAttributeObject{
-																Attributes: map[string]schema.Attribute{
-																	"name": schema.StringAttribute{
-																		Description:         "",
-																		MarkdownDescription: "",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
-																	},
-																	"namespace": schema.StringAttribute{
-																		Description:         "",
-																		MarkdownDescription: "",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
-																	},
-																	"tenant": schema.StringAttribute{
-																		Description:         "",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            false,
-																		Computed:            true,
-																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-												"intra_segment": schema.BoolAttribute{
-													Description:         "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-													MarkdownDescription: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.Bool{
-														boolvalidator.Equals(true),
-													},
-												},
-											},
-										},
 										"src_segment_choice": schema.SingleNestedAttribute{
 											Description:         "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
 											MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
@@ -1552,7 +1422,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1631,9 +1501,17 @@ func (r *ResourceF5XCRateLimiterPolicy) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCRateLimiterPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1944,13 +1822,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 								}
 							}
 							countryListOneOfSpec.CountryList.CountryCodes = countryCodesSpec
-
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !rateLimiterPolicyCountryListModel.InvertMatch.IsNull() && !rateLimiterPolicyCountryListModel.InvertMatch.IsUnknown() {
-								countryListOneOfSpec.CountryList.InvertMatch = bool(rateLimiterPolicyCountryListModel.InvertMatch.ValueBool())
-							} else {
-								countryListOneOfSpec.CountryList.InvertMatch = bool(false)
-							}
 
 						}
 
@@ -2392,77 +2263,10 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 						}
 
 						segmentPolicySpec := &ves_io_schema_policy.SegmentPolicyType{}
-						specSpec.SegmentPolicy = segmentPolicySpec
-
-						// resource modelToSpecNested OneOfField --> DstSegmentChoice
-						if !segmentPolicyModel.DstSegmentChoice.IsNull() && !segmentPolicyModel.DstSegmentChoice.IsUnknown() {
-							segmentPolicyDstSegmentChoiceModel := RateLimiterPolicyDstSegmentChoice{}
-							response.Diagnostics.Append(segmentPolicyModel.DstSegmentChoice.As(ctx, &segmentPolicyDstSegmentChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> DstAny
-							if !segmentPolicyDstSegmentChoiceModel.DstAny.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstAny.IsUnknown() {
-								dstAnySpecBool := &ves_io_schema_policy.SegmentPolicyType_DstAny{}
-								dstAnySpecBool.DstAny = &ves_io_schema.Empty{}
-								segmentPolicySpec.DstSegmentChoice = dstAnySpecBool
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> DstSegments
-							if !segmentPolicyDstSegmentChoiceModel.DstSegments.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstSegments.IsUnknown() {
-								var rateLimiterPolicyDstSegmentsModel RateLimiterPolicyDstSegments
-								response.Diagnostics.Append(segmentPolicyDstSegmentChoiceModel.DstSegments.As(ctx, &rateLimiterPolicyDstSegmentsModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								dstSegmentsOneOfSpec := &ves_io_schema_policy.SegmentPolicyType_DstSegments{}
-								dstSegmentsOneOfSpec.DstSegments = &ves_io_schema_views.SegmentRefList{}
-								segmentPolicySpec.DstSegmentChoice = dstSegmentsOneOfSpec
-
-								// resource modelToSpecNested RequiredArrayOfPointerField --> Segments
-								if !rateLimiterPolicyDstSegmentsModel.Segments.IsNull() && !rateLimiterPolicyDstSegmentsModel.Segments.IsUnknown() && len(rateLimiterPolicyDstSegmentsModel.Segments.Elements()) > 0 {
-									// 1. Convert the types.List into a slice of the model's Go struct
-									var segmentsElements []ObjectRefTypeModel
-									response.Diagnostics.Append(rateLimiterPolicyDstSegmentsModel.Segments.ElementsAs(ctx, &segmentsElements, false)...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Initialize the spec slice
-									segmentsSpec := make([]*ves_io_schema_views.ObjectRefType, len(segmentsElements))
-									dstSegmentsOneOfSpec.DstSegments.Segments = segmentsSpec
-
-									// 3. Iterate over the converted Go slice
-									for ii, segmentsElement := range segmentsElements {
-										// Initialize the spec struct for the current element
-										dstSegmentsOneOfSpec.DstSegments.Segments[ii] = &ves_io_schema_views.ObjectRefType{}
-
-										// Recursively process nested elements
-
-										// resource modelToSpecNested RequiredStringField --> Name
-										if !segmentsElement.Name.IsNull() && !segmentsElement.Name.IsUnknown() {
-											dstSegmentsOneOfSpec.DstSegments.Segments[ii].Name = string(segmentsElement.Name.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Namespace
-										if !segmentsElement.Namespace.IsNull() && !segmentsElement.Namespace.IsUnknown() {
-											dstSegmentsOneOfSpec.DstSegments.Segments[ii].Namespace = string(segmentsElement.Namespace.ValueString())
-										}
-
-									}
-								}
-
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IntraSegment
-							if !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsNull() && !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsUnknown() {
-								intraSegmentSpecBool := &ves_io_schema_policy.SegmentPolicyType_IntraSegment{}
-								intraSegmentSpecBool.IntraSegment = &ves_io_schema.Empty{}
-								segmentPolicySpec.DstSegmentChoice = intraSegmentSpecBool
-							}
-
+						segmentPolicySpec.DstSegmentChoice = &ves_io_schema_policy.SegmentPolicyType_DstAny{
+							DstAny: &ves_io_schema.Empty{},
 						}
+						specSpec.SegmentPolicy = segmentPolicySpec
 
 						// resource modelToSpecNested OneOfField --> SrcSegmentChoice
 						if !segmentPolicyModel.SrcSegmentChoice.IsNull() && !segmentPolicyModel.SrcSegmentChoice.IsUnknown() {
@@ -2540,7 +2344,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2563,7 +2367,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "rate_limiter_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "rate_limiter_policy", err),
 		)
 		return
 	}
@@ -2684,6 +2488,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 	// resource SpecToModelRoot ArrayOfPointerField --> Rules
 	if len(specData.GetRules()) > 0 {
 		rulesElements := make([]RateLimiterPolicyRateLimiterRule, 0, len(specData.GetRules()))
+		i := 0
 		for _, rulesElement := range specData.GetRules() {
 			rateLimiterPolicyRateLimiterRuleModel := RateLimiterPolicyRateLimiterRule{}
 
@@ -3024,9 +2829,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 									countryListAttributeMap["country_codes"] = types.ListNull(types.StringType)
 								}
 							}
-
-							// resource specToModelNested BoolField --> InvertMatch
-							countryListAttributeMap["invert_match"] = types.BoolValue(bool(countryListElement.GetInvertMatch()))
 
 							countryListObj, countryListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap, countryListAttributeMap)
 							response.Diagnostics.Append(countryListObjDiags...)
@@ -3429,9 +3231,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -3443,9 +3267,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -3595,124 +3441,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested OneOfField --> DstSegmentChoice
-					if segmentPolicyElement.GetDstSegmentChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-						_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-						if isDstAny {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> DstSegments
-						// GlobalSpecType
-						// false
-						{
-							dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-							dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-							if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-								dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-								// resource specToModelNested RequiredArrayOfPointerField --> Segments
-								if len(dstSegmentsElement.GetSegments()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-									for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentsElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentsElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentsElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-									response.Diagnostics.Append(segmentsListDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
-								}
-
-								dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-								response.Diagnostics.Append(dstSegmentsObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-							} else {
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-						_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-						if isIntraSegment {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-							RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							segmentPolicydstSegmentChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested OneOfField --> SrcSegmentChoice
 					if segmentPolicyElement.GetSrcSegmentChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -3859,6 +3587,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 			}
 
 			rulesElements = append(rulesElements, rateLimiterPolicyRateLimiterRuleModel)
+			i++
 		}
 
 		{
@@ -3880,14 +3609,12 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 			AttrTypes: RateLimiterPolicyRulesModelAttributeMap,
 		}
 		nullRulesList := basetypes.NewListNull(rulesObjectType)
-		var priorValRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("rules"), &priorValRules)
-		if !priorValRules.IsNull() && !priorValRules.IsUnknown() {
-			data.Rules = priorValRules
+		if !data.Rules.IsNull() && !data.Rules.IsUnknown() && len(data.Rules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Rules = basetypes.NewListValueMust(rulesObjectType, nil)
 		} else {
 			data.Rules = nullRulesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3940,7 +3667,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "rate_limiter_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "rate_limiter_policy", err),
 		)
 		return
 	}
@@ -4061,6 +3788,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 	// resource SpecToModelRoot ArrayOfPointerField --> Rules
 	if len(specData.GetRules()) > 0 {
 		rulesElements := make([]RateLimiterPolicyRateLimiterRule, 0, len(specData.GetRules()))
+		i := 0
 		for _, rulesElement := range specData.GetRules() {
 			rateLimiterPolicyRateLimiterRuleModel := RateLimiterPolicyRateLimiterRule{}
 
@@ -4204,7 +3932,11 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 					rateLimiterPolicyRateLimiterRuleSpecModel.ActionChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					rateLimiterPolicyRateLimiterRuleSpecModel.ActionChoice = types.ObjectNull(RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap)
+					rateLimiterPolicyRateLimiterRuleSpecModel.ActionChoice = types.ObjectValueMust(RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap, map[string]attr.Value{
+						"apply_rate_limiter":  types.BoolNull(),
+						"bypass_rate_limiter": types.BoolValue(true),
+						"custom_rate_limiter": types.ObjectNull(RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested OneOfField --> AsnChoice
@@ -4402,9 +4134,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 								}
 							}
 
-							// resource specToModelNested BoolField --> InvertMatch
-							countryListAttributeMap["invert_match"] = types.BoolValue(bool(countryListElement.GetInvertMatch()))
-
 							countryListObj, countryListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap, countryListAttributeMap)
 							response.Diagnostics.Append(countryListObjDiags...)
 							if response.Diagnostics.HasError() {
@@ -4432,7 +4161,10 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 					rateLimiterPolicyRateLimiterRuleSpecModel.CountryChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					rateLimiterPolicyRateLimiterRuleSpecModel.CountryChoice = types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap)
+					rateLimiterPolicyRateLimiterRuleSpecModel.CountryChoice = types.ObjectValueMust(RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap, map[string]attr.Value{
+						"any_country":  types.BoolValue(true),
+						"country_list": types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> DomainMatcher
@@ -4806,9 +4538,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -4820,9 +4574,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -4972,124 +4748,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested OneOfField --> DstSegmentChoice
-					if segmentPolicyElement.GetDstSegmentChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-						_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-						if isDstAny {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> DstSegments
-						// <no value>
-						// false
-						{
-							dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-							dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-							if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-								dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-								// resource specToModelNested RequiredArrayOfPointerField --> Segments
-								if len(dstSegmentsElement.GetSegments()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-									for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentsElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentsElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentsElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-									response.Diagnostics.Append(segmentsListDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
-								}
-
-								dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-								response.Diagnostics.Append(dstSegmentsObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-							} else {
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-						_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-						if isIntraSegment {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-							RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							segmentPolicydstSegmentChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested OneOfField --> SrcSegmentChoice
 					if segmentPolicyElement.GetSrcSegmentChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -5231,11 +4889,28 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-				// The target is a types.Object, so we use types.ObjectNull.
-				rateLimiterPolicyRateLimiterRuleModel.Spec = types.ObjectNull(RateLimiterPolicyRulesSpecModelAttributeMap)
+				rateLimiterPolicyRateLimiterRuleModel.Spec = types.ObjectValueMust(RateLimiterPolicyRulesSpecModelAttributeMap, map[string]attr.Value{
+					"action_choice": types.ObjectValueMust(RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap, map[string]attr.Value{
+						"apply_rate_limiter":  types.BoolNull(),
+						"bypass_rate_limiter": types.BoolValue(true),
+						"custom_rate_limiter": types.ObjectNull(RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap),
+					}),
+					"asn_choice": types.ObjectNull(RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap),
+					"country_choice": types.ObjectValueMust(RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap, map[string]attr.Value{
+						"any_country":  types.BoolValue(true),
+						"country_list": types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap),
+					}),
+					"domain_matcher": types.ObjectNull(RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap),
+					"headers":        types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyRulesSpecHeadersModelAttributeMap}),
+					"http_method":    types.ObjectNull(RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap),
+					"ip_choice":      types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap),
+					"path":           types.ObjectNull(RateLimiterPolicyRulesSpecPathModelAttributeMap),
+					"segment_policy": types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap),
+				})
 			}
 
 			rulesElements = append(rulesElements, rateLimiterPolicyRateLimiterRuleModel)
+			i++
 		}
 
 		{
@@ -5257,14 +4932,12 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 			AttrTypes: RateLimiterPolicyRulesModelAttributeMap,
 		}
 		nullRulesList := basetypes.NewListNull(rulesObjectType)
-		var priorValRules types.List
-		_ = request.State.GetAttribute(ctx, path.Root("rules"), &priorValRules)
-		if !priorValRules.IsNull() && !priorValRules.IsUnknown() {
-			data.Rules = priorValRules
+		if !data.Rules.IsNull() && !data.Rules.IsUnknown() && len(data.Rules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Rules = basetypes.NewListValueMust(rulesObjectType, nil)
 		} else {
 			data.Rules = nullRulesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -5276,6 +4949,12 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCRateLimiterPolicyModel
@@ -5606,13 +5285,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 								}
 							}
 							countryListOneOfSpec.CountryList.CountryCodes = countryCodesSpec
-
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !rateLimiterPolicyCountryListModel.InvertMatch.IsNull() && !rateLimiterPolicyCountryListModel.InvertMatch.IsUnknown() {
-								countryListOneOfSpec.CountryList.InvertMatch = bool(rateLimiterPolicyCountryListModel.InvertMatch.ValueBool())
-							} else {
-								countryListOneOfSpec.CountryList.InvertMatch = bool(false)
-							}
 
 						}
 
@@ -6054,77 +5726,10 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 						}
 
 						segmentPolicySpec := &ves_io_schema_policy.SegmentPolicyType{}
-						specSpec.SegmentPolicy = segmentPolicySpec
-
-						// resource modelToSpecNested OneOfField --> DstSegmentChoice
-						if !segmentPolicyModel.DstSegmentChoice.IsNull() && !segmentPolicyModel.DstSegmentChoice.IsUnknown() {
-							segmentPolicyDstSegmentChoiceModel := RateLimiterPolicyDstSegmentChoice{}
-							response.Diagnostics.Append(segmentPolicyModel.DstSegmentChoice.As(ctx, &segmentPolicyDstSegmentChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> DstAny
-							if !segmentPolicyDstSegmentChoiceModel.DstAny.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstAny.IsUnknown() {
-								dstAnySpecBool := &ves_io_schema_policy.SegmentPolicyType_DstAny{}
-								dstAnySpecBool.DstAny = &ves_io_schema.Empty{}
-								segmentPolicySpec.DstSegmentChoice = dstAnySpecBool
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> DstSegments
-							if !segmentPolicyDstSegmentChoiceModel.DstSegments.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstSegments.IsUnknown() {
-								var rateLimiterPolicyDstSegmentsModel RateLimiterPolicyDstSegments
-								response.Diagnostics.Append(segmentPolicyDstSegmentChoiceModel.DstSegments.As(ctx, &rateLimiterPolicyDstSegmentsModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								dstSegmentsOneOfSpec := &ves_io_schema_policy.SegmentPolicyType_DstSegments{}
-								dstSegmentsOneOfSpec.DstSegments = &ves_io_schema_views.SegmentRefList{}
-								segmentPolicySpec.DstSegmentChoice = dstSegmentsOneOfSpec
-
-								// resource modelToSpecNested RequiredArrayOfPointerField --> Segments
-								if !rateLimiterPolicyDstSegmentsModel.Segments.IsNull() && !rateLimiterPolicyDstSegmentsModel.Segments.IsUnknown() && len(rateLimiterPolicyDstSegmentsModel.Segments.Elements()) > 0 {
-									// 1. Convert the types.List into a slice of the model's Go struct
-									var segmentsElements []ObjectRefTypeModel
-									response.Diagnostics.Append(rateLimiterPolicyDstSegmentsModel.Segments.ElementsAs(ctx, &segmentsElements, false)...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// 2. Initialize the spec slice
-									segmentsSpec := make([]*ves_io_schema_views.ObjectRefType, len(segmentsElements))
-									dstSegmentsOneOfSpec.DstSegments.Segments = segmentsSpec
-
-									// 3. Iterate over the converted Go slice
-									for ii, segmentsElement := range segmentsElements {
-										// Initialize the spec struct for the current element
-										dstSegmentsOneOfSpec.DstSegments.Segments[ii] = &ves_io_schema_views.ObjectRefType{}
-
-										// Recursively process nested elements
-
-										// resource modelToSpecNested RequiredStringField --> Name
-										if !segmentsElement.Name.IsNull() && !segmentsElement.Name.IsUnknown() {
-											dstSegmentsOneOfSpec.DstSegments.Segments[ii].Name = string(segmentsElement.Name.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Namespace
-										if !segmentsElement.Namespace.IsNull() && !segmentsElement.Namespace.IsUnknown() {
-											dstSegmentsOneOfSpec.DstSegments.Segments[ii].Namespace = string(segmentsElement.Namespace.ValueString())
-										}
-
-									}
-								}
-
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IntraSegment
-							if !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsNull() && !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsUnknown() {
-								intraSegmentSpecBool := &ves_io_schema_policy.SegmentPolicyType_IntraSegment{}
-								intraSegmentSpecBool.IntraSegment = &ves_io_schema.Empty{}
-								segmentPolicySpec.DstSegmentChoice = intraSegmentSpecBool
-							}
-
+						segmentPolicySpec.DstSegmentChoice = &ves_io_schema_policy.SegmentPolicyType_DstAny{
+							DstAny: &ves_io_schema.Empty{},
 						}
+						specSpec.SegmentPolicy = segmentPolicySpec
 
 						// resource modelToSpecNested OneOfField --> SrcSegmentChoice
 						if !segmentPolicyModel.SrcSegmentChoice.IsNull() && !segmentPolicyModel.SrcSegmentChoice.IsUnknown() {
@@ -6202,7 +5807,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6218,7 +5823,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "rate_limiter_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "rate_limiter_policy", err),
 		)
 		return
 	}
@@ -6227,7 +5832,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "rate_limiter_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "rate_limiter_policy", err),
 		)
 		return
 	}
@@ -6347,6 +5952,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 	// resource SpecToModelRoot ArrayOfPointerField --> Rules
 	if len(specData.GetRules()) > 0 {
 		rulesElements := make([]RateLimiterPolicyRateLimiterRule, 0, len(specData.GetRules()))
+		i := 0
 		for _, rulesElement := range specData.GetRules() {
 			rateLimiterPolicyRateLimiterRuleModel := RateLimiterPolicyRateLimiterRule{}
 
@@ -6687,9 +6293,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 									countryListAttributeMap["country_codes"] = types.ListNull(types.StringType)
 								}
 							}
-
-							// resource specToModelNested BoolField --> InvertMatch
-							countryListAttributeMap["invert_match"] = types.BoolValue(bool(countryListElement.GetInvertMatch()))
 
 							countryListObj, countryListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap, countryListAttributeMap)
 							response.Diagnostics.Append(countryListObjDiags...)
@@ -7092,9 +6695,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -7106,9 +6731,31 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rules").AtListIndex(i).AtName("spec").AtName("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -7258,124 +6905,6 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested OneOfField --> DstSegmentChoice
-					if segmentPolicyElement.GetDstSegmentChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-						_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-						if isDstAny {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> DstSegments
-						// GlobalSpecType
-						// false
-						{
-							dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-							dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-							if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-								dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-								// resource specToModelNested RequiredArrayOfPointerField --> Segments
-								if len(dstSegmentsElement.GetSegments()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-									for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// resource specToModelNested RequiredStringField --> Name
-										if segmentsElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if segmentsElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Tenant
-										if segmentsElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-									response.Diagnostics.Append(segmentsListDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
-								}
-
-								dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-								response.Diagnostics.Append(dstSegmentsObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-							} else {
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-						_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-						if isIntraSegment {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-							RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							segmentPolicydstSegmentChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						rateLimiterPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested OneOfField --> SrcSegmentChoice
 					if segmentPolicyElement.GetSrcSegmentChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -7522,6 +7051,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 			}
 
 			rulesElements = append(rulesElements, rateLimiterPolicyRateLimiterRuleModel)
+			i++
 		}
 
 		{
@@ -7543,14 +7073,12 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 			AttrTypes: RateLimiterPolicyRulesModelAttributeMap,
 		}
 		nullRulesList := basetypes.NewListNull(rulesObjectType)
-		var priorValRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("rules"), &priorValRules)
-		if !priorValRules.IsNull() && !priorValRules.IsUnknown() {
-			data.Rules = priorValRules
+		if !data.Rules.IsNull() && !data.Rules.IsUnknown() && len(data.Rules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Rules = basetypes.NewListValueMust(rulesObjectType, nil)
 		} else {
 			data.Rules = nullRulesList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -7625,7 +7153,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "rate_limiter_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "rate_limiter_policy", err),
 		)
 		return
 	}

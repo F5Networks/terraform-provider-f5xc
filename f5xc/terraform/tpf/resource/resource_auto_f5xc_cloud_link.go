@@ -38,6 +38,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -96,6 +97,7 @@ type CloudLinkSecretType struct {
 type CloudLinkSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type CloudLinkBlindfoldSecretInfo struct {
@@ -308,6 +310,7 @@ var CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofM
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -457,8 +460,8 @@ func (r *ResourceF5XCCloudLink) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a cloud_link This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_link) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a cloud_link This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_link) etc. can be fetched",
+		MarkdownDescription: "CloudLink is used to establish private connectivity from customer network to Cloud Sites or private connectivity from<br>F5 XC Regional Edge(RE) to customer Cloud Sites",
+		Description:         "CloudLink is used to establish private connectivity from customer network to Cloud Sites or private connectivity from F5 XC Regional Edge(RE) to customer Cloud Sites",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -583,7 +586,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -635,6 +638,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																		exactlyoneofvalidator.RequiredExactlyOneOf(
 																			"blindfold_secret_info",
 																			"clear_secret_info",
+																			"none",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
@@ -658,6 +662,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
+																					WriteOnly:           true,
 																					Validators: []validator.String{
 																						stringvalidator.RegexMatches(
 																							regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -710,6 +715,16 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																						),
 																					},
 																				},
+																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																			Validators: []validator.Bool{
+																				boolvalidator.Equals(true),
 																			},
 																		},
 																	},
@@ -840,7 +855,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 														},
 														"region": schema.StringAttribute{
 															Description:         "Region Region where the connection is setup",
-															MarkdownDescription: "Region Region where the connection is setup",
+															MarkdownDescription: "Region Region where the connection is setup<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1038,7 +1053,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 														},
 														"region": schema.StringAttribute{
 															Description:         "Region GCP Region in which the GCP Cloud Interconnect attachment is configured",
-															MarkdownDescription: "Region GCP Region in which the GCP Cloud Interconnect attachment is configured",
+															MarkdownDescription: "Region GCP Region in which the GCP Cloud Interconnect attachment is configured<br>**Allowed Values (choose one):** `['asia-east1', 'asia-east2', 'asia-northeast1', 'asia-northeast2', 'asia-northeast3', 'asia-southeast1', 'asia-southeast2', 'europe-central2', 'europe-north1', 'europe-west1', 'europe-west2', 'europe-west3', 'europe-west4', 'europe-west6', 'europe-west8', 'europe-west9', 'europe-west10', 'europe-west12', 'europe-southwest1', 'me-west1', 'me-central1', 'me-central2', 'northamerica-northeast1', 'northamerica-northeast2', 'us-central1', 'us-east1', 'us-east4', 'us-east5', 'us-south1', 'us-west1', 'us-west2', 'us-west3', 'us-west4', 'southamerica-east1', 'southamerica-west1', 'australia-southeast1', 'australia-southeast2', 'asia-south1', 'asia-south2']`",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1081,7 +1096,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -1217,9 +1232,17 @@ func (r *ResourceF5XCCloudLink) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCloudLinkModel
 
 	// Read Terraform plan data into the model
@@ -1227,6 +1250,17 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCCloudLinkModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.CloudProviderChoice.IsNull() && !configData.CloudProviderChoice.IsUnknown() {
+		data.CloudProviderChoice = configData.CloudProviderChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1449,6 +1483,13 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudLinkClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !authKeySecretInfoChoiceModel.None.IsNull() && !authKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										authKeySpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -1770,7 +1811,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1793,7 +1834,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cloud_link.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cloud_link", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cloud_link", err),
 		)
 		return
 	}
@@ -2130,6 +2171,15 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 												} else {
 													authKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := authKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -2854,7 +2904,7 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cloud_link", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_link", err),
 		)
 		return
 	}
@@ -3191,6 +3241,15 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 												} else {
 													authKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := authKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -3641,7 +3700,10 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 										cloudLinkGCPBYOCTypeModel.ProjectChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cloudLinkGCPBYOCTypeModel.ProjectChoice = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsProjectChoiceModelAttributeMap)
+										cloudLinkGCPBYOCTypeModel.ProjectChoice = types.ObjectValueMust(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsProjectChoiceModelAttributeMap, map[string]attr.Value{
+											"project":            types.StringNull(),
+											"same_as_credential": types.BoolValue(true),
+										})
 									}
 
 									// resource specToModelNested RequiredStringField --> Region
@@ -3853,7 +3915,13 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.EnableConnectionToReChoice = types.ObjectNull(CloudLinkEnableConnectionToReChoiceModelAttributeMap)
+
+		if data.EnableConnectionToReChoice.IsNull() || data.EnableConnectionToReChoice.IsUnknown() || ((data.EnableConnectionToReChoice.Attributes()["disabled"].IsNull() || data.EnableConnectionToReChoice.Attributes()["disabled"].IsUnknown()) && (data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).IsNull() || data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).IsUnknown() || (data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).Attributes()["cloudlink_network_name"].IsNull() || data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).Attributes()["cloudlink_network_name"].IsUnknown()))) {
+			data.EnableConnectionToReChoice = types.ObjectValueMust(CloudLinkEnableConnectionToReChoiceModelAttributeMap, map[string]attr.Value{
+				"disabled": types.BoolValue(true),
+				"enabled":  types.ObjectNull(CloudLinkEnableConnectionToReChoiceEnabledModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot IntField --> Sites
@@ -3891,6 +3959,12 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCloudLinkModel
@@ -3900,6 +3974,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planCloudProviderChoice := data.CloudProviderChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -3919,7 +3994,11 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planCloudProviderChoice := data.CloudProviderChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.CloudProviderChoice.IsNull() && !configData.CloudProviderChoice.IsUnknown() {
+		data.CloudProviderChoice = configData.CloudProviderChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -4141,6 +4220,13 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudLinkClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !authKeySecretInfoChoiceModel.None.IsNull() && !authKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										authKeySpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -4462,7 +4548,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4478,7 +4564,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_link.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cloud_link", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cloud_link", err),
 		)
 		return
 	}
@@ -4487,7 +4573,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cloud_link", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cloud_link", err),
 		)
 		return
 	}
@@ -4823,6 +4909,15 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 												} else {
 													authKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := authKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -5523,7 +5618,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	}
 	// Restore plan value for CloudProviderChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.CloudProviderChoice = planCloudProviderChoice
+	data.CloudProviderChoice = utils.ResolveUnknowns(planCloudProviderChoice, data.CloudProviderChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -5571,7 +5666,7 @@ func (r *ResourceF5XCCloudLink) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "cloud_link", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "cloud_link", err),
 		)
 		return
 	}

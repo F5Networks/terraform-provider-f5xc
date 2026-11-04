@@ -20,6 +20,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	bgpSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/bgp"
 )
@@ -28,13 +29,11 @@ var testAccResourceAutoF5XCBgpImportVerifyIgnore = []string{
 	"peers.0.type_choice.external.auth_choice.md5_auth_key",
 }
 
-// TestAccResourceAutoF5XCBgp_basic creates the minimal required BGP object
-// with all required fields and basic optional fields.
 func TestAccResourceAutoF5XCBgp_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-bgp-" + acctest.RandString(t, 8)
+	name := "example-bgp-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -42,172 +41,36 @@ func TestAccResourceAutoF5XCBgp_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  
-  where = {
-    ref_or_selector_choice = {
-      site = {
-        ref = [
-          {
-            name      = "test-site"
-            namespace = "system"
-          }
-        ]
-        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
-        internet_vip_choice = {
-          disable_internet_vip = true
-        }
-      }
-    }
-  }
-
-  peers = [
-    {
-      metadata = {
-        name = "peer-1"
-      }
-      bfd_choice = {
-        bfd_disabled = true
-      }
-      type_choice = {
-        external = {
-          asn = 65001
-          address_choice = {
-            default_gateway = true
-          }
-          address_choice_v6_choice = {
-            disable_v6 = true
-          }
-          interface_choice = {
-            interface = {
-              name      = "eth0"
-              namespace = "system"
-            }
-          }
-          auth_choice = {
-            no_authentication = true
-          }
-        }
-      }
-      passive_choice = {
-        passive_mode_disabled = true
-      }
-      enable_choice = {
-        routing_policies = {}
-      }
-    }
-  ]
-
-  bgp_parameters = {
-    asn = 64512
-    router_id_choice = {
-      local_address = true
-    }
-  }
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name        = %q
-  namespace   = %q
-  description = "BGP updated"
-  
-  where = {
-    ref_or_selector_choice = {
-      site = {
-        ref = [
-          {
-            name      = "test-site"
-            namespace = "system"
-          }
-        ]
-        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
-        internet_vip_choice = {
-          disable_internet_vip = true
-        }
-      }
-    }
-  }
-
-  peers = [
-    {
-      metadata = {
-        name = "peer-1"
-      }
-      bfd_choice = {
-        bfd_disabled = true
-      }
-      type_choice = {
-        external = {
-          asn = 65001
-          address_choice = {
-            default_gateway = true
-          }
-          address_choice_v6_choice = {
-            disable_v6 = true
-          }
-          interface_choice = {
-            interface = {
-              name      = "eth0"
-              namespace = "system"
-            }
-          }
-          auth_choice = {
-            no_authentication = true
-          }
-        }
-      }
-      passive_choice = {
-        passive_mode_disabled = true
-      }
-      enable_choice = {
-        routing_policies = {}
-      }
-    }
-  ]
-
-  bgp_parameters = {
-    asn = 64512
-    router_id_choice = {
-      local_address = true
-    }
-  }
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-// TestAccResourceAutoF5XCBgp_withRouterIdTransition exercises the
-// bgp_parameters.router_id_choice oneof transitions:
-// local_address → from_site → ip_address("10.0.0.1").
 func TestAccResourceAutoF5XCBgp_withRouterIdTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-bgp-" + acctest.RandString(t, 8)
+	name := "example-bgp-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -215,142 +78,47 @@ func TestAccResourceAutoF5XCBgp_withRouterIdTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  
-  where = {
-    ref_or_selector_choice = {
-      site = {
-        ref = [{name = "test-site", namespace = "system"}]
-        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
-        internet_vip_choice = {disable_internet_vip = true}
-      }
-    }
-  }
-
-  peers = [{
-    metadata = {name = "peer-1"}
-    bfd_choice = {bfd_disabled = true}
-    type_choice = {external = {
-      asn = 65001
-      address_choice = {default_gateway = true}
-      address_choice_v6_choice = {disable_v6 = true}
-      interface_choice = {interface = {name = "eth0", namespace = "system"}}
-      auth_choice = {no_authentication = true}
-    }}
-    passive_choice = {passive_mode_disabled = true}
-    enable_choice = {routing_policies = {}}
-  }]
-
-  bgp_parameters = {asn = 64512, router_id_choice = {local_address = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_routerIdLocal(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  
-  where = {
-    ref_or_selector_choice = {
-      site = {
-        ref = [{name = "test-site", namespace = "system"}]
-        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
-        internet_vip_choice = {disable_internet_vip = true}
-      }
-    }
-  }
-
-  peers = [{
-    metadata = {name = "peer-1"}
-    bfd_choice = {bfd_disabled = true}
-    type_choice = {external = {
-      asn = 65001
-      address_choice = {default_gateway = true}
-      address_choice_v6_choice = {disable_v6 = true}
-      interface_choice = {interface = {name = "eth0", namespace = "system"}}
-      auth_choice = {no_authentication = true}
-    }}
-    passive_choice = {passive_mode_disabled = true}
-    enable_choice = {routing_policies = {}}
-  }]
-
-  bgp_parameters = {asn = 64512, router_id_choice = {from_site = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_routerIdFromSite(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  
-  where = {
-    ref_or_selector_choice = {
-      site = {
-        ref = [{name = "test-site", namespace = "system"}]
-        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
-        internet_vip_choice = {disable_internet_vip = true}
-      }
-    }
-  }
-
-  peers = [{
-    metadata = {name = "peer-1"}
-    bfd_choice = {bfd_disabled = true}
-    type_choice = {external = {
-      asn = 65001
-      address_choice = {default_gateway = true}
-      address_choice_v6_choice = {disable_v6 = true}
-      interface_choice = {interface = {name = "eth0", namespace = "system"}}
-      auth_choice = {no_authentication = true}
-    }}
-    passive_choice = {passive_mode_disabled = true}
-    enable_choice = {routing_policies = {}}
-  }]
-
-  bgp_parameters = {asn = 64512, router_id_choice = {ip_address = "10.0.0.1"}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_routerIdIpAddress(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-// TestAccResourceAutoF5XCBgp_withAuthTransition exercises peers[].type_choice.external.auth_choice oneof:
-// no_authentication → md5_auth_key.
 func TestAccResourceAutoF5XCBgp_withAuthTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-bgp-" + acctest.RandString(t, 8)
+	name := "example-bgp-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -358,54 +126,40 @@ func TestAccResourceAutoF5XCBgp_withAuthTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{metadata = {name = "peer-1"}, bfd_choice = {bfd_disabled = true}, type_choice = {external = {asn = 65001, address_choice = {default_gateway = true}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {no_authentication = true}}}, passive_choice = {passive_mode_disabled = true}, enable_choice = {routing_policies = {}}}]
-  bgp_parameters = {asn = 64512, router_id_choice = {local_address = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_authNone(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{metadata = {name = "peer-1"}, bfd_choice = {bfd_disabled = true}, type_choice = {external = {asn = 65001, address_choice = {default_gateway = true}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {md5_auth_key = "supersecretkey"}}}, passive_choice = {passive_mode_disabled = true}, enable_choice = {routing_policies = {}}}]
-  bgp_parameters = {asn = 64512, router_id_choice = {local_address = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_authMd5(name, namespace),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_bgp.example",
+					tfjsonpath.New("peers").AtSliceIndex(0).AtMapKey("type_choice").AtMapKey("external").AtMapKey("auth_choice").AtMapKey("md5_auth_key"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-// TestAccResourceAutoF5XCBgp_withPassiveModeTransition exercises peers[].passive_choice oneof:
-// passive_mode_disabled → passive_mode_enabled.
 func TestAccResourceAutoF5XCBgp_withPassiveModeTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-bgp-" + acctest.RandString(t, 8)
+	name := "example-bgp-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -413,119 +167,895 @@ func TestAccResourceAutoF5XCBgp_withPassiveModeTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{metadata = {name = "peer-1"}, bfd_choice = {bfd_disabled = true}, type_choice = {external = {asn = 65001, address_choice = {default_gateway = true}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {no_authentication = true}}}, passive_choice = {passive_mode_disabled = true}, enable_choice = {routing_policies = {}}}]
-  bgp_parameters = {asn = 64512, router_id_choice = {local_address = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_passiveDisabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name      = %q
-  namespace = %q
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{metadata = {name = "peer-1"}, bfd_choice = {bfd_disabled = true}, type_choice = {external = {asn = 65001, address_choice = {default_gateway = true}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {no_authentication = true}}}, passive_choice = {passive_mode_enabled = true}, enable_choice = {routing_policies = {}}}]
-  bgp_parameters = {asn = 64512, router_id_choice = {local_address = true}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_passiveEnabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-// TestAccResourceAutoF5XCBgp_full exercises all major optional fields.
 func TestAccResourceAutoF5XCBgp_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-bgp-" + acctest.RandString(t, 8)
+	name := "example-bgp-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckBgpDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name        = %q
-  namespace   = %q
-  description = "BGP full"
-  labels = {env = "test", team = "network"}
-  annotations = {owner = "platform"}
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{
-    metadata = {name = "peer-1", description = "Primary peer"}
-    bfd_choice = {bfd_enabled = {transmit_interval_milliseconds = 3000, receive_interval_milliseconds = 3000, multiplier = 3}}
-    type_choice = {external = {asn = 65001, address_choice = {address = "192.168.1.1"}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {no_authentication = true}, family_inet = {enable_choice = {enable = {aggregation = [{ip_prefix = "10.0.0.0/8", options = [{aggregation_choice = {summary_only = true}}]}]}}}}}
-    passive_choice = {passive_mode_disabled = true}
-    enable_choice = {routing_policies = {}}
-  }]
-  bgp_parameters = {asn = 64512, router_id_choice = {ip_address = "10.0.0.1"}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: fmt.Sprintf(`
-resource "f5xc_bgp" "test" {
-  name        = %q
-  namespace   = %q
-  description = "BGP full updated"
-  labels = {env = "stage", team = "netops"}
-  annotations = {owner = "infra"}
-  where = {ref_or_selector_choice = {site = {ref = [{name = "test-site", namespace = "system"}], network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"], internet_vip_choice = {disable_internet_vip = true}}}}
-  peers = [{
-    metadata = {name = "peer-1", description = "Primary peer updated"}
-    bfd_choice = {bfd_enabled = {transmit_interval_milliseconds = 5000, receive_interval_milliseconds = 5000, multiplier = 5}}
-    type_choice = {external = {asn = 65002, address_choice = {address = "192.168.2.1"}, address_choice_v6_choice = {disable_v6 = true}, interface_choice = {interface = {name = "eth0", namespace = "system"}}, auth_choice = {md5_auth_key = "newsecretkey"}}}
-    passive_choice = {passive_mode_enabled = true}
-    enable_choice = {routing_policies = {}}
-  }]
-  bgp_parameters = {asn = 64512, router_id_choice = {ip_address = "10.0.0.2"}}
-}
-`, name, namespace),
+				Config: testAccResourceAutoF5XCBgpConfig_fullUpdated(name, namespace),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_bgp.example",
+					tfjsonpath.New("peers").AtSliceIndex(0).AtMapKey("type_choice").AtMapKey("external").AtMapKey("auth_choice").AtMapKey("md5_auth_key"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_bgp.test",
+				ResourceName:                         "f5xc_bgp.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCBgpImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCBgpConfig_full("example-bgp", "system"),
+		})
 }
 
 func testAccCheckBgpDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_bgp", bgpSchema.ObjectType, "bgp")
+}
+
+func testAccResourceAutoF5XCBgpConfig_basic(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+  
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_basicUpdated(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name        = %q
+  namespace   = %q
+  description = "BGP example updated"
+  
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_routerIdLocal(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_routerIdFromSite(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      from_site = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_routerIdIpAddress(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      ip_address = "10.0.0.1"
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_authNone(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_authMd5(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            md5_auth_key = "supersecretkey"
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_passiveDisabled(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_passiveEnabled(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name      = %q
+  namespace = %q
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name = "peer-1"
+      }
+      bfd_choice = {
+        bfd_disabled = true
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            default_gateway = true
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_enabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      local_address = true
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_full(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name        = %q
+  namespace   = %q
+  description = "BGP example"
+
+  labels = {
+    env  = "example"
+    team = "network"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name        = "peer-1"
+        description = "Primary peer"
+      }
+      bfd_choice = {
+        bfd_enabled = {
+          transmit_interval_milliseconds = 3000
+          receive_interval_milliseconds  = 3000
+          multiplier                     = 3
+        }
+      }
+      type_choice = {
+        external = {
+          asn = 65001
+          address_choice = {
+            address = "192.168.1.1"
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            no_authentication = true
+          }
+          family_inet = {
+            enable_choice = {
+              enable = {
+                aggregation = [
+                  {
+                    ip_prefix = "10.0.0.0/8"
+                    options = [
+                      {
+                        aggregation_choice = {
+                          summary_only = true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_disabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      ip_address = "10.0.0.1"
+    }
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCBgpConfig_fullUpdated(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_bgp" "example" {
+  name        = %q
+  namespace   = %q
+  description = "BGP example updated"
+
+  labels = {
+    env  = "stage"
+    team = "netops"
+  }
+
+  annotations = {
+    owner = "infra"
+  }
+
+  where = {
+    ref_or_selector_choice = {
+      site = {
+        ref = [
+          {
+            name      = "example-site"
+            namespace = "system"
+          }
+        ]
+        network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        internet_vip_choice = {
+          disable_internet_vip = true
+        }
+      }
+    }
+  }
+
+  peers = [
+    {
+      metadata = {
+        name        = "peer-1"
+        description = "Primary peer updated"
+      }
+      bfd_choice = {
+        bfd_enabled = {
+          transmit_interval_milliseconds = 5000
+          receive_interval_milliseconds  = 5000
+          multiplier                     = 5
+        }
+      }
+      type_choice = {
+        external = {
+          asn = 65002
+          address_choice = {
+            address = "192.168.2.1"
+          }
+          address_choice_v6_choice = {
+            disable_v6 = true
+          }
+          interface_choice = {
+            interface = {
+              name      = "eth0"
+              namespace = "system"
+            }
+          }
+          auth_choice = {
+            md5_auth_key = "newsecretkey"
+          }
+        }
+      }
+      passive_choice = {
+        passive_mode_enabled = true
+      }
+      enable_choice = {
+        routing_policies = {}
+      }
+    }
+  ]
+
+  bgp_parameters = {
+    asn = 64512
+    router_id_choice = {
+      ip_address = "10.0.0.2"
+    }
+  }
+}
+`, name, namespace)
 }

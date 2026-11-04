@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCBgpRoutingPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_allow_action(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_basic(t *testing.T) {
 func TestAccResourceAutoF5XCBgpRoutingPolicy_withActionTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withActionTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_allow_action(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_deny_action(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withActionTransition(t *testing.T) 
 func TestAccResourceAutoF5XCBgpRoutingPolicy_withPrefixMatchVariants(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withPrefixMatchVariants(t *testing.
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_prefix_match(name, namespace, "equal_or_longer_than", "allow"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_prefix_match(name, namespace, "longer_than", "deny"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +132,7 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withPrefixMatchVariants(t *testing.
 func TestAccResourceAutoF5XCBgpRoutingPolicy_withCommunityMatchAndAction(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withCommunityMatchAndAction(t *test
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_community(name, namespace, "[\"65000:100\", \"65000:200\"]", "[\"65001:100\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_community(name, namespace, "[\"65000:300\"]", "[\"65001:200\", \"65001:300\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,7 +167,7 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withCommunityMatchAndAction(t *test
 func TestAccResourceAutoF5XCBgpRoutingPolicy_withAsPathAndMetricTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -179,20 +179,20 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withAsPathAndMetricTransition(t *te
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_as_path_metric(name, namespace, "^65001$", 100),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_as_path_metric(name, namespace, "^65100_", 200),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -202,36 +202,40 @@ func TestAccResourceAutoF5XCBgpRoutingPolicy_withAsPathAndMetricTransition(t *te
 func TestAccResourceAutoF5XCBgpRoutingPolicy_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-rp-" + acctest.RandString(t, 8)
+	name := "example-bgp-routing-policy-" + testAccRunSuffix(t)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckBgpRoutingPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_full(name, namespace, "bgp routing policy full", "team-a", 150),
+				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_full(name, namespace, "bgp routing policy full", "example-team", 150),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_full(name, namespace, "bgp routing policy full updated", "team-b", 250),
+				Config: testAccResourceAutoF5XCBgpRoutingPolicyConfig_full(name, namespace, "bgp routing policy updated full example", "example-team-alt", 250),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_routing_policy.test",
+				ResourceName:                         "f5xc_bgp_routing_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_routing_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCBgpRoutingPolicyConfig_full("example-bgp-routing-policy", "system", "BGP routing policy example", "example-team", 150),
+		})
 }
 
 func testAccCheckBgpRoutingPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,7 +244,7 @@ func testAccCheckBgpRoutingPolicyDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -251,7 +255,7 @@ resource "f5xc_bgp_routing_policy" "test" {
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_allow_action(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -268,7 +272,7 @@ resource "f5xc_bgp_routing_policy" "test" {
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_deny_action(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -297,7 +301,7 @@ func testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_prefix_match(name, names
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -326,7 +330,7 @@ resource "f5xc_bgp_routing_policy" "test" {
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_community(name, namespace, matchCommunityList, actionCommunityList string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -352,7 +356,7 @@ resource "f5xc_bgp_routing_policy" "test" {
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_with_as_path_metric(name, namespace, asPath string, metric int) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -374,7 +378,7 @@ resource "f5xc_bgp_routing_policy" "test" {
 
 func testAccResourceAutoF5XCBgpRoutingPolicyConfig_full(name, namespace, description, team string, localPreference int) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_routing_policy" "test" {
+resource "f5xc_bgp_routing_policy" "example" {
   name        = %q
   namespace   = %q
   description = %q

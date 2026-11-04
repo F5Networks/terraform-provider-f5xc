@@ -20,11 +20,12 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -37,6 +38,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -81,6 +83,7 @@ type CodeBaseIntegrationSecretType struct {
 type CodeBaseIntegrationSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type CodeBaseIntegrationBlindfoldSecretInfo struct {
@@ -219,6 +222,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeAzureReposAccessTokenSecretInfoOne
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeAzureReposAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -264,6 +268,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketPasswdSecretInfoOneofMode
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketPasswdSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -311,6 +316,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketServerPasswdSecretInfoOne
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketServerPasswdSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -357,6 +363,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeGithubAccessTokenSecretInfoOneofMo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeGithubAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -403,6 +410,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeGithubEnterpriseAccessTokenSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeGithubEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -447,6 +455,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeGitlabAccessTokenSecretInfoOneofMo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeGitlabAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -492,6 +501,7 @@ var CodeBaseIntegrationCodeBaseIntegrationTypeGitlabEnterpriseAccessTokenSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CodeBaseIntegrationCodeBaseIntegrationTypeGitlabEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -529,8 +539,8 @@ func (r *ResourceF5XCCodeBaseIntegration) Metadata(ctx context.Context, request 
 func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a code_base_integration This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of code_base_integration) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a code_base_integration This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of code_base_integration) etc. can be fetched",
+		MarkdownDescription: "Code base integration",
+		Description:         "Code base integration",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -645,6 +655,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -668,6 +679,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -720,6 +732,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -752,6 +774,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -775,6 +798,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -827,6 +851,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -866,6 +900,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -889,6 +924,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -941,6 +977,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -995,6 +1041,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -1018,6 +1065,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1070,6 +1118,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -1117,6 +1175,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -1140,6 +1199,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1192,6 +1252,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -1238,6 +1308,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -1261,6 +1332,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1313,6 +1385,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -1345,6 +1427,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"blindfold_secret_info",
 														"clear_secret_info",
+														"none",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -1368,6 +1451,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																WriteOnly:           true,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
 																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1420,6 +1504,16 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 																	),
 																},
 															},
+														},
+													},
+													"none": schema.BoolAttribute{
+														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
 														},
 													},
 												},
@@ -1474,31 +1568,30 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 			},
 			"number_of_api_repos": schema.Int32Attribute{
 				Description:         "Number of API Repositories Number of API repositories found in the code base",
-				MarkdownDescription: "Number of API Repositories Number of API repositories found in the code base",
+				MarkdownDescription: "Number of API Repositories Number of API repositories found in the code base<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Int32{
-					int32planmodifier.UseStateForUnknown(),
-				},
+				Default:             int32default.StaticInt32(0),
 			},
 			"number_of_repos": schema.Int32Attribute{
 				Description:         "Number of Repositories Number of repositories found in the code base",
-				MarkdownDescription: "Number of Repositories Number of repositories found in the code base",
+				MarkdownDescription: "Number of Repositories Number of repositories found in the code base<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Int32{
-					int32planmodifier.UseStateForUnknown(),
-				},
+				Default:             int32default.StaticInt32(0),
 			},
 			"updated_at": schema.StringAttribute{
 				Description:         "Last Scan The last time where the coed base was scanned",
 				MarkdownDescription: "Last Scan The last time where the coed base was scanned",
 				CustomType:          timetypes.RFC3339Type{},
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
@@ -1562,9 +1655,17 @@ func (r *ResourceF5XCCodeBaseIntegration) ModifyPlan(ctx context.Context, req re
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCodeBaseIntegrationModel
 
 	// Read Terraform plan data into the model
@@ -1572,6 +1673,17 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCCodeBaseIntegrationModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.CodeBaseIntegration.IsNull() && !configData.CodeBaseIntegration.IsUnknown() {
+		data.CodeBaseIntegration = configData.CodeBaseIntegration
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1748,6 +1860,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -1833,6 +1952,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(codeBaseIntegrationClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdSecretInfoChoiceModel.None.IsNull() && !passwdSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -1925,6 +2051,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(codeBaseIntegrationClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdSecretInfoChoiceModel.None.IsNull() && !passwdSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -2031,6 +2164,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -2130,6 +2270,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -2227,6 +2374,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -2314,6 +2468,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -2333,7 +2494,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2356,7 +2517,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "code_base_integration", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "code_base_integration", err),
 		)
 		return
 	}
@@ -2601,6 +2762,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -2758,6 +2928,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -2925,6 +3104,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketServerPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -3105,6 +3293,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -3273,6 +3470,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								} else {
 									accessTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeGithubEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -3450,6 +3656,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -3607,6 +3822,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Create(ctx context.Context, request re
 								} else {
 									accessTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeGitlabEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -3801,7 +4025,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "code_base_integration", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "code_base_integration", err),
 		)
 		return
 	}
@@ -4046,6 +4270,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -4215,6 +4448,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -4394,6 +4636,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketServerPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -4586,6 +4837,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -4766,6 +5026,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								} else {
 									accessTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeGithubEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -4955,6 +5224,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -5126,6 +5404,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -5294,6 +5581,12 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 }
 
 func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCodeBaseIntegrationModel
@@ -5303,6 +5596,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planCodeBaseIntegration := data.CodeBaseIntegration
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -5322,7 +5616,11 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planCodeBaseIntegration := data.CodeBaseIntegration
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.CodeBaseIntegration.IsNull() && !configData.CodeBaseIntegration.IsUnknown() {
+		data.CodeBaseIntegration = configData.CodeBaseIntegration
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -5498,6 +5796,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -5583,6 +5888,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(codeBaseIntegrationClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdSecretInfoChoiceModel.None.IsNull() && !passwdSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -5675,6 +5987,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(codeBaseIntegrationClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdSecretInfoChoiceModel.None.IsNull() && !passwdSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -5781,6 +6100,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -5880,6 +6206,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -5977,6 +6310,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -6064,6 +6404,13 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !accessTokenSecretInfoChoiceModel.None.IsNull() && !accessTokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								accessTokenSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -6083,7 +6430,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6099,7 +6446,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "code_base_integration", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "code_base_integration", err),
 		)
 		return
 	}
@@ -6108,7 +6455,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "code_base_integration", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "code_base_integration", err),
 		)
 		return
 	}
@@ -6352,6 +6699,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -6509,6 +6865,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -6676,6 +7041,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								} else {
 									passwdsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeBitbucketServerPasswdSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := passwdsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								passwdsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -6856,6 +7230,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -7024,6 +7407,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								} else {
 									accessTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeGithubEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -7201,6 +7593,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								}
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -7358,6 +7759,15 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 								} else {
 									accessTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CodeBaseIntegrationCodeBaseIntegrationTypeGitlabEnterpriseAccessTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 								}
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := accessTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								accessTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -7528,7 +7938,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	}
 	// Restore plan value for CodeBaseIntegration. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.CodeBaseIntegration = planCodeBaseIntegration
+	data.CodeBaseIntegration = utils.ResolveUnknowns(planCodeBaseIntegration, data.CodeBaseIntegration)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -7576,7 +7986,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Delete(ctx context.Context, request re
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "code_base_integration", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "code_base_integration", err),
 		)
 		return
 	}

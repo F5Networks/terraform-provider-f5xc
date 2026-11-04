@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCUserGroup_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ug-" + acctest.RandString(t, 8)
+	name := "example-ug-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,21 +38,21 @@ func TestAccResourceAutoF5XCUserGroup_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserGroupConfig_basic(name),
 			},
 			{
-				ResourceName:                         "f5xc_user_group.test",
+				ResourceName:                         "f5xc_user_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.example"),
 			},
 			{
 				Config: testAccResourceAutoF5XCUserGroupConfig_basicUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_user_group.test",
+				ResourceName:                         "f5xc_user_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.example"),
 			},
 		},
 	})
@@ -61,7 +61,7 @@ func TestAccResourceAutoF5XCUserGroup_basic(t *testing.T) {
 func TestAccResourceAutoF5XCUserGroup_withDescription(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ug-" + acctest.RandString(t, 8)
+	name := "example-ug-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,14 +72,52 @@ func TestAccResourceAutoF5XCUserGroup_withDescription(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserGroupConfig_withDescription(name),
 			},
 			{
-				ResourceName:                         "f5xc_user_group.test",
+				ResourceName:                         "f5xc_user_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.example"),
 			},
 		},
 	})
+}
+
+func TestAccResourceAutoF5XCUserGroup_full(t *testing.T) {
+	t.Parallel()
+
+	name := "example-ug-" + acctest.RandString(t, 8)
+
+	acctest.VcrTestWithOptions(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckUserGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCUserGroupConfig_full(name, "User group full example", "system", "ves-io-monitor-role"),
+			},
+			{
+				ResourceName:                         "f5xc_user_group.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.example"),
+			},
+			{
+				Config: testAccResourceAutoF5XCUserGroupConfig_full(name, "User group updated full example", "shared", "ves-io-admin-role"),
+			},
+			{
+				ResourceName:                         "f5xc_user_group.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_group.example"),
+			},
+		},
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCUserGroupConfig_full("example-user-group", "User group full example", "system", "ves-io-monitor-role"),
+		})
 }
 
 func testAccCheckUserGroupDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -88,7 +126,7 @@ func testAccCheckUserGroupDestroyProducer(t *testing.T) func(*terraform.State) e
 
 func testAccResourceAutoF5XCUserGroupConfig_basic(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_group" "test" {
+resource "f5xc_user_group" "example" {
   name = %q
 }
 `, name)
@@ -96,18 +134,35 @@ resource "f5xc_user_group" "test" {
 
 func testAccResourceAutoF5XCUserGroupConfig_basicUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_group" "test" {
+resource "f5xc_user_group" "example" {
   name        = %q
-  description = "Updated user group"
+  description = "User group updated example"
 }
 `, name)
 }
 
 func testAccResourceAutoF5XCUserGroupConfig_withDescription(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_group" "test" {
+resource "f5xc_user_group" "example" {
   name        = %q
-  description = "Acceptance test user group"
+  description = "User group example"
 }
 `, name)
+}
+
+func testAccResourceAutoF5XCUserGroupConfig_full(name, description, namespace, role string) string {
+	return fmt.Sprintf(`
+resource "f5xc_user_group" "example" {
+  name         = %q
+  description  = %q
+  display_name = "User Group Example"
+
+  namespace_roles = [
+    {
+      namespace = %q
+      role      = %q
+    }
+  ]
+}
+`, name, description, namespace, role)
 }

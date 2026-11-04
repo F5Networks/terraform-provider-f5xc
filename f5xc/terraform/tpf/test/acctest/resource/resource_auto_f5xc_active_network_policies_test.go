@@ -30,7 +30,7 @@ import (
 func TestAccResourceAutoF5XCActiveNetworkPolicies_basic(t *testing.T) {
 
 	namespace := "default"
-	policyOneName := "tf-acc-active-network-policy-one-" + acctest.RandString(t, 8)
+	policyOneName := "example-active-network-policy-one-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -40,7 +40,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -50,7 +50,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withSinglePolicy(namespace, policyOneName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -60,13 +60,13 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceAutoF5XCActiveNetworkPolicies_withSinglePolicyTransition(t *testing.T) {
+func TestAccResourceAutoF5XCActiveNetworkPolicies_withPolicy(t *testing.T) {
 
 	namespace := "default"
-	policyOneName := "tf-acc-active-network-policy-one-" + acctest.RandString(t, 8)
-	policyTwoName := "tf-acc-active-network-policy-two-" + acctest.RandString(t, 8)
+	policyOneName := "example-active-network-policy-one-" + acctest.RandString(t, 8)
+	policyTwoName := "example-active-network-policy-two-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -74,7 +74,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withSinglePolicyTransition(t *
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withSinglePolicy(namespace, policyOneName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -84,22 +84,26 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withSinglePolicyTransition(t *
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withReplacementPolicy(namespace, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
 				ImportStateVerifyIdentifierAttribute: "namespace",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withSinglePolicy(namespace, policyOneName),
+		})
 }
 
 func TestAccResourceAutoF5XCActiveNetworkPolicies_withMultiplePolicies(t *testing.T) {
 
 	namespace := "default"
-	policyOneName := "tf-acc-active-network-policy-one-" + acctest.RandString(t, 8)
-	policyTwoName := "tf-acc-active-network-policy-two-" + acctest.RandString(t, 8)
-	policyThreeName := "tf-acc-active-network-policy-three-" + acctest.RandString(t, 8)
+	policyOneName := "example-active-network-policy-one-" + acctest.RandString(t, 8)
+	policyTwoName := "example-active-network-policy-two-" + acctest.RandString(t, 8)
+	policyThreeName := "example-active-network-policy-three-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,7 +113,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withMultiplePolicies(t *testin
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withTwoPolicies(namespace, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -119,7 +123,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withMultiplePolicies(t *testin
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withThreePolicies(namespace, policyOneName, policyTwoName, policyThreeName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -132,8 +136,8 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withMultiplePolicies(t *testin
 func TestAccResourceAutoF5XCActiveNetworkPolicies_withPoliciesCleared(t *testing.T) {
 
 	namespace := "default"
-	policyOneName := "tf-acc-active-network-policy-one-" + acctest.RandString(t, 8)
-	policyTwoName := "tf-acc-active-network-policy-two-" + acctest.RandString(t, 8)
+	policyOneName := "example-active-network-policy-one-" + acctest.RandString(t, 8)
+	policyTwoName := "example-active-network-policy-two-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -143,7 +147,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withPoliciesCleared(t *testing
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withTwoPolicies(namespace, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -153,7 +157,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withPoliciesCleared(t *testing
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -165,9 +169,9 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withPoliciesCleared(t *testing
 
 func TestAccResourceAutoF5XCActiveNetworkPolicies_withUpdateCycle(t *testing.T) {
 
-	namespace := "shared"
-	policyOneName := "tf-acc-active-network-policy-one-" + acctest.RandString(t, 8)
-	policyTwoName := "tf-acc-active-network-policy-two-" + acctest.RandString(t, 8)
+	namespace := "default"
+	policyOneName := "example-active-network-policy-one-" + acctest.RandString(t, 8)
+	policyTwoName := "example-active-network-policy-two-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -177,7 +181,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withUpdateCycle(t *testing.T) 
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -187,7 +191,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withUpdateCycle(t *testing.T) 
 				Config: testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withTwoPolicies(namespace, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_network_policies.test",
+				ResourceName:                         "f5xc_active_network_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -199,7 +203,7 @@ func TestAccResourceAutoF5XCActiveNetworkPolicies_withUpdateCycle(t *testing.T) 
 
 func testAccResourceAutoF5XCActiveNetworkPoliciesConfig_basic(namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_active_network_policies" "test" {
+resource "f5xc_active_network_policies" "example" {
   namespace = %q
 }
 `, namespace)
@@ -209,7 +213,7 @@ func testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withSinglePolicy(namespa
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_network_policies" "test" {
+resource "f5xc_active_network_policies" "example" {
   namespace = %q
 
   network_policies = [
@@ -228,7 +232,7 @@ func testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withReplacementPolicy(na
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_network_policies" "test" {
+resource "f5xc_active_network_policies" "example" {
   namespace = %q
 
   network_policies = [
@@ -248,7 +252,7 @@ func testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withTwoPolicies(namespac
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_network_policies" "test" {
+resource "f5xc_active_network_policies" "example" {
   namespace = %q
 
   network_policies = [
@@ -272,7 +276,7 @@ func testAccResourceAutoF5XCActiveNetworkPoliciesConfig_withThreePolicies(namesp
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_network_policies" "test" {
+resource "f5xc_active_network_policies" "example" {
   namespace = %q
 
   network_policies = [

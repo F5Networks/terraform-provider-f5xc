@@ -8,27 +8,14 @@ terraform {
   }
 }
 
-# 2. Configure the F5XC Provider using an API P12 file
+# 2. Configure the F5XC Provider.
+# Set F5XCProvider_API_TOKEN in the environment or use one of the other
+# authentication methods documented in the provider authentication guide.
 provider "f5xc" {
-  api_p12_file = "/path/to/api_credential.p12"
-  url          = "https://<tenant_name>.console.ves.volterra.io/api"
-  throttling = {
-    enabled             = true
-    max_retries         = 5
-    initial_backoff     = "250ms"
-    max_backoff         = "8s"
-    multiplier          = 2.0
-    jitter_ratio        = 0.2
-    respect_retry_after = true
-  }
-}
+  url = "https://<tenant_name>.console.ves.volterra.io/api"
 
-# 2. (Alternative) Configure the F5XC Provider using an API Token
-provider "f5xc" {
-  api_token = "<your_api_token>"
-  url       = "https://<tenant_name>.console.ves.volterra.io/api"
+  # Declaring the block enables retries for HTTP 429 responses.
   throttling = {
-    enabled             = true
     max_retries         = 5
     initial_backoff     = "250ms"
     max_backoff         = "8s"

@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestResolveMetadata_UsesGeneratedLinksOverride(t *testing.T) {
+func TestResolveMetadata_UsesGeneratedResourceLinksOverride(t *testing.T) {
 	cfg := &Config{
 		DefaultCategory: "General",
 		Resources: map[string]DocMetadata{
@@ -28,10 +28,64 @@ func TestResolveMetadata_UsesGeneratedLinksOverride(t *testing.T) {
 
 	meta := resolveMetadata("origin_pool", "resources", cfg, links)
 	if meta.APIURL != "https://docs.cloud.f5.com/docs-v2/api/generated-url" {
-		t.Fatalf("expected generated links override URL, got %q", meta.APIURL)
+		t.Fatalf("expected generated resource links override URL, got %q", meta.APIURL)
 	}
 	if meta.Subcategory != "App Security & Load Balancing" {
 		t.Fatalf("expected subcategory to come from categories config, got %q", meta.Subcategory)
+	}
+}
+
+func TestMergeLinksConfig_UsesOverrideOnlyForExplicitEntries(t *testing.T) {
+	base := &LinksConfig{
+		Resources: map[string]string{
+			"api_crawler":      "https://docs.cloud.f5.com/docs-v2/api/api-crawler",
+			"allowed_domain":   "https://docs.cloud.f5.com/docs-v2/api/allowed-domain",
+			"protected_domain": "https://docs.cloud.f5.com/docs-v2/api/protected-domain",
+		},
+		DataSources: map[string]string{
+			"active_alert_policies": "https://docs.cloud.f5.com/docs-v2/api/namespace",
+		},
+	}
+	override := &LinksConfig{
+		Resources: map[string]string{
+			"api_crawler": "https://docs.cloud.f5.com/docs-v2/api/api-sec-api-crawler",
+		},
+	}
+
+	merged := mergeLinksConfig(base, override)
+
+	if merged.Resources["api_crawler"] != "https://docs.cloud.f5.com/docs-v2/api/api-sec-api-crawler" {
+		t.Fatalf("expected override resource URL to win, got %q", merged.Resources["api_crawler"])
+	}
+	if merged.Resources["allowed_domain"] != "https://docs.cloud.f5.com/docs-v2/api/allowed-domain" {
+		t.Fatalf("expected non-overridden resource URL to remain from generated data, got %q", merged.Resources["allowed_domain"])
+	}
+	if merged.DataSources["active_alert_policies"] != "https://docs.cloud.f5.com/docs-v2/api/namespace" {
+		t.Fatalf("expected generated data source URL to remain unchanged, got %q", merged.DataSources["active_alert_policies"])
+	}
+}
+
+func TestResolveMetadata_UsesGeneratedDataSourceLinksOverride(t *testing.T) {
+	cfg := &Config{
+		DefaultCategory: "General",
+		Resources:       map[string]DocMetadata{},
+		DataSources: map[string]DocMetadata{
+			"active_alert_policies": {
+				Subcategory: "General",
+				APIURL:      "https://docs.cloud.f5.com/docs-v2/api/old-url",
+			},
+		},
+		PrefixMappings: map[string]string{},
+	}
+
+	links := &LinksConfig{DataSources: map[string]string{"active_alert_policies": "https://docs.cloud.f5.com/docs-v2/api/new-url"}}
+
+	meta := resolveMetadata("active_alert_policies", "data-sources", cfg, links)
+	if meta.APIURL != "https://docs.cloud.f5.com/docs-v2/api/new-url" {
+		t.Fatalf("expected data-source generated links override URL, got %q", meta.APIURL)
+	}
+	if meta.Subcategory != "General" {
+		t.Fatalf("expected subcategory to remain from categories config, got %q", meta.Subcategory)
 	}
 }
 
@@ -158,5 +212,40 @@ func TestUpdateDocFile_UpdatesSubcategoryAndAPIReference(t *testing.T) {
 	}
 	if updatedAgain {
 		t.Fatalf("expected second pass to be idempotent and report no changes")
+	}
+}
+
+func TestResolveMetadata_AttachmentResourceInheritsSubcategoryAndParentLink(t *testing.T) {
+	cfg := &Config{
+		DefaultCategory: "General",
+		Resources:       map[string]DocMetadata{},
+		DataSources:     map[string]DocMetadata{},
+		PrefixMappings: map[string]string{
+			"securemesh_": "Site Management",
+		},
+	}
+
+	links := &LinksConfig{
+		Resources: map[string]string{
+			"tcp_loadbalancer":   "https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer",
+			"securemesh_site":    "https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site",
+			"securemesh_site_v2": "https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2",
+		},
+	}
+
+	tcpMeta := resolveMetadata("tcp_loadbalancer_service_policy_attachments", "resources", cfg, links)
+	if tcpMeta.Subcategory != "App Security & Load Balancing" {
+		t.Fatalf("expected attachment subcategory %q, got %q", "App Security & Load Balancing", tcpMeta.Subcategory)
+	}
+	if tcpMeta.APIURL != "https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer" {
+		t.Fatalf("expected parent TCP loadbalancer API URL, got %q", tcpMeta.APIURL)
+	}
+
+	smMeta := resolveMetadata("securemesh_site_v2_forward_proxy_policy_attachments", "resources", cfg, links)
+	if smMeta.Subcategory != "App Security & Load Balancing" {
+		t.Fatalf("expected attachment subcategory %q even when prefix_mappings match, got %q", "App Security & Load Balancing", smMeta.Subcategory)
+	}
+	if smMeta.APIURL != "https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2" {
+		t.Fatalf("expected longest-prefix parent securemesh_site_v2 API URL, got %q", smMeta.APIURL)
 	}
 }

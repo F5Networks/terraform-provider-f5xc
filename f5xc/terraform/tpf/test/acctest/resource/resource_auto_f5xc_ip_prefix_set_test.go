@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCIpPrefixSet_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ips-" + acctest.RandString(t, 8)
+	name := "example-ips-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCIpPrefixSet_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCIpPrefixSet_basic(t *testing.T) {
 func TestAccResourceAutoF5XCIpPrefixSet_withIpv4Prefixes(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ips-" + acctest.RandString(t, 8)
+	name := "example-ips-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,10 +74,10 @@ func TestAccResourceAutoF5XCIpPrefixSet_withIpv4Prefixes(t *testing.T) {
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_withIpv4Prefixes(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -87,7 +87,7 @@ func TestAccResourceAutoF5XCIpPrefixSet_withIpv4Prefixes(t *testing.T) {
 func TestAccResourceAutoF5XCIpPrefixSet_withIpv6Prefixes(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ips-" + acctest.RandString(t, 8)
+	name := "example-ips-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -99,10 +99,10 @@ func TestAccResourceAutoF5XCIpPrefixSet_withIpv6Prefixes(t *testing.T) {
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_withIpv6Prefixes(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -112,7 +112,7 @@ func TestAccResourceAutoF5XCIpPrefixSet_withIpv6Prefixes(t *testing.T) {
 func TestAccResourceAutoF5XCIpPrefixSet_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ips-" + acctest.RandString(t, 8)
+	name := "example-ips-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -124,20 +124,20 @@ func TestAccResourceAutoF5XCIpPrefixSet_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -147,10 +147,10 @@ func TestAccResourceAutoF5XCIpPrefixSet_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCIpPrefixSet_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ips-" + acctest.RandString(t, 8)
+	name := "example-ips-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckIpPrefixSetDestroyProducer(t),
@@ -159,24 +159,28 @@ func TestAccResourceAutoF5XCIpPrefixSet_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIpPrefixSetConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ip_prefix_set.test",
+				ResourceName:                         "f5xc_ip_prefix_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ip_prefix_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCIpPrefixSetConfig_full("example-ips", "default"),
+		})
 }
 
 func testAccCheckIpPrefixSetDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -185,10 +189,10 @@ func testAccCheckIpPrefixSetDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test ip prefix set"
+  description = "Basic ip prefix set example"
 
 	ipv4_prefixes = [
 		{
@@ -202,10 +206,10 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test ip prefix set updated"
+  description = "Updated basic ip prefix set example"
 
 	ipv4_prefixes = [
 		{
@@ -219,10 +223,10 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_withIpv4Prefixes(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "IP prefix set with IPv4 prefixes"
+  description = "IP prefix set example with IPv4 prefixes"
 
   ipv4_prefixes = [
     {
@@ -240,14 +244,14 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_withIpv6Prefixes(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "IP prefix set with IPv6 prefixes"
+  description = "IP prefix set example with IPv6 prefixes"
 
   ipv6_prefixes = [
     {
-			ipv6_prefix = "2001:0db8:0000:0000:0000:0000:0000:0000/32"
+	  ipv6_prefix = "2001:0db8:0000:0000:0000:0000:0000:0000/32"
       description = "Documentation prefix"
     }
   ]
@@ -257,13 +261,13 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "IP prefix set with labels"
+  description = "IP prefix set example with labels"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   ipv4_prefixes = [
@@ -277,13 +281,13 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "IP prefix set with labels updated"
+  description = "IP prefix set example with labels updated"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "network"
   }
 
@@ -301,13 +305,13 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Full ip prefix set"
+  description = "Full ip prefix set example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -327,7 +331,7 @@ resource "f5xc_ip_prefix_set" "test" {
 
   ipv6_prefixes = [
     {
-			ipv6_prefix = "2001:0db8:0000:0000:0000:0000:0000:0000/32"
+	  ipv6_prefix = "2001:0db8:0000:0000:0000:0000:0000:0000/32"
       description = "Documentation prefix"
     }
   ]
@@ -337,18 +341,18 @@ resource "f5xc_ip_prefix_set" "test" {
 
 func testAccResourceAutoF5XCIpPrefixSetConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ip_prefix_set" "test" {
+resource "f5xc_ip_prefix_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Full ip prefix set updated"
+  description = "Updated full ip prefix set example"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "network"
   }
 
   annotations = {
-    owner = "infra-team"
+    owner = "netsec-team"
   }
 
   ipv4_prefixes = [

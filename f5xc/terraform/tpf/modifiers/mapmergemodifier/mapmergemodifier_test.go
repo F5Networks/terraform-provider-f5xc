@@ -196,9 +196,9 @@ func TestPlanModifyMap_KnownConfig_KnownState(t *testing.T) {
 		"expected plan = config keys ∪ ves.io/* state keys")
 }
 
-// Scenario 4b: user deletes a key from HCL config → merge(state, config) preserves
-// the key from state in the plan. The key will be removed after the API call + Read
-// cycle on the next refresh. Backend-injected keys (ves.io/*) are also preserved.
+// Scenario 4b: user deletes a key from HCL config → plan equals config to satisfy
+// Terraform Core's constraint (plan must equal config or prior state, never a hybrid).
+// Backend-injected keys (ves.io/*) are re-populated after the Update + Read cycle.
 func TestPlanModifyMap_KnownConfig_KnownState_UserDeletesKey(t *testing.T) {
 	m := MapMergeModifier{}
 
@@ -220,17 +220,6 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserDeletesKey(t *testing.T) {
 		t.Fatalf("failed to create state map: %v", diags)
 	}
 
-	// Expected: merge(state, config) — keyB is preserved from state (will be removed
-	// after the API call + Read cycle), ves.io/provider is kept (backend key).
-	expectedMap, diags := types.MapValue(types.StringType, map[string]attr.Value{
-		"keyA":            types.StringValue("valueA"),
-		"keyB":            types.StringValue("valueB"),
-		"ves.io/provider": types.StringValue("azure"),
-	})
-	if diags.HasError() {
-		t.Fatalf("failed to create expected map: %v", diags)
-	}
-
 	req := planmodifier.MapRequest{
 		ConfigValue: configMap,
 		StateValue:  stateMap,
@@ -242,12 +231,12 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserDeletesKey(t *testing.T) {
 
 	assert.False(t, resp.PlanValue.IsUnknown(),
 		"expected plan to be known after user deletes a key")
-	assert.Equal(t, expectedMap, resp.PlanValue,
-		"expected merge(state, config): all state keys preserved, config values win on conflict")
+	assert.Equal(t, configMap, resp.PlanValue,
+		"expected plan to equal config when user deletes a key")
 }
 
-// Scenario 4c: user adds a new key to HCL config → new key must appear in plan.
-// Backend-injected keys (ves.io/*) must still be preserved.
+// Scenario 4c: user adds a new key to HCL config → plan equals config to satisfy
+// Terraform Core's constraint (plan must equal config or prior state, never a hybrid).
 func TestPlanModifyMap_KnownConfig_KnownState_UserAddsKey(t *testing.T) {
 	m := MapMergeModifier{}
 
@@ -269,16 +258,6 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserAddsKey(t *testing.T) {
 		t.Fatalf("failed to create state map: %v", diags)
 	}
 
-	// Expected: keyA + keyB (user) + ves.io/provider (backend).
-	expectedMap, diags := types.MapValue(types.StringType, map[string]attr.Value{
-		"keyA":            types.StringValue("valueA"),
-		"keyB":            types.StringValue("valueB"),
-		"ves.io/provider": types.StringValue("azure"),
-	})
-	if diags.HasError() {
-		t.Fatalf("failed to create expected map: %v", diags)
-	}
-
 	req := planmodifier.MapRequest{
 		ConfigValue: configMap,
 		StateValue:  stateMap,
@@ -290,8 +269,8 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserAddsKey(t *testing.T) {
 
 	assert.False(t, resp.PlanValue.IsUnknown(),
 		"expected plan to be known after user adds a key")
-	assert.Equal(t, expectedMap, resp.PlanValue,
-		"expected new user key and backend keys to both appear in plan")
+	assert.Equal(t, configMap, resp.PlanValue,
+		"expected plan to equal config when user adds a key")
 }
 
 // Scenario 4d: user changes value of an existing key → new value must appear in plan.
@@ -333,7 +312,7 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserChangesValue(t *testing.T) {
 }
 
 // Scenario 4e: user changes a value AND backend keys are present in state.
-// New value must appear in plan; backend-injected keys (ves.io/*) must be preserved.
+// Plan must equal config to satisfy Terraform Core's constraint (no hybrid of config and state).
 func TestPlanModifyMap_KnownConfig_KnownState_UserChangesValue_WithBackendKey(t *testing.T) {
 	m := MapMergeModifier{}
 
@@ -354,15 +333,6 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserChangesValue_WithBackendKey(t 
 		t.Fatalf("failed to create state map: %v", diags)
 	}
 
-	// Expected: new env value from config, backend key preserved.
-	expectedMap, diags := types.MapValue(types.StringType, map[string]attr.Value{
-		"env":             types.StringValue("stage"),
-		"ves.io/provider": types.StringValue("azure"),
-	})
-	if diags.HasError() {
-		t.Fatalf("failed to create expected map: %v", diags)
-	}
-
 	req := planmodifier.MapRequest{
 		ConfigValue: configMap,
 		StateValue:  stateMap,
@@ -374,8 +344,8 @@ func TestPlanModifyMap_KnownConfig_KnownState_UserChangesValue_WithBackendKey(t 
 
 	assert.False(t, resp.PlanValue.IsUnknown(),
 		"expected plan to be known after user changes a value with backend key present")
-	assert.Equal(t, expectedMap, resp.PlanValue,
-		"expected new user value and backend key to both appear in plan")
+	assert.Equal(t, configMap, resp.PlanValue,
+		"expected plan to equal config when user changes a value")
 }
 
 // TestPlanModifyMap_KnownConfigMultipleKeys verifies that a config with multiple

@@ -39,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -49,6 +50,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_network_connector "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_connector"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -227,8 +229,8 @@ func (r *ResourceF5XCNetworkConnector) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
+		MarkdownDescription: "Network Connector is used to create connection between two virtual networks on a given site.<br><br>Outside Network is the unsecured network<br><br>Inside Network is secured network<br><br>Inside network can have connectivity to outside network in the following ways<br><br>Snat: There are 2 Snat modes<br><br>Default Gateway Snat:<br>A default route is added in inside network with CE as gateway. As outside network does not have any visibility<br>of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either<br>interface IP of out side virtual network interface Snat pool<br><br>Dynamic Gateway Snat:<br>Non default routes from out side network are pushed to inside network with CE as gateway. As outside network<br>does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside.<br>SNAT IP can be either interface IP of out side virtual network interface Snat pool<br>This mode is currently not supported<br><br>Dynamic Gateway:<br><br>Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has<br>reachability information of inside network, no SNAT is required<br>This mode is currently not supported<br><br>Proxy Configuration:<br>In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity.<br>There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would<br>take effect<br><br>Dynamic Reverse Proxy:<br>There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is<br>attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network<br>to select the destination. This dynamic resolution is done using a pre defined field in the received packet.<br>This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https,<br>DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS<br>resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the<br>outside network<br><br>Forward Proxy:<br>Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated<br>to actual IPs towards outside network<br><br>Constraint: There are no overlapping ip(s) between outside and inside network.",
+		Description:         "Network Connector is used to create connection between two virtual networks on a given site. Outside Network is the unsecured network Inside Network is secured network Inside network can have connectivity to outside network in the following ways Snat: There are 2 Snat modes Default Gateway Snat: A default route is added in inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool Dynamic Gateway Snat: Non default routes from out side network are pushed to inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool This mode is currently not supported Dynamic Gateway: Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has reachability information of inside network, no SNAT is required This mode is currently not supported Proxy Configuration: In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity. There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would take effect Dynamic Reverse Proxy: There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network to select the destination. This dynamic resolution is done using a pre defined field in the received packet. This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https, DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the outside network Forward Proxy: Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated to actual IPs towards outside network Constraint: There are no overlapping ip(s) between outside and inside network.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -284,7 +286,7 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -600,9 +602,17 @@ func (r *ResourceF5XCNetworkConnector) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNetworkConnectorModel
 
 	// Read Terraform plan data into the model
@@ -846,6 +856,9 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 			}
 			enableForwardProxyOneOfSpec := &ves_io_schema_network_connector.CreateSpecType_EnableForwardProxy{}
 			enableForwardProxyOneOfSpec.EnableForwardProxy = &ves_io_schema.ForwardProxyConfigType{}
+			enableForwardProxyOneOfSpec.EnableForwardProxy.TlsInterceptionChoice = &ves_io_schema.ForwardProxyConfigType_NoInterception{
+				NoInterception: &ves_io_schema.Empty{},
+			}
 			spec.ForwardProxyChoice = enableForwardProxyOneOfSpec
 
 			// resource modelToSpecNested UintField --> ConnectionTimeout
@@ -894,7 +907,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -917,7 +930,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_network_connector.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "network_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "network_connector", err),
 		)
 		return
 	}
@@ -1288,6 +1301,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["pool_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
 				}
 
@@ -1341,6 +1355,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["routing_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					sliToSloSnatAttributeMap["routing_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap)
 				}
 
@@ -1644,7 +1659,7 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "network_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_connector", err),
 		)
 		return
 	}
@@ -2009,7 +2024,10 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["pool_choice"] = finalObj
 				} else {
-					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectValueMust(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap, map[string]attr.Value{
+						"interface_ip": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> RoutingChoice
@@ -2062,7 +2080,10 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["routing_choice"] = finalObj
 				} else {
-					sliToSloSnatAttributeMap["routing_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					sliToSloSnatAttributeMap["routing_choice"] = types.ObjectValueMust(NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap, map[string]attr.Value{
+						"default_gw_snat": types.BoolValue(true),
+					})
 				}
 
 				sliToSloSnatObj, sliToSloSnatObjDiags := types.ObjectValue(NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap, sliToSloSnatAttributeMap)
@@ -2306,7 +2327,13 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.ForwardProxyChoice = types.ObjectNull(NetworkConnectorForwardProxyChoiceModelAttributeMap)
+
+		if data.ForwardProxyChoice.IsNull() || data.ForwardProxyChoice.IsUnknown() || ((data.ForwardProxyChoice.Attributes()["disable_forward_proxy"].IsNull() || data.ForwardProxyChoice.Attributes()["disable_forward_proxy"].IsUnknown()) && (data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).IsNull() || data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).IsUnknown() || ((data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["connection_timeout"].IsNull() || data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["connection_timeout"].IsUnknown()) && (data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["max_connect_attempts"].IsNull() || data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["max_connect_attempts"].IsUnknown()) && (data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["white_listed_ports"].IsNull() || data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["white_listed_ports"].IsUnknown()) && (data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["white_listed_prefixes"].IsNull() || data.ForwardProxyChoice.Attributes()["enable_forward_proxy"].(types.Object).Attributes()["white_listed_prefixes"].IsUnknown())))) {
+			data.ForwardProxyChoice = types.ObjectValueMust(NetworkConnectorForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_forward_proxy": types.BoolValue(true),
+				"enable_forward_proxy":  types.ObjectNull(NetworkConnectorForwardProxyChoiceEnableForwardProxyModelAttributeMap),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2318,6 +2345,12 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNetworkConnectorModel
@@ -2581,6 +2614,9 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 			}
 			enableForwardProxyOneOfSpec := &ves_io_schema_network_connector.ReplaceSpecType_EnableForwardProxy{}
 			enableForwardProxyOneOfSpec.EnableForwardProxy = &ves_io_schema.ForwardProxyConfigType{}
+			enableForwardProxyOneOfSpec.EnableForwardProxy.TlsInterceptionChoice = &ves_io_schema.ForwardProxyConfigType_NoInterception{
+				NoInterception: &ves_io_schema.Empty{},
+			}
 			spec.ForwardProxyChoice = enableForwardProxyOneOfSpec
 
 			// resource modelToSpecNested UintField --> ConnectionTimeout
@@ -2629,7 +2665,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2645,7 +2681,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	err = r.client.ReplaceObject(ctx, ves_io_schema_network_connector.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "network_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_connector", err),
 		)
 		return
 	}
@@ -2660,7 +2696,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "network_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_connector", err),
 		)
 		return
 	}
@@ -2766,34 +2802,27 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -2822,17 +2851,23 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -3025,6 +3060,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["pool_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
 				}
 
@@ -3078,6 +3114,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					sliToSloSnatAttributeMap["routing_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					sliToSloSnatAttributeMap["routing_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap)
 				}
 
@@ -3397,7 +3434,7 @@ func (r *ResourceF5XCNetworkConnector) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "network_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "network_connector", err),
 		)
 		return
 	}

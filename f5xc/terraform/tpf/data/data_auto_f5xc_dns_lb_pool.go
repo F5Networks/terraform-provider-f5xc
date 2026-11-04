@@ -29,7 +29,7 @@ type DataSourceF5XCDnsLbPool struct {
 	client *client.APIClient
 }
 
-type DnsLbPoolGlobalSpecTypePoolTypeChoice struct {
+type DnsLbPoolPoolTypeChoice struct {
 	APool     types.Object `tfsdk:"a_pool"`
 	AaaaPool  types.Object `tfsdk:"aaaa_pool"`
 	CnamePool types.Object `tfsdk:"cname_pool"`
@@ -37,30 +37,30 @@ type DnsLbPoolGlobalSpecTypePoolTypeChoice struct {
 	SrvPool   types.Object `tfsdk:"srv_pool"`
 }
 
-type DnsLbPoolGlobalSpecTypeAPool struct {
+type DnsLbPoolAPool struct {
 	HealthCheckChoice types.Object `tfsdk:"health_check_choice"`
 	MaxAnswers        types.Int64  `tfsdk:"max_answers"`
 	Members           types.List   `tfsdk:"members"`
 }
 
-type DnsLbPoolAPoolHealthCheckChoice struct {
+type DnsLbPoolHealthCheckChoice struct {
 	DisableHealthCheck types.Bool   `tfsdk:"disable_health_check"`
 	HealthCheck        types.Object `tfsdk:"health_check"`
 }
 
-type DnsLbPoolDnsLbPoolAddressMember struct {
+type DnsLbPoolAddrMember struct {
 	IpEndpoint types.String `tfsdk:"ip_endpoint"`
 	Name       types.String `tfsdk:"name"`
 	Priority   types.Int64  `tfsdk:"priority"`
 	Ratio      types.Int64  `tfsdk:"ratio"`
 }
 
-type DnsLbPoolGlobalSpecTypeAaaaPool struct {
+type DnsLbPoolAaaaPool struct {
 	MaxAnswers types.Int64 `tfsdk:"max_answers"`
 	Members    types.List  `tfsdk:"members"`
 }
 
-type DnsLbPoolGlobalSpecTypeCnamePool struct {
+type DnsLbPoolCnamePool struct {
 	HealthCheckChoice types.Object `tfsdk:"health_check_choice"`
 	Members           types.List   `tfsdk:"members"`
 }
@@ -70,7 +70,7 @@ type DnsLbPoolCNAMEPoolHealthCheckChoice struct {
 	HealthCheck        types.Object `tfsdk:"health_check"`
 }
 
-type DnsLbPoolDnsLbPoolCNAMEMember struct {
+type DnsLbPoolCNAMEMember struct {
 	Domain           types.String `tfsdk:"domain"`
 	FinalTranslation types.Bool   `tfsdk:"final_translation"`
 	Name             types.String `tfsdk:"name"`
@@ -78,24 +78,24 @@ type DnsLbPoolDnsLbPoolCNAMEMember struct {
 	Ratio            types.Int64  `tfsdk:"ratio"`
 }
 
-type DnsLbPoolGlobalSpecTypeMxPool struct {
+type DnsLbPoolMxPool struct {
 	MaxAnswers types.Int64 `tfsdk:"max_answers"`
 	Members    types.List  `tfsdk:"members"`
 }
 
-type DnsLbPoolDnsLbPoolMXMember struct {
+type DnsLbPoolMXMember struct {
 	Domain   types.String `tfsdk:"domain"`
 	Name     types.String `tfsdk:"name"`
 	Priority types.Int64  `tfsdk:"priority"`
 	Ratio    types.Int64  `tfsdk:"ratio"`
 }
 
-type DnsLbPoolGlobalSpecTypeSrvPool struct {
+type DnsLbPoolSrvPool struct {
 	MaxAnswers types.Int64 `tfsdk:"max_answers"`
 	Members    types.List  `tfsdk:"members"`
 }
 
-type DnsLbPoolDnsLbPoolSRVMember struct {
+type DnsLbPoolSRVMember struct {
 	FinalTranslation types.Bool   `tfsdk:"final_translation"`
 	Name             types.String `tfsdk:"name"`
 	Port             types.Int64  `tfsdk:"port"`
@@ -105,7 +105,7 @@ type DnsLbPoolDnsLbPoolSRVMember struct {
 	Weight           types.Int64  `tfsdk:"weight"`
 }
 
-type DnsLbPoolGlobalSpecTypeTtlChoice struct {
+type DnsLbPoolTtlChoice struct {
 	Ttl         types.Int64 `tfsdk:"ttl"`
 	UseRrsetTtl types.Bool  `tfsdk:"use_rrset_ttl"`
 }
@@ -352,8 +352,8 @@ func (d *DataSourceF5XCDnsLbPool) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCDnsLbPool) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Pool  object is used for configuring DNS Load Balancer Pool",
+		Description:         "DNS Load Balancer Pool  object is used for configuring DNS Load Balancer Pool",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -852,7 +852,7 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_lb_pool", err))
 		return
 	}
 
@@ -996,7 +996,7 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 		poolTypeChoiceChoices := specData.GetPoolTypeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var poolTypeChoiceChoicesModel = &DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		var poolTypeChoiceChoicesModel = &DnsLbPoolPoolTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1102,33 +1102,33 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 				if len(aPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aPoolElement.GetMembers()))
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aPoolElement.GetMembers()))
 					for _, membersElement := range aPoolElement.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
 
 						// data specToModelNested RequiredStringField --> IpEndpoint
 						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// data specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1174,33 +1174,33 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 				if len(aaaaPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aaaaPoolElement.GetMembers()))
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aaaaPoolElement.GetMembers()))
 					for _, membersElement := range aaaaPoolElement.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
 
 						// data specToModelNested RequiredStringField --> IpEndpoint
 						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// data specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1328,36 +1328,36 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 				if len(cnamePoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolCNAMEMember, 0, len(cnamePoolElement.GetMembers()))
+					membersElements := make([]DnsLbPoolCNAMEMember, 0, len(cnamePoolElement.GetMembers()))
 					for _, membersElement := range cnamePoolElement.GetMembers() {
-						dnsLbPoolDnsLbPoolCNAMEMemberModel := DnsLbPoolDnsLbPoolCNAMEMember{}
+						dnsLbPoolCNAMEMemberModel := DnsLbPoolCNAMEMember{}
 
 						// data specToModelNested RequiredStringField --> Domain
 						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
 						}
 
 						// data specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
+						dnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
 
 						// data specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringNull()
+							dnsLbPoolCNAMEMemberModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// data specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolCNAMEMemberModel)
+						membersElements = append(membersElements, dnsLbPoolCNAMEMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1403,33 +1403,33 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 				if len(mxPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolMXMember, 0, len(mxPoolElement.GetMembers()))
+					membersElements := make([]DnsLbPoolMXMember, 0, len(mxPoolElement.GetMembers()))
 					for _, membersElement := range mxPoolElement.GetMembers() {
-						dnsLbPoolDnsLbPoolMXMemberModel := DnsLbPoolDnsLbPoolMXMember{}
+						dnsLbPoolMXMemberModel := DnsLbPoolMXMember{}
 
 						// data specToModelNested RequiredStringField --> Domain
 						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+							dnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringNull()
+							dnsLbPoolMXMemberModel.Domain = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringNull()
+							dnsLbPoolMXMemberModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// data specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolMXMemberModel)
+						membersElements = append(membersElements, dnsLbPoolMXMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1475,42 +1475,42 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 				if len(srvPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolSRVMember, 0, len(srvPoolElement.GetMembers()))
+					membersElements := make([]DnsLbPoolSRVMember, 0, len(srvPoolElement.GetMembers()))
 					for _, membersElement := range srvPoolElement.GetMembers() {
-						dnsLbPoolDnsLbPoolSRVMemberModel := DnsLbPoolDnsLbPoolSRVMember{}
+						dnsLbPoolSRVMemberModel := DnsLbPoolSRVMember{}
 
 						// data specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
+						dnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
 
 						// data specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringNull()
+							dnsLbPoolSRVMemberModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredUintField --> Port
-						dnsLbPoolDnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
+						dnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
 
 						// data specToModelNested RequiredUintField --> Priority
-						dnsLbPoolDnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// data specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
 						// data specToModelNested RequiredStringField --> Target
 						if membersElement.GetTarget() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
+							dnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringNull()
+							dnsLbPoolSRVMemberModel.Target = types.StringNull()
 						}
 
 						// data specToModelNested RequiredUintField --> Weight
-						dnsLbPoolDnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
+						dnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolSRVMemberModel)
+						membersElements = append(membersElements, dnsLbPoolSRVMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1569,7 +1569,7 @@ func (d *DataSourceF5XCDnsLbPool) Read(ctx context.Context, request datasource.R
 		ttlChoiceChoices := specData.GetTtlChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ttlChoiceChoicesModel = &DnsLbPoolGlobalSpecTypeTtlChoice{}
+		var ttlChoiceChoicesModel = &DnsLbPoolTtlChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

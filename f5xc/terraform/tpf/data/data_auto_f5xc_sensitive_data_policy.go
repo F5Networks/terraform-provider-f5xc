@@ -30,7 +30,7 @@ type DataSourceF5XCSensitiveDataPolicy struct {
 	client *client.APIClient
 }
 
-type SensitiveDataPolicySensitiveDataPolicyCustomDataTypeRef struct {
+type SensitiveDataPolicyCustomDataTypeRef struct {
 	CustomDataTypeRef types.Object `tfsdk:"custom_data_type_ref"`
 }
 
@@ -81,8 +81,8 @@ func (d *DataSourceF5XCSensitiveDataPolicy) Metadata(ctx context.Context, reques
 func (r *DataSourceF5XCSensitiveDataPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a sensitive_data_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of sensitive_data_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a sensitive_data_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of sensitive_data_policy) etc. can be fetched",
+		MarkdownDescription: "The sensitive_data_policy is a policy defined by the user to discover the relevant compliances<br>and data types to the user.<br>the user can disabled predefined data types, and add custom data types.<br>the user defines the compliance list that he'd like to monitor.",
+		Description:         "The sensitive_data_policy is a policy defined by the user to discover the relevant compliances and data types to the user. the user can disabled predefined data types, and add custom data types. the user defines the compliance list that he'd like to monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -230,7 +230,7 @@ func (d *DataSourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request da
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "sensitive_data_policy", err))
 		return
 	}
 
@@ -313,10 +313,10 @@ func (d *DataSourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request da
 
 	// data SpecToModelRoot ArrayOfPointerField --> CustomDataTypes
 	if len(specData.GetCustomDataTypes()) > 0 {
-		customDataTypesElements := make([]SensitiveDataPolicySensitiveDataPolicyCustomDataTypeRef, 0, len(specData.GetCustomDataTypes()))
+		customDataTypesElements := make([]SensitiveDataPolicyCustomDataTypeRef, 0, len(specData.GetCustomDataTypes()))
 
 		for _, customDataTypesElement := range specData.GetCustomDataTypes() {
-			sensitiveDataPolicySensitiveDataPolicyCustomDataTypeRefModel := SensitiveDataPolicySensitiveDataPolicyCustomDataTypeRef{}
+			sensitiveDataPolicyCustomDataTypeRefModel := SensitiveDataPolicyCustomDataTypeRef{}
 
 			// data specToModelNested RequiredPointerField --> CustomDataTypeRef
 			if customDataTypesElement.GetCustomDataTypeRef() != nil {
@@ -356,7 +356,7 @@ func (d *DataSourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request da
 				if response.Diagnostics.HasError() {
 					return
 				}
-				sensitiveDataPolicySensitiveDataPolicyCustomDataTypeRefModel.CustomDataTypeRef = objectRefTypeModelModelObj
+				sensitiveDataPolicyCustomDataTypeRefModel.CustomDataTypeRef = objectRefTypeModelModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -365,10 +365,10 @@ func (d *DataSourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request da
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				sensitiveDataPolicySensitiveDataPolicyCustomDataTypeRefModel.CustomDataTypeRef = types.ObjectNull(SensitiveDataPolicyCustomDataTypesCustomDataTypeRefModelAttributeMap)
+				sensitiveDataPolicyCustomDataTypeRefModel.CustomDataTypeRef = types.ObjectNull(SensitiveDataPolicyCustomDataTypesCustomDataTypeRefModelAttributeMap)
 			}
 
-			customDataTypesElements = append(customDataTypesElements, sensitiveDataPolicySensitiveDataPolicyCustomDataTypeRefModel)
+			customDataTypesElements = append(customDataTypesElements, sensitiveDataPolicyCustomDataTypeRefModel)
 		}
 
 		{

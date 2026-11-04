@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCMobileBaseConfig_basicAndroid(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-mobile-base-config-" + testAccRunSuffix(t)
+	name := "example-mobile-base-config-" + testAccRunSuffix(t)
 	firstFQDN := fmt.Sprintf("%s.mobile.example.com", acctest.RandString(t, 8))
 	secondFQDN := fmt.Sprintf("%s.mobile.example.net", acctest.RandString(t, 8))
 
@@ -41,20 +41,20 @@ func TestAccResourceAutoF5XCMobileBaseConfig_basicAndroid(t *testing.T) {
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_basic(name, namespace, "ANDROID", firstFQDN),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_basic(name, namespace, "ANDROID", secondFQDN),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -65,7 +65,7 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withOsTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-mobile-base-config-" + testAccRunSuffix(t)
+	name := "example-mobile-base-config-" + testAccRunSuffix(t)
 	fqdn := fmt.Sprintf("%s.bot.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -77,20 +77,20 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withOsTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_basic(name, namespace, "ANDROID", fqdn),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_basic(name, namespace, "IOS", fqdn),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -101,7 +101,7 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withDescriptionTransition(t *testin
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-mobile-base-config-" + testAccRunSuffix(t)
+	name := "example-mobile-base-config-" + testAccRunSuffix(t)
 	fqdn := fmt.Sprintf("%s.desc.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -110,23 +110,23 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withDescriptionTransition(t *testin
 		CheckDestroy:             testAccCheckMobileBaseConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withDescription(name, namespace, "ANDROID", fqdn, "mobile config one"),
+				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withDescription(name, namespace, "ANDROID", fqdn, "Mobile base config example one"),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withDescription(name, namespace, "ANDROID", fqdn, "mobile config two"),
+				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withDescription(name, namespace, "ANDROID", fqdn, "Mobile base config example two"),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -137,7 +137,7 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withMetadataTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-mobile-base-config-" + testAccRunSuffix(t)
+	name := "example-mobile-base-config-" + testAccRunSuffix(t)
 	fqdn := fmt.Sprintf("%s.meta.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -146,23 +146,23 @@ func TestAccResourceAutoF5XCMobileBaseConfig_withMetadataTransition(t *testing.T
 		CheckDestroy:             testAccCheckMobileBaseConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withMetadata(name, namespace, "ANDROID", fqdn, "test", "platform", "platform-team"),
+				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withMetadata(name, namespace, "ANDROID", fqdn, "example", "platform", "platform-team"),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withMetadata(name, namespace, "IOS", fqdn, "prod", "security", "security-team"),
+				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_withMetadata(name, namespace, "IOS", fqdn, "example", "security", "netsec-team"),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -173,11 +173,11 @@ func TestAccResourceAutoF5XCMobileBaseConfig_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-mobile-base-config-" + testAccRunSuffix(t)
+	name := "example-mobile-base-config-" + testAccRunSuffix(t)
 	firstFQDN := fmt.Sprintf("%s.full.example.com", acctest.RandString(t, 8))
 	secondFQDN := fmt.Sprintf("%s.full.example.net", acctest.RandString(t, 8))
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckMobileBaseConfigDestroyProducer(t),
@@ -186,24 +186,28 @@ func TestAccResourceAutoF5XCMobileBaseConfig_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_full(name, namespace, "ANDROID", firstFQDN),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMobileBaseConfigConfig_full(name, namespace, "IOS", secondFQDN),
 			},
 			{
-				ResourceName:                         "f5xc_mobile_base_config.test",
+				ResourceName:                         "f5xc_mobile_base_config.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_mobile_base_config.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCMobileBaseConfigConfig_full("example-mobile-base-config", "default", "ANDROID", firstFQDN),
+		})
 }
 
 func testAccCheckMobileBaseConfigDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -212,7 +216,7 @@ func testAccCheckMobileBaseConfigDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCMobileBaseConfigConfig_basic(name, namespace, osValue, fqdn string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mobile_base_config" "test" {
+resource "f5xc_mobile_base_config" "example" {
   name      = %q
   namespace = %q
   os        = [%q]
@@ -223,7 +227,7 @@ resource "f5xc_mobile_base_config" "test" {
 
 func testAccResourceAutoF5XCMobileBaseConfigConfig_withDescription(name, namespace, osValue, fqdn, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mobile_base_config" "test" {
+resource "f5xc_mobile_base_config" "example" {
   name        = %q
   namespace   = %q
   os          = [%q]
@@ -235,7 +239,7 @@ resource "f5xc_mobile_base_config" "test" {
 
 func testAccResourceAutoF5XCMobileBaseConfigConfig_withMetadata(name, namespace, osValue, fqdn, env, team, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mobile_base_config" "test" {
+resource "f5xc_mobile_base_config" "example" {
   name      = %q
   namespace = %q
   os        = [%q]
@@ -255,15 +259,15 @@ resource "f5xc_mobile_base_config" "test" {
 
 func testAccResourceAutoF5XCMobileBaseConfigConfig_full(name, namespace, osValue, fqdn string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mobile_base_config" "test" {
+resource "f5xc_mobile_base_config" "example" {
   name        = %q
   namespace   = %q
   os          = [%q]
   fqdn        = %q
-  description = "mobile base config full"
+  description = "Full mobile base config example"
 
   labels = {
-    env   = "test"
+    env   = "example"
     owner = "mobile"
   }
 

@@ -28,9 +28,9 @@ import (
 func TestAccResourceAutoF5XCCrl_basic(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_crl", crlSchema.ObjectType, "crl"),
@@ -39,30 +39,34 @@ func TestAccResourceAutoF5XCCrl_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCrlConfig_basic(name, "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCCrl_withServerPortTransition(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -73,20 +77,20 @@ func TestAccResourceAutoF5XCCrl_withServerPortTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_withServerPort(name, namespace, 8080),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_withServerPort(name, namespace, 8443),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -96,7 +100,7 @@ func TestAccResourceAutoF5XCCrl_withServerPortTransition(t *testing.T) {
 func TestAccResourceAutoF5XCCrl_withRefreshIntervalTransition(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,20 +111,20 @@ func TestAccResourceAutoF5XCCrl_withRefreshIntervalTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_withRefreshInterval(name, namespace, 24),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_withRefreshInterval(name, namespace, 72),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -130,7 +134,7 @@ func TestAccResourceAutoF5XCCrl_withRefreshIntervalTransition(t *testing.T) {
 func TestAccResourceAutoF5XCCrl_withTimeoutTransition(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -141,20 +145,20 @@ func TestAccResourceAutoF5XCCrl_withTimeoutTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_withTimeout(name, namespace, 10),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_withTimeout(name, namespace, 60),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -164,7 +168,7 @@ func TestAccResourceAutoF5XCCrl_withTimeoutTransition(t *testing.T) {
 func TestAccResourceAutoF5XCCrl_withHttpAccessPathTransition(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -175,20 +179,20 @@ func TestAccResourceAutoF5XCCrl_withHttpAccessPathTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_withHttpPath(name, namespace, "/repo/latest.crl"),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_withHttpPath(name, namespace, "/repo/updated.crl"),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -198,9 +202,9 @@ func TestAccResourceAutoF5XCCrl_withHttpAccessPathTransition(t *testing.T) {
 func TestAccResourceAutoF5XCCrl_full(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-crl-" + testAccRunSuffix(t)
+	name := "example-crl-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_crl", crlSchema.ObjectType, "crl"),
@@ -209,29 +213,33 @@ func TestAccResourceAutoF5XCCrl_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCCrlConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCrlConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_crl.test",
+				ResourceName:                         "f5xc_crl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_crl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCrlConfig_full(name, "default"),
+		})
 }
 
 func testAccResourceAutoF5XCCrlConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name           = %q
   namespace      = %q
   server_address = "mycrl.example.com"
@@ -241,10 +249,10 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name             = %q
   namespace        = %q
-  description      = "crl basic updated"
+	description      = "CRL example updated"
   server_address   = "updated-crl.example.com"
   server_port      = 8080
   refresh_interval = 48
@@ -255,7 +263,7 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_withServerPort(name, namespace string, serverPort int) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name           = %q
   namespace      = %q
   server_address = "mycrl.example.com"
@@ -266,7 +274,7 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_withRefreshInterval(name, namespace string, refreshInterval int) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name             = %q
   namespace        = %q
   server_address   = "mycrl.example.com"
@@ -277,7 +285,7 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_withTimeout(name, namespace string, timeout int) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name           = %q
   namespace      = %q
   server_address = "mycrl.example.com"
@@ -288,7 +296,7 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_withHttpPath(name, namespace, path string) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name           = %q
   namespace      = %q
   server_address = "mycrl.example.com"
@@ -304,17 +312,17 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name             = %q
   namespace        = %q
-  description      = "crl full"
+	description      = "CRL example"
   server_address   = "mycrl.example.com"
   server_port      = 80
   refresh_interval = 24
   timeout          = 10
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
@@ -334,17 +342,17 @@ resource "f5xc_crl" "test" {
 
 func testAccResourceAutoF5XCCrlConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_crl" "test" {
+resource "f5xc_crl" "example" {
   name             = %q
   namespace        = %q
-  description      = "crl full updated"
+	description      = "CRL example updated"
   server_address   = "mycrl-updated.example.com"
   server_port      = 8443
   refresh_interval = 72
   timeout          = 45
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "edge"
   }
 

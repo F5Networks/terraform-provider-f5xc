@@ -34,14 +34,14 @@ type DataSourceF5XCWorkload struct {
 	client *client.APIClient
 }
 
-type WorkloadGlobalSpecTypeWorkloadChoice struct {
+type WorkloadWorkloadChoice struct {
 	Job             types.Object `tfsdk:"job"`
 	Service         types.Object `tfsdk:"service"`
 	SimpleService   types.Object `tfsdk:"simple_service"`
 	StatefulService types.Object `tfsdk:"stateful_service"`
 }
 
-type WorkloadGlobalSpecTypeJob struct {
+type WorkloadJob struct {
 	Configuration types.Object `tfsdk:"configuration"`
 	Containers    types.List   `tfsdk:"containers"`
 	DeployOptions types.Object `tfsdk:"deploy_options"`
@@ -49,38 +49,38 @@ type WorkloadGlobalSpecTypeJob struct {
 	Volumes       types.List   `tfsdk:"volumes"`
 }
 
-type WorkloadWorkloadConfigurationParametersType struct {
+type WorkloadCfgParametersType struct {
 	Parameters types.List `tfsdk:"parameters"`
 }
 
-type WorkloadWorkloadConfigurationParameterType struct {
+type WorkloadCfgParamType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type WorkloadConfigurationParameterTypeChoice struct {
+type WorkloadChoice struct {
 	EnvVar types.Object `tfsdk:"env_var"`
 	File   types.Object `tfsdk:"file"`
 }
 
-type WorkloadConfigurationParameterTypeEnvVar struct {
+type WorkloadEnvVar struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type WorkloadConfigurationParameterTypeFile struct {
+type WorkloadFile struct {
 	Data       types.String `tfsdk:"data"`
 	Mount      types.Object `tfsdk:"mount"`
 	Name       types.String `tfsdk:"name"`
 	VolumeName types.String `tfsdk:"volume_name"`
 }
 
-type WorkloadWorkloadVolumeMountType struct {
+type WorkloadVolumeMountType struct {
 	Mode      types.List   `tfsdk:"mode"`
 	MountPath types.String `tfsdk:"mount_path"`
 	SubPath   types.String `tfsdk:"sub_path"`
 }
 
-type WorkloadWorkloadContainerType struct {
+type WorkloadContainerType struct {
 	Args           types.List   `tfsdk:"args"`
 	Command        types.List   `tfsdk:"command"`
 	FlavorChoice   types.Object `tfsdk:"flavor_choice"`
@@ -91,24 +91,24 @@ type WorkloadWorkloadContainerType struct {
 	ReadinessCheck types.Object `tfsdk:"readiness_check"`
 }
 
-type WorkloadContainerTypeFlavorChoice struct {
+type WorkloadFlavorChoice struct {
 	CustomFlavor  types.Object `tfsdk:"custom_flavor"`
 	DefaultFlavor types.Bool   `tfsdk:"default_flavor"`
 	Flavor        types.List   `tfsdk:"flavor"`
 }
 
-type WorkloadWorkloadImageType struct {
+type WorkloadImageType struct {
 	Name           types.String `tfsdk:"name"`
 	PullPolicy     types.List   `tfsdk:"pull_policy"`
 	RegistryChoice types.Object `tfsdk:"registry_choice"`
 }
 
-type WorkloadImageTypeRegistryChoice struct {
+type WorkloadRegistryChoice struct {
 	ContainerRegistry types.Object `tfsdk:"container_registry"`
 	Public            types.Bool   `tfsdk:"public"`
 }
 
-type WorkloadWorkloadHealthCheckType struct {
+type WorkloadHealthCheckType struct {
 	HealthCheckChoice  types.Object `tfsdk:"health_check_choice"`
 	HealthyThreshold   types.Int64  `tfsdk:"healthy_threshold"`
 	InitialDelay       types.Int64  `tfsdk:"initial_delay"`
@@ -117,41 +117,41 @@ type WorkloadWorkloadHealthCheckType struct {
 	UnhealthyThreshold types.Int64  `tfsdk:"unhealthy_threshold"`
 }
 
-type WorkloadHealthCheckTypeHealthCheckChoice struct {
+type WorkloadHealthCheckChoice struct {
 	ExecHealthCheck types.Object `tfsdk:"exec_health_check"`
 	HttpHealthCheck types.Object `tfsdk:"http_health_check"`
 	TcpHealthCheck  types.Object `tfsdk:"tcp_health_check"`
 }
 
-type WorkloadHealthCheckTypeExecHealthCheck struct {
+type WorkloadExecHealthCheck struct {
 	Command types.List `tfsdk:"command"`
 }
 
-type WorkloadHealthCheckTypeHttpHealthCheck struct {
+type WorkloadHttpHealthCheck struct {
 	Headers    types.Map    `tfsdk:"headers"`
 	HostHeader types.String `tfsdk:"host_header"`
 	Path       types.String `tfsdk:"path"`
 	Port       types.Object `tfsdk:"port"`
 }
 
-type WorkloadWorkloadPortChoiceType struct {
+type WorkloadPortChoiceType struct {
 	PortChoice types.Object `tfsdk:"port_choice"`
 }
 
-type WorkloadPortChoiceTypePortChoice struct {
+type WorkloadPortChoice struct {
 	Name types.String `tfsdk:"name"`
 	Num  types.Int64  `tfsdk:"num"`
 }
 
-type WorkloadHealthCheckTypeTcpHealthCheck struct {
+type WorkloadTcpHealthCheck struct {
 	Port types.Object `tfsdk:"port"`
 }
 
-type WorkloadWorkloadDeployOptionsType struct {
+type WorkloadDeployOptionsType struct {
 	DeployChoice types.Object `tfsdk:"deploy_choice"`
 }
 
-type WorkloadDeployOptionsTypeDeployChoice struct {
+type WorkloadDeployChoice struct {
 	AllRes               types.Bool   `tfsdk:"all_res"`
 	DefaultVirtualSites  types.Bool   `tfsdk:"default_virtual_sites"`
 	DeployCeSites        types.Object `tfsdk:"deploy_ce_sites"`
@@ -160,60 +160,60 @@ type WorkloadDeployOptionsTypeDeployChoice struct {
 	DeployReVirtualSites types.Object `tfsdk:"deploy_re_virtual_sites"`
 }
 
-type WorkloadDeployOptionsTypeDeployCeSites struct {
+type WorkloadDeployCeSites struct {
 	Site types.List `tfsdk:"site"`
 }
 
-type WorkloadDeployOptionsTypeDeployCeVirtualSites struct {
+type WorkloadDeployCeVirtualSites struct {
 	VirtualSite types.List `tfsdk:"virtual_site"`
 }
 
-type WorkloadDeployOptionsTypeDeployReSites struct {
+type WorkloadDeployReSites struct {
 	Site types.List `tfsdk:"site"`
 }
 
-type WorkloadDeployOptionsTypeDeployReVirtualSites struct {
+type WorkloadDeployReVirtualSites struct {
 	VirtualSite types.List `tfsdk:"virtual_site"`
 }
 
-type WorkloadWorkloadStorageVolumeType struct {
+type WorkloadStorageVolumeType struct {
 	Name         types.String `tfsdk:"name"`
 	VolumeChoice types.Object `tfsdk:"volume_choice"`
 }
 
-type WorkloadStorageVolumeTypeVolumeChoice struct {
+type WorkloadVolumeChoice struct {
 	EmptyDir         types.Object `tfsdk:"empty_dir"`
 	HostPath         types.Object `tfsdk:"host_path"`
 	PersistentVolume types.Object `tfsdk:"persistent_volume"`
 }
 
-type WorkloadStorageVolumeTypeEmptyDir struct {
+type WorkloadEmptyDir struct {
 	Mount     types.Object  `tfsdk:"mount"`
 	SizeLimit types.Float32 `tfsdk:"size_limit"`
 }
 
-type WorkloadStorageVolumeTypeHostPath struct {
+type WorkloadHostPath struct {
 	Mount types.Object `tfsdk:"mount"`
 	Path  types.String `tfsdk:"path"`
 }
 
-type WorkloadStorageVolumeTypePersistentVolume struct {
+type WorkloadPersistentVolume struct {
 	Mount   types.Object `tfsdk:"mount"`
 	Storage types.Object `tfsdk:"storage"`
 }
 
-type WorkloadWorkloadPersistentStorageType struct {
+type WorkloadPersistentStorageType struct {
 	AccessMode      types.List    `tfsdk:"access_mode"`
 	ClassNameChoice types.Object  `tfsdk:"class_name_choice"`
 	StorageSize     types.Float32 `tfsdk:"storage_size"`
 }
 
-type WorkloadPersistentStorageTypeClassNameChoice struct {
+type WorkloadClassNameChoice struct {
 	ClassName types.String `tfsdk:"class_name"`
 	Default   types.Bool   `tfsdk:"default"`
 }
 
-type WorkloadGlobalSpecTypeService struct {
+type WorkloadSvc struct {
 	AdvertiseOptions types.Object `tfsdk:"advertise_options"`
 	Configuration    types.Object `tfsdk:"configuration"`
 	Containers       types.List   `tfsdk:"containers"`
@@ -223,23 +223,23 @@ type WorkloadGlobalSpecTypeService struct {
 	Volumes          types.List   `tfsdk:"volumes"`
 }
 
-type WorkloadWorkloadAdvertiseOptionsType struct {
+type WorkloadAdvertiseOptionsType struct {
 	AdvertiseChoice types.Object `tfsdk:"advertise_choice"`
 }
 
-type WorkloadAdvertiseOptionsTypeAdvertiseChoice struct {
+type WorkloadAdvertiseChoice struct {
 	AdvertiseCustom    types.Object `tfsdk:"advertise_custom"`
 	AdvertiseInCluster types.Object `tfsdk:"advertise_in_cluster"`
 	AdvertiseOnPublic  types.Object `tfsdk:"advertise_on_public"`
 	DoNotAdvertise     types.Bool   `tfsdk:"do_not_advertise"`
 }
 
-type WorkloadAdvertiseOptionsTypeAdvertiseCustom struct {
+type WorkloadAdvertiseCustom struct {
 	AdvertiseWhere types.List `tfsdk:"advertise_where"`
 	Ports          types.List `tfsdk:"ports"`
 }
 
-type WorkloadWorkloadAdvertiseWhereType struct {
+type WorkloadAdvertiseWhereType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -249,28 +249,28 @@ type WorkloadAdvertiseWhereTypeChoice struct {
 	Vk8SService types.Object `tfsdk:"vk8s_service"`
 }
 
-type WorkloadAdvertiseWhereTypeSite struct {
+type WorkloadSite struct {
 	Ip      types.String `tfsdk:"ip"`
 	Ipv6    types.String `tfsdk:"ipv6"`
 	Network types.List   `tfsdk:"network"`
 	Site    types.Object `tfsdk:"site"`
 }
 
-type WorkloadAdvertiseWhereTypeVirtualSite struct {
+type WorkloadVirtualSite struct {
 	Network     types.List   `tfsdk:"network"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type WorkloadAdvertiseWhereTypeVk8SService struct {
+type WorkloadVk8SSvc struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type WorkloadWhereVK8SServiceChoice struct {
+type WorkloadWhereVK8SSvcChoice struct {
 	Site        types.Object `tfsdk:"site"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type WorkloadWorkloadAdvertisePortType struct {
+type WorkloadAdvertisePortType struct {
 	AdvertiseChoice types.Object `tfsdk:"advertise_choice"`
 	Port            types.Object `tfsdk:"port"`
 }
@@ -280,19 +280,19 @@ type WorkloadAdvertisePortTypeAdvertiseChoice struct {
 	TcpLoadbalancer  types.Object `tfsdk:"tcp_loadbalancer"`
 }
 
-type WorkloadAdvertisePortTypeHttpLoadbalancer struct {
+type WorkloadHttpLoadbalancer struct {
 	Domains                types.List   `tfsdk:"domains"`
 	LoadbalancerTypeChoice types.Object `tfsdk:"loadbalancer_type_choice"`
 	RouteChoice            types.Object `tfsdk:"route_choice"`
 }
 
-type WorkloadHTTPLoadBalancerTypeLoadbalancerTypeChoice struct {
+type WorkloadLoadbalancerTypeChoice struct {
 	Http          types.Object `tfsdk:"http"`
 	Https         types.Object `tfsdk:"https"`
 	HttpsAutoCert types.Object `tfsdk:"https_auto_cert"`
 }
 
-type WorkloadHTTPLoadBalancerTypeHttp struct {
+type WorkloadHttp struct {
 	DnsVolterraManaged types.Bool   `tfsdk:"dns_volterra_managed"`
 	PortChoice         types.Object `tfsdk:"port_choice"`
 }
@@ -302,7 +302,7 @@ type WorkloadProxyTypeHttpPortChoice struct {
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type WorkloadHTTPLoadBalancerTypeHttps struct {
+type WorkloadHttps struct {
 	AddHsts               types.Bool   `tfsdk:"add_hsts"`
 	CoalescingOptions     types.Object `tfsdk:"coalescing_options"`
 	ConnectionIdleTimeout types.Int64  `tfsdk:"connection_idle_timeout"`
@@ -319,27 +319,27 @@ type WorkloadTLSCoalescingOptions struct {
 	CoalescingChoice types.Object `tfsdk:"coalescing_choice"`
 }
 
-type WorkloadTLSCoalescingOptionsCoalescingChoice struct {
+type WorkloadCoalescingChoice struct {
 	DefaultCoalescing types.Bool `tfsdk:"default_coalescing"`
 	StrictCoalescing  types.Bool `tfsdk:"strict_coalescing"`
 }
 
-type WorkloadProxyTypeHttpsDefaultLbChoice struct {
+type WorkloadDefaultLbChoice struct {
 	DefaultLoadbalancer    types.Bool `tfsdk:"default_loadbalancer"`
 	NonDefaultLoadbalancer types.Bool `tfsdk:"non_default_loadbalancer"`
 }
 
-type WorkloadVirtualHostHttpProtocolOptions struct {
+type WorkloadHttpProtoOptions struct {
 	HttpProtocolChoice types.Object `tfsdk:"http_protocol_choice"`
 }
 
-type WorkloadHttpProtocolOptionsHttpProtocolChoice struct {
+type WorkloadHttpProtoChoice struct {
 	HttpProtocolEnableV1Only types.Object `tfsdk:"http_protocol_enable_v1_only"`
 	HttpProtocolEnableV1V2   types.Bool   `tfsdk:"http_protocol_enable_v1_v2"`
 	HttpProtocolEnableV2Only types.Bool   `tfsdk:"http_protocol_enable_v2_only"`
 }
 
-type WorkloadHttpProtocolOptionsHttpProtocolEnableV1Only struct {
+type WorkloadHttpProtoEnableV1Only struct {
 	HeaderTransformation types.Object `tfsdk:"header_transformation"`
 }
 
@@ -347,14 +347,14 @@ type WorkloadHeaderTransformationType struct {
 	HeaderTransformationChoice types.Object `tfsdk:"header_transformation_choice"`
 }
 
-type WorkloadHeaderTransformationTypeHeaderTransformationChoice struct {
+type WorkloadHeaderTransformationChoice struct {
 	DefaultHeaderTransformation      types.Bool `tfsdk:"default_header_transformation"`
 	LegacyHeaderTransformation       types.Bool `tfsdk:"legacy_header_transformation"`
 	PreserveCaseHeaderTransformation types.Bool `tfsdk:"preserve_case_header_transformation"`
 	ProperCaseHeaderTransformation   types.Bool `tfsdk:"proper_case_header_transformation"`
 }
 
-type WorkloadProxyTypeHttpsPathNormalizeChoice struct {
+type WorkloadPathNormalizeChoice struct {
 	DisablePathNormalize types.Bool `tfsdk:"disable_path_normalize"`
 	EnablePathNormalize  types.Bool `tfsdk:"enable_path_normalize"`
 }
@@ -364,56 +364,46 @@ type WorkloadProxyTypeHttpsPortChoice struct {
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type WorkloadProxyTypeHttpsServerHeaderChoice struct {
+type WorkloadServerHeaderChoice struct {
 	AppendServerName types.String `tfsdk:"append_server_name"`
 	DefaultHeader    types.Bool   `tfsdk:"default_header"`
 	PassThrough      types.Bool   `tfsdk:"pass_through"`
 	ServerName       types.String `tfsdk:"server_name"`
 }
 
-type WorkloadProxyTypeHttpsTlsCertificatesChoice struct {
+type WorkloadTlsCertificatesChoice struct {
 	TlsCertParams types.Object `tfsdk:"tls_cert_params"`
 	TlsParameters types.Object `tfsdk:"tls_parameters"`
 }
 
-type WorkloadProxyTypeHttpsTlsCertParams struct {
+type WorkloadTlsCertParams struct {
 	Certificates types.List   `tfsdk:"certificates"`
 	MtlsChoice   types.Object `tfsdk:"mtls_choice"`
 	TlsConfig    types.Object `tfsdk:"tls_config"`
 }
 
-type WorkloadDownstreamTLSCertsParamsMtlsChoice struct {
+type WorkloadMtlsChoice struct {
 	NoMtls  types.Bool   `tfsdk:"no_mtls"`
 	UseMtls types.Object `tfsdk:"use_mtls"`
 }
 
-type WorkloadDownstreamTLSCertsParamsUseMtls struct {
+type WorkloadUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type WorkloadDownstreamTlsValidationContextCrlChoice struct {
+type WorkloadCrlChoice struct {
 	Crl   types.Object `tfsdk:"crl"`
 	NoCrl types.Bool   `tfsdk:"no_crl"`
 }
 
-type WorkloadDownstreamTlsValidationContextTrustedCaChoice struct {
+type WorkloadTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type WorkloadDownstreamTlsValidationContextXfccHeaderChoice struct {
-	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
-	XfccOptions  types.Object `tfsdk:"xfcc_options"`
-}
-
-type WorkloadDownstreamTlsValidationContextXfccOptions struct {
-	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
-}
-
-type WorkloadViewsTlsConfig struct {
+type WorkloadTlsConfig struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -424,13 +414,13 @@ type WorkloadTlsConfigChoice struct {
 	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
 }
 
-type WorkloadTlsConfigCustomSecurity struct {
+type WorkloadCustomSec struct {
 	CipherSuites types.List `tfsdk:"cipher_suites"`
 	MaxVersion   types.List `tfsdk:"max_version"`
 	MinVersion   types.List `tfsdk:"min_version"`
 }
 
-type WorkloadProxyTypeHttpsTlsParameters struct {
+type WorkloadTlsParameters struct {
 	MtlsChoice      types.Object `tfsdk:"mtls_choice"`
 	TlsCertificates types.List   `tfsdk:"tls_certificates"`
 	TlsConfig       types.Object `tfsdk:"tls_config"`
@@ -445,23 +435,22 @@ type WorkloadDownstreamTlsParamsTypeUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type WorkloadTlsCertificateType struct {
+type WorkloadTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type WorkloadTlsCertificateTypeOcspStaplingChoice struct {
+type WorkloadOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type WorkloadTlsCertificateTypeCustomHashAlgorithms struct {
+type WorkloadCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -469,23 +458,24 @@ type WorkloadSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type WorkloadSecretTypeSecretInfoChoice struct {
+type WorkloadSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type WorkloadSecretTypeBlindfoldSecretInfo struct {
+type WorkloadBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type WorkloadSecretTypeClearSecretInfo struct {
+type WorkloadClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type WorkloadHTTPLoadBalancerTypeHttpsAutoCert struct {
+type WorkloadHttpsAutoCert struct {
 	AddHsts               types.Bool   `tfsdk:"add_hsts"`
 	CoalescingOptions     types.Object `tfsdk:"coalescing_options"`
 	ConnectionIdleTimeout types.Int64  `tfsdk:"connection_idle_timeout"`
@@ -513,7 +503,6 @@ type WorkloadProxyTypeHttpsAutoCertsUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
 type WorkloadProxyTypeHttpsAutoCertsPathNormalizeChoice struct {
@@ -533,26 +522,26 @@ type WorkloadProxyTypeHttpsAutoCertsServerHeaderChoice struct {
 	ServerName       types.String `tfsdk:"server_name"`
 }
 
-type WorkloadHTTPLoadBalancerTypeRouteChoice struct {
+type WorkloadRouteChoice struct {
 	DefaultRoute   types.Object `tfsdk:"default_route"`
 	SpecificRoutes types.Object `tfsdk:"specific_routes"`
 }
 
-type WorkloadHTTPLoadBalancerTypeDefaultRoute struct {
+type WorkloadDefaultRoute struct {
 	HostRewriteParamsChoice types.Object `tfsdk:"host_rewrite_params_choice"`
 }
 
-type WorkloadMatchAllRouteTypeHostRewriteParamsChoice struct {
+type WorkloadHostRewriteParamsChoice struct {
 	AutoHostRewrite    types.Bool   `tfsdk:"auto_host_rewrite"`
 	DisableHostRewrite types.Bool   `tfsdk:"disable_host_rewrite"`
 	HostRewrite        types.String `tfsdk:"host_rewrite"`
 }
 
-type WorkloadHTTPLoadBalancerTypeSpecificRoutes struct {
+type WorkloadSpecificRoutes struct {
 	Routes types.List `tfsdk:"routes"`
 }
 
-type WorkloadWorkloadRouteInfoType struct {
+type WorkloadRouteInfoType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -563,17 +552,17 @@ type WorkloadRouteInfoTypeChoice struct {
 	SimpleRoute         types.Object `tfsdk:"simple_route"`
 }
 
-type WorkloadRouteInfoTypeCustomRouteObject struct {
+type WorkloadCustomRouteObject struct {
 	CachingChoice types.Object `tfsdk:"caching_choice"`
 	RouteRef      types.Object `tfsdk:"route_ref"`
 }
 
-type WorkloadRouteTypeCustomRouteCachingChoice struct {
+type WorkloadCachingChoice struct {
 	CachingDisable types.Bool `tfsdk:"caching_disable"`
 	CachingInherit types.Bool `tfsdk:"caching_inherit"`
 }
 
-type WorkloadRouteInfoTypeDirectResponseRoute struct {
+type WorkloadDirectRespRoute struct {
 	Headers             types.List   `tfsdk:"headers"`
 	HttpMethod          types.List   `tfsdk:"http_method"`
 	IncomingPort        types.Object `tfsdk:"incoming_port"`
@@ -587,7 +576,7 @@ type WorkloadHeaderMatcherType struct {
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type WorkloadHeaderMatcherTypeValueMatchChoice struct {
+type WorkloadValueMatchChoice struct {
 	Exact    types.String `tfsdk:"exact"`
 	Presence types.Bool   `tfsdk:"presence"`
 	Regex    types.String `tfsdk:"regex"`
@@ -597,7 +586,7 @@ type WorkloadPortMatcherType struct {
 	PortMatchChoice types.Object `tfsdk:"port_match_choice"`
 }
 
-type WorkloadPortMatcherTypePortMatchChoice struct {
+type WorkloadPortMatchChoice struct {
 	NoPortMatch types.Bool   `tfsdk:"no_port_match"`
 	Port        types.Int64  `tfsdk:"port"`
 	PortRanges  types.String `tfsdk:"port_ranges"`
@@ -607,18 +596,18 @@ type WorkloadPathMatcherType struct {
 	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
 }
 
-type WorkloadPathMatcherTypePathMatchChoice struct {
+type WorkloadPathMatchChoice struct {
 	Path   types.String `tfsdk:"path"`
 	Prefix types.String `tfsdk:"prefix"`
 	Regex  types.String `tfsdk:"regex"`
 }
 
-type WorkloadRouteRouteDirectResponse struct {
+type WorkloadRouteDirectResp struct {
 	ResponseBodyEncoded types.String `tfsdk:"response_body_encoded"`
 	ResponseCode        types.Int64  `tfsdk:"response_code"`
 }
 
-type WorkloadRouteInfoTypeRedirectRoute struct {
+type WorkloadRedirectRoute struct {
 	Headers       types.List   `tfsdk:"headers"`
 	HttpMethod    types.List   `tfsdk:"http_method"`
 	IncomingPort  types.Object `tfsdk:"incoming_port"`
@@ -626,7 +615,7 @@ type WorkloadRouteInfoTypeRedirectRoute struct {
 	RouteRedirect types.Object `tfsdk:"route_redirect"`
 }
 
-type WorkloadRouteRouteRedirect struct {
+type WorkloadRouteRedirect struct {
 	HostRedirect       types.String `tfsdk:"host_redirect"`
 	ProtoRedirect      types.String `tfsdk:"proto_redirect"`
 	QueryParamsChoice  types.Object `tfsdk:"query_params_choice"`
@@ -634,18 +623,18 @@ type WorkloadRouteRouteRedirect struct {
 	ResponseCode       types.Int64  `tfsdk:"response_code"`
 }
 
-type WorkloadRouteRedirectQueryParamsChoice struct {
+type WorkloadQueryParamsChoice struct {
 	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
 	ReplaceParams   types.String `tfsdk:"replace_params"`
 	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
 }
 
-type WorkloadRouteRedirectRedirectPathChoice struct {
+type WorkloadRedirectPathChoice struct {
 	PathRedirect  types.String `tfsdk:"path_redirect"`
 	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
 }
 
-type WorkloadRouteInfoTypeSimpleRoute struct {
+type WorkloadSimpleRoute struct {
 	HostRewriteParamsChoice types.Object `tfsdk:"host_rewrite_params_choice"`
 	HttpMethod              types.List   `tfsdk:"http_method"`
 	Path                    types.Object `tfsdk:"path"`
@@ -657,28 +646,28 @@ type WorkloadRouteTypeSimpleWithDefaultOriginPoolHostRewriteParamsChoice struct 
 	HostRewrite        types.String `tfsdk:"host_rewrite"`
 }
 
-type WorkloadAdvertisePortTypeTcpLoadbalancer struct {
+type WorkloadTcpLoadbalancer struct {
 	Domains types.List `tfsdk:"domains"`
 	WithSni types.Bool `tfsdk:"with_sni"`
 }
 
-type WorkloadWorkloadPortType struct {
+type WorkloadPortType struct {
 	Info types.Object `tfsdk:"info"`
 	Name types.String `tfsdk:"name"`
 }
 
-type WorkloadWorkloadPortInfoType struct {
+type WorkloadPortInfoType struct {
 	Port             types.Int64  `tfsdk:"port"`
 	Protocol         types.List   `tfsdk:"protocol"`
 	TargetPortChoice types.Object `tfsdk:"target_port_choice"`
 }
 
-type WorkloadPortInfoTypeTargetPortChoice struct {
+type WorkloadTargetPortChoice struct {
 	SameAsPort types.Bool  `tfsdk:"same_as_port"`
 	TargetPort types.Int64 `tfsdk:"target_port"`
 }
 
-type WorkloadAdvertiseOptionsTypeAdvertiseInCluster struct {
+type WorkloadAdvertiseInCluster struct {
 	PortChoice types.Object `tfsdk:"port_choice"`
 }
 
@@ -687,15 +676,15 @@ type WorkloadAdvertiseInClusterTypePortChoice struct {
 	Port       types.Object `tfsdk:"port"`
 }
 
-type WorkloadAdvertiseInClusterTypeMultiPorts struct {
+type WorkloadMultiPorts struct {
 	Ports types.List `tfsdk:"ports"`
 }
 
-type WorkloadAdvertiseInClusterTypePort struct {
+type WorkloadPort struct {
 	Info types.Object `tfsdk:"info"`
 }
 
-type WorkloadAdvertiseOptionsTypeAdvertiseOnPublic struct {
+type WorkloadAdvertiseOnPublic struct {
 	AdvertiseChoice types.Object `tfsdk:"advertise_choice"`
 }
 
@@ -729,27 +718,27 @@ type WorkloadAdvertiseSinglePortTypeTcpLoadbalancer struct {
 	WithSni types.Bool `tfsdk:"with_sni"`
 }
 
-type WorkloadWorkloadSinglePortType struct {
+type WorkloadSinglePortType struct {
 	Info types.Object `tfsdk:"info"`
 }
 
-type WorkloadWorkloadIPFamilyType struct {
+type WorkloadIPFamilyType struct {
 	IpFamilyChoice types.Object `tfsdk:"ip_family_choice"`
 }
 
-type WorkloadIPFamilyTypeIpFamilyChoice struct {
+type WorkloadIpFamilyChoice struct {
 	DualV4Preferred types.Bool `tfsdk:"dual_v4_preferred"`
 	DualV6Preferred types.Bool `tfsdk:"dual_v6_preferred"`
 	V4              types.Bool `tfsdk:"v4"`
 	V6              types.Bool `tfsdk:"v6"`
 }
 
-type WorkloadServiceTypeScalingChoice struct {
+type WorkloadScalingChoice struct {
 	NumReplicas types.Int32 `tfsdk:"num_replicas"`
 	ScaleToZero types.Bool  `tfsdk:"scale_to_zero"`
 }
 
-type WorkloadGlobalSpecTypeSimpleService struct {
+type WorkloadSimpleSvc struct {
 	AdvertiseChoice   types.Object `tfsdk:"advertise_choice"`
 	Configuration     types.Object `tfsdk:"configuration"`
 	Container         types.Object `tfsdk:"container"`
@@ -757,32 +746,32 @@ type WorkloadGlobalSpecTypeSimpleService struct {
 	ScaleToZero       types.Bool   `tfsdk:"scale_to_zero"`
 }
 
-type WorkloadSimpleServiceTypeAdvertiseChoice struct {
+type WorkloadSimpleSvcTypeAdvertiseChoice struct {
 	DoNotAdvertise  types.Bool   `tfsdk:"do_not_advertise"`
 	SimpleAdvertise types.Object `tfsdk:"simple_advertise"`
 }
 
-type WorkloadSimpleServiceTypeSimpleAdvertise struct {
+type WorkloadSimpleAdvertise struct {
 	Domains     types.List  `tfsdk:"domains"`
 	ServicePort types.Int64 `tfsdk:"service_port"`
 }
 
-type WorkloadSimpleServiceTypePersistenceChoice struct {
+type WorkloadPersistenceChoice struct {
 	Disabled types.Bool   `tfsdk:"disabled"`
 	Enabled  types.Object `tfsdk:"enabled"`
 }
 
-type WorkloadSimpleServiceTypeEnabled struct {
+type WorkloadEnabled struct {
 	Name             types.String `tfsdk:"name"`
 	PersistentVolume types.Object `tfsdk:"persistent_volume"`
 }
 
-type WorkloadWorkloadPersistentStorageVolumeType struct {
+type WorkloadPersistentStorageVolumeType struct {
 	Mount   types.Object `tfsdk:"mount"`
 	Storage types.Object `tfsdk:"storage"`
 }
 
-type WorkloadGlobalSpecTypeStatefulService struct {
+type WorkloadStatefulSvc struct {
 	AdvertiseOptions  types.Object `tfsdk:"advertise_options"`
 	Configuration     types.Object `tfsdk:"configuration"`
 	Containers        types.List   `tfsdk:"containers"`
@@ -793,17 +782,17 @@ type WorkloadGlobalSpecTypeStatefulService struct {
 	Volumes           types.List   `tfsdk:"volumes"`
 }
 
-type WorkloadWorkloadPersistentVolumeType struct {
+type WorkloadPersistentVolumeType struct {
 	Name             types.String `tfsdk:"name"`
 	PersistentVolume types.Object `tfsdk:"persistent_volume"`
 }
 
-type WorkloadStatefulServiceTypeScalingChoice struct {
+type WorkloadStatefulSvcTypeScalingChoice struct {
 	NumReplicas types.Int32 `tfsdk:"num_replicas"`
 	ScaleToZero types.Bool  `tfsdk:"scale_to_zero"`
 }
 
-type WorkloadWorkloadEphemeralStorageVolumeType struct {
+type WorkloadEphemeralStorageVolumeType struct {
 	Name         types.String `tfsdk:"name"`
 	VolumeChoice types.Object `tfsdk:"volume_choice"`
 }
@@ -2009,9 +1998,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -2046,23 +2032,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -2147,9 +2116,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -2184,23 +2150,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -2253,6 +2202,7 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2427,9 +2377,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -2464,23 +2411,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomP
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -3333,9 +3263,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -3370,23 +3297,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -3471,9 +3381,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -3508,23 +3415,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -3577,6 +3467,7 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3751,9 +3642,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -3788,23 +3676,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -4502,9 +4373,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -4539,23 +4407,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -4640,9 +4491,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -4677,23 +4525,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -4746,6 +4577,7 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -4920,9 +4752,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -4957,23 +4786,6 @@ var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPubli
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -7028,9 +6840,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -7065,23 +6874,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -7166,9 +6958,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -7203,23 +6992,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -7272,6 +7044,7 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -7446,9 +7219,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -7483,23 +7253,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -8352,9 +8105,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -8389,23 +8139,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -8490,9 +8223,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -8527,23 +8257,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -8596,6 +8309,7 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -8770,9 +8484,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -8807,23 +8518,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -9521,9 +9215,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -9558,23 +9249,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -9659,9 +9333,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -9696,23 +9367,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -9765,6 +9419,7 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -9939,9 +9594,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -9976,23 +9628,6 @@ var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertis
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> PathNormalizeChoice
@@ -11044,8 +10679,8 @@ func (d *DataSourceF5XCWorkload) Metadata(ctx context.Context, request datasourc
 func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "ServiceType Service does not maintain per replica state, however it can be configured to use persistent storage that is shared amongst all the replicas. Replicas of a service are fungible and do not have a stable network identity or storage. Common examples of services are web servers, application servers, traditional SQL databases, etc.",
-		Description:         "ServiceType Service does not maintain per replica state, however it can be configured to use persistent storage that is shared amongst all the replicas. Replicas of a service are fungible and do not have a stable network identity or storage. Common examples of services are web servers, application servers, traditional SQL databases, etc.",
+		MarkdownDescription: "Workload is used to configure and deploy a workload in Virtual Kubernetes. A workload can be<br>either a service or stateful service or a batch job. Services and jobs can be deployed on<br>regional edges or customer sites. Services can be exposed in-cluster or by L7 or L4<br>load balancer on Internet or on sites using an advertise policy.",
+		Description:         "Workload is used to configure and deploy a workload in Virtual Kubernetes. A workload can be either a service or stateful service or a batch job. Services and jobs can be deployed on regional edges or customer sites. Services can be exposed in-cluster or by L7 or L4 load balancer on Internet or on sites using an advertise policy.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -12472,13 +12107,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																									Computed:    true,
 																									Attributes: map[string]schema.Attribute{
 																										"append_server_name": schema.StringAttribute{
-																											Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																											Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
 																										},
 																										"default_header": schema.BoolAttribute{
-																											Description: "default_header Response header name is “server” and value is “volt-adc”",
+																											Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -12490,7 +12125,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																											Computed:    true,
 																										},
 																										"server_name": schema.StringAttribute{
-																											Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																											Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -12638,35 +12273,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																			Required:    false,
 																																			Optional:    false,
 																																			Computed:    true,
-																																		},
-																																	},
-																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
 																																		},
 																																	},
 																																},
@@ -12849,35 +12455,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																		},
 																																	},
 																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
-																																		},
-																																	},
-																																},
 																															},
 																														},
 																													},
@@ -12991,8 +12568,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																						Required:    false,
 																																						Optional:    false,
 																																						Computed:    true,
+																																						Sensitive:   true,
 																																					},
 																																				},
+																																			},
+																																			"none": schema.BoolAttribute{
+																																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																				Required:    false,
+																																				Optional:    false,
+																																				Computed:    true,
 																																			},
 																																		},
 																																	},
@@ -13322,35 +12906,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																														},
 																													},
 																												},
-																												"xfcc_header_choice": schema.SingleNestedAttribute{
-																													Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																													Required:    false,
-																													Optional:    false,
-																													Computed:    true,
-																													Attributes: map[string]schema.Attribute{
-																														"xfcc_disabled": schema.BoolAttribute{
-																															Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																															Required:    false,
-																															Optional:    false,
-																															Computed:    true,
-																														},
-																														"xfcc_options": schema.SingleNestedAttribute{
-																															Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																															Required:    false,
-																															Optional:    false,
-																															Computed:    true,
-																															Attributes: map[string]schema.Attribute{
-																																"xfcc_header_elements": schema.ListAttribute{
-																																	Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																	ElementType: types.StringType,
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																},
-																															},
-																														},
-																													},
-																												},
 																											},
 																										},
 																									},
@@ -13402,13 +12957,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																									Computed:    true,
 																									Attributes: map[string]schema.Attribute{
 																										"append_server_name": schema.StringAttribute{
-																											Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																											Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
 																										},
 																										"default_header": schema.BoolAttribute{
-																											Description: "default_header Response header name is “server” and value is “volt-adc”",
+																											Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -13420,7 +12975,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																											Computed:    true,
 																										},
 																										"server_name": schema.StringAttribute{
-																											Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																											Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -14539,13 +14094,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																													Computed:    true,
 																													Attributes: map[string]schema.Attribute{
 																														"append_server_name": schema.StringAttribute{
-																															Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																															Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
 																														},
 																														"default_header": schema.BoolAttribute{
-																															Description: "default_header Response header name is “server” and value is “volt-adc”",
+																															Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -14557,7 +14112,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															Computed:    true,
 																														},
 																														"server_name": schema.StringAttribute{
-																															Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																															Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -14705,35 +14260,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																							Required:    false,
 																																							Optional:    false,
 																																							Computed:    true,
-																																						},
-																																					},
-																																				},
-																																				"xfcc_header_choice": schema.SingleNestedAttribute{
-																																					Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																					Attributes: map[string]schema.Attribute{
-																																						"xfcc_disabled": schema.BoolAttribute{
-																																							Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																						},
-																																						"xfcc_options": schema.SingleNestedAttribute{
-																																							Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																							Attributes: map[string]schema.Attribute{
-																																								"xfcc_header_elements": schema.ListAttribute{
-																																									Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																									ElementType: types.StringType,
-																																									Required:    false,
-																																									Optional:    false,
-																																									Computed:    true,
-																																								},
-																																							},
 																																						},
 																																					},
 																																				},
@@ -14916,35 +14442,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																						},
 																																					},
 																																				},
-																																				"xfcc_header_choice": schema.SingleNestedAttribute{
-																																					Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																					Attributes: map[string]schema.Attribute{
-																																						"xfcc_disabled": schema.BoolAttribute{
-																																							Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																						},
-																																						"xfcc_options": schema.SingleNestedAttribute{
-																																							Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																							Attributes: map[string]schema.Attribute{
-																																								"xfcc_header_elements": schema.ListAttribute{
-																																									Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																									ElementType: types.StringType,
-																																									Required:    false,
-																																									Optional:    false,
-																																									Computed:    true,
-																																								},
-																																							},
-																																						},
-																																					},
-																																				},
 																																			},
 																																		},
 																																	},
@@ -15058,8 +14555,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																										Required:    false,
 																																										Optional:    false,
 																																										Computed:    true,
+																																										Sensitive:   true,
 																																									},
 																																								},
+																																							},
+																																							"none": schema.BoolAttribute{
+																																								Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																								Required:    false,
+																																								Optional:    false,
+																																								Computed:    true,
 																																							},
 																																						},
 																																					},
@@ -15389,35 +14893,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																		},
 																																	},
 																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
-																																		},
-																																	},
-																																},
 																															},
 																														},
 																													},
@@ -15469,13 +14944,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																													Computed:    true,
 																													Attributes: map[string]schema.Attribute{
 																														"append_server_name": schema.StringAttribute{
-																															Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																															Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
 																														},
 																														"default_header": schema.BoolAttribute{
-																															Description: "default_header Response header name is “server” and value is “volt-adc”",
+																															Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -15487,7 +14962,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															Computed:    true,
 																														},
 																														"server_name": schema.StringAttribute{
-																															Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																															Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -16457,13 +15932,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																										Computed:    true,
 																										Attributes: map[string]schema.Attribute{
 																											"append_server_name": schema.StringAttribute{
-																												Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																												Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
 																											},
 																											"default_header": schema.BoolAttribute{
-																												Description: "default_header Response header name is “server” and value is “volt-adc”",
+																												Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -16475,7 +15950,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																												Computed:    true,
 																											},
 																											"server_name": schema.StringAttribute{
-																												Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																												Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -16623,35 +16098,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																				Required:    false,
 																																				Optional:    false,
 																																				Computed:    true,
-																																			},
-																																		},
-																																	},
-																																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																		Attributes: map[string]schema.Attribute{
-																																			"xfcc_disabled": schema.BoolAttribute{
-																																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																			},
-																																			"xfcc_options": schema.SingleNestedAttribute{
-																																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																				Attributes: map[string]schema.Attribute{
-																																					"xfcc_header_elements": schema.ListAttribute{
-																																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																						ElementType: types.StringType,
-																																						Required:    false,
-																																						Optional:    false,
-																																						Computed:    true,
-																																					},
-																																				},
 																																			},
 																																		},
 																																	},
@@ -16834,35 +16280,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																			},
 																																		},
 																																	},
-																																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																		Attributes: map[string]schema.Attribute{
-																																			"xfcc_disabled": schema.BoolAttribute{
-																																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																			},
-																																			"xfcc_options": schema.SingleNestedAttribute{
-																																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																				Attributes: map[string]schema.Attribute{
-																																					"xfcc_header_elements": schema.ListAttribute{
-																																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																						ElementType: types.StringType,
-																																						Required:    false,
-																																						Optional:    false,
-																																						Computed:    true,
-																																					},
-																																				},
-																																			},
-																																		},
-																																	},
 																																},
 																															},
 																														},
@@ -16976,8 +16393,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																							Required:    false,
 																																							Optional:    false,
 																																							Computed:    true,
+																																							Sensitive:   true,
 																																						},
 																																					},
+																																				},
+																																				"none": schema.BoolAttribute{
+																																					Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																					Required:    false,
+																																					Optional:    false,
+																																					Computed:    true,
 																																				},
 																																			},
 																																		},
@@ -17307,35 +16731,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															},
 																														},
 																													},
-																													"xfcc_header_choice": schema.SingleNestedAttribute{
-																														Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																														Attributes: map[string]schema.Attribute{
-																															"xfcc_disabled": schema.BoolAttribute{
-																																Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																Required:    false,
-																																Optional:    false,
-																																Computed:    true,
-																															},
-																															"xfcc_options": schema.SingleNestedAttribute{
-																																Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																Required:    false,
-																																Optional:    false,
-																																Computed:    true,
-																																Attributes: map[string]schema.Attribute{
-																																	"xfcc_header_elements": schema.ListAttribute{
-																																		Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																		ElementType: types.StringType,
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																	},
-																																},
-																															},
-																														},
-																													},
 																												},
 																											},
 																										},
@@ -17387,13 +16782,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																										Computed:    true,
 																										Attributes: map[string]schema.Attribute{
 																											"append_server_name": schema.StringAttribute{
-																												Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																												Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
 																											},
 																											"default_header": schema.BoolAttribute{
-																												Description: "default_header Response header name is “server” and value is “volt-adc”",
+																												Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -17405,7 +16800,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																												Computed:    true,
 																											},
 																											"server_name": schema.StringAttribute{
-																												Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																												Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -20246,13 +19641,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																									Computed:    true,
 																									Attributes: map[string]schema.Attribute{
 																										"append_server_name": schema.StringAttribute{
-																											Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																											Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
 																										},
 																										"default_header": schema.BoolAttribute{
-																											Description: "default_header Response header name is “server” and value is “volt-adc”",
+																											Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -20264,7 +19659,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																											Computed:    true,
 																										},
 																										"server_name": schema.StringAttribute{
-																											Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																											Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -20412,35 +19807,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																			Required:    false,
 																																			Optional:    false,
 																																			Computed:    true,
-																																		},
-																																	},
-																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
 																																		},
 																																	},
 																																},
@@ -20623,35 +19989,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																		},
 																																	},
 																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
-																																		},
-																																	},
-																																},
 																															},
 																														},
 																													},
@@ -20765,8 +20102,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																						Required:    false,
 																																						Optional:    false,
 																																						Computed:    true,
+																																						Sensitive:   true,
 																																					},
 																																				},
+																																			},
+																																			"none": schema.BoolAttribute{
+																																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																				Required:    false,
+																																				Optional:    false,
+																																				Computed:    true,
 																																			},
 																																		},
 																																	},
@@ -21096,35 +20440,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																														},
 																													},
 																												},
-																												"xfcc_header_choice": schema.SingleNestedAttribute{
-																													Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																													Required:    false,
-																													Optional:    false,
-																													Computed:    true,
-																													Attributes: map[string]schema.Attribute{
-																														"xfcc_disabled": schema.BoolAttribute{
-																															Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																															Required:    false,
-																															Optional:    false,
-																															Computed:    true,
-																														},
-																														"xfcc_options": schema.SingleNestedAttribute{
-																															Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																															Required:    false,
-																															Optional:    false,
-																															Computed:    true,
-																															Attributes: map[string]schema.Attribute{
-																																"xfcc_header_elements": schema.ListAttribute{
-																																	Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																	ElementType: types.StringType,
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																},
-																															},
-																														},
-																													},
-																												},
 																											},
 																										},
 																									},
@@ -21176,13 +20491,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																									Computed:    true,
 																									Attributes: map[string]schema.Attribute{
 																										"append_server_name": schema.StringAttribute{
-																											Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																											Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
 																										},
 																										"default_header": schema.BoolAttribute{
-																											Description: "default_header Response header name is “server” and value is “volt-adc”",
+																											Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -21194,7 +20509,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																											Computed:    true,
 																										},
 																										"server_name": schema.StringAttribute{
-																											Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																											Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																											Required:    false,
 																											Optional:    false,
 																											Computed:    true,
@@ -22313,13 +21628,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																													Computed:    true,
 																													Attributes: map[string]schema.Attribute{
 																														"append_server_name": schema.StringAttribute{
-																															Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																															Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
 																														},
 																														"default_header": schema.BoolAttribute{
-																															Description: "default_header Response header name is “server” and value is “volt-adc”",
+																															Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -22331,7 +21646,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															Computed:    true,
 																														},
 																														"server_name": schema.StringAttribute{
-																															Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																															Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -22479,35 +21794,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																							Required:    false,
 																																							Optional:    false,
 																																							Computed:    true,
-																																						},
-																																					},
-																																				},
-																																				"xfcc_header_choice": schema.SingleNestedAttribute{
-																																					Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																					Attributes: map[string]schema.Attribute{
-																																						"xfcc_disabled": schema.BoolAttribute{
-																																							Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																						},
-																																						"xfcc_options": schema.SingleNestedAttribute{
-																																							Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																							Attributes: map[string]schema.Attribute{
-																																								"xfcc_header_elements": schema.ListAttribute{
-																																									Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																									ElementType: types.StringType,
-																																									Required:    false,
-																																									Optional:    false,
-																																									Computed:    true,
-																																								},
-																																							},
 																																						},
 																																					},
 																																				},
@@ -22690,35 +21976,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																						},
 																																					},
 																																				},
-																																				"xfcc_header_choice": schema.SingleNestedAttribute{
-																																					Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																					Attributes: map[string]schema.Attribute{
-																																						"xfcc_disabled": schema.BoolAttribute{
-																																							Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																						},
-																																						"xfcc_options": schema.SingleNestedAttribute{
-																																							Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																							Required:    false,
-																																							Optional:    false,
-																																							Computed:    true,
-																																							Attributes: map[string]schema.Attribute{
-																																								"xfcc_header_elements": schema.ListAttribute{
-																																									Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																									ElementType: types.StringType,
-																																									Required:    false,
-																																									Optional:    false,
-																																									Computed:    true,
-																																								},
-																																							},
-																																						},
-																																					},
-																																				},
 																																			},
 																																		},
 																																	},
@@ -22832,8 +22089,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																										Required:    false,
 																																										Optional:    false,
 																																										Computed:    true,
+																																										Sensitive:   true,
 																																									},
 																																								},
+																																							},
+																																							"none": schema.BoolAttribute{
+																																								Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																								Required:    false,
+																																								Optional:    false,
+																																								Computed:    true,
 																																							},
 																																						},
 																																					},
@@ -23163,35 +22427,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																		},
 																																	},
 																																},
-																																"xfcc_header_choice": schema.SingleNestedAttribute{
-																																	Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																	Required:    false,
-																																	Optional:    false,
-																																	Computed:    true,
-																																	Attributes: map[string]schema.Attribute{
-																																		"xfcc_disabled": schema.BoolAttribute{
-																																			Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																		},
-																																		"xfcc_options": schema.SingleNestedAttribute{
-																																			Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																			Required:    false,
-																																			Optional:    false,
-																																			Computed:    true,
-																																			Attributes: map[string]schema.Attribute{
-																																				"xfcc_header_elements": schema.ListAttribute{
-																																					Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																					ElementType: types.StringType,
-																																					Required:    false,
-																																					Optional:    false,
-																																					Computed:    true,
-																																				},
-																																			},
-																																		},
-																																	},
-																																},
 																															},
 																														},
 																													},
@@ -23243,13 +22478,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																													Computed:    true,
 																													Attributes: map[string]schema.Attribute{
 																														"append_server_name": schema.StringAttribute{
-																															Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																															Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
 																														},
 																														"default_header": schema.BoolAttribute{
-																															Description: "default_header Response header name is “server” and value is “volt-adc”",
+																															Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -23261,7 +22496,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															Computed:    true,
 																														},
 																														"server_name": schema.StringAttribute{
-																															Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																															Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																															Required:    false,
 																															Optional:    false,
 																															Computed:    true,
@@ -24231,13 +23466,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																										Computed:    true,
 																										Attributes: map[string]schema.Attribute{
 																											"append_server_name": schema.StringAttribute{
-																												Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																												Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
 																											},
 																											"default_header": schema.BoolAttribute{
-																												Description: "default_header Response header name is “server” and value is “volt-adc”",
+																												Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -24249,7 +23484,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																												Computed:    true,
 																											},
 																											"server_name": schema.StringAttribute{
-																												Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																												Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -24397,35 +23632,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																				Required:    false,
 																																				Optional:    false,
 																																				Computed:    true,
-																																			},
-																																		},
-																																	},
-																																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																		Attributes: map[string]schema.Attribute{
-																																			"xfcc_disabled": schema.BoolAttribute{
-																																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																			},
-																																			"xfcc_options": schema.SingleNestedAttribute{
-																																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																				Attributes: map[string]schema.Attribute{
-																																					"xfcc_header_elements": schema.ListAttribute{
-																																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																						ElementType: types.StringType,
-																																						Required:    false,
-																																						Optional:    false,
-																																						Computed:    true,
-																																					},
-																																				},
 																																			},
 																																		},
 																																	},
@@ -24608,35 +23814,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																			},
 																																		},
 																																	},
-																																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																		Attributes: map[string]schema.Attribute{
-																																			"xfcc_disabled": schema.BoolAttribute{
-																																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																			},
-																																			"xfcc_options": schema.SingleNestedAttribute{
-																																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																				Required:    false,
-																																				Optional:    false,
-																																				Computed:    true,
-																																				Attributes: map[string]schema.Attribute{
-																																					"xfcc_header_elements": schema.ListAttribute{
-																																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																						ElementType: types.StringType,
-																																						Required:    false,
-																																						Optional:    false,
-																																						Computed:    true,
-																																					},
-																																				},
-																																			},
-																																		},
-																																	},
 																																},
 																															},
 																														},
@@ -24750,8 +23927,15 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																																							Required:    false,
 																																							Optional:    false,
 																																							Computed:    true,
+																																							Sensitive:   true,
 																																						},
 																																					},
+																																				},
+																																				"none": schema.BoolAttribute{
+																																					Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																																					Required:    false,
+																																					Optional:    false,
+																																					Computed:    true,
 																																				},
 																																			},
 																																		},
@@ -25081,35 +24265,6 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																															},
 																														},
 																													},
-																													"xfcc_header_choice": schema.SingleNestedAttribute{
-																														Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																														Attributes: map[string]schema.Attribute{
-																															"xfcc_disabled": schema.BoolAttribute{
-																																Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																																Required:    false,
-																																Optional:    false,
-																																Computed:    true,
-																															},
-																															"xfcc_options": schema.SingleNestedAttribute{
-																																Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																																Required:    false,
-																																Optional:    false,
-																																Computed:    true,
-																																Attributes: map[string]schema.Attribute{
-																																	"xfcc_header_elements": schema.ListAttribute{
-																																		Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																																		ElementType: types.StringType,
-																																		Required:    false,
-																																		Optional:    false,
-																																		Computed:    true,
-																																	},
-																																},
-																															},
-																														},
-																													},
 																												},
 																											},
 																										},
@@ -25161,13 +24316,13 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																										Computed:    true,
 																										Attributes: map[string]schema.Attribute{
 																											"append_server_name": schema.StringAttribute{
-																												Description: "append_server_name Define the header value for the header name “server”. If header value is already present, it is not overwritten and passed as-is.",
+																												Description: "append_server_name Define the header value for the header name 'server'. If header value is already present, it is not overwritten and passed as-is.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
 																											},
 																											"default_header": schema.BoolAttribute{
-																												Description: "default_header Response header name is “server” and value is “volt-adc”",
+																												Description: "default_header Response header name is 'server' and value is 'volt-adc'",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -25179,7 +24334,7 @@ func (r *DataSourceF5XCWorkload) Schema(ctx context.Context, request datasource.
 																												Computed:    true,
 																											},
 																											"server_name": schema.StringAttribute{
-																												Description: "server_name Define the header value for the header name “server”. This will overwrite existing values, if any, for the server header.",
+																												Description: "server_name Define the header value for the header name 'server'. This will overwrite existing values, if any, for the server header.",
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
@@ -26932,7 +26087,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_workload.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "workload", err))
 		return
 	}
 
@@ -27003,7 +26158,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 		workloadChoiceChoices := specData.GetWorkloadChoice()
 
 		// The model struct that will be populated by the nested template.
-		var workloadChoiceChoicesModel = &WorkloadGlobalSpecTypeWorkloadChoice{}
+		var workloadChoiceChoicesModel = &WorkloadWorkloadChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -27020,7 +26175,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Configuration
 				if jobElement.GetConfiguration() != nil {
 					// Create the nested Go struct
-					workloadWorkloadConfigurationParametersTypeModel := &WorkloadWorkloadConfigurationParametersType{}
+					workloadCfgParametersTypeModel := &WorkloadCfgParametersType{}
 					configurationElement := jobElement.GetConfiguration()
 
 					// Recursively populate the nested struct
@@ -27029,9 +26184,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 					if len(configurationElement.GetParameters()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						parametersElements := make([]WorkloadWorkloadConfigurationParameterType, 0, len(configurationElement.GetParameters()))
+						parametersElements := make([]WorkloadCfgParamType, 0, len(configurationElement.GetParameters()))
 						for _, parametersElement := range configurationElement.GetParameters() {
-							workloadWorkloadConfigurationParameterTypeModel := WorkloadWorkloadConfigurationParameterType{}
+							workloadCfgParamTypeModel := WorkloadCfgParamType{}
 
 							// data specToModelNested RequiredOneOfField --> Choice
 							// <no value>
@@ -27103,7 +26258,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Mount
 										if fileElement.GetMount() != nil {
 											// Create the nested Go struct
-											workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+											workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 											mountElement := fileElement.GetMount()
 
 											// Recursively populate the nested struct
@@ -27117,34 +26272,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadVolumeMountTypeModel.Mode = listValue
+												workloadVolumeMountTypeModel.Mode = listValue
 											} else {
-												workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+												workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredStringField --> MountPath
 											if mountElement.GetMountPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+												workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+												workloadVolumeMountTypeModel.MountPath = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> SubPath
 											if mountElement.GetSubPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+												workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+												workloadVolumeMountTypeModel.SubPath = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobConfigurationParametersChoiceFileMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+											workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobConfigurationParametersChoiceFileMountModelAttributeMap, workloadVolumeMountTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fileAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+											fileAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -27196,13 +26351,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadConfigurationParameterTypeModel.Choice = finalObj
+								workloadCfgParamTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadConfigurationParameterTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceJobConfigurationParametersChoiceModelAttributeMap)
+								workloadCfgParamTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceJobConfigurationParametersChoiceModelAttributeMap)
 							}
 
-							parametersElements = append(parametersElements, workloadWorkloadConfigurationParameterTypeModel)
+							parametersElements = append(parametersElements, workloadCfgParamTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27211,22 +26366,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = parametersListValue
+						workloadCfgParametersTypeModel.Parameters = parametersListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceJobConfigurationParametersModelAttributeMap})
+						workloadCfgParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceJobConfigurationParametersModelAttributeMap})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadConfigurationParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobConfigurationModelAttributeMap, workloadWorkloadConfigurationParametersTypeModel)
+					workloadCfgParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobConfigurationModelAttributeMap, workloadCfgParametersTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					jobAttributeMap["configuration"] = workloadWorkloadConfigurationParametersTypeModelObj
+					jobAttributeMap["configuration"] = workloadCfgParametersTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -27242,9 +26397,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(jobElement.GetContainers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					containersElements := make([]WorkloadWorkloadContainerType, 0, len(jobElement.GetContainers()))
+					containersElements := make([]WorkloadContainerType, 0, len(jobElement.GetContainers()))
 					for _, containersElement := range jobElement.GetContainers() {
-						workloadWorkloadContainerTypeModel := WorkloadWorkloadContainerType{}
+						workloadContainerTypeModel := WorkloadContainerType{}
 
 						// data specToModelNested ArrayOfStringField --> Args
 						if len(containersElement.GetArgs()) > 0 {
@@ -27253,9 +26408,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Args = listValue
+							workloadContainerTypeModel.Args = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Args = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Args = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested ArrayOfStringField --> Command
@@ -27265,9 +26420,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Command = listValue
+							workloadContainerTypeModel.Command = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Command = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Command = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested OneOfField --> FlavorChoice
@@ -27376,26 +26531,26 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadContainerTypeModel.FlavorChoice = finalObj
+							workloadContainerTypeModel.FlavorChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersFlavorChoiceModelAttributeMap)
+							workloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersFlavorChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Image
 						if containersElement.GetImage() != nil {
 							// Create the nested Go struct
-							workloadWorkloadImageTypeModel := &WorkloadWorkloadImageType{}
+							workloadImageTypeModel := &WorkloadImageType{}
 							imageElement := containersElement.GetImage()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested RequiredStringField --> Name
 							if imageElement.GetName() != "" {
-								workloadWorkloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
+								workloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
 							} else {
 								// Empty string, set to null
-								workloadWorkloadImageTypeModel.Name = types.StringNull()
+								workloadImageTypeModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested EnumField --> PullPolicy
@@ -27407,9 +26562,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if response.Diagnostics.HasError() {
 									return
 								}
-								workloadWorkloadImageTypeModel.PullPolicy = listValue
+								workloadImageTypeModel.PullPolicy = listValue
 							} else {
-								workloadWorkloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
+								workloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> RegistryChoice
@@ -27491,19 +26646,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadImageTypeModel.RegistryChoice = finalObj
+								workloadImageTypeModel.RegistryChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersImageRegistryChoiceModelAttributeMap)
+								workloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersImageRegistryChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersImageModelAttributeMap, workloadWorkloadImageTypeModel)
+							workloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersImageModelAttributeMap, workloadImageTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Image = workloadWorkloadImageTypeModelObj
+							workloadContainerTypeModel.Image = workloadImageTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -27512,16 +26667,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceJobContainersImageModelAttributeMap)
+							workloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceJobContainersImageModelAttributeMap)
 						}
 
 						// data specToModelNested BoolField --> InitContainer
-						workloadWorkloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
+						workloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
 
 						// data specToModelNested PointerField --> LivenessCheck
 						if containersElement.GetLivenessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							livenessCheckElement := containersElement.GetLivenessCheck()
 
 							// Recursively populate the nested struct
@@ -27618,7 +26773,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -27668,19 +26823,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -27716,7 +26871,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -27766,19 +26921,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -27814,34 +26969,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersLivenessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.LivenessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.LivenessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -27850,21 +27005,21 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckModelAttributeMap)
+							workloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceJobContainersLivenessCheckModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> Name
 						if containersElement.GetName() != "" {
-							workloadWorkloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
+							workloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadContainerTypeModel.Name = types.StringNull()
+							workloadContainerTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> ReadinessCheck
 						if containersElement.GetReadinessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							readinessCheckElement := containersElement.GetReadinessCheck()
 
 							// Recursively populate the nested struct
@@ -27961,7 +27116,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -28011,19 +27166,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -28059,7 +27214,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -28109,19 +27264,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -28157,34 +27312,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobContainersReadinessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.ReadinessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.ReadinessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -28193,10 +27348,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckModelAttributeMap)
+							workloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceJobContainersReadinessCheckModelAttributeMap)
 						}
 
-						containersElements = append(containersElements, workloadWorkloadContainerTypeModel)
+						containersElements = append(containersElements, workloadContainerTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -28217,7 +27372,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> DeployOptions
 				if jobElement.GetDeployOptions() != nil {
 					// Create the nested Go struct
-					workloadWorkloadDeployOptionsTypeModel := &WorkloadWorkloadDeployOptionsType{}
+					workloadDeployOptionsTypeModel := &WorkloadDeployOptionsType{}
 					deployOptionsElement := jobElement.GetDeployOptions()
 
 					// Recursively populate the nested struct
@@ -28549,19 +27704,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = finalObj
+						workloadDeployOptionsTypeModel.DeployChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceJobDeployOptionsDeployChoiceModelAttributeMap)
+						workloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceJobDeployOptionsDeployChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobDeployOptionsModelAttributeMap, workloadWorkloadDeployOptionsTypeModel)
+					workloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobDeployOptionsModelAttributeMap, workloadDeployOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					jobAttributeMap["deploy_options"] = workloadWorkloadDeployOptionsTypeModelObj
+					jobAttributeMap["deploy_options"] = workloadDeployOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -28580,16 +27735,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(jobElement.GetVolumes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					volumesElements := make([]WorkloadWorkloadStorageVolumeType, 0, len(jobElement.GetVolumes()))
+					volumesElements := make([]WorkloadStorageVolumeType, 0, len(jobElement.GetVolumes()))
 					for _, volumesElement := range jobElement.GetVolumes() {
-						workloadWorkloadStorageVolumeTypeModel := WorkloadWorkloadStorageVolumeType{}
+						workloadStorageVolumeTypeModel := WorkloadStorageVolumeType{}
 
 						// data specToModelNested StringField --> Name
 						if volumesElement.GetName() != "" {
-							workloadWorkloadStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
+							workloadStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadStorageVolumeTypeModel.Name = types.StringNull()
+							workloadStorageVolumeTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredOneOfField --> VolumeChoice
@@ -28617,7 +27772,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if emptyDirElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := emptyDirElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -28631,34 +27786,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										emptyDirAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										emptyDirAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -28697,7 +27852,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if hostPathElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := hostPathElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -28711,34 +27866,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										hostPathAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										hostPathAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -28782,7 +27937,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if persistentVolumeElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := persistentVolumeElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -28796,34 +27951,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										persistentVolumeAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										persistentVolumeAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -28838,7 +27993,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Storage
 									if persistentVolumeElement.GetStorage() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPersistentStorageTypeModel := &WorkloadWorkloadPersistentStorageType{}
+										workloadPersistentStorageTypeModel := &WorkloadPersistentStorageType{}
 										storageElement := persistentVolumeElement.GetStorage()
 
 										// Recursively populate the nested struct
@@ -28852,9 +28007,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadPersistentStorageTypeModel.AccessMode = listValue
+											workloadPersistentStorageTypeModel.AccessMode = listValue
 										} else {
-											workloadWorkloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
+											workloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredOneOfField --> ClassNameChoice
@@ -28901,22 +28056,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = finalObj
+											workloadPersistentStorageTypeModel.ClassNameChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeStorageClassNameChoiceModelAttributeMap)
+											workloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeStorageClassNameChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredFloatField --> StorageSize
-										workloadWorkloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
+										workloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeStorageModelAttributeMap, workloadWorkloadPersistentStorageTypeModel)
+										workloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceJobVolumesVolumeChoicePersistentVolumeStorageModelAttributeMap, workloadPersistentStorageTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										persistentVolumeAttributeMap["storage"] = workloadWorkloadPersistentStorageTypeModelObj
+										persistentVolumeAttributeMap["storage"] = workloadPersistentStorageTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -28952,13 +28107,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadStorageVolumeTypeModel.VolumeChoice = finalObj
+							workloadStorageVolumeTypeModel.VolumeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceJobVolumesVolumeChoiceModelAttributeMap)
+							workloadStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceJobVolumesVolumeChoiceModelAttributeMap)
 						}
 
-						volumesElements = append(volumesElements, workloadWorkloadStorageVolumeTypeModel)
+						volumesElements = append(volumesElements, workloadStorageVolumeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -29000,7 +28155,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> AdvertiseOptions
 				if serviceElement.GetAdvertiseOptions() != nil {
 					// Create the nested Go struct
-					workloadWorkloadAdvertiseOptionsTypeModel := &WorkloadWorkloadAdvertiseOptionsType{}
+					workloadAdvertiseOptionsTypeModel := &WorkloadAdvertiseOptionsType{}
 					advertiseOptionsElement := serviceElement.GetAdvertiseOptions()
 
 					// Recursively populate the nested struct
@@ -29031,9 +28186,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if len(advertiseCustomElement.GetAdvertiseWhere()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									advertiseWhereElements := make([]WorkloadWorkloadAdvertiseWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
+									advertiseWhereElements := make([]WorkloadAdvertiseWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
 									for _, advertiseWhereElement := range advertiseCustomElement.GetAdvertiseWhere() {
-										workloadWorkloadAdvertiseWhereTypeModel := WorkloadWorkloadAdvertiseWhereType{}
+										workloadAdvertiseWhereTypeModel := WorkloadAdvertiseWhereType{}
 
 										// data specToModelNested RequiredOneOfField --> Choice
 										// <no value>
@@ -29388,13 +28543,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadAdvertiseWhereTypeModel.Choice = finalObj
+											workloadAdvertiseWhereTypeModel.Choice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadAdvertiseWhereTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
+											workloadAdvertiseWhereTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 										}
 
-										advertiseWhereElements = append(advertiseWhereElements, workloadWorkloadAdvertiseWhereTypeModel)
+										advertiseWhereElements = append(advertiseWhereElements, workloadAdvertiseWhereTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -29416,9 +28571,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if len(advertiseCustomElement.GetPorts()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									portsElements := make([]WorkloadWorkloadAdvertisePortType, 0, len(advertiseCustomElement.GetPorts()))
+									portsElements := make([]WorkloadAdvertisePortType, 0, len(advertiseCustomElement.GetPorts()))
 									for _, portsElement := range advertiseCustomElement.GetPorts() {
-										workloadWorkloadAdvertisePortTypeModel := WorkloadWorkloadAdvertisePortType{}
+										workloadAdvertisePortTypeModel := WorkloadAdvertisePortType{}
 
 										// data specToModelNested RequiredOneOfField --> AdvertiseChoice
 										// <no value>
@@ -29683,7 +28838,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> HttpProtocolOptions
 																if httpsElement.GetHttpProtocolOptions() != nil {
 																	// Create the nested Go struct
-																	workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																	workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																	httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																	// Recursively populate the nested struct
@@ -29845,19 +29000,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																	workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																	httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -30316,84 +29471,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -30427,7 +29504,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if tlsCertParamsElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -30545,19 +29622,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -30794,84 +29871,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -30906,24 +29905,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																				// Step 1: Always create a slice of model structs from the spec data.
 																				// This slice serves as an intermediate representation.
-																				tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																				tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																				for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																					workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																					workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																					// data specToModelNested RequiredStringField --> CertificateUrl
 																					if tlsCertificatesElement.GetCertificateUrl() != "" {
-																						workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																						workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																					} else {
 																						// Empty string, set to null
-																						workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																						workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																					}
 
 																					// data specToModelNested StringField --> Description
 																					if tlsCertificatesElement.GetDescription() != "" {
-																						workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																						workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																					} else {
 																						// Empty string, set to null
-																						workloadTlsCertificateTypeModel.Description = types.StringNull()
+																						workloadTlsCertTypeModel.Description = types.StringNull()
 																					}
 
 																					// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -31007,10 +30006,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																						workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																						workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																					}
 
 																					// data specToModelNested RequiredPointerField --> PrivateKey
@@ -31115,6 +30114,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 																							}
 
+																							// data specToModelNested BoolOfOneOfPointerField --> None
+																							_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																							if isNone {
+																								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																							} else {
+																								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																							}
+
 																							// --- End of Choices ---
 
 																							// Create the final ObjectValue for this OneOf field
@@ -31152,7 +30160,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																						workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -31161,10 +30169,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// here because the API may always return a non-nil struct (with REDACTED values) for this
 																						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																						// The target is a types.Object, so we use types.ObjectNull.
-																						workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																						workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																					}
 
-																					tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																					tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																				}
 																				// CASE 1: The target field is a `types.List` or an attribute map.
 																				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -31185,7 +30193,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if tlsParametersElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -31303,19 +30311,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -31510,7 +30518,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> HttpProtocolOptions
 																if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																	// Create the nested Go struct
-																	workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																	workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																	httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																	// Recursively populate the nested struct
@@ -31672,19 +30680,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																	workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																	httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -31903,84 +30911,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																			}
 
-																			// data specToModelNested OneOfField --> XfccHeader
-																			if useMtlsElement.GetXfccHeader() != nil {
-																				// Create a temporary attribute map for the choices within this OneOf
-																				useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																				// Define a variable for the spec choices to be passed down to nested templates.
-																				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																				useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																				// Process nested choices, populating the temporary attribute map
-
-																				// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																				_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																				if isXfccDisabled {
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																				} else {
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																				}
-
-																				// data specToModelNested PointerOfOneOfField --> XfccOptions
-																				// <no value>
-																				// false
-																				{
-																					xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																					xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																					if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																						xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																						// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																						if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																							xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																							for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																								if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																									xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																								}
-																							}
-																							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																							response.Diagnostics.Append(listDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-																							xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																						} else {
-																							xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																						}
-
-																						xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																						response.Diagnostics.Append(xfccOptionsObjDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																					} else {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																					}
-																				}
-
-																				// --- End of Choices ---
-
-																				// Create the final ObjectValue for this OneOf field
-																				finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																					WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																				)
-																				response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																				if response.Diagnostics.HasError() {
-																					return
-																				}
-
-																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																			} else {
-																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																			}
-
 																			useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																			response.Diagnostics.Append(useMtlsObjDiags...)
 																			if response.Diagnostics.HasError() {
@@ -32181,7 +31111,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> TlsConfig
 																if httpsAutoCertElement.GetTlsConfig() != nil {
 																	// Create the nested Go struct
-																	workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																	workloadTlsConfigModel := &WorkloadTlsConfig{}
 																	tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																	// Recursively populate the nested struct
@@ -32299,19 +31229,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadViewsTlsConfigModel.Choice = finalObj
+																		workloadTlsConfigModel.Choice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																		workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																	workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																	httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -32459,9 +31389,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																if len(specificRoutesElement.GetRoutes()) > 0 {
 																	// Step 1: Always create a slice of model structs from the spec data.
 																	// This slice serves as an intermediate representation.
-																	routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																	routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																	for _, routesElement := range specificRoutesElement.GetRoutes() {
-																		workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																		workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																		// data specToModelNested RequiredOneOfField --> Choice
 																		// <no value>
@@ -32889,29 +31819,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					// data specToModelNested PointerField --> RouteDirectResponse
 																					if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																						// Create the nested Go struct
-																						workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																						workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																						routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																						// Recursively populate the nested struct
 
 																						// data specToModelNested StringField --> ResponseBodyEncoded
 																						if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																							workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																						}
 
 																						// data specToModelNested UintField --> ResponseCode
-																						workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																						workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																						// This field needs to be converted to a types.ObjectValue before assignment.
-																						workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																						workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																						response.Diagnostics.Append(objDiags...)
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																						directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -33229,25 +32159,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					// data specToModelNested PointerField --> RouteRedirect
 																					if redirectRouteElement.GetRouteRedirect() != nil {
 																						// Create the nested Go struct
-																						workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																						workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																						routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																						// Recursively populate the nested struct
 
 																						// data specToModelNested StringField --> HostRedirect
 																						if routeRedirectElement.GetHostRedirect() != "" {
-																							workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																							workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																							workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																						}
 
 																						// data specToModelNested StringField --> ProtoRedirect
 																						if routeRedirectElement.GetProtoRedirect() != "" {
-																							workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																							workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																							workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																						}
 
 																						// data specToModelNested OneOfField --> QueryParams
@@ -33302,10 +32232,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																							workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																							workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																						}
 
 																						// data specToModelNested OneOfField --> RedirectPathChoice
@@ -33352,22 +32282,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																							workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																							workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																						}
 
 																						// data specToModelNested UintField --> ResponseCode
-																						workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																						workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																						// This field needs to be converted to a types.ObjectValue before assignment.
-																						workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																						workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																						response.Diagnostics.Append(objDiags...)
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																						redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -33584,13 +32514,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																			workloadRouteInfoTypeModel.Choice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																			workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																		}
 
-																		routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																		routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																	}
 																	// CASE 1: The target field is a `types.List` or an attribute map.
 																	// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -33698,16 +32628,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
+											workloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceModelAttributeMap)
+											workloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredPointerField --> Port
 										if portsElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortTypeModel := &WorkloadWorkloadPortType{}
+											workloadPortTypeModel := &WorkloadPortType{}
 											portElement := portsElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -33715,13 +32645,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Info
 											if portElement.GetInfo() != nil {
 												// Create the nested Go struct
-												workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+												workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 												infoElement := portElement.GetInfo()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested RequiredUintField --> Port
-												workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+												workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 												// data specToModelNested EnumField --> Protocol
 												if infoElement.GetProtocol().String() != "" {
@@ -33732,9 +32662,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadPortInfoTypeModel.Protocol = listValue
+													workloadPortInfoTypeModel.Protocol = listValue
 												} else {
-													workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+													workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -33781,19 +32711,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+													workloadPortInfoTypeModel.TargetPortChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoTargetPortChoiceModelAttributeMap)
+													workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoTargetPortChoiceModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+												workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+												workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -33802,24 +32732,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												// here because the API may always return a non-nil struct (with REDACTED values) for this
 												// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 												// The target is a types.Object, so we use types.ObjectNull.
-												workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap)
+												workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredStringField --> Name
 											if portElement.GetName() != "" {
-												workloadWorkloadPortTypeModel.Name = types.StringValue(portElement.GetName())
+												workloadPortTypeModel.Name = types.StringValue(portElement.GetName())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadPortTypeModel.Name = types.StringNull()
+												workloadPortTypeModel.Name = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap, workloadWorkloadPortTypeModel)
+											workloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap, workloadPortTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadAdvertisePortTypeModel.Port = workloadWorkloadPortTypeModelObj
+											workloadAdvertisePortTypeModel.Port = workloadPortTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -33828,10 +32758,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// here because the API may always return a non-nil struct (with REDACTED values) for this
 											// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											workloadWorkloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap)
+											workloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap)
 										}
 
-										portsElements = append(portsElements, workloadWorkloadAdvertisePortTypeModel)
+										portsElements = append(portsElements, workloadAdvertisePortTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -33896,20 +32826,20 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if len(multiPortsElement.GetPorts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												portsElements := make([]WorkloadWorkloadPortType, 0, len(multiPortsElement.GetPorts()))
+												portsElements := make([]WorkloadPortType, 0, len(multiPortsElement.GetPorts()))
 												for _, portsElement := range multiPortsElement.GetPorts() {
-													workloadWorkloadPortTypeModel := WorkloadWorkloadPortType{}
+													workloadPortTypeModel := WorkloadPortType{}
 
 													// data specToModelNested RequiredPointerField --> Info
 													if portsElement.GetInfo() != nil {
 														// Create the nested Go struct
-														workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+														workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 														infoElement := portsElement.GetInfo()
 
 														// Recursively populate the nested struct
 
 														// data specToModelNested RequiredUintField --> Port
-														workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+														workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 														// data specToModelNested EnumField --> Protocol
 														if infoElement.GetProtocol().String() != "" {
@@ -33920,9 +32850,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															if response.Diagnostics.HasError() {
 																return
 															}
-															workloadWorkloadPortInfoTypeModel.Protocol = listValue
+															workloadPortInfoTypeModel.Protocol = listValue
 														} else {
-															workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+															workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 														}
 
 														// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -33969,19 +32899,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+															workloadPortInfoTypeModel.TargetPortChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoTargetPortChoiceModelAttributeMap)
+															workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoTargetPortChoiceModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+														workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap, workloadPortInfoTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+														workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -33990,18 +32920,18 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// here because the API may always return a non-nil struct (with REDACTED values) for this
 														// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap)
+														workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredStringField --> Name
 													if portsElement.GetName() != "" {
-														workloadWorkloadPortTypeModel.Name = types.StringValue(portsElement.GetName())
+														workloadPortTypeModel.Name = types.StringValue(portsElement.GetName())
 													} else {
 														// Empty string, set to null
-														workloadWorkloadPortTypeModel.Name = types.StringNull()
+														workloadPortTypeModel.Name = types.StringNull()
 													}
 
-													portsElements = append(portsElements, workloadWorkloadPortTypeModel)
+													portsElements = append(portsElements, workloadPortTypeModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -34043,13 +32973,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Info
 											if portElement.GetInfo() != nil {
 												// Create the nested Go struct
-												workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+												workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 												infoElement := portElement.GetInfo()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested RequiredUintField --> Port
-												workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+												workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 												// data specToModelNested EnumField --> Protocol
 												if infoElement.GetProtocol().String() != "" {
@@ -34060,9 +32990,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadPortInfoTypeModel.Protocol = listValue
+													workloadPortInfoTypeModel.Protocol = listValue
 												} else {
-													workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+													workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -34109,19 +33039,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+													workloadPortInfoTypeModel.TargetPortChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoTargetPortChoiceModelAttributeMap)
+													workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoTargetPortChoiceModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+												workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoModelAttributeMap, workloadPortInfoTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												portAttributeMap["info"] = workloadWorkloadPortInfoTypeModelObj
+												portAttributeMap["info"] = workloadPortInfoTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -34210,9 +33140,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if len(multiPortsElement.GetPorts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												portsElements := make([]WorkloadWorkloadAdvertisePortType, 0, len(multiPortsElement.GetPorts()))
+												portsElements := make([]WorkloadAdvertisePortType, 0, len(multiPortsElement.GetPorts()))
 												for _, portsElement := range multiPortsElement.GetPorts() {
-													workloadWorkloadAdvertisePortTypeModel := WorkloadWorkloadAdvertisePortType{}
+													workloadAdvertisePortTypeModel := WorkloadAdvertisePortType{}
 
 													// data specToModelNested RequiredOneOfField --> AdvertiseChoice
 													// <no value>
@@ -34477,7 +33407,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> HttpProtocolOptions
 																			if httpsElement.GetHttpProtocolOptions() != nil {
 																				// Create the nested Go struct
-																				workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																				workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																				httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																				// Recursively populate the nested struct
@@ -34639,19 +33569,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																				workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																				httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -35110,84 +34040,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																									}
 
-																									// data specToModelNested OneOfField --> XfccHeader
-																									if useMtlsElement.GetXfccHeader() != nil {
-																										// Create a temporary attribute map for the choices within this OneOf
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																										// Define a variable for the spec choices to be passed down to nested templates.
-																										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																										useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																										// Process nested choices, populating the temporary attribute map
-
-																										// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																										_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																										if isXfccDisabled {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																										} else {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																										}
-
-																										// data specToModelNested PointerOfOneOfField --> XfccOptions
-																										// <no value>
-																										// false
-																										{
-																											xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																											xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																											if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																												xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																												// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																												if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																													xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																													for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																														if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																															xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																														}
-																													}
-																													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																													response.Diagnostics.Append(listDiags...)
-																													if response.Diagnostics.HasError() {
-																														return
-																													}
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																												} else {
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																												}
-
-																												xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																												response.Diagnostics.Append(xfccOptionsObjDiags...)
-																												if response.Diagnostics.HasError() {
-																													return
-																												}
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																											} else {
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																											}
-																										}
-
-																										// --- End of Choices ---
-
-																										// Create the final ObjectValue for this OneOf field
-																										finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																											WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																										)
-																										response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-
-																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																									} else {
-																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																									}
-
 																									useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																									response.Diagnostics.Append(useMtlsObjDiags...)
 																									if response.Diagnostics.HasError() {
@@ -35221,7 +34073,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> TlsConfig
 																						if tlsCertParamsElement.GetTlsConfig() != nil {
 																							// Create the nested Go struct
-																							workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																							workloadTlsConfigModel := &WorkloadTlsConfig{}
 																							tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																							// Recursively populate the nested struct
@@ -35339,19 +34191,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadViewsTlsConfigModel.Choice = finalObj
+																								workloadTlsConfigModel.Choice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																								workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																							}
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																							workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																							tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -35588,84 +34440,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																									}
 
-																									// data specToModelNested OneOfField --> XfccHeader
-																									if useMtlsElement.GetXfccHeader() != nil {
-																										// Create a temporary attribute map for the choices within this OneOf
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																										// Define a variable for the spec choices to be passed down to nested templates.
-																										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																										useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																										// Process nested choices, populating the temporary attribute map
-
-																										// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																										_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																										if isXfccDisabled {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																										} else {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																										}
-
-																										// data specToModelNested PointerOfOneOfField --> XfccOptions
-																										// <no value>
-																										// false
-																										{
-																											xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																											xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																											if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																												xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																												// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																												if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																													xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																													for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																														if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																															xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																														}
-																													}
-																													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																													response.Diagnostics.Append(listDiags...)
-																													if response.Diagnostics.HasError() {
-																														return
-																													}
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																												} else {
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																												}
-
-																												xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																												response.Diagnostics.Append(xfccOptionsObjDiags...)
-																												if response.Diagnostics.HasError() {
-																													return
-																												}
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																											} else {
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																											}
-																										}
-
-																										// --- End of Choices ---
-
-																										// Create the final ObjectValue for this OneOf field
-																										finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																											WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																										)
-																										response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-
-																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																									} else {
-																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																									}
-
 																									useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																									response.Diagnostics.Append(useMtlsObjDiags...)
 																									if response.Diagnostics.HasError() {
@@ -35700,24 +34474,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																							// Step 1: Always create a slice of model structs from the spec data.
 																							// This slice serves as an intermediate representation.
-																							tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																							tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																							for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																								workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																								workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																								// data specToModelNested RequiredStringField --> CertificateUrl
 																								if tlsCertificatesElement.GetCertificateUrl() != "" {
-																									workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																									workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																								} else {
 																									// Empty string, set to null
-																									workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																									workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																								}
 
 																								// data specToModelNested StringField --> Description
 																								if tlsCertificatesElement.GetDescription() != "" {
-																									workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																									workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																								} else {
 																									// Empty string, set to null
-																									workloadTlsCertificateTypeModel.Description = types.StringNull()
+																									workloadTlsCertTypeModel.Description = types.StringNull()
 																								}
 
 																								// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -35801,10 +34575,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									}
 
 																									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																									workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																									workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																								} else {
 																									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																									workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																									workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																								}
 
 																								// data specToModelNested RequiredPointerField --> PrivateKey
@@ -35909,6 +34683,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																											}
 																										}
 
+																										// data specToModelNested BoolOfOneOfPointerField --> None
+																										_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																										if isNone {
+																											privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																										} else {
+																											privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																										}
+
 																										// --- End of Choices ---
 
 																										// Create the final ObjectValue for this OneOf field
@@ -35946,7 +34729,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																									workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -35955,10 +34738,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									// here because the API may always return a non-nil struct (with REDACTED values) for this
 																									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																									// The target is a types.Object, so we use types.ObjectNull.
-																									workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																									workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																								}
 
-																								tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																								tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																							}
 																							// CASE 1: The target field is a `types.List` or an attribute map.
 																							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -35979,7 +34762,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> TlsConfig
 																						if tlsParametersElement.GetTlsConfig() != nil {
 																							// Create the nested Go struct
-																							workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																							workloadTlsConfigModel := &WorkloadTlsConfig{}
 																							tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																							// Recursively populate the nested struct
@@ -36097,19 +34880,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadViewsTlsConfigModel.Choice = finalObj
+																								workloadTlsConfigModel.Choice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																								workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																							}
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																							workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																							tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -36304,7 +35087,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> HttpProtocolOptions
 																			if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																				// Create the nested Go struct
-																				workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																				workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																				httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																				// Recursively populate the nested struct
@@ -36466,19 +35249,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																				workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																				httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -36697,84 +35480,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -36975,7 +35680,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if httpsAutoCertElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -37093,19 +35798,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -37253,9 +35958,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			if len(specificRoutesElement.GetRoutes()) > 0 {
 																				// Step 1: Always create a slice of model structs from the spec data.
 																				// This slice serves as an intermediate representation.
-																				routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																				routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																				for _, routesElement := range specificRoutesElement.GetRoutes() {
-																					workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																					workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																					// data specToModelNested RequiredOneOfField --> Choice
 																					// <no value>
@@ -37683,29 +36388,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								// data specToModelNested PointerField --> RouteDirectResponse
 																								if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																									// Create the nested Go struct
-																									workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																									workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																									routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																									// Recursively populate the nested struct
 
 																									// data specToModelNested StringField --> ResponseBodyEncoded
 																									if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																										workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																									}
 
 																									// data specToModelNested UintField --> ResponseCode
-																									workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																									workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																									// This field needs to be converted to a types.ObjectValue before assignment.
-																									workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																									workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																									response.Diagnostics.Append(objDiags...)
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																									directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -38023,25 +36728,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								// data specToModelNested PointerField --> RouteRedirect
 																								if redirectRouteElement.GetRouteRedirect() != nil {
 																									// Create the nested Go struct
-																									workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																									workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																									routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																									// Recursively populate the nested struct
 
 																									// data specToModelNested StringField --> HostRedirect
 																									if routeRedirectElement.GetHostRedirect() != "" {
-																										workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																										workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																										workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																									}
 
 																									// data specToModelNested StringField --> ProtoRedirect
 																									if routeRedirectElement.GetProtoRedirect() != "" {
-																										workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																										workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																										workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																									}
 
 																									// data specToModelNested OneOfField --> QueryParams
@@ -38096,10 +36801,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										}
 
 																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																										workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																									} else {
 																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																										workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																									}
 
 																									// data specToModelNested OneOfField --> RedirectPathChoice
@@ -38146,22 +36851,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										}
 
 																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																										workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																									} else {
 																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																										workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																									}
 
 																									// data specToModelNested UintField --> ResponseCode
-																									workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																									workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																									// This field needs to be converted to a types.ObjectValue before assignment.
-																									workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																									workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																									response.Diagnostics.Append(objDiags...)
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																									redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -38378,13 +37083,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																						workloadRouteInfoTypeModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																						workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																					}
 
-																					routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																					routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																				}
 																				// CASE 1: The target field is a `types.List` or an attribute map.
 																				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -38492,16 +37197,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
+														workloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceModelAttributeMap)
+														workloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredPointerField --> Port
 													if portsElement.GetPort() != nil {
 														// Create the nested Go struct
-														workloadWorkloadPortTypeModel := &WorkloadWorkloadPortType{}
+														workloadPortTypeModel := &WorkloadPortType{}
 														portElement := portsElement.GetPort()
 
 														// Recursively populate the nested struct
@@ -38509,13 +37214,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// data specToModelNested RequiredPointerField --> Info
 														if portElement.GetInfo() != nil {
 															// Create the nested Go struct
-															workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+															workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 															infoElement := portElement.GetInfo()
 
 															// Recursively populate the nested struct
 
 															// data specToModelNested RequiredUintField --> Port
-															workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+															workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 															// data specToModelNested EnumField --> Protocol
 															if infoElement.GetProtocol().String() != "" {
@@ -38526,9 +37231,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																workloadWorkloadPortInfoTypeModel.Protocol = listValue
+																workloadPortInfoTypeModel.Protocol = listValue
 															} else {
-																workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+																workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 															}
 
 															// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -38575,19 +37280,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+																workloadPortInfoTypeModel.TargetPortChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoTargetPortChoiceModelAttributeMap)
+																workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoTargetPortChoiceModelAttributeMap)
 															}
 
 															// This field needs to be converted to a types.ObjectValue before assignment.
-															workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+															workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 															response.Diagnostics.Append(objDiags...)
 															if response.Diagnostics.HasError() {
 																return
 															}
-															workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+															workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 														} else {
 															// The source field is nil (e.g. redacted by the API).
@@ -38596,24 +37301,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															// here because the API may always return a non-nil struct (with REDACTED values) for this
 															// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 															// The target is a types.Object, so we use types.ObjectNull.
-															workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap)
+															workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap)
 														}
 
 														// data specToModelNested RequiredStringField --> Name
 														if portElement.GetName() != "" {
-															workloadWorkloadPortTypeModel.Name = types.StringValue(portElement.GetName())
+															workloadPortTypeModel.Name = types.StringValue(portElement.GetName())
 														} else {
 															// Empty string, set to null
-															workloadWorkloadPortTypeModel.Name = types.StringNull()
+															workloadPortTypeModel.Name = types.StringNull()
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														workloadWorkloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap, workloadWorkloadPortTypeModel)
+														workloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap, workloadPortTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadAdvertisePortTypeModel.Port = workloadWorkloadPortTypeModelObj
+														workloadAdvertisePortTypeModel.Port = workloadPortTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -38622,10 +37327,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// here because the API may always return a non-nil struct (with REDACTED values) for this
 														// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														workloadWorkloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap)
+														workloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap)
 													}
 
-													portsElements = append(portsElements, workloadWorkloadAdvertisePortTypeModel)
+													portsElements = append(portsElements, workloadAdvertisePortTypeModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -38927,7 +37632,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> HttpProtocolOptions
 																	if httpsElement.GetHttpProtocolOptions() != nil {
 																		// Create the nested Go struct
-																		workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																		workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																		httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																		// Recursively populate the nested struct
@@ -39089,19 +37794,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																		workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																		httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -39560,84 +38265,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																							}
 
-																							// data specToModelNested OneOfField --> XfccHeader
-																							if useMtlsElement.GetXfccHeader() != nil {
-																								// Create a temporary attribute map for the choices within this OneOf
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																								// Define a variable for the spec choices to be passed down to nested templates.
-																								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																								// Process nested choices, populating the temporary attribute map
-
-																								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																								if isXfccDisabled {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																								}
-
-																								// data specToModelNested PointerOfOneOfField --> XfccOptions
-																								// <no value>
-																								// false
-																								{
-																									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																												}
-																											}
-																											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																											response.Diagnostics.Append(listDiags...)
-																											if response.Diagnostics.HasError() {
-																												return
-																											}
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																										} else {
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																										}
-
-																										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																										response.Diagnostics.Append(xfccOptionsObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																									} else {
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																									}
-																								}
-
-																								// --- End of Choices ---
-
-																								// Create the final ObjectValue for this OneOf field
-																								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																									WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																								)
-																								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-
-																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																							} else {
-																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																							}
-
 																							useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																							response.Diagnostics.Append(useMtlsObjDiags...)
 																							if response.Diagnostics.HasError() {
@@ -39671,7 +38298,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				// data specToModelNested PointerField --> TlsConfig
 																				if tlsCertParamsElement.GetTlsConfig() != nil {
 																					// Create the nested Go struct
-																					workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																					workloadTlsConfigModel := &WorkloadTlsConfig{}
 																					tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																					// Recursively populate the nested struct
@@ -39789,19 +38416,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadViewsTlsConfigModel.Choice = finalObj
+																						workloadTlsConfigModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																						workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																					}
 
 																					// This field needs to be converted to a types.ObjectValue before assignment.
-																					workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																					workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																					response.Diagnostics.Append(objDiags...)
 																					if response.Diagnostics.HasError() {
 																						return
 																					}
-																					tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																					tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																				} else {
 																					// The source field is nil (e.g. redacted by the API).
@@ -40038,84 +38665,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																							}
 
-																							// data specToModelNested OneOfField --> XfccHeader
-																							if useMtlsElement.GetXfccHeader() != nil {
-																								// Create a temporary attribute map for the choices within this OneOf
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																								// Define a variable for the spec choices to be passed down to nested templates.
-																								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																								// Process nested choices, populating the temporary attribute map
-
-																								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																								if isXfccDisabled {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																								}
-
-																								// data specToModelNested PointerOfOneOfField --> XfccOptions
-																								// <no value>
-																								// false
-																								{
-																									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																												}
-																											}
-																											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																											response.Diagnostics.Append(listDiags...)
-																											if response.Diagnostics.HasError() {
-																												return
-																											}
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																										} else {
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																										}
-
-																										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																										response.Diagnostics.Append(xfccOptionsObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																									} else {
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																									}
-																								}
-
-																								// --- End of Choices ---
-
-																								// Create the final ObjectValue for this OneOf field
-																								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																									WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																								)
-																								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-
-																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																							} else {
-																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																							}
-
 																							useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																							response.Diagnostics.Append(useMtlsObjDiags...)
 																							if response.Diagnostics.HasError() {
@@ -40150,24 +38699,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																					// Step 1: Always create a slice of model structs from the spec data.
 																					// This slice serves as an intermediate representation.
-																					tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																					tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																					for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																						workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																						workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																						// data specToModelNested RequiredStringField --> CertificateUrl
 																						if tlsCertificatesElement.GetCertificateUrl() != "" {
-																							workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																							workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																						} else {
 																							// Empty string, set to null
-																							workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																							workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																						}
 
 																						// data specToModelNested StringField --> Description
 																						if tlsCertificatesElement.GetDescription() != "" {
-																							workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																							workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																						} else {
 																							// Empty string, set to null
-																							workloadTlsCertificateTypeModel.Description = types.StringNull()
+																							workloadTlsCertTypeModel.Description = types.StringNull()
 																						}
 
 																						// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -40251,10 +38800,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																							workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																							workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																						}
 
 																						// data specToModelNested RequiredPointerField --> PrivateKey
@@ -40359,6 +38908,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									}
 																								}
 
+																								// data specToModelNested BoolOfOneOfPointerField --> None
+																								_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																								if isNone {
+																									privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																								} else {
+																									privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																								}
+
 																								// --- End of Choices ---
 
 																								// Create the final ObjectValue for this OneOf field
@@ -40396,7 +38954,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																							workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -40405,10 +38963,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							// here because the API may always return a non-nil struct (with REDACTED values) for this
 																							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																							// The target is a types.Object, so we use types.ObjectNull.
-																							workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																							workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																						}
 
-																						tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																						tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																					}
 																					// CASE 1: The target field is a `types.List` or an attribute map.
 																					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -40429,7 +38987,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				// data specToModelNested PointerField --> TlsConfig
 																				if tlsParametersElement.GetTlsConfig() != nil {
 																					// Create the nested Go struct
-																					workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																					workloadTlsConfigModel := &WorkloadTlsConfig{}
 																					tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																					// Recursively populate the nested struct
@@ -40547,19 +39105,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadViewsTlsConfigModel.Choice = finalObj
+																						workloadTlsConfigModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																						workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																					}
 
 																					// This field needs to be converted to a types.ObjectValue before assignment.
-																					workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																					workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																					response.Diagnostics.Append(objDiags...)
 																					if response.Diagnostics.HasError() {
 																						return
 																					}
-																					tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																					tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																				} else {
 																					// The source field is nil (e.g. redacted by the API).
@@ -40754,7 +39312,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> HttpProtocolOptions
 																	if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																		// Create the nested Go struct
-																		workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																		workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																		httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																		// Recursively populate the nested struct
@@ -40916,19 +39474,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																		workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																		httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -41147,84 +39705,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																				}
 
-																				// data specToModelNested OneOfField --> XfccHeader
-																				if useMtlsElement.GetXfccHeader() != nil {
-																					// Create a temporary attribute map for the choices within this OneOf
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																					// Define a variable for the spec choices to be passed down to nested templates.
-																					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																					useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																					// Process nested choices, populating the temporary attribute map
-
-																					// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																					_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																					if isXfccDisabled {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																					} else {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																					}
-
-																					// data specToModelNested PointerOfOneOfField --> XfccOptions
-																					// <no value>
-																					// false
-																					{
-																						xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																						xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																						if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																							xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																							// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																							if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																								xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																								for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																									if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																										xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																									}
-																								}
-																								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																								response.Diagnostics.Append(listDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-																								xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																							} else {
-																								xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																							}
-
-																							xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																							response.Diagnostics.Append(xfccOptionsObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																						} else {
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																						}
-																					}
-
-																					// --- End of Choices ---
-
-																					// Create the final ObjectValue for this OneOf field
-																					finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																						WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																					)
-																					response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-
-																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																				} else {
-																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																				}
-
 																				useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																				response.Diagnostics.Append(useMtlsObjDiags...)
 																				if response.Diagnostics.HasError() {
@@ -41425,7 +39905,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> TlsConfig
 																	if httpsAutoCertElement.GetTlsConfig() != nil {
 																		// Create the nested Go struct
-																		workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																		workloadTlsConfigModel := &WorkloadTlsConfig{}
 																		tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																		// Recursively populate the nested struct
@@ -41543,19 +40023,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadViewsTlsConfigModel.Choice = finalObj
+																			workloadTlsConfigModel.Choice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																			workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																		workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																		httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -41703,9 +40183,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	if len(specificRoutesElement.GetRoutes()) > 0 {
 																		// Step 1: Always create a slice of model structs from the spec data.
 																		// This slice serves as an intermediate representation.
-																		routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																		routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																		for _, routesElement := range specificRoutesElement.GetRoutes() {
-																			workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																			workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																			// data specToModelNested RequiredOneOfField --> Choice
 																			// <no value>
@@ -42133,29 +40613,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> RouteDirectResponse
 																						if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																							// Create the nested Go struct
-																							workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																							workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																							routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																							// Recursively populate the nested struct
 
 																							// data specToModelNested StringField --> ResponseBodyEncoded
 																							if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																								workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																							}
 
 																							// data specToModelNested UintField --> ResponseCode
-																							workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																							workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																							workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																							directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -42473,25 +40953,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> RouteRedirect
 																						if redirectRouteElement.GetRouteRedirect() != nil {
 																							// Create the nested Go struct
-																							workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																							workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																							routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																							// Recursively populate the nested struct
 
 																							// data specToModelNested StringField --> HostRedirect
 																							if routeRedirectElement.GetHostRedirect() != "" {
-																								workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																								workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																								workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																							}
 
 																							// data specToModelNested StringField --> ProtoRedirect
 																							if routeRedirectElement.GetProtoRedirect() != "" {
-																								workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																								workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																								workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																							}
 
 																							// data specToModelNested OneOfField --> QueryParams
@@ -42546,10 +41026,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																								workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																								workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																							}
 
 																							// data specToModelNested OneOfField --> RedirectPathChoice
@@ -42596,22 +41076,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																								workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																								workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																							}
 
 																							// data specToModelNested UintField --> ResponseCode
-																							workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																							workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																							workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																							redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -42828,13 +41308,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				}
 
 																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																				workloadRouteInfoTypeModel.Choice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																				workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																			}
 
-																			routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																			routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																		}
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -42951,7 +41431,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Port
 											if portElement.GetPort() != nil {
 												// Create the nested Go struct
-												workloadWorkloadSinglePortTypeModel := &WorkloadWorkloadSinglePortType{}
+												workloadSinglePortTypeModel := &WorkloadSinglePortType{}
 												portElement := portElement.GetPort()
 
 												// Recursively populate the nested struct
@@ -42959,13 +41439,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												// data specToModelNested RequiredPointerField --> Info
 												if portElement.GetInfo() != nil {
 													// Create the nested Go struct
-													workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+													workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 													infoElement := portElement.GetInfo()
 
 													// Recursively populate the nested struct
 
 													// data specToModelNested RequiredUintField --> Port
-													workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+													workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 													// data specToModelNested EnumField --> Protocol
 													if infoElement.GetProtocol().String() != "" {
@@ -42976,9 +41456,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadPortInfoTypeModel.Protocol = listValue
+														workloadPortInfoTypeModel.Protocol = listValue
 													} else {
-														workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+														workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -43025,19 +41505,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+														workloadPortInfoTypeModel.TargetPortChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoTargetPortChoiceModelAttributeMap)
+														workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoTargetPortChoiceModelAttributeMap)
 													}
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+													workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadSinglePortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+													workloadSinglePortTypeModel.Info = workloadPortInfoTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -43046,16 +41526,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													// here because the API may always return a non-nil struct (with REDACTED values) for this
 													// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 													// The target is a types.Object, so we use types.ObjectNull.
-													workloadWorkloadSinglePortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap)
+													workloadSinglePortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadSinglePortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortModelAttributeMap, workloadWorkloadSinglePortTypeModel)
+												workloadSinglePortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortModelAttributeMap, workloadSinglePortTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												portAttributeMap["port"] = workloadWorkloadSinglePortTypeModelObj
+												portAttributeMap["port"] = workloadSinglePortTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -43130,19 +41610,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadAdvertiseOptionsTypeModel.AdvertiseChoice = finalObj
+						workloadAdvertiseOptionsTypeModel.AdvertiseChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadAdvertiseOptionsTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceModelAttributeMap)
+						workloadAdvertiseOptionsTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceAdvertiseOptionsAdvertiseChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadAdvertiseOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsModelAttributeMap, workloadWorkloadAdvertiseOptionsTypeModel)
+					workloadAdvertiseOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceAdvertiseOptionsModelAttributeMap, workloadAdvertiseOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					serviceAttributeMap["advertise_options"] = workloadWorkloadAdvertiseOptionsTypeModelObj
+					serviceAttributeMap["advertise_options"] = workloadAdvertiseOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -43157,7 +41637,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Configuration
 				if serviceElement.GetConfiguration() != nil {
 					// Create the nested Go struct
-					workloadWorkloadConfigurationParametersTypeModel := &WorkloadWorkloadConfigurationParametersType{}
+					workloadCfgParametersTypeModel := &WorkloadCfgParametersType{}
 					configurationElement := serviceElement.GetConfiguration()
 
 					// Recursively populate the nested struct
@@ -43166,9 +41646,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 					if len(configurationElement.GetParameters()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						parametersElements := make([]WorkloadWorkloadConfigurationParameterType, 0, len(configurationElement.GetParameters()))
+						parametersElements := make([]WorkloadCfgParamType, 0, len(configurationElement.GetParameters()))
 						for _, parametersElement := range configurationElement.GetParameters() {
-							workloadWorkloadConfigurationParameterTypeModel := WorkloadWorkloadConfigurationParameterType{}
+							workloadCfgParamTypeModel := WorkloadCfgParamType{}
 
 							// data specToModelNested RequiredOneOfField --> Choice
 							// <no value>
@@ -43240,7 +41720,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Mount
 										if fileElement.GetMount() != nil {
 											// Create the nested Go struct
-											workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+											workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 											mountElement := fileElement.GetMount()
 
 											// Recursively populate the nested struct
@@ -43254,34 +41734,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadVolumeMountTypeModel.Mode = listValue
+												workloadVolumeMountTypeModel.Mode = listValue
 											} else {
-												workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+												workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredStringField --> MountPath
 											if mountElement.GetMountPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+												workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+												workloadVolumeMountTypeModel.MountPath = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> SubPath
 											if mountElement.GetSubPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+												workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+												workloadVolumeMountTypeModel.SubPath = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+											workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadVolumeMountTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fileAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+											fileAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -43333,13 +41813,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadConfigurationParameterTypeModel.Choice = finalObj
+								workloadCfgParamTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadConfigurationParameterTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceConfigurationParametersChoiceModelAttributeMap)
+								workloadCfgParamTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceServiceConfigurationParametersChoiceModelAttributeMap)
 							}
 
-							parametersElements = append(parametersElements, workloadWorkloadConfigurationParameterTypeModel)
+							parametersElements = append(parametersElements, workloadCfgParamTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -43348,22 +41828,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = parametersListValue
+						workloadCfgParametersTypeModel.Parameters = parametersListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceServiceConfigurationParametersModelAttributeMap})
+						workloadCfgParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceServiceConfigurationParametersModelAttributeMap})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadConfigurationParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceConfigurationModelAttributeMap, workloadWorkloadConfigurationParametersTypeModel)
+					workloadCfgParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceConfigurationModelAttributeMap, workloadCfgParametersTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					serviceAttributeMap["configuration"] = workloadWorkloadConfigurationParametersTypeModelObj
+					serviceAttributeMap["configuration"] = workloadCfgParametersTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -43379,9 +41859,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(serviceElement.GetContainers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					containersElements := make([]WorkloadWorkloadContainerType, 0, len(serviceElement.GetContainers()))
+					containersElements := make([]WorkloadContainerType, 0, len(serviceElement.GetContainers()))
 					for _, containersElement := range serviceElement.GetContainers() {
-						workloadWorkloadContainerTypeModel := WorkloadWorkloadContainerType{}
+						workloadContainerTypeModel := WorkloadContainerType{}
 
 						// data specToModelNested ArrayOfStringField --> Args
 						if len(containersElement.GetArgs()) > 0 {
@@ -43390,9 +41870,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Args = listValue
+							workloadContainerTypeModel.Args = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Args = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Args = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested ArrayOfStringField --> Command
@@ -43402,9 +41882,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Command = listValue
+							workloadContainerTypeModel.Command = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Command = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Command = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested OneOfField --> FlavorChoice
@@ -43513,26 +41993,26 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadContainerTypeModel.FlavorChoice = finalObj
+							workloadContainerTypeModel.FlavorChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersFlavorChoiceModelAttributeMap)
+							workloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersFlavorChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Image
 						if containersElement.GetImage() != nil {
 							// Create the nested Go struct
-							workloadWorkloadImageTypeModel := &WorkloadWorkloadImageType{}
+							workloadImageTypeModel := &WorkloadImageType{}
 							imageElement := containersElement.GetImage()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested RequiredStringField --> Name
 							if imageElement.GetName() != "" {
-								workloadWorkloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
+								workloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
 							} else {
 								// Empty string, set to null
-								workloadWorkloadImageTypeModel.Name = types.StringNull()
+								workloadImageTypeModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested EnumField --> PullPolicy
@@ -43544,9 +42024,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if response.Diagnostics.HasError() {
 									return
 								}
-								workloadWorkloadImageTypeModel.PullPolicy = listValue
+								workloadImageTypeModel.PullPolicy = listValue
 							} else {
-								workloadWorkloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
+								workloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> RegistryChoice
@@ -43628,19 +42108,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadImageTypeModel.RegistryChoice = finalObj
+								workloadImageTypeModel.RegistryChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersImageRegistryChoiceModelAttributeMap)
+								workloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersImageRegistryChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersImageModelAttributeMap, workloadWorkloadImageTypeModel)
+							workloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersImageModelAttributeMap, workloadImageTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Image = workloadWorkloadImageTypeModelObj
+							workloadContainerTypeModel.Image = workloadImageTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -43649,16 +42129,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersImageModelAttributeMap)
+							workloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersImageModelAttributeMap)
 						}
 
 						// data specToModelNested BoolField --> InitContainer
-						workloadWorkloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
+						workloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
 
 						// data specToModelNested PointerField --> LivenessCheck
 						if containersElement.GetLivenessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							livenessCheckElement := containersElement.GetLivenessCheck()
 
 							// Recursively populate the nested struct
@@ -43755,7 +42235,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -43805,19 +42285,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -43853,7 +42333,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -43903,19 +42383,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -43951,34 +42431,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersLivenessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.LivenessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.LivenessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -43987,21 +42467,21 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckModelAttributeMap)
+							workloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersLivenessCheckModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> Name
 						if containersElement.GetName() != "" {
-							workloadWorkloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
+							workloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadContainerTypeModel.Name = types.StringNull()
+							workloadContainerTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> ReadinessCheck
 						if containersElement.GetReadinessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							readinessCheckElement := containersElement.GetReadinessCheck()
 
 							// Recursively populate the nested struct
@@ -44098,7 +42578,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -44148,19 +42628,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -44196,7 +42676,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -44246,19 +42726,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -44294,34 +42774,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceContainersReadinessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.ReadinessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.ReadinessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -44330,10 +42810,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckModelAttributeMap)
+							workloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceServiceContainersReadinessCheckModelAttributeMap)
 						}
 
-						containersElements = append(containersElements, workloadWorkloadContainerTypeModel)
+						containersElements = append(containersElements, workloadContainerTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -44354,7 +42834,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> DeployOptions
 				if serviceElement.GetDeployOptions() != nil {
 					// Create the nested Go struct
-					workloadWorkloadDeployOptionsTypeModel := &WorkloadWorkloadDeployOptionsType{}
+					workloadDeployOptionsTypeModel := &WorkloadDeployOptionsType{}
 					deployOptionsElement := serviceElement.GetDeployOptions()
 
 					// Recursively populate the nested struct
@@ -44686,19 +43166,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = finalObj
+						workloadDeployOptionsTypeModel.DeployChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceDeployOptionsDeployChoiceModelAttributeMap)
+						workloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceDeployOptionsDeployChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceDeployOptionsModelAttributeMap, workloadWorkloadDeployOptionsTypeModel)
+					workloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceDeployOptionsModelAttributeMap, workloadDeployOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					serviceAttributeMap["deploy_options"] = workloadWorkloadDeployOptionsTypeModelObj
+					serviceAttributeMap["deploy_options"] = workloadDeployOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -44713,7 +43193,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Family
 				if serviceElement.GetFamily() != nil {
 					// Create the nested Go struct
-					workloadWorkloadIPFamilyTypeModel := &WorkloadWorkloadIPFamilyType{}
+					workloadIPFamilyTypeModel := &WorkloadIPFamilyType{}
 					familyElement := serviceElement.GetFamily()
 
 					// Recursively populate the nested struct
@@ -44779,19 +43259,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadIPFamilyTypeModel.IpFamilyChoice = finalObj
+						workloadIPFamilyTypeModel.IpFamilyChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadIPFamilyTypeModel.IpFamilyChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceFamilyIpFamilyChoiceModelAttributeMap)
+						workloadIPFamilyTypeModel.IpFamilyChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceFamilyIpFamilyChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadIPFamilyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceFamilyModelAttributeMap, workloadWorkloadIPFamilyTypeModel)
+					workloadIPFamilyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceFamilyModelAttributeMap, workloadIPFamilyTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					serviceAttributeMap["family"] = workloadWorkloadIPFamilyTypeModelObj
+					serviceAttributeMap["family"] = workloadIPFamilyTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -44857,16 +43337,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(serviceElement.GetVolumes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					volumesElements := make([]WorkloadWorkloadStorageVolumeType, 0, len(serviceElement.GetVolumes()))
+					volumesElements := make([]WorkloadStorageVolumeType, 0, len(serviceElement.GetVolumes()))
 					for _, volumesElement := range serviceElement.GetVolumes() {
-						workloadWorkloadStorageVolumeTypeModel := WorkloadWorkloadStorageVolumeType{}
+						workloadStorageVolumeTypeModel := WorkloadStorageVolumeType{}
 
 						// data specToModelNested StringField --> Name
 						if volumesElement.GetName() != "" {
-							workloadWorkloadStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
+							workloadStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadStorageVolumeTypeModel.Name = types.StringNull()
+							workloadStorageVolumeTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredOneOfField --> VolumeChoice
@@ -44894,7 +43374,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if emptyDirElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := emptyDirElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -44908,34 +43388,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										emptyDirAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										emptyDirAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -44974,7 +43454,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if hostPathElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := hostPathElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -44988,34 +43468,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										hostPathAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										hostPathAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -45059,7 +43539,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if persistentVolumeElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := persistentVolumeElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -45073,34 +43553,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										persistentVolumeAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										persistentVolumeAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -45115,7 +43595,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Storage
 									if persistentVolumeElement.GetStorage() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPersistentStorageTypeModel := &WorkloadWorkloadPersistentStorageType{}
+										workloadPersistentStorageTypeModel := &WorkloadPersistentStorageType{}
 										storageElement := persistentVolumeElement.GetStorage()
 
 										// Recursively populate the nested struct
@@ -45129,9 +43609,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadPersistentStorageTypeModel.AccessMode = listValue
+											workloadPersistentStorageTypeModel.AccessMode = listValue
 										} else {
-											workloadWorkloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
+											workloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredOneOfField --> ClassNameChoice
@@ -45178,22 +43658,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = finalObj
+											workloadPersistentStorageTypeModel.ClassNameChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeStorageClassNameChoiceModelAttributeMap)
+											workloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeStorageClassNameChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredFloatField --> StorageSize
-										workloadWorkloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
+										workloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeStorageModelAttributeMap, workloadWorkloadPersistentStorageTypeModel)
+										workloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceServiceVolumesVolumeChoicePersistentVolumeStorageModelAttributeMap, workloadPersistentStorageTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										persistentVolumeAttributeMap["storage"] = workloadWorkloadPersistentStorageTypeModelObj
+										persistentVolumeAttributeMap["storage"] = workloadPersistentStorageTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -45229,13 +43709,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadStorageVolumeTypeModel.VolumeChoice = finalObj
+							workloadStorageVolumeTypeModel.VolumeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceVolumesVolumeChoiceModelAttributeMap)
+							workloadStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceServiceVolumesVolumeChoiceModelAttributeMap)
 						}
 
-						volumesElements = append(volumesElements, workloadWorkloadStorageVolumeTypeModel)
+						volumesElements = append(volumesElements, workloadStorageVolumeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -45353,7 +43833,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Configuration
 				if simpleServiceElement.GetConfiguration() != nil {
 					// Create the nested Go struct
-					workloadWorkloadConfigurationParametersTypeModel := &WorkloadWorkloadConfigurationParametersType{}
+					workloadCfgParametersTypeModel := &WorkloadCfgParametersType{}
 					configurationElement := simpleServiceElement.GetConfiguration()
 
 					// Recursively populate the nested struct
@@ -45362,9 +43842,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 					if len(configurationElement.GetParameters()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						parametersElements := make([]WorkloadWorkloadConfigurationParameterType, 0, len(configurationElement.GetParameters()))
+						parametersElements := make([]WorkloadCfgParamType, 0, len(configurationElement.GetParameters()))
 						for _, parametersElement := range configurationElement.GetParameters() {
-							workloadWorkloadConfigurationParameterTypeModel := WorkloadWorkloadConfigurationParameterType{}
+							workloadCfgParamTypeModel := WorkloadCfgParamType{}
 
 							// data specToModelNested RequiredOneOfField --> Choice
 							// <no value>
@@ -45436,7 +43916,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Mount
 										if fileElement.GetMount() != nil {
 											// Create the nested Go struct
-											workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+											workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 											mountElement := fileElement.GetMount()
 
 											// Recursively populate the nested struct
@@ -45450,34 +43930,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadVolumeMountTypeModel.Mode = listValue
+												workloadVolumeMountTypeModel.Mode = listValue
 											} else {
-												workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+												workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredStringField --> MountPath
 											if mountElement.GetMountPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+												workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+												workloadVolumeMountTypeModel.MountPath = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> SubPath
 											if mountElement.GetSubPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+												workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+												workloadVolumeMountTypeModel.SubPath = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+											workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadVolumeMountTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fileAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+											fileAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -45529,13 +44009,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadConfigurationParameterTypeModel.Choice = finalObj
+								workloadCfgParamTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadConfigurationParameterTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceConfigurationParametersChoiceModelAttributeMap)
+								workloadCfgParamTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceConfigurationParametersChoiceModelAttributeMap)
 							}
 
-							parametersElements = append(parametersElements, workloadWorkloadConfigurationParameterTypeModel)
+							parametersElements = append(parametersElements, workloadCfgParamTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -45544,22 +44024,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = parametersListValue
+						workloadCfgParametersTypeModel.Parameters = parametersListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceSimpleServiceConfigurationParametersModelAttributeMap})
+						workloadCfgParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceSimpleServiceConfigurationParametersModelAttributeMap})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadConfigurationParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceConfigurationModelAttributeMap, workloadWorkloadConfigurationParametersTypeModel)
+					workloadCfgParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceConfigurationModelAttributeMap, workloadCfgParametersTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					simpleServiceAttributeMap["configuration"] = workloadWorkloadConfigurationParametersTypeModelObj
+					simpleServiceAttributeMap["configuration"] = workloadCfgParametersTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -45574,7 +44054,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> Container
 				if simpleServiceElement.GetContainer() != nil {
 					// Create the nested Go struct
-					workloadWorkloadContainerTypeModel := &WorkloadWorkloadContainerType{}
+					workloadContainerTypeModel := &WorkloadContainerType{}
 					containerElement := simpleServiceElement.GetContainer()
 
 					// Recursively populate the nested struct
@@ -45586,9 +44066,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadContainerTypeModel.Args = listValue
+						workloadContainerTypeModel.Args = listValue
 					} else {
-						workloadWorkloadContainerTypeModel.Args = types.ListNull(types.StringType)
+						workloadContainerTypeModel.Args = types.ListNull(types.StringType)
 					}
 
 					// data specToModelNested ArrayOfStringField --> Command
@@ -45598,9 +44078,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadContainerTypeModel.Command = listValue
+						workloadContainerTypeModel.Command = listValue
 					} else {
-						workloadWorkloadContainerTypeModel.Command = types.ListNull(types.StringType)
+						workloadContainerTypeModel.Command = types.ListNull(types.StringType)
 					}
 
 					// data specToModelNested OneOfField --> FlavorChoice
@@ -45709,26 +44189,26 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadContainerTypeModel.FlavorChoice = finalObj
+						workloadContainerTypeModel.FlavorChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerFlavorChoiceModelAttributeMap)
+						workloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerFlavorChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredPointerField --> Image
 					if containerElement.GetImage() != nil {
 						// Create the nested Go struct
-						workloadWorkloadImageTypeModel := &WorkloadWorkloadImageType{}
+						workloadImageTypeModel := &WorkloadImageType{}
 						imageElement := containerElement.GetImage()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested RequiredStringField --> Name
 						if imageElement.GetName() != "" {
-							workloadWorkloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
+							workloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadImageTypeModel.Name = types.StringNull()
+							workloadImageTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested EnumField --> PullPolicy
@@ -45740,9 +44220,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadImageTypeModel.PullPolicy = listValue
+							workloadImageTypeModel.PullPolicy = listValue
 						} else {
-							workloadWorkloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
+							workloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> RegistryChoice
@@ -45824,19 +44304,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadImageTypeModel.RegistryChoice = finalObj
+							workloadImageTypeModel.RegistryChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerImageRegistryChoiceModelAttributeMap)
+							workloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerImageRegistryChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						workloadWorkloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerImageModelAttributeMap, workloadWorkloadImageTypeModel)
+						workloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerImageModelAttributeMap, workloadImageTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadContainerTypeModel.Image = workloadWorkloadImageTypeModelObj
+						workloadContainerTypeModel.Image = workloadImageTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -45845,16 +44325,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						// here because the API may always return a non-nil struct (with REDACTED values) for this
 						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						workloadWorkloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerImageModelAttributeMap)
+						workloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerImageModelAttributeMap)
 					}
 
 					// data specToModelNested BoolField --> InitContainer
-					workloadWorkloadContainerTypeModel.InitContainer = types.BoolValue(bool(containerElement.GetInitContainer()))
+					workloadContainerTypeModel.InitContainer = types.BoolValue(bool(containerElement.GetInitContainer()))
 
 					// data specToModelNested PointerField --> LivenessCheck
 					if containerElement.GetLivenessCheck() != nil {
 						// Create the nested Go struct
-						workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+						workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 						livenessCheckElement := containerElement.GetLivenessCheck()
 
 						// Recursively populate the nested struct
@@ -45951,7 +44431,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Port
 									if httpHealthCheckElement.GetPort() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+										workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 										portElement := httpHealthCheckElement.GetPort()
 
 										// Recursively populate the nested struct
@@ -46001,19 +44481,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+											workloadPortChoiceTypeModel.PortChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+											workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+										workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+										httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -46049,7 +44529,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Port
 									if tcpHealthCheckElement.GetPort() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+										workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 										portElement := tcpHealthCheckElement.GetPort()
 
 										// Recursively populate the nested struct
@@ -46099,19 +44579,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+											workloadPortChoiceTypeModel.PortChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+											workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+										workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+										tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -46147,34 +44627,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+							workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceModelAttributeMap)
+							workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckHealthCheckChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredUintField --> HealthyThreshold
-						workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
+						workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
 
 						// data specToModelNested UintField --> InitialDelay
-						workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
+						workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
 
 						// data specToModelNested RequiredUintField --> Interval
-						workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
+						workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
 
 						// data specToModelNested RequiredUintField --> Timeout
-						workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
+						workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
 
 						// data specToModelNested RequiredUintField --> UnhealthyThreshold
-						workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
+						workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+						workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadContainerTypeModel.LivenessCheck = workloadWorkloadHealthCheckTypeModelObj
+						workloadContainerTypeModel.LivenessCheck = workloadHealthCheckTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -46183,21 +44663,21 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						workloadWorkloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckModelAttributeMap)
+						workloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerLivenessCheckModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredStringField --> Name
 					if containerElement.GetName() != "" {
-						workloadWorkloadContainerTypeModel.Name = types.StringValue(containerElement.GetName())
+						workloadContainerTypeModel.Name = types.StringValue(containerElement.GetName())
 					} else {
 						// Empty string, set to null
-						workloadWorkloadContainerTypeModel.Name = types.StringNull()
+						workloadContainerTypeModel.Name = types.StringNull()
 					}
 
 					// data specToModelNested PointerField --> ReadinessCheck
 					if containerElement.GetReadinessCheck() != nil {
 						// Create the nested Go struct
-						workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+						workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 						readinessCheckElement := containerElement.GetReadinessCheck()
 
 						// Recursively populate the nested struct
@@ -46294,7 +44774,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Port
 									if httpHealthCheckElement.GetPort() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+										workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 										portElement := httpHealthCheckElement.GetPort()
 
 										// Recursively populate the nested struct
@@ -46344,19 +44824,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+											workloadPortChoiceTypeModel.PortChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+											workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+										workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+										httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -46392,7 +44872,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Port
 									if tcpHealthCheckElement.GetPort() != nil {
 										// Create the nested Go struct
-										workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+										workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 										portElement := tcpHealthCheckElement.GetPort()
 
 										// Recursively populate the nested struct
@@ -46442,19 +44922,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+											workloadPortChoiceTypeModel.PortChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+											workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+										workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+										tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -46490,34 +44970,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+							workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceModelAttributeMap)
+							workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckHealthCheckChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredUintField --> HealthyThreshold
-						workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
+						workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
 
 						// data specToModelNested UintField --> InitialDelay
-						workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
+						workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
 
 						// data specToModelNested RequiredUintField --> Interval
-						workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
+						workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
 
 						// data specToModelNested RequiredUintField --> Timeout
-						workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
+						workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
 
 						// data specToModelNested RequiredUintField --> UnhealthyThreshold
-						workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
+						workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+						workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadContainerTypeModel.ReadinessCheck = workloadWorkloadHealthCheckTypeModelObj
+						workloadContainerTypeModel.ReadinessCheck = workloadHealthCheckTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -46526,16 +45006,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						workloadWorkloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckModelAttributeMap)
+						workloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceSimpleServiceContainerReadinessCheckModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadContainerTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerModelAttributeMap, workloadWorkloadContainerTypeModel)
+					workloadContainerTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServiceContainerModelAttributeMap, workloadContainerTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					simpleServiceAttributeMap["container"] = workloadWorkloadContainerTypeModelObj
+					simpleServiceAttributeMap["container"] = workloadContainerTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -46589,7 +45069,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// data specToModelNested RequiredPointerField --> PersistentVolume
 							if enabledElement.GetPersistentVolume() != nil {
 								// Create the nested Go struct
-								workloadWorkloadPersistentStorageVolumeTypeModel := &WorkloadWorkloadPersistentStorageVolumeType{}
+								workloadPersistentStorageVolumeTypeModel := &WorkloadPersistentStorageVolumeType{}
 								persistentVolumeElement := enabledElement.GetPersistentVolume()
 
 								// Recursively populate the nested struct
@@ -46597,7 +45077,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								// data specToModelNested RequiredPointerField --> Mount
 								if persistentVolumeElement.GetMount() != nil {
 									// Create the nested Go struct
-									workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+									workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 									mountElement := persistentVolumeElement.GetMount()
 
 									// Recursively populate the nested struct
@@ -46611,34 +45091,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										if response.Diagnostics.HasError() {
 											return
 										}
-										workloadWorkloadVolumeMountTypeModel.Mode = listValue
+										workloadVolumeMountTypeModel.Mode = listValue
 									} else {
-										workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+										workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredStringField --> MountPath
 									if mountElement.GetMountPath() != "" {
-										workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+										workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 									} else {
 										// Empty string, set to null
-										workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+										workloadVolumeMountTypeModel.MountPath = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> SubPath
 									if mountElement.GetSubPath() != "" {
-										workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+										workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 									} else {
 										// Empty string, set to null
-										workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+										workloadVolumeMountTypeModel.SubPath = types.StringNull()
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+									workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeMountModelAttributeMap, workloadVolumeMountTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									workloadWorkloadPersistentStorageVolumeTypeModel.Mount = workloadWorkloadVolumeMountTypeModelObj
+									workloadPersistentStorageVolumeTypeModel.Mount = workloadVolumeMountTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -46647,13 +45127,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// here because the API may always return a non-nil struct (with REDACTED values) for this
 									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									workloadWorkloadPersistentStorageVolumeTypeModel.Mount = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeMountModelAttributeMap)
+									workloadPersistentStorageVolumeTypeModel.Mount = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeMountModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredPointerField --> Storage
 								if persistentVolumeElement.GetStorage() != nil {
 									// Create the nested Go struct
-									workloadWorkloadPersistentStorageTypeModel := &WorkloadWorkloadPersistentStorageType{}
+									workloadPersistentStorageTypeModel := &WorkloadPersistentStorageType{}
 									storageElement := persistentVolumeElement.GetStorage()
 
 									// Recursively populate the nested struct
@@ -46667,9 +45147,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										if response.Diagnostics.HasError() {
 											return
 										}
-										workloadWorkloadPersistentStorageTypeModel.AccessMode = listValue
+										workloadPersistentStorageTypeModel.AccessMode = listValue
 									} else {
-										workloadWorkloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
+										workloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredOneOfField --> ClassNameChoice
@@ -46716,22 +45196,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = finalObj
+										workloadPersistentStorageTypeModel.ClassNameChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageClassNameChoiceModelAttributeMap)
+										workloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageClassNameChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredFloatField --> StorageSize
-									workloadWorkloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
+									workloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									workloadWorkloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageModelAttributeMap, workloadWorkloadPersistentStorageTypeModel)
+									workloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageModelAttributeMap, workloadPersistentStorageTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									workloadWorkloadPersistentStorageVolumeTypeModel.Storage = workloadWorkloadPersistentStorageTypeModelObj
+									workloadPersistentStorageVolumeTypeModel.Storage = workloadPersistentStorageTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -46740,16 +45220,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// here because the API may always return a non-nil struct (with REDACTED values) for this
 									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									workloadWorkloadPersistentStorageVolumeTypeModel.Storage = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageModelAttributeMap)
+									workloadPersistentStorageVolumeTypeModel.Storage = types.ObjectNull(WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeStorageModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								workloadWorkloadPersistentStorageVolumeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeModelAttributeMap, workloadWorkloadPersistentStorageVolumeTypeModel)
+								workloadPersistentStorageVolumeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceSimpleServicePersistenceChoiceEnabledPersistentVolumeModelAttributeMap, workloadPersistentStorageVolumeTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								enabledAttributeMap["persistent_volume"] = workloadWorkloadPersistentStorageVolumeTypeModelObj
+								enabledAttributeMap["persistent_volume"] = workloadPersistentStorageVolumeTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -46818,7 +45298,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> AdvertiseOptions
 				if statefulServiceElement.GetAdvertiseOptions() != nil {
 					// Create the nested Go struct
-					workloadWorkloadAdvertiseOptionsTypeModel := &WorkloadWorkloadAdvertiseOptionsType{}
+					workloadAdvertiseOptionsTypeModel := &WorkloadAdvertiseOptionsType{}
 					advertiseOptionsElement := statefulServiceElement.GetAdvertiseOptions()
 
 					// Recursively populate the nested struct
@@ -46849,9 +45329,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if len(advertiseCustomElement.GetAdvertiseWhere()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									advertiseWhereElements := make([]WorkloadWorkloadAdvertiseWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
+									advertiseWhereElements := make([]WorkloadAdvertiseWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
 									for _, advertiseWhereElement := range advertiseCustomElement.GetAdvertiseWhere() {
-										workloadWorkloadAdvertiseWhereTypeModel := WorkloadWorkloadAdvertiseWhereType{}
+										workloadAdvertiseWhereTypeModel := WorkloadAdvertiseWhereType{}
 
 										// data specToModelNested RequiredOneOfField --> Choice
 										// <no value>
@@ -47206,13 +45686,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadAdvertiseWhereTypeModel.Choice = finalObj
+											workloadAdvertiseWhereTypeModel.Choice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadAdvertiseWhereTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
+											workloadAdvertiseWhereTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 										}
 
-										advertiseWhereElements = append(advertiseWhereElements, workloadWorkloadAdvertiseWhereTypeModel)
+										advertiseWhereElements = append(advertiseWhereElements, workloadAdvertiseWhereTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -47234,9 +45714,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if len(advertiseCustomElement.GetPorts()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									portsElements := make([]WorkloadWorkloadAdvertisePortType, 0, len(advertiseCustomElement.GetPorts()))
+									portsElements := make([]WorkloadAdvertisePortType, 0, len(advertiseCustomElement.GetPorts()))
 									for _, portsElement := range advertiseCustomElement.GetPorts() {
-										workloadWorkloadAdvertisePortTypeModel := WorkloadWorkloadAdvertisePortType{}
+										workloadAdvertisePortTypeModel := WorkloadAdvertisePortType{}
 
 										// data specToModelNested RequiredOneOfField --> AdvertiseChoice
 										// <no value>
@@ -47501,7 +45981,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> HttpProtocolOptions
 																if httpsElement.GetHttpProtocolOptions() != nil {
 																	// Create the nested Go struct
-																	workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																	workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																	httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																	// Recursively populate the nested struct
@@ -47663,19 +46143,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																	workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																	httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -48134,84 +46614,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -48245,7 +46647,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if tlsCertParamsElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -48363,19 +46765,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -48612,84 +47014,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -48724,24 +47048,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																				// Step 1: Always create a slice of model structs from the spec data.
 																				// This slice serves as an intermediate representation.
-																				tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																				tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																				for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																					workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																					workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																					// data specToModelNested RequiredStringField --> CertificateUrl
 																					if tlsCertificatesElement.GetCertificateUrl() != "" {
-																						workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																						workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																					} else {
 																						// Empty string, set to null
-																						workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																						workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																					}
 
 																					// data specToModelNested StringField --> Description
 																					if tlsCertificatesElement.GetDescription() != "" {
-																						workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																						workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																					} else {
 																						// Empty string, set to null
-																						workloadTlsCertificateTypeModel.Description = types.StringNull()
+																						workloadTlsCertTypeModel.Description = types.StringNull()
 																					}
 
 																					// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -48825,10 +47149,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																						workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																						workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																					}
 
 																					// data specToModelNested RequiredPointerField --> PrivateKey
@@ -48933,6 +47257,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 																							}
 
+																							// data specToModelNested BoolOfOneOfPointerField --> None
+																							_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																							if isNone {
+																								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																							} else {
+																								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																							}
+
 																							// --- End of Choices ---
 
 																							// Create the final ObjectValue for this OneOf field
@@ -48970,7 +47303,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																						workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -48979,10 +47312,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// here because the API may always return a non-nil struct (with REDACTED values) for this
 																						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																						// The target is a types.Object, so we use types.ObjectNull.
-																						workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																						workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																					}
 
-																					tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																					tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																				}
 																				// CASE 1: The target field is a `types.List` or an attribute map.
 																				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -49003,7 +47336,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if tlsParametersElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -49121,19 +47454,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -49328,7 +47661,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> HttpProtocolOptions
 																if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																	// Create the nested Go struct
-																	workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																	workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																	httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																	// Recursively populate the nested struct
@@ -49490,19 +47823,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																		workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																	workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																	httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -49721,84 +48054,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																			}
 
-																			// data specToModelNested OneOfField --> XfccHeader
-																			if useMtlsElement.GetXfccHeader() != nil {
-																				// Create a temporary attribute map for the choices within this OneOf
-																				useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																				// Define a variable for the spec choices to be passed down to nested templates.
-																				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																				useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																				// Process nested choices, populating the temporary attribute map
-
-																				// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																				_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																				if isXfccDisabled {
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																				} else {
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																				}
-
-																				// data specToModelNested PointerOfOneOfField --> XfccOptions
-																				// <no value>
-																				// false
-																				{
-																					xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																					xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																					if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																						xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																						// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																						if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																							xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																							for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																								if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																									xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																								}
-																							}
-																							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																							response.Diagnostics.Append(listDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-																							xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																						} else {
-																							xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																						}
-
-																						xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																						response.Diagnostics.Append(xfccOptionsObjDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																					} else {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																					}
-																				}
-
-																				// --- End of Choices ---
-
-																				// Create the final ObjectValue for this OneOf field
-																				finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																					WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																				)
-																				response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																				if response.Diagnostics.HasError() {
-																					return
-																				}
-
-																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																			} else {
-																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																			}
-
 																			useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																			response.Diagnostics.Append(useMtlsObjDiags...)
 																			if response.Diagnostics.HasError() {
@@ -49999,7 +48254,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																// data specToModelNested PointerField --> TlsConfig
 																if httpsAutoCertElement.GetTlsConfig() != nil {
 																	// Create the nested Go struct
-																	workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																	workloadTlsConfigModel := &WorkloadTlsConfig{}
 																	tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																	// Recursively populate the nested struct
@@ -50117,19 +48372,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		workloadViewsTlsConfigModel.Choice = finalObj
+																		workloadTlsConfigModel.Choice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																		workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																	workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																	httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -50277,9 +48532,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																if len(specificRoutesElement.GetRoutes()) > 0 {
 																	// Step 1: Always create a slice of model structs from the spec data.
 																	// This slice serves as an intermediate representation.
-																	routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																	routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																	for _, routesElement := range specificRoutesElement.GetRoutes() {
-																		workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																		workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																		// data specToModelNested RequiredOneOfField --> Choice
 																		// <no value>
@@ -50707,29 +48962,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					// data specToModelNested PointerField --> RouteDirectResponse
 																					if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																						// Create the nested Go struct
-																						workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																						workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																						routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																						// Recursively populate the nested struct
 
 																						// data specToModelNested StringField --> ResponseBodyEncoded
 																						if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																							workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																						}
 
 																						// data specToModelNested UintField --> ResponseCode
-																						workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																						workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																						// This field needs to be converted to a types.ObjectValue before assignment.
-																						workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																						workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																						response.Diagnostics.Append(objDiags...)
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																						directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -51047,25 +49302,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					// data specToModelNested PointerField --> RouteRedirect
 																					if redirectRouteElement.GetRouteRedirect() != nil {
 																						// Create the nested Go struct
-																						workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																						workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																						routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																						// Recursively populate the nested struct
 
 																						// data specToModelNested StringField --> HostRedirect
 																						if routeRedirectElement.GetHostRedirect() != "" {
-																							workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																							workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																							workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																						}
 
 																						// data specToModelNested StringField --> ProtoRedirect
 																						if routeRedirectElement.GetProtoRedirect() != "" {
-																							workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																							workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																						} else {
 																							// Empty string, set to null
-																							workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																							workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																						}
 
 																						// data specToModelNested OneOfField --> QueryParams
@@ -51120,10 +49375,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																							workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																							workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																						}
 
 																						// data specToModelNested OneOfField --> RedirectPathChoice
@@ -51170,22 +49425,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																							workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																							workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																						}
 
 																						// data specToModelNested UintField --> ResponseCode
-																						workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																						workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																						// This field needs to be converted to a types.ObjectValue before assignment.
-																						workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																						workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																						response.Diagnostics.Append(objDiags...)
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																						redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																					} else {
 																						// The source field is nil (e.g. redacted by the API).
@@ -51402,13 +49657,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																			workloadRouteInfoTypeModel.Choice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																			workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																		}
 
-																		routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																		routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																	}
 																	// CASE 1: The target field is a `types.List` or an attribute map.
 																	// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -51516,16 +49771,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
+											workloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceModelAttributeMap)
+											workloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsAdvertiseChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredPointerField --> Port
 										if portsElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortTypeModel := &WorkloadWorkloadPortType{}
+											workloadPortTypeModel := &WorkloadPortType{}
 											portElement := portsElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -51533,13 +49788,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Info
 											if portElement.GetInfo() != nil {
 												// Create the nested Go struct
-												workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+												workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 												infoElement := portElement.GetInfo()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested RequiredUintField --> Port
-												workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+												workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 												// data specToModelNested EnumField --> Protocol
 												if infoElement.GetProtocol().String() != "" {
@@ -51550,9 +49805,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadPortInfoTypeModel.Protocol = listValue
+													workloadPortInfoTypeModel.Protocol = listValue
 												} else {
-													workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+													workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -51599,19 +49854,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+													workloadPortInfoTypeModel.TargetPortChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoTargetPortChoiceModelAttributeMap)
+													workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoTargetPortChoiceModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+												workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+												workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -51620,24 +49875,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												// here because the API may always return a non-nil struct (with REDACTED values) for this
 												// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 												// The target is a types.Object, so we use types.ObjectNull.
-												workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap)
+												workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortInfoModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredStringField --> Name
 											if portElement.GetName() != "" {
-												workloadWorkloadPortTypeModel.Name = types.StringValue(portElement.GetName())
+												workloadPortTypeModel.Name = types.StringValue(portElement.GetName())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadPortTypeModel.Name = types.StringNull()
+												workloadPortTypeModel.Name = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap, workloadWorkloadPortTypeModel)
+											workloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap, workloadPortTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadAdvertisePortTypeModel.Port = workloadWorkloadPortTypeModelObj
+											workloadAdvertisePortTypeModel.Port = workloadPortTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -51646,10 +49901,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// here because the API may always return a non-nil struct (with REDACTED values) for this
 											// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											workloadWorkloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap)
+											workloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseCustomPortsPortModelAttributeMap)
 										}
 
-										portsElements = append(portsElements, workloadWorkloadAdvertisePortTypeModel)
+										portsElements = append(portsElements, workloadAdvertisePortTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -51714,20 +49969,20 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if len(multiPortsElement.GetPorts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												portsElements := make([]WorkloadWorkloadPortType, 0, len(multiPortsElement.GetPorts()))
+												portsElements := make([]WorkloadPortType, 0, len(multiPortsElement.GetPorts()))
 												for _, portsElement := range multiPortsElement.GetPorts() {
-													workloadWorkloadPortTypeModel := WorkloadWorkloadPortType{}
+													workloadPortTypeModel := WorkloadPortType{}
 
 													// data specToModelNested RequiredPointerField --> Info
 													if portsElement.GetInfo() != nil {
 														// Create the nested Go struct
-														workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+														workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 														infoElement := portsElement.GetInfo()
 
 														// Recursively populate the nested struct
 
 														// data specToModelNested RequiredUintField --> Port
-														workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+														workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 														// data specToModelNested EnumField --> Protocol
 														if infoElement.GetProtocol().String() != "" {
@@ -51738,9 +49993,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															if response.Diagnostics.HasError() {
 																return
 															}
-															workloadWorkloadPortInfoTypeModel.Protocol = listValue
+															workloadPortInfoTypeModel.Protocol = listValue
 														} else {
-															workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+															workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 														}
 
 														// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -51787,19 +50042,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+															workloadPortInfoTypeModel.TargetPortChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoTargetPortChoiceModelAttributeMap)
+															workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoTargetPortChoiceModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+														workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap, workloadPortInfoTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+														workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -51808,18 +50063,18 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// here because the API may always return a non-nil struct (with REDACTED values) for this
 														// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap)
+														workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoiceMultiPortsPortsInfoModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredStringField --> Name
 													if portsElement.GetName() != "" {
-														workloadWorkloadPortTypeModel.Name = types.StringValue(portsElement.GetName())
+														workloadPortTypeModel.Name = types.StringValue(portsElement.GetName())
 													} else {
 														// Empty string, set to null
-														workloadWorkloadPortTypeModel.Name = types.StringNull()
+														workloadPortTypeModel.Name = types.StringNull()
 													}
 
-													portsElements = append(portsElements, workloadWorkloadPortTypeModel)
+													portsElements = append(portsElements, workloadPortTypeModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -51861,13 +50116,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Info
 											if portElement.GetInfo() != nil {
 												// Create the nested Go struct
-												workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+												workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 												infoElement := portElement.GetInfo()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested RequiredUintField --> Port
-												workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+												workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 												// data specToModelNested EnumField --> Protocol
 												if infoElement.GetProtocol().String() != "" {
@@ -51878,9 +50133,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadPortInfoTypeModel.Protocol = listValue
+													workloadPortInfoTypeModel.Protocol = listValue
 												} else {
-													workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+													workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -51927,19 +50182,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+													workloadPortInfoTypeModel.TargetPortChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoTargetPortChoiceModelAttributeMap)
+													workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoTargetPortChoiceModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+												workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseInClusterPortChoicePortInfoModelAttributeMap, workloadPortInfoTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												portAttributeMap["info"] = workloadWorkloadPortInfoTypeModelObj
+												portAttributeMap["info"] = workloadPortInfoTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -52028,9 +50283,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if len(multiPortsElement.GetPorts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												portsElements := make([]WorkloadWorkloadAdvertisePortType, 0, len(multiPortsElement.GetPorts()))
+												portsElements := make([]WorkloadAdvertisePortType, 0, len(multiPortsElement.GetPorts()))
 												for _, portsElement := range multiPortsElement.GetPorts() {
-													workloadWorkloadAdvertisePortTypeModel := WorkloadWorkloadAdvertisePortType{}
+													workloadAdvertisePortTypeModel := WorkloadAdvertisePortType{}
 
 													// data specToModelNested RequiredOneOfField --> AdvertiseChoice
 													// <no value>
@@ -52295,7 +50550,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> HttpProtocolOptions
 																			if httpsElement.GetHttpProtocolOptions() != nil {
 																				// Create the nested Go struct
-																				workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																				workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																				httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																				// Recursively populate the nested struct
@@ -52457,19 +50712,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																				workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																				httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -52928,84 +51183,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																									}
 
-																									// data specToModelNested OneOfField --> XfccHeader
-																									if useMtlsElement.GetXfccHeader() != nil {
-																										// Create a temporary attribute map for the choices within this OneOf
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																										// Define a variable for the spec choices to be passed down to nested templates.
-																										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																										useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																										// Process nested choices, populating the temporary attribute map
-
-																										// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																										_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																										if isXfccDisabled {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																										} else {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																										}
-
-																										// data specToModelNested PointerOfOneOfField --> XfccOptions
-																										// <no value>
-																										// false
-																										{
-																											xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																											xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																											if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																												xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																												// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																												if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																													xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																													for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																														if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																															xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																														}
-																													}
-																													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																													response.Diagnostics.Append(listDiags...)
-																													if response.Diagnostics.HasError() {
-																														return
-																													}
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																												} else {
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																												}
-
-																												xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																												response.Diagnostics.Append(xfccOptionsObjDiags...)
-																												if response.Diagnostics.HasError() {
-																													return
-																												}
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																											} else {
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																											}
-																										}
-
-																										// --- End of Choices ---
-
-																										// Create the final ObjectValue for this OneOf field
-																										finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																											WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																										)
-																										response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-
-																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																									} else {
-																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																									}
-
 																									useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																									response.Diagnostics.Append(useMtlsObjDiags...)
 																									if response.Diagnostics.HasError() {
@@ -53039,7 +51216,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> TlsConfig
 																						if tlsCertParamsElement.GetTlsConfig() != nil {
 																							// Create the nested Go struct
-																							workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																							workloadTlsConfigModel := &WorkloadTlsConfig{}
 																							tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																							// Recursively populate the nested struct
@@ -53157,19 +51334,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadViewsTlsConfigModel.Choice = finalObj
+																								workloadTlsConfigModel.Choice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																								workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																							}
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																							workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																							tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -53406,84 +51583,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																									}
 
-																									// data specToModelNested OneOfField --> XfccHeader
-																									if useMtlsElement.GetXfccHeader() != nil {
-																										// Create a temporary attribute map for the choices within this OneOf
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																										// Define a variable for the spec choices to be passed down to nested templates.
-																										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																										useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																										// Process nested choices, populating the temporary attribute map
-
-																										// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																										_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																										if isXfccDisabled {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																										} else {
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																										}
-
-																										// data specToModelNested PointerOfOneOfField --> XfccOptions
-																										// <no value>
-																										// false
-																										{
-																											xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																											xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																											if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																												xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																												// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																												if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																													xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																													for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																														if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																															xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																														}
-																													}
-																													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																													response.Diagnostics.Append(listDiags...)
-																													if response.Diagnostics.HasError() {
-																														return
-																													}
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																												} else {
-																													xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																												}
-
-																												xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																												response.Diagnostics.Append(xfccOptionsObjDiags...)
-																												if response.Diagnostics.HasError() {
-																													return
-																												}
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																											} else {
-																												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																											}
-																										}
-
-																										// --- End of Choices ---
-
-																										// Create the final ObjectValue for this OneOf field
-																										finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																											WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																											useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																										)
-																										response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-
-																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																									} else {
-																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																									}
-
 																									useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																									response.Diagnostics.Append(useMtlsObjDiags...)
 																									if response.Diagnostics.HasError() {
@@ -53518,24 +51617,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																							// Step 1: Always create a slice of model structs from the spec data.
 																							// This slice serves as an intermediate representation.
-																							tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																							tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																							for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																								workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																								workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																								// data specToModelNested RequiredStringField --> CertificateUrl
 																								if tlsCertificatesElement.GetCertificateUrl() != "" {
-																									workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																									workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																								} else {
 																									// Empty string, set to null
-																									workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																									workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																								}
 
 																								// data specToModelNested StringField --> Description
 																								if tlsCertificatesElement.GetDescription() != "" {
-																									workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																									workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																								} else {
 																									// Empty string, set to null
-																									workloadTlsCertificateTypeModel.Description = types.StringNull()
+																									workloadTlsCertTypeModel.Description = types.StringNull()
 																								}
 
 																								// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -53619,10 +51718,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									}
 
 																									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																									workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																									workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																								} else {
 																									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																									workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																									workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																								}
 
 																								// data specToModelNested RequiredPointerField --> PrivateKey
@@ -53727,6 +51826,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																											}
 																										}
 
+																										// data specToModelNested BoolOfOneOfPointerField --> None
+																										_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																										if isNone {
+																											privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																										} else {
+																											privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																										}
+
 																										// --- End of Choices ---
 
 																										// Create the final ObjectValue for this OneOf field
@@ -53764,7 +51872,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																									workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -53773,10 +51881,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									// here because the API may always return a non-nil struct (with REDACTED values) for this
 																									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																									// The target is a types.Object, so we use types.ObjectNull.
-																									workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																									workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																								}
 
-																								tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																								tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																							}
 																							// CASE 1: The target field is a `types.List` or an attribute map.
 																							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -53797,7 +51905,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> TlsConfig
 																						if tlsParametersElement.GetTlsConfig() != nil {
 																							// Create the nested Go struct
-																							workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																							workloadTlsConfigModel := &WorkloadTlsConfig{}
 																							tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																							// Recursively populate the nested struct
@@ -53915,19 +52023,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadViewsTlsConfigModel.Choice = finalObj
+																								workloadTlsConfigModel.Choice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																								workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																							}
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																							workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																							tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -54122,7 +52230,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> HttpProtocolOptions
 																			if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																				// Create the nested Go struct
-																				workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																				workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																				httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																				// Recursively populate the nested struct
@@ -54284,19 +52392,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																					workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																				workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																				httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -54515,84 +52623,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																						}
 
-																						// data specToModelNested OneOfField --> XfccHeader
-																						if useMtlsElement.GetXfccHeader() != nil {
-																							// Create a temporary attribute map for the choices within this OneOf
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																							// Define a variable for the spec choices to be passed down to nested templates.
-																							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																							useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																							// Process nested choices, populating the temporary attribute map
-
-																							// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																							_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																							if isXfccDisabled {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																							} else {
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																							}
-
-																							// data specToModelNested PointerOfOneOfField --> XfccOptions
-																							// <no value>
-																							// false
-																							{
-																								xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																								xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																								if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																									xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																									// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																									if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																										xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																										for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																											if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																												xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																											}
-																										}
-																										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																										response.Diagnostics.Append(listDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																									} else {
-																										xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																									}
-
-																									xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																									response.Diagnostics.Append(xfccOptionsObjDiags...)
-																									if response.Diagnostics.HasError() {
-																										return
-																									}
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																								}
-																							}
-
-																							// --- End of Choices ---
-
-																							// Create the final ObjectValue for this OneOf field
-																							finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																								WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																							)
-																							response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-
-																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																						} else {
-																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																						}
-
 																						useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																						response.Diagnostics.Append(useMtlsObjDiags...)
 																						if response.Diagnostics.HasError() {
@@ -54793,7 +52823,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			// data specToModelNested PointerField --> TlsConfig
 																			if httpsAutoCertElement.GetTlsConfig() != nil {
 																				// Create the nested Go struct
-																				workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																				workloadTlsConfigModel := &WorkloadTlsConfig{}
 																				tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																				// Recursively populate the nested struct
@@ -54911,19 +52941,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					}
 
 																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					workloadViewsTlsConfigModel.Choice = finalObj
+																					workloadTlsConfigModel.Choice = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																					workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																				}
 
 																				// This field needs to be converted to a types.ObjectValue before assignment.
-																				workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																				workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																				response.Diagnostics.Append(objDiags...)
 																				if response.Diagnostics.HasError() {
 																					return
 																				}
-																				httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																				httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																			} else {
 																				// The source field is nil (e.g. redacted by the API).
@@ -55071,9 +53101,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			if len(specificRoutesElement.GetRoutes()) > 0 {
 																				// Step 1: Always create a slice of model structs from the spec data.
 																				// This slice serves as an intermediate representation.
-																				routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																				routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																				for _, routesElement := range specificRoutesElement.GetRoutes() {
-																					workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																					workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																					// data specToModelNested RequiredOneOfField --> Choice
 																					// <no value>
@@ -55501,29 +53531,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								// data specToModelNested PointerField --> RouteDirectResponse
 																								if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																									// Create the nested Go struct
-																									workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																									workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																									routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																									// Recursively populate the nested struct
 
 																									// data specToModelNested StringField --> ResponseBodyEncoded
 																									if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																										workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																									}
 
 																									// data specToModelNested UintField --> ResponseCode
-																									workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																									workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																									// This field needs to be converted to a types.ObjectValue before assignment.
-																									workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																									workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																									response.Diagnostics.Append(objDiags...)
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																									directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -55841,25 +53871,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								// data specToModelNested PointerField --> RouteRedirect
 																								if redirectRouteElement.GetRouteRedirect() != nil {
 																									// Create the nested Go struct
-																									workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																									workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																									routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																									// Recursively populate the nested struct
 
 																									// data specToModelNested StringField --> HostRedirect
 																									if routeRedirectElement.GetHostRedirect() != "" {
-																										workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																										workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																										workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																									}
 
 																									// data specToModelNested StringField --> ProtoRedirect
 																									if routeRedirectElement.GetProtoRedirect() != "" {
-																										workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																										workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																									} else {
 																										// Empty string, set to null
-																										workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																										workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																									}
 
 																									// data specToModelNested OneOfField --> QueryParams
@@ -55914,10 +53944,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										}
 
 																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																										workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																									} else {
 																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																										workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																									}
 
 																									// data specToModelNested OneOfField --> RedirectPathChoice
@@ -55964,22 +53994,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																										}
 
 																										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																										workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																										workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																									} else {
 																										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																										workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																										workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																									}
 
 																									// data specToModelNested UintField --> ResponseCode
-																									workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																									workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																									// This field needs to be converted to a types.ObjectValue before assignment.
-																									workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																									workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																									response.Diagnostics.Append(objDiags...)
 																									if response.Diagnostics.HasError() {
 																										return
 																									}
-																									redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																									redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																								} else {
 																									// The source field is nil (e.g. redacted by the API).
@@ -56196,13 +54226,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																						workloadRouteInfoTypeModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																						workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																					}
 
-																					routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																					routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																				}
 																				// CASE 1: The target field is a `types.List` or an attribute map.
 																				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -56310,16 +54340,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
+														workloadAdvertisePortTypeModel.AdvertiseChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														workloadWorkloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceModelAttributeMap)
+														workloadAdvertisePortTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsAdvertiseChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredPointerField --> Port
 													if portsElement.GetPort() != nil {
 														// Create the nested Go struct
-														workloadWorkloadPortTypeModel := &WorkloadWorkloadPortType{}
+														workloadPortTypeModel := &WorkloadPortType{}
 														portElement := portsElement.GetPort()
 
 														// Recursively populate the nested struct
@@ -56327,13 +54357,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// data specToModelNested RequiredPointerField --> Info
 														if portElement.GetInfo() != nil {
 															// Create the nested Go struct
-															workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+															workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 															infoElement := portElement.GetInfo()
 
 															// Recursively populate the nested struct
 
 															// data specToModelNested RequiredUintField --> Port
-															workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+															workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 															// data specToModelNested EnumField --> Protocol
 															if infoElement.GetProtocol().String() != "" {
@@ -56344,9 +54374,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																workloadWorkloadPortInfoTypeModel.Protocol = listValue
+																workloadPortInfoTypeModel.Protocol = listValue
 															} else {
-																workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+																workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 															}
 
 															// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -56393,19 +54423,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+																workloadPortInfoTypeModel.TargetPortChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoTargetPortChoiceModelAttributeMap)
+																workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoTargetPortChoiceModelAttributeMap)
 															}
 
 															// This field needs to be converted to a types.ObjectValue before assignment.
-															workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+															workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 															response.Diagnostics.Append(objDiags...)
 															if response.Diagnostics.HasError() {
 																return
 															}
-															workloadWorkloadPortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+															workloadPortTypeModel.Info = workloadPortInfoTypeModelObj
 
 														} else {
 															// The source field is nil (e.g. redacted by the API).
@@ -56414,24 +54444,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 															// here because the API may always return a non-nil struct (with REDACTED values) for this
 															// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 															// The target is a types.Object, so we use types.ObjectNull.
-															workloadWorkloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap)
+															workloadPortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortInfoModelAttributeMap)
 														}
 
 														// data specToModelNested RequiredStringField --> Name
 														if portElement.GetName() != "" {
-															workloadWorkloadPortTypeModel.Name = types.StringValue(portElement.GetName())
+															workloadPortTypeModel.Name = types.StringValue(portElement.GetName())
 														} else {
 															// Empty string, set to null
-															workloadWorkloadPortTypeModel.Name = types.StringNull()
+															workloadPortTypeModel.Name = types.StringNull()
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														workloadWorkloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap, workloadWorkloadPortTypeModel)
+														workloadPortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap, workloadPortTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadAdvertisePortTypeModel.Port = workloadWorkloadPortTypeModelObj
+														workloadAdvertisePortTypeModel.Port = workloadPortTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -56440,10 +54470,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														// here because the API may always return a non-nil struct (with REDACTED values) for this
 														// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														workloadWorkloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap)
+														workloadAdvertisePortTypeModel.Port = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoiceMultiPortsPortsPortModelAttributeMap)
 													}
 
-													portsElements = append(portsElements, workloadWorkloadAdvertisePortTypeModel)
+													portsElements = append(portsElements, workloadAdvertisePortTypeModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -56745,7 +54775,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> HttpProtocolOptions
 																	if httpsElement.GetHttpProtocolOptions() != nil {
 																		// Create the nested Go struct
-																		workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																		workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																		httpProtocolOptionsElement := httpsElement.GetHttpProtocolOptions()
 
 																		// Recursively populate the nested struct
@@ -56907,19 +54937,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																		workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																		httpsAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -57378,84 +55408,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																							}
 
-																							// data specToModelNested OneOfField --> XfccHeader
-																							if useMtlsElement.GetXfccHeader() != nil {
-																								// Create a temporary attribute map for the choices within this OneOf
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																								// Define a variable for the spec choices to be passed down to nested templates.
-																								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																								// Process nested choices, populating the temporary attribute map
-
-																								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																								if isXfccDisabled {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																								}
-
-																								// data specToModelNested PointerOfOneOfField --> XfccOptions
-																								// <no value>
-																								// false
-																								{
-																									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																												}
-																											}
-																											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																											response.Diagnostics.Append(listDiags...)
-																											if response.Diagnostics.HasError() {
-																												return
-																											}
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																										} else {
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																										}
-
-																										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																										response.Diagnostics.Append(xfccOptionsObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																									} else {
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																									}
-																								}
-
-																								// --- End of Choices ---
-
-																								// Create the final ObjectValue for this OneOf field
-																								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																									WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																								)
-																								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-
-																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																							} else {
-																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																							}
-
 																							useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																							response.Diagnostics.Append(useMtlsObjDiags...)
 																							if response.Diagnostics.HasError() {
@@ -57489,7 +55441,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				// data specToModelNested PointerField --> TlsConfig
 																				if tlsCertParamsElement.GetTlsConfig() != nil {
 																					// Create the nested Go struct
-																					workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																					workloadTlsConfigModel := &WorkloadTlsConfig{}
 																					tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 																					// Recursively populate the nested struct
@@ -57607,19 +55559,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadViewsTlsConfigModel.Choice = finalObj
+																						workloadTlsConfigModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+																						workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 																					}
 
 																					// This field needs to be converted to a types.ObjectValue before assignment.
-																					workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																					workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																					response.Diagnostics.Append(objDiags...)
 																					if response.Diagnostics.HasError() {
 																						return
 																					}
-																					tlsCertParamsAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																					tlsCertParamsAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																				} else {
 																					// The source field is nil (e.g. redacted by the API).
@@ -57856,84 +55808,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																							}
 
-																							// data specToModelNested OneOfField --> XfccHeader
-																							if useMtlsElement.GetXfccHeader() != nil {
-																								// Create a temporary attribute map for the choices within this OneOf
-																								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																								// Define a variable for the spec choices to be passed down to nested templates.
-																								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																								// Process nested choices, populating the temporary attribute map
-
-																								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																								if isXfccDisabled {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																								} else {
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																								}
-
-																								// data specToModelNested PointerOfOneOfField --> XfccOptions
-																								// <no value>
-																								// false
-																								{
-																									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																												}
-																											}
-																											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																											response.Diagnostics.Append(listDiags...)
-																											if response.Diagnostics.HasError() {
-																												return
-																											}
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																										} else {
-																											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																										}
-
-																										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																										response.Diagnostics.Append(xfccOptionsObjDiags...)
-																										if response.Diagnostics.HasError() {
-																											return
-																										}
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																									} else {
-																										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																									}
-																								}
-
-																								// --- End of Choices ---
-
-																								// Create the final ObjectValue for this OneOf field
-																								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																									WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																								)
-																								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-
-																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																							} else {
-																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																							}
-
 																							useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																							response.Diagnostics.Append(useMtlsObjDiags...)
 																							if response.Diagnostics.HasError() {
@@ -57968,24 +55842,24 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 																					// Step 1: Always create a slice of model structs from the spec data.
 																					// This slice serves as an intermediate representation.
-																					tlsCertificatesElements := make([]WorkloadTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+																					tlsCertificatesElements := make([]WorkloadTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 																					for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-																						workloadTlsCertificateTypeModel := WorkloadTlsCertificateType{}
+																						workloadTlsCertTypeModel := WorkloadTlsCertType{}
 
 																						// data specToModelNested RequiredStringField --> CertificateUrl
 																						if tlsCertificatesElement.GetCertificateUrl() != "" {
-																							workloadTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+																							workloadTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 																						} else {
 																							// Empty string, set to null
-																							workloadTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+																							workloadTlsCertTypeModel.CertificateUrl = types.StringNull()
 																						}
 
 																						// data specToModelNested StringField --> Description
 																						if tlsCertificatesElement.GetDescription() != "" {
-																							workloadTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+																							workloadTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 																						} else {
 																							// Empty string, set to null
-																							workloadTlsCertificateTypeModel.Description = types.StringNull()
+																							workloadTlsCertTypeModel.Description = types.StringNull()
 																						}
 
 																						// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -58069,10 +55943,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							}
 
 																							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																							workloadTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+																							workloadTlsCertTypeModel.OcspStaplingChoice = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							workloadTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+																							workloadTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 																						}
 
 																						// data specToModelNested RequiredPointerField --> PrivateKey
@@ -58177,6 +56051,15 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									}
 																								}
 
+																								// data specToModelNested BoolOfOneOfPointerField --> None
+																								_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																								if isNone {
+																									privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																								} else {
+																									privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																								}
+
 																								// --- End of Choices ---
 
 																								// Create the final ObjectValue for this OneOf field
@@ -58214,7 +56097,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							workloadTlsCertificateTypeModel.PrivateKey = workloadSecretTypeModelObj
+																							workloadTlsCertTypeModel.PrivateKey = workloadSecretTypeModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -58223,10 +56106,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							// here because the API may always return a non-nil struct (with REDACTED values) for this
 																							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 																							// The target is a types.Object, so we use types.ObjectNull.
-																							workloadTlsCertificateTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+																							workloadTlsCertTypeModel.PrivateKey = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 																						}
 
-																						tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertificateTypeModel)
+																						tlsCertificatesElements = append(tlsCertificatesElements, workloadTlsCertTypeModel)
 																					}
 																					// CASE 1: The target field is a `types.List` or an attribute map.
 																					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -58247,7 +56130,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				// data specToModelNested PointerField --> TlsConfig
 																				if tlsParametersElement.GetTlsConfig() != nil {
 																					// Create the nested Go struct
-																					workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																					workloadTlsConfigModel := &WorkloadTlsConfig{}
 																					tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 																					// Recursively populate the nested struct
@@ -58365,19 +56248,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						workloadViewsTlsConfigModel.Choice = finalObj
+																						workloadTlsConfigModel.Choice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+																						workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 																					}
 
 																					// This field needs to be converted to a types.ObjectValue before assignment.
-																					workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																					workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																					response.Diagnostics.Append(objDiags...)
 																					if response.Diagnostics.HasError() {
 																						return
 																					}
-																					tlsParametersAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																					tlsParametersAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																				} else {
 																					// The source field is nil (e.g. redacted by the API).
@@ -58572,7 +56455,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> HttpProtocolOptions
 																	if httpsAutoCertElement.GetHttpProtocolOptions() != nil {
 																		// Create the nested Go struct
-																		workloadVirtualHostHttpProtocolOptionsModel := &WorkloadVirtualHostHttpProtocolOptions{}
+																		workloadHttpProtoOptionsModel := &WorkloadHttpProtoOptions{}
 																		httpProtocolOptionsElement := httpsAutoCertElement.GetHttpProtocolOptions()
 
 																		// Recursively populate the nested struct
@@ -58734,19 +56617,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = finalObj
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadVirtualHostHttpProtocolOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
+																			workloadHttpProtoOptionsModel.HttpProtocolChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsHttpProtocolChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadVirtualHostHttpProtocolOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadVirtualHostHttpProtocolOptionsModel)
+																		workloadHttpProtoOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertHttpProtocolOptionsModelAttributeMap, workloadHttpProtoOptionsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAutoCertAttributeMap["http_protocol_options"] = workloadVirtualHostHttpProtocolOptionsModelObj
+																		httpsAutoCertAttributeMap["http_protocol_options"] = workloadHttpProtoOptionsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -58965,84 +56848,6 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																					useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 																				}
 
-																				// data specToModelNested OneOfField --> XfccHeader
-																				if useMtlsElement.GetXfccHeader() != nil {
-																					// Create a temporary attribute map for the choices within this OneOf
-																					useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																					// Define a variable for the spec choices to be passed down to nested templates.
-																					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																					useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-																					// Process nested choices, populating the temporary attribute map
-
-																					// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-																					_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-																					if isXfccDisabled {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-																					} else {
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-																					}
-
-																					// data specToModelNested PointerOfOneOfField --> XfccOptions
-																					// <no value>
-																					// false
-																					{
-																						xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-																						xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-																						if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-																							xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-																							// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-																							if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-																								xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-																								for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																									if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																										xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																									}
-																								}
-																								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-																								response.Diagnostics.Append(listDiags...)
-																								if response.Diagnostics.HasError() {
-																									return
-																								}
-																								xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-																							} else {
-																								xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-																							}
-
-																							xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-																							response.Diagnostics.Append(xfccOptionsObjDiags...)
-																							if response.Diagnostics.HasError() {
-																								return
-																							}
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-																						} else {
-																							useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-																						}
-																					}
-
-																					// --- End of Choices ---
-
-																					// Create the final ObjectValue for this OneOf field
-																					finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-																						WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-																						useMtlsxfccHeaderChoiceChoicesAttributeMap,
-																					)
-																					response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-
-																					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																					useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-																				} else {
-																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-																				}
-
 																				useMtlsObj, useMtlsObjDiags := types.ObjectValue(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 																				response.Diagnostics.Append(useMtlsObjDiags...)
 																				if response.Diagnostics.HasError() {
@@ -59243,7 +57048,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	// data specToModelNested PointerField --> TlsConfig
 																	if httpsAutoCertElement.GetTlsConfig() != nil {
 																		// Create the nested Go struct
-																		workloadViewsTlsConfigModel := &WorkloadViewsTlsConfig{}
+																		workloadTlsConfigModel := &WorkloadTlsConfig{}
 																		tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 																		// Recursively populate the nested struct
@@ -59361,19 +57166,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			workloadViewsTlsConfigModel.Choice = finalObj
+																			workloadTlsConfigModel.Choice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			workloadViewsTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+																			workloadTlsConfigModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		workloadViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadViewsTlsConfigModel)
+																		workloadTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, workloadTlsConfigModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		httpsAutoCertAttributeMap["tls_config"] = workloadViewsTlsConfigModelObj
+																		httpsAutoCertAttributeMap["tls_config"] = workloadTlsConfigModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -59521,9 +57326,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																	if len(specificRoutesElement.GetRoutes()) > 0 {
 																		// Step 1: Always create a slice of model structs from the spec data.
 																		// This slice serves as an intermediate representation.
-																		routesElements := make([]WorkloadWorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
+																		routesElements := make([]WorkloadRouteInfoType, 0, len(specificRoutesElement.GetRoutes()))
 																		for _, routesElement := range specificRoutesElement.GetRoutes() {
-																			workloadWorkloadRouteInfoTypeModel := WorkloadWorkloadRouteInfoType{}
+																			workloadRouteInfoTypeModel := WorkloadRouteInfoType{}
 
 																			// data specToModelNested RequiredOneOfField --> Choice
 																			// <no value>
@@ -59951,29 +57756,29 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> RouteDirectResponse
 																						if directResponseRouteElement.GetRouteDirectResponse() != nil {
 																							// Create the nested Go struct
-																							workloadRouteRouteDirectResponseModel := &WorkloadRouteRouteDirectResponse{}
+																							workloadRouteDirectRespModel := &WorkloadRouteDirectResp{}
 																							routeDirectResponseElement := directResponseRouteElement.GetRouteDirectResponse()
 
 																							// Recursively populate the nested struct
 
 																							// data specToModelNested StringField --> ResponseBodyEncoded
 																							if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
-																								workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteDirectResponseModel.ResponseBodyEncoded = types.StringNull()
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
 																							}
 
 																							// data specToModelNested UintField --> ResponseCode
-																							workloadRouteRouteDirectResponseModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
+																							workloadRouteDirectRespModel.ResponseCode = types.Int64Value(int64(routeDirectResponseElement.GetResponseCode()))
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadRouteRouteDirectResponseModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteRouteDirectResponseModel)
+																							workloadRouteDirectRespModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap, workloadRouteDirectRespModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							directResponseRouteAttributeMap["route_direct_response"] = workloadRouteRouteDirectResponseModelObj
+																							directResponseRouteAttributeMap["route_direct_response"] = workloadRouteDirectRespModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -60291,25 +58096,25 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested PointerField --> RouteRedirect
 																						if redirectRouteElement.GetRouteRedirect() != nil {
 																							// Create the nested Go struct
-																							workloadRouteRouteRedirectModel := &WorkloadRouteRouteRedirect{}
+																							workloadRouteRedirectModel := &WorkloadRouteRedirect{}
 																							routeRedirectElement := redirectRouteElement.GetRouteRedirect()
 
 																							// Recursively populate the nested struct
 
 																							// data specToModelNested StringField --> HostRedirect
 																							if routeRedirectElement.GetHostRedirect() != "" {
-																								workloadRouteRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
+																								workloadRouteRedirectModel.HostRedirect = types.StringValue(routeRedirectElement.GetHostRedirect())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteRedirectModel.HostRedirect = types.StringNull()
+																								workloadRouteRedirectModel.HostRedirect = types.StringNull()
 																							}
 
 																							// data specToModelNested StringField --> ProtoRedirect
 																							if routeRedirectElement.GetProtoRedirect() != "" {
-																								workloadRouteRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
+																								workloadRouteRedirectModel.ProtoRedirect = types.StringValue(routeRedirectElement.GetProtoRedirect())
 																							} else {
 																								// Empty string, set to null
-																								workloadRouteRouteRedirectModel.ProtoRedirect = types.StringNull()
+																								workloadRouteRedirectModel.ProtoRedirect = types.StringNull()
 																							}
 
 																							// data specToModelNested OneOfField --> QueryParams
@@ -60364,10 +58169,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadRouteRouteRedirectModel.QueryParamsChoice = finalObj
+																								workloadRouteRedirectModel.QueryParamsChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadRouteRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
+																								workloadRouteRedirectModel.QueryParamsChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectQueryParamsModelAttributeMap)
 																							}
 
 																							// data specToModelNested OneOfField --> RedirectPathChoice
@@ -60414,22 +58219,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								workloadRouteRouteRedirectModel.RedirectPathChoice = finalObj
+																								workloadRouteRedirectModel.RedirectPathChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								workloadRouteRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
+																								workloadRouteRedirectModel.RedirectPathChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectRedirectPathChoiceModelAttributeMap)
 																							}
 
 																							// data specToModelNested UintField --> ResponseCode
-																							workloadRouteRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
+																							workloadRouteRedirectModel.ResponseCode = types.Int64Value(int64(routeRedirectElement.GetResponseCode()))
 
 																							// This field needs to be converted to a types.ObjectValue before assignment.
-																							workloadRouteRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRouteRedirectModel)
+																							workloadRouteRedirectModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceRedirectRouteRouteRedirectModelAttributeMap, workloadRouteRedirectModel)
 																							response.Diagnostics.Append(objDiags...)
 																							if response.Diagnostics.HasError() {
 																								return
 																							}
-																							redirectRouteAttributeMap["route_redirect"] = workloadRouteRouteRedirectModelObj
+																							redirectRouteAttributeMap["route_redirect"] = workloadRouteRedirectModelObj
 
 																						} else {
 																							// The source field is nil (e.g. redacted by the API).
@@ -60646,13 +58451,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																				}
 
 																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				workloadWorkloadRouteInfoTypeModel.Choice = finalObj
+																				workloadRouteInfoTypeModel.Choice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				workloadWorkloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
+																				workloadRouteInfoTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortAdvertiseChoiceHttpLoadbalancerRouteChoiceSpecificRoutesRoutesChoiceModelAttributeMap)
 																			}
 
-																			routesElements = append(routesElements, workloadWorkloadRouteInfoTypeModel)
+																			routesElements = append(routesElements, workloadRouteInfoTypeModel)
 																		}
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -60769,7 +58574,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											// data specToModelNested RequiredPointerField --> Port
 											if portElement.GetPort() != nil {
 												// Create the nested Go struct
-												workloadWorkloadSinglePortTypeModel := &WorkloadWorkloadSinglePortType{}
+												workloadSinglePortTypeModel := &WorkloadSinglePortType{}
 												portElement := portElement.GetPort()
 
 												// Recursively populate the nested struct
@@ -60777,13 +58582,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												// data specToModelNested RequiredPointerField --> Info
 												if portElement.GetInfo() != nil {
 													// Create the nested Go struct
-													workloadWorkloadPortInfoTypeModel := &WorkloadWorkloadPortInfoType{}
+													workloadPortInfoTypeModel := &WorkloadPortInfoType{}
 													infoElement := portElement.GetInfo()
 
 													// Recursively populate the nested struct
 
 													// data specToModelNested RequiredUintField --> Port
-													workloadWorkloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
+													workloadPortInfoTypeModel.Port = types.Int64Value(int64(infoElement.GetPort()))
 
 													// data specToModelNested EnumField --> Protocol
 													if infoElement.GetProtocol().String() != "" {
@@ -60794,9 +58599,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														if response.Diagnostics.HasError() {
 															return
 														}
-														workloadWorkloadPortInfoTypeModel.Protocol = listValue
+														workloadPortInfoTypeModel.Protocol = listValue
 													} else {
-														workloadWorkloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
+														workloadPortInfoTypeModel.Protocol = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredOneOfField --> TargetPortChoice
@@ -60843,19 +58648,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														workloadWorkloadPortInfoTypeModel.TargetPortChoice = finalObj
+														workloadPortInfoTypeModel.TargetPortChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														workloadWorkloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoTargetPortChoiceModelAttributeMap)
+														workloadPortInfoTypeModel.TargetPortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoTargetPortChoiceModelAttributeMap)
 													}
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													workloadWorkloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap, workloadWorkloadPortInfoTypeModel)
+													workloadPortInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap, workloadPortInfoTypeModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													workloadWorkloadSinglePortTypeModel.Info = workloadWorkloadPortInfoTypeModelObj
+													workloadSinglePortTypeModel.Info = workloadPortInfoTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -60864,16 +58669,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 													// here because the API may always return a non-nil struct (with REDACTED values) for this
 													// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 													// The target is a types.Object, so we use types.ObjectNull.
-													workloadWorkloadSinglePortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap)
+													workloadSinglePortTypeModel.Info = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortInfoModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												workloadWorkloadSinglePortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortModelAttributeMap, workloadWorkloadSinglePortTypeModel)
+												workloadSinglePortTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceAdvertiseOnPublicAdvertiseChoicePortPortModelAttributeMap, workloadSinglePortTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												portAttributeMap["port"] = workloadWorkloadSinglePortTypeModelObj
+												portAttributeMap["port"] = workloadSinglePortTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -60948,19 +58753,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadAdvertiseOptionsTypeModel.AdvertiseChoice = finalObj
+						workloadAdvertiseOptionsTypeModel.AdvertiseChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadAdvertiseOptionsTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceModelAttributeMap)
+						workloadAdvertiseOptionsTypeModel.AdvertiseChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsAdvertiseChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadAdvertiseOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsModelAttributeMap, workloadWorkloadAdvertiseOptionsTypeModel)
+					workloadAdvertiseOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceAdvertiseOptionsModelAttributeMap, workloadAdvertiseOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					statefulServiceAttributeMap["advertise_options"] = workloadWorkloadAdvertiseOptionsTypeModelObj
+					statefulServiceAttributeMap["advertise_options"] = workloadAdvertiseOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -60975,7 +58780,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Configuration
 				if statefulServiceElement.GetConfiguration() != nil {
 					// Create the nested Go struct
-					workloadWorkloadConfigurationParametersTypeModel := &WorkloadWorkloadConfigurationParametersType{}
+					workloadCfgParametersTypeModel := &WorkloadCfgParametersType{}
 					configurationElement := statefulServiceElement.GetConfiguration()
 
 					// Recursively populate the nested struct
@@ -60984,9 +58789,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 					if len(configurationElement.GetParameters()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						parametersElements := make([]WorkloadWorkloadConfigurationParameterType, 0, len(configurationElement.GetParameters()))
+						parametersElements := make([]WorkloadCfgParamType, 0, len(configurationElement.GetParameters()))
 						for _, parametersElement := range configurationElement.GetParameters() {
-							workloadWorkloadConfigurationParameterTypeModel := WorkloadWorkloadConfigurationParameterType{}
+							workloadCfgParamTypeModel := WorkloadCfgParamType{}
 
 							// data specToModelNested RequiredOneOfField --> Choice
 							// <no value>
@@ -61058,7 +58863,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Mount
 										if fileElement.GetMount() != nil {
 											// Create the nested Go struct
-											workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+											workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 											mountElement := fileElement.GetMount()
 
 											// Recursively populate the nested struct
@@ -61072,34 +58877,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												if response.Diagnostics.HasError() {
 													return
 												}
-												workloadWorkloadVolumeMountTypeModel.Mode = listValue
+												workloadVolumeMountTypeModel.Mode = listValue
 											} else {
-												workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+												workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredStringField --> MountPath
 											if mountElement.GetMountPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+												workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+												workloadVolumeMountTypeModel.MountPath = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> SubPath
 											if mountElement.GetSubPath() != "" {
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+												workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 											} else {
 												// Empty string, set to null
-												workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+												workloadVolumeMountTypeModel.SubPath = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+											workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceConfigurationParametersChoiceFileMountModelAttributeMap, workloadVolumeMountTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fileAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+											fileAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -61151,13 +58956,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadConfigurationParameterTypeModel.Choice = finalObj
+								workloadCfgParamTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadConfigurationParameterTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceConfigurationParametersChoiceModelAttributeMap)
+								workloadCfgParamTypeModel.Choice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceConfigurationParametersChoiceModelAttributeMap)
 							}
 
-							parametersElements = append(parametersElements, workloadWorkloadConfigurationParameterTypeModel)
+							parametersElements = append(parametersElements, workloadCfgParamTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -61166,22 +58971,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						if response.Diagnostics.HasError() {
 							return
 						}
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = parametersListValue
+						workloadCfgParametersTypeModel.Parameters = parametersListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						workloadWorkloadConfigurationParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceStatefulServiceConfigurationParametersModelAttributeMap})
+						workloadCfgParametersTypeModel.Parameters = types.ListNull(types.ObjectType{AttrTypes: WorkloadWorkloadChoiceStatefulServiceConfigurationParametersModelAttributeMap})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadConfigurationParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceConfigurationModelAttributeMap, workloadWorkloadConfigurationParametersTypeModel)
+					workloadCfgParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceConfigurationModelAttributeMap, workloadCfgParametersTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					statefulServiceAttributeMap["configuration"] = workloadWorkloadConfigurationParametersTypeModelObj
+					statefulServiceAttributeMap["configuration"] = workloadCfgParametersTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -61197,9 +59002,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(statefulServiceElement.GetContainers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					containersElements := make([]WorkloadWorkloadContainerType, 0, len(statefulServiceElement.GetContainers()))
+					containersElements := make([]WorkloadContainerType, 0, len(statefulServiceElement.GetContainers()))
 					for _, containersElement := range statefulServiceElement.GetContainers() {
-						workloadWorkloadContainerTypeModel := WorkloadWorkloadContainerType{}
+						workloadContainerTypeModel := WorkloadContainerType{}
 
 						// data specToModelNested ArrayOfStringField --> Args
 						if len(containersElement.GetArgs()) > 0 {
@@ -61208,9 +59013,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Args = listValue
+							workloadContainerTypeModel.Args = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Args = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Args = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested ArrayOfStringField --> Command
@@ -61220,9 +59025,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Command = listValue
+							workloadContainerTypeModel.Command = listValue
 						} else {
-							workloadWorkloadContainerTypeModel.Command = types.ListNull(types.StringType)
+							workloadContainerTypeModel.Command = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested OneOfField --> FlavorChoice
@@ -61331,26 +59136,26 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadContainerTypeModel.FlavorChoice = finalObj
+							workloadContainerTypeModel.FlavorChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersFlavorChoiceModelAttributeMap)
+							workloadContainerTypeModel.FlavorChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersFlavorChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Image
 						if containersElement.GetImage() != nil {
 							// Create the nested Go struct
-							workloadWorkloadImageTypeModel := &WorkloadWorkloadImageType{}
+							workloadImageTypeModel := &WorkloadImageType{}
 							imageElement := containersElement.GetImage()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested RequiredStringField --> Name
 							if imageElement.GetName() != "" {
-								workloadWorkloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
+								workloadImageTypeModel.Name = types.StringValue(imageElement.GetName())
 							} else {
 								// Empty string, set to null
-								workloadWorkloadImageTypeModel.Name = types.StringNull()
+								workloadImageTypeModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested EnumField --> PullPolicy
@@ -61362,9 +59167,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								if response.Diagnostics.HasError() {
 									return
 								}
-								workloadWorkloadImageTypeModel.PullPolicy = listValue
+								workloadImageTypeModel.PullPolicy = listValue
 							} else {
-								workloadWorkloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
+								workloadImageTypeModel.PullPolicy = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> RegistryChoice
@@ -61446,19 +59251,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadImageTypeModel.RegistryChoice = finalObj
+								workloadImageTypeModel.RegistryChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersImageRegistryChoiceModelAttributeMap)
+								workloadImageTypeModel.RegistryChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersImageRegistryChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersImageModelAttributeMap, workloadWorkloadImageTypeModel)
+							workloadImageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersImageModelAttributeMap, workloadImageTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.Image = workloadWorkloadImageTypeModelObj
+							workloadContainerTypeModel.Image = workloadImageTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -61467,16 +59272,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersImageModelAttributeMap)
+							workloadContainerTypeModel.Image = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersImageModelAttributeMap)
 						}
 
 						// data specToModelNested BoolField --> InitContainer
-						workloadWorkloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
+						workloadContainerTypeModel.InitContainer = types.BoolValue(bool(containersElement.GetInitContainer()))
 
 						// data specToModelNested PointerField --> LivenessCheck
 						if containersElement.GetLivenessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							livenessCheckElement := containersElement.GetLivenessCheck()
 
 							// Recursively populate the nested struct
@@ -61573,7 +59378,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -61623,19 +59428,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -61671,7 +59476,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -61721,19 +59526,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -61769,34 +59574,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(livenessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(livenessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(livenessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(livenessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.LivenessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.LivenessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -61805,21 +59610,21 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckModelAttributeMap)
+							workloadContainerTypeModel.LivenessCheck = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersLivenessCheckModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> Name
 						if containersElement.GetName() != "" {
-							workloadWorkloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
+							workloadContainerTypeModel.Name = types.StringValue(containersElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadContainerTypeModel.Name = types.StringNull()
+							workloadContainerTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> ReadinessCheck
 						if containersElement.GetReadinessCheck() != nil {
 							// Create the nested Go struct
-							workloadWorkloadHealthCheckTypeModel := &WorkloadWorkloadHealthCheckType{}
+							workloadHealthCheckTypeModel := &WorkloadHealthCheckType{}
 							readinessCheckElement := containersElement.GetReadinessCheck()
 
 							// Recursively populate the nested struct
@@ -61916,7 +59721,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if httpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := httpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -61966,19 +59771,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceHttpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											httpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											httpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -62014,7 +59819,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 										// data specToModelNested RequiredPointerField --> Port
 										if tcpHealthCheckElement.GetPort() != nil {
 											// Create the nested Go struct
-											workloadWorkloadPortChoiceTypeModel := &WorkloadWorkloadPortChoiceType{}
+											workloadPortChoiceTypeModel := &WorkloadPortChoiceType{}
 											portElement := tcpHealthCheckElement.GetPort()
 
 											// Recursively populate the nested struct
@@ -62064,19 +59869,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												workloadWorkloadPortChoiceTypeModel.PortChoice = finalObj
+												workloadPortChoiceTypeModel.PortChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												workloadWorkloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
+												workloadPortChoiceTypeModel.PortChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortPortChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											workloadWorkloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadWorkloadPortChoiceTypeModel)
+											workloadPortChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceTcpHealthCheckPortModelAttributeMap, workloadPortChoiceTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tcpHealthCheckAttributeMap["port"] = workloadWorkloadPortChoiceTypeModelObj
+											tcpHealthCheckAttributeMap["port"] = workloadPortChoiceTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -62112,34 +59917,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = finalObj
+								workloadHealthCheckTypeModel.HealthCheckChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								workloadWorkloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
+								workloadHealthCheckTypeModel.HealthCheckChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckHealthCheckChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredUintField --> HealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
+							workloadHealthCheckTypeModel.HealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetHealthyThreshold()))
 
 							// data specToModelNested UintField --> InitialDelay
-							workloadWorkloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
+							workloadHealthCheckTypeModel.InitialDelay = types.Int64Value(int64(readinessCheckElement.GetInitialDelay()))
 
 							// data specToModelNested RequiredUintField --> Interval
-							workloadWorkloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
+							workloadHealthCheckTypeModel.Interval = types.Int64Value(int64(readinessCheckElement.GetInterval()))
 
 							// data specToModelNested RequiredUintField --> Timeout
-							workloadWorkloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
+							workloadHealthCheckTypeModel.Timeout = types.Int64Value(int64(readinessCheckElement.GetTimeout()))
 
 							// data specToModelNested RequiredUintField --> UnhealthyThreshold
-							workloadWorkloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
+							workloadHealthCheckTypeModel.UnhealthyThreshold = types.Int64Value(int64(readinessCheckElement.GetUnhealthyThreshold()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckModelAttributeMap, workloadWorkloadHealthCheckTypeModel)
+							workloadHealthCheckTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckModelAttributeMap, workloadHealthCheckTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadContainerTypeModel.ReadinessCheck = workloadWorkloadHealthCheckTypeModelObj
+							workloadContainerTypeModel.ReadinessCheck = workloadHealthCheckTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -62148,10 +59953,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckModelAttributeMap)
+							workloadContainerTypeModel.ReadinessCheck = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceContainersReadinessCheckModelAttributeMap)
 						}
 
-						containersElements = append(containersElements, workloadWorkloadContainerTypeModel)
+						containersElements = append(containersElements, workloadContainerTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -62172,7 +59977,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested RequiredPointerField --> DeployOptions
 				if statefulServiceElement.GetDeployOptions() != nil {
 					// Create the nested Go struct
-					workloadWorkloadDeployOptionsTypeModel := &WorkloadWorkloadDeployOptionsType{}
+					workloadDeployOptionsTypeModel := &WorkloadDeployOptionsType{}
 					deployOptionsElement := statefulServiceElement.GetDeployOptions()
 
 					// Recursively populate the nested struct
@@ -62504,19 +60309,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = finalObj
+						workloadDeployOptionsTypeModel.DeployChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceDeployOptionsDeployChoiceModelAttributeMap)
+						workloadDeployOptionsTypeModel.DeployChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceDeployOptionsDeployChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceDeployOptionsModelAttributeMap, workloadWorkloadDeployOptionsTypeModel)
+					workloadDeployOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceDeployOptionsModelAttributeMap, workloadDeployOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					statefulServiceAttributeMap["deploy_options"] = workloadWorkloadDeployOptionsTypeModelObj
+					statefulServiceAttributeMap["deploy_options"] = workloadDeployOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -62531,7 +60336,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				// data specToModelNested PointerField --> Family
 				if statefulServiceElement.GetFamily() != nil {
 					// Create the nested Go struct
-					workloadWorkloadIPFamilyTypeModel := &WorkloadWorkloadIPFamilyType{}
+					workloadIPFamilyTypeModel := &WorkloadIPFamilyType{}
 					familyElement := statefulServiceElement.GetFamily()
 
 					// Recursively populate the nested struct
@@ -62597,19 +60402,19 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						workloadWorkloadIPFamilyTypeModel.IpFamilyChoice = finalObj
+						workloadIPFamilyTypeModel.IpFamilyChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						workloadWorkloadIPFamilyTypeModel.IpFamilyChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceFamilyIpFamilyChoiceModelAttributeMap)
+						workloadIPFamilyTypeModel.IpFamilyChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceFamilyIpFamilyChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					workloadWorkloadIPFamilyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceFamilyModelAttributeMap, workloadWorkloadIPFamilyTypeModel)
+					workloadIPFamilyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceFamilyModelAttributeMap, workloadIPFamilyTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					statefulServiceAttributeMap["family"] = workloadWorkloadIPFamilyTypeModelObj
+					statefulServiceAttributeMap["family"] = workloadIPFamilyTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -62625,22 +60430,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(statefulServiceElement.GetPersistentVolumes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					persistentVolumesElements := make([]WorkloadWorkloadPersistentVolumeType, 0, len(statefulServiceElement.GetPersistentVolumes()))
+					persistentVolumesElements := make([]WorkloadPersistentVolumeType, 0, len(statefulServiceElement.GetPersistentVolumes()))
 					for _, persistentVolumesElement := range statefulServiceElement.GetPersistentVolumes() {
-						workloadWorkloadPersistentVolumeTypeModel := WorkloadWorkloadPersistentVolumeType{}
+						workloadPersistentVolumeTypeModel := WorkloadPersistentVolumeType{}
 
 						// data specToModelNested RequiredStringField --> Name
 						if persistentVolumesElement.GetName() != "" {
-							workloadWorkloadPersistentVolumeTypeModel.Name = types.StringValue(persistentVolumesElement.GetName())
+							workloadPersistentVolumeTypeModel.Name = types.StringValue(persistentVolumesElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadPersistentVolumeTypeModel.Name = types.StringNull()
+							workloadPersistentVolumeTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredPointerField --> PersistentVolume
 						if persistentVolumesElement.GetPersistentVolume() != nil {
 							// Create the nested Go struct
-							workloadWorkloadPersistentStorageVolumeTypeModel := &WorkloadWorkloadPersistentStorageVolumeType{}
+							workloadPersistentStorageVolumeTypeModel := &WorkloadPersistentStorageVolumeType{}
 							persistentVolumeElement := persistentVolumesElement.GetPersistentVolume()
 
 							// Recursively populate the nested struct
@@ -62648,7 +60453,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// data specToModelNested RequiredPointerField --> Mount
 							if persistentVolumeElement.GetMount() != nil {
 								// Create the nested Go struct
-								workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+								workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 								mountElement := persistentVolumeElement.GetMount()
 
 								// Recursively populate the nested struct
@@ -62662,34 +60467,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									if response.Diagnostics.HasError() {
 										return
 									}
-									workloadWorkloadVolumeMountTypeModel.Mode = listValue
+									workloadVolumeMountTypeModel.Mode = listValue
 								} else {
-									workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+									workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested RequiredStringField --> MountPath
 								if mountElement.GetMountPath() != "" {
-									workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+									workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 								} else {
 									// Empty string, set to null
-									workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+									workloadVolumeMountTypeModel.MountPath = types.StringNull()
 								}
 
 								// data specToModelNested StringField --> SubPath
 								if mountElement.GetSubPath() != "" {
-									workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+									workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 								} else {
 									// Empty string, set to null
-									workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+									workloadVolumeMountTypeModel.SubPath = types.StringNull()
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+								workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeMountModelAttributeMap, workloadVolumeMountTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								workloadWorkloadPersistentStorageVolumeTypeModel.Mount = workloadWorkloadVolumeMountTypeModelObj
+								workloadPersistentStorageVolumeTypeModel.Mount = workloadVolumeMountTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -62698,13 +60503,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								workloadWorkloadPersistentStorageVolumeTypeModel.Mount = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeMountModelAttributeMap)
+								workloadPersistentStorageVolumeTypeModel.Mount = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeMountModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredPointerField --> Storage
 							if persistentVolumeElement.GetStorage() != nil {
 								// Create the nested Go struct
-								workloadWorkloadPersistentStorageTypeModel := &WorkloadWorkloadPersistentStorageType{}
+								workloadPersistentStorageTypeModel := &WorkloadPersistentStorageType{}
 								storageElement := persistentVolumeElement.GetStorage()
 
 								// Recursively populate the nested struct
@@ -62718,9 +60523,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									if response.Diagnostics.HasError() {
 										return
 									}
-									workloadWorkloadPersistentStorageTypeModel.AccessMode = listValue
+									workloadPersistentStorageTypeModel.AccessMode = listValue
 								} else {
-									workloadWorkloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
+									workloadPersistentStorageTypeModel.AccessMode = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested RequiredOneOfField --> ClassNameChoice
@@ -62767,22 +60572,22 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = finalObj
+									workloadPersistentStorageTypeModel.ClassNameChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									workloadWorkloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageClassNameChoiceModelAttributeMap)
+									workloadPersistentStorageTypeModel.ClassNameChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageClassNameChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredFloatField --> StorageSize
-								workloadWorkloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
+								workloadPersistentStorageTypeModel.StorageSize = types.Float32Value(float32(storageElement.GetStorageSize()))
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								workloadWorkloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageModelAttributeMap, workloadWorkloadPersistentStorageTypeModel)
+								workloadPersistentStorageTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageModelAttributeMap, workloadPersistentStorageTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								workloadWorkloadPersistentStorageVolumeTypeModel.Storage = workloadWorkloadPersistentStorageTypeModelObj
+								workloadPersistentStorageVolumeTypeModel.Storage = workloadPersistentStorageTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -62791,16 +60596,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								workloadWorkloadPersistentStorageVolumeTypeModel.Storage = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageModelAttributeMap)
+								workloadPersistentStorageVolumeTypeModel.Storage = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeStorageModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							workloadWorkloadPersistentStorageVolumeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeModelAttributeMap, workloadWorkloadPersistentStorageVolumeTypeModel)
+							workloadPersistentStorageVolumeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeModelAttributeMap, workloadPersistentStorageVolumeTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							workloadWorkloadPersistentVolumeTypeModel.PersistentVolume = workloadWorkloadPersistentStorageVolumeTypeModelObj
+							workloadPersistentVolumeTypeModel.PersistentVolume = workloadPersistentStorageVolumeTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -62809,10 +60614,10 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							workloadWorkloadPersistentVolumeTypeModel.PersistentVolume = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeModelAttributeMap)
+							workloadPersistentVolumeTypeModel.PersistentVolume = types.ObjectNull(WorkloadWorkloadChoiceStatefulServicePersistentVolumesPersistentVolumeModelAttributeMap)
 						}
 
-						persistentVolumesElements = append(persistentVolumesElements, workloadWorkloadPersistentVolumeTypeModel)
+						persistentVolumesElements = append(persistentVolumesElements, workloadPersistentVolumeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -62884,16 +60689,16 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 				if len(statefulServiceElement.GetVolumes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					volumesElements := make([]WorkloadWorkloadEphemeralStorageVolumeType, 0, len(statefulServiceElement.GetVolumes()))
+					volumesElements := make([]WorkloadEphemeralStorageVolumeType, 0, len(statefulServiceElement.GetVolumes()))
 					for _, volumesElement := range statefulServiceElement.GetVolumes() {
-						workloadWorkloadEphemeralStorageVolumeTypeModel := WorkloadWorkloadEphemeralStorageVolumeType{}
+						workloadEphemeralStorageVolumeTypeModel := WorkloadEphemeralStorageVolumeType{}
 
 						// data specToModelNested StringField --> Name
 						if volumesElement.GetName() != "" {
-							workloadWorkloadEphemeralStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
+							workloadEphemeralStorageVolumeTypeModel.Name = types.StringValue(volumesElement.GetName())
 						} else {
 							// Empty string, set to null
-							workloadWorkloadEphemeralStorageVolumeTypeModel.Name = types.StringNull()
+							workloadEphemeralStorageVolumeTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredOneOfField --> VolumeChoice
@@ -62921,7 +60726,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if emptyDirElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := emptyDirElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -62935,34 +60740,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceEmptyDirMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										emptyDirAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										emptyDirAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -63001,7 +60806,7 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 									// data specToModelNested RequiredPointerField --> Mount
 									if hostPathElement.GetMount() != nil {
 										// Create the nested Go struct
-										workloadWorkloadVolumeMountTypeModel := &WorkloadWorkloadVolumeMountType{}
+										workloadVolumeMountTypeModel := &WorkloadVolumeMountType{}
 										mountElement := hostPathElement.GetMount()
 
 										// Recursively populate the nested struct
@@ -63015,34 +60820,34 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 											if response.Diagnostics.HasError() {
 												return
 											}
-											workloadWorkloadVolumeMountTypeModel.Mode = listValue
+											workloadVolumeMountTypeModel.Mode = listValue
 										} else {
-											workloadWorkloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
+											workloadVolumeMountTypeModel.Mode = types.ListNull(types.StringType)
 										}
 
 										// data specToModelNested RequiredStringField --> MountPath
 										if mountElement.GetMountPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
+											workloadVolumeMountTypeModel.MountPath = types.StringValue(mountElement.GetMountPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.MountPath = types.StringNull()
+											workloadVolumeMountTypeModel.MountPath = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> SubPath
 										if mountElement.GetSubPath() != "" {
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
+											workloadVolumeMountTypeModel.SubPath = types.StringValue(mountElement.GetSubPath())
 										} else {
 											// Empty string, set to null
-											workloadWorkloadVolumeMountTypeModel.SubPath = types.StringNull()
+											workloadVolumeMountTypeModel.SubPath = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										workloadWorkloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadWorkloadVolumeMountTypeModel)
+										workloadVolumeMountTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceHostPathMountModelAttributeMap, workloadVolumeMountTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										hostPathAttributeMap["mount"] = workloadWorkloadVolumeMountTypeModelObj
+										hostPathAttributeMap["mount"] = workloadVolumeMountTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -63086,13 +60891,13 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							workloadWorkloadEphemeralStorageVolumeTypeModel.VolumeChoice = finalObj
+							workloadEphemeralStorageVolumeTypeModel.VolumeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							workloadWorkloadEphemeralStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceModelAttributeMap)
+							workloadEphemeralStorageVolumeTypeModel.VolumeChoice = types.ObjectNull(WorkloadWorkloadChoiceStatefulServiceVolumesVolumeChoiceModelAttributeMap)
 						}
 
-						volumesElements = append(volumesElements, workloadWorkloadEphemeralStorageVolumeTypeModel)
+						volumesElements = append(volumesElements, workloadEphemeralStorageVolumeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

@@ -29,36 +29,37 @@ type DataSourceF5XCDnsLoadBalancer struct {
 	client *client.APIClient
 }
 
-type DnsLoadBalancerDnsLoadBalancerResponseCache struct {
+type DnsLoadBalancerRespCache struct {
 	ResponseCacheParametersChoice types.Object `tfsdk:"response_cache_parameters_choice"`
 }
 
-type DnsLoadBalancerResponseCacheResponseCacheParametersChoice struct {
+type DnsLoadBalancerRespCacheParametersChoice struct {
 	DefaultResponseCacheParameters types.Bool   `tfsdk:"default_response_cache_parameters"`
+	Disable                        types.Bool   `tfsdk:"disable"`
 	ResponseCacheParameters        types.Object `tfsdk:"response_cache_parameters"`
 }
 
-type DnsLoadBalancerResponseCacheResponseCacheParameters struct {
+type DnsLoadBalancerRespCacheParameters struct {
 	CacheCidrIpv4 types.Int64 `tfsdk:"cache_cidr_ipv4"`
 	CacheCidrIpv6 types.Int64 `tfsdk:"cache_cidr_ipv6"`
 	CacheTtl      types.Int64 `tfsdk:"cache_ttl"`
 }
 
-type DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList struct {
+type DnsLoadBalancerLoadBalancingRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type DnsLoadBalancerDnsLoadBalancerLoadBalancingRule struct {
+type DnsLoadBalancerLoadBalancingRule struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 	ClientChoice types.Object `tfsdk:"client_choice"`
 	Score        types.Int64  `tfsdk:"score"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleActionChoice struct {
+type DnsLoadBalancerActionChoice struct {
 	Pool types.Object `tfsdk:"pool"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleClientChoice struct {
+type DnsLoadBalancerClientChoice struct {
 	AsnList                  types.Object `tfsdk:"asn_list"`
 	AsnMatcher               types.Object `tfsdk:"asn_matcher"`
 	GeoLocationLabelSelector types.Object `tfsdk:"geo_location_label_selector"`
@@ -67,27 +68,25 @@ type DnsLoadBalancerLoadBalancingRuleClientChoice struct {
 	IpPrefixSet              types.Object `tfsdk:"ip_prefix_set"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleAsnList struct {
+type DnsLoadBalancerAsnList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleAsnMatcher struct {
+type DnsLoadBalancerAsnMatcher struct {
 	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelector struct {
+type DnsLoadBalancerGeoLocationLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleIpPrefixList struct {
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
+type DnsLoadBalancerIpPrefixList struct {
 	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
-type DnsLoadBalancerLoadBalancingRuleIpPrefixSet struct {
-	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
-	PrefixSets    types.List `tfsdk:"prefix_sets"`
+type DnsLoadBalancerIpPrefixSet struct {
+	PrefixSets types.List `tfsdk:"prefix_sets"`
 }
 
 // DataSourceF5XCDnsLoadBalancerModel describes the resource data model.
@@ -135,6 +134,7 @@ var DnsLoadBalancerResponseCacheModelAttributeMap = map[string]attr.Type{
 var DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_response_cache_parameters": types.BoolType,
+	"disable":                           types.BoolType,
 	"response_cache_parameters": types.ObjectType{
 		AttrTypes: DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap,
 	},
@@ -268,7 +268,6 @@ var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap = ma
 // Attribute map for PointerOfOneOfField --> IpPrefixList
 var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
 
-	"invert_match": types.BoolType,
 	"ip_prefixes": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -280,7 +279,6 @@ var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[
 // Attribute map for PointerOfOneOfField --> IpPrefixSet
 var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"prefix_sets": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -315,8 +313,8 @@ func (d *DataSourceF5XCDnsLoadBalancer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Record is used for configuring DNS Load Balancer for a record.",
+		Description:         "DNS Load Balancer Record is used for configuring DNS Load Balancer for a record.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -432,6 +430,12 @@ func (r *DataSourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request data
 						Attributes: map[string]schema.Attribute{
 							"default_response_cache_parameters": schema.BoolAttribute{
 								Description: "Default Response Cache Parameters Default Parameters for caching the DNS responses",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"disable": schema.BoolAttribute{
+								Description: "Disable Response Cache When Response Cache is disabled, responses will be computed for each request",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -617,12 +621,6 @@ func (r *DataSourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"invert_match": schema.BoolAttribute{
-													Description: "invert_matcher Invert the match result.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"ip_prefixes": schema.ListAttribute{
 													Description: "ip prefixes List of IPv4 prefix strings.",
 													ElementType: types.StringType,
@@ -645,12 +643,6 @@ func (r *DataSourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"invert_matcher": schema.BoolAttribute{
-													Description: "invert_matcher Invert the match result.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"prefix_sets": schema.ListNestedAttribute{
 													Description: "prefix_sets A list of references to ip_prefix_set objects.",
 													Required:    false,
@@ -751,7 +743,7 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_load_balancer", err))
 		return
 	}
 
@@ -927,7 +919,7 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> ResponseCache
 	if specData.GetResponseCache() != nil {
-		var dnsLoadBalancerDnsLoadBalancerResponseCacheModel = &DnsLoadBalancerDnsLoadBalancerResponseCache{}
+		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
 		// data specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
@@ -949,6 +941,15 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolValue(true)
 			} else {
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_Disable)
+
+			if isDisable {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolNull()
 			}
 
 			// data specToModelNested PointerOfOneOfField --> ResponseCacheParameters
@@ -994,16 +995,16 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = finalObj
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
 		}
 
 		responseCacheObj, responseCacheDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsLoadBalancerResponseCacheModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel,
+			dnsLoadBalancerRespCacheModel,
 		)
 		response.Diagnostics.Append(responseCacheDiags...)
 		data.ResponseCache = responseCacheObj
@@ -1013,16 +1014,16 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot RequiredPointerField --> RuleList
 	if specData.GetRuleList() != nil {
-		var dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList{}
+		var dnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerLoadBalancingRuleList{}
 		ruleListElement := specData.GetRuleList()
 
 		// data specToModelNested RequiredArrayOfPointerField --> Rules
 		if len(ruleListElement.GetRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			rulesElements := make([]DnsLoadBalancerDnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
 			for _, rulesElement := range ruleListElement.GetRules() {
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerDnsLoadBalancerLoadBalancingRule{}
+				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
 				// data specToModelNested RequiredOneOfField --> ActionChoice
 				// <no value>
@@ -1094,10 +1095,10 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredOneOfField --> ClientChoice
@@ -1305,9 +1306,6 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
 							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
 
-							// data specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
-
 							// data specToModelNested ArrayOfStringField --> IpPrefixes
 							if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
 								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpPrefixes())
@@ -1352,9 +1350,6 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 
 						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
 							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
-
-							// data specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
 
 							// data specToModelNested RequiredArrayOfPointerField --> PrefixSets
 							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
@@ -1430,16 +1425,16 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested UintField --> Score
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
+				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
 
-				rulesElements = append(rulesElements, dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel)
+				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1448,19 +1443,19 @@ func (d *DataSourceF5XCDnsLoadBalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
 		}
 
 		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsLoadBalancerRuleListModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel,
+			dnsLoadBalancerLoadBalancingRuleListModel,
 		)
 		response.Diagnostics.Append(ruleListDiags...)
 		if response.Diagnostics.HasError() {

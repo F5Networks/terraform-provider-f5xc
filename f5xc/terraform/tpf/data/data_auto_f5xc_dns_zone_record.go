@@ -6,17 +6,10 @@
 package data
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"reflect"
-	"regexp"
-	"strings"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -31,28 +24,18 @@ import (
 	ves_io_schema_dns_zone_rrset "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_zone/rrset"
 )
 
-var (
-	_ = bytes.Buffer{}
-	_ = json.Unmarshal
-	_ = reflect.TypeOf
-	_ = regexp.MustCompile
-	_ = strings.TrimSpace
-	_ = jsonpb.Marshaler{}
-	_ proto.Message
-)
-
 // DataSourceF5XCDnsZoneRecord defines the data source implementation.
 type DataSourceF5XCDnsZoneRecord struct {
 	client *client.APIClient
 }
 
-type DnsZoneRecordDnsZoneRRSet struct {
+type DnsZoneRecordRRSet struct {
 	Description         types.String `tfsdk:"description"`
 	Ttl                 types.Int64  `tfsdk:"ttl"`
 	TypeRecordSetChoice types.Object `tfsdk:"type_record_set_choice"`
 }
 
-type DnsZoneRecordRRSetTypeRecordSetChoice struct {
+type DnsZoneRecordTypeRecordSetChoice struct {
 	ARecord     types.Object `tfsdk:"a_record"`
 	AaaaRecord  types.Object `tfsdk:"aaaa_record"`
 	AfsdbRecord types.Object `tfsdk:"afsdb_record"`
@@ -76,113 +59,113 @@ type DnsZoneRecordRRSetTypeRecordSetChoice struct {
 	TxtRecord   types.Object `tfsdk:"txt_record"`
 }
 
-type DnsZoneRecordRRSetARecord struct {
+type DnsZoneRecordARecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordRRSetAaaaRecord struct {
+type DnsZoneRecordAaaaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordRRSetAfsdbRecord struct {
+type DnsZoneRecordAfsdbRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneAFSDBRecordValue struct {
+type DnsZoneRecordAFSDBRecordValue struct {
 	Hostname types.String `tfsdk:"hostname"`
 	Subtype  types.List   `tfsdk:"subtype"`
 }
 
-type DnsZoneRecordRRSetAliasRecord struct {
+type DnsZoneRecordAliasRecord struct {
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetCaaRecord struct {
+type DnsZoneRecordCaaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneCertificationAuthorityAuthorization struct {
+type DnsZoneRecordCertificationAuthorityAuthz struct {
 	Flags types.Int64  `tfsdk:"flags"`
 	Tag   types.String `tfsdk:"tag"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetCdsRecord struct {
+type DnsZoneRecordCdsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneDSRecordValue struct {
+type DnsZoneRecordDSRecordValue struct {
 	DigestChoice   types.Object `tfsdk:"digest_choice"`
 	DsKeyAlgorithm types.List   `tfsdk:"ds_key_algorithm"`
 	KeyTag         types.Int64  `tfsdk:"key_tag"`
 }
 
-type DnsZoneRecordDSRecordValueDigestChoice struct {
+type DnsZoneRecordDigestChoice struct {
 	Sha1Digest   types.Object `tfsdk:"sha1_digest"`
 	Sha256Digest types.Object `tfsdk:"sha256_digest"`
 	Sha384Digest types.Object `tfsdk:"sha384_digest"`
 }
 
-type DnsZoneRecordDSRecordValueSha1Digest struct {
+type DnsZoneRecordSha1Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneRecordDSRecordValueSha256Digest struct {
+type DnsZoneRecordSha256Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneRecordDSRecordValueSha384Digest struct {
+type DnsZoneRecordSha384Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneRecordRRSetCertRecord struct {
+type DnsZoneRecordCertRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneCERTRecordValue struct {
+type DnsZoneRecordCERTRecordValue struct {
 	Algorithm   types.List   `tfsdk:"algorithm"`
 	CertKeyTag  types.Int64  `tfsdk:"cert_key_tag"`
 	CertType    types.List   `tfsdk:"cert_type"`
 	Certificate types.String `tfsdk:"certificate"`
 }
 
-type DnsZoneRecordRRSetCnameRecord struct {
+type DnsZoneRecordCnameRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetDsRecord struct {
+type DnsZoneRecordDsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordRRSetEui48Record struct {
+type DnsZoneRecordEui48Record struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetEui64Record struct {
+type DnsZoneRecordEui64Record struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetLbRecord struct {
+type DnsZoneRecordLbRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.Object `tfsdk:"value"`
 }
 
-type DnsZoneRecordRRSetLocRecord struct {
+type DnsZoneRecordLocRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneLOCValue struct {
+type DnsZoneRecordLOCValue struct {
 	Altitude            types.Float32 `tfsdk:"altitude"`
 	HorizontalPrecision types.Float32 `tfsdk:"horizontal_precision"`
 	LatitudeDegree      types.Int32   `tfsdk:"latitude_degree"`
@@ -197,22 +180,22 @@ type DnsZoneRecordDnsZoneLOCValue struct {
 	VerticalPrecision   types.Float32 `tfsdk:"vertical_precision"`
 }
 
-type DnsZoneRecordRRSetMxRecord struct {
+type DnsZoneRecordMxRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneMailExchanger struct {
+type DnsZoneRecordMailExchanger struct {
 	Domain   types.String `tfsdk:"domain"`
 	Priority types.Int64  `tfsdk:"priority"`
 }
 
-type DnsZoneRecordRRSetNaptrRecord struct {
+type DnsZoneRecordNaptrRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneNAPTRValue struct {
+type DnsZoneRecordNAPTRValue struct {
 	Flags       types.String `tfsdk:"flags"`
 	Order       types.Int64  `tfsdk:"order"`
 	Preference  types.Int64  `tfsdk:"preference"`
@@ -221,64 +204,64 @@ type DnsZoneRecordDnsZoneNAPTRValue struct {
 	Service     types.String `tfsdk:"service"`
 }
 
-type DnsZoneRecordRRSetNsRecord struct {
+type DnsZoneRecordNsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordRRSetPtrRecord struct {
+type DnsZoneRecordPtrRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordRRSetSrvRecord struct {
+type DnsZoneRecordSrvRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneSRVService struct {
+type DnsZoneRecordSRVSvc struct {
 	Port     types.Int64  `tfsdk:"port"`
 	Priority types.Int64  `tfsdk:"priority"`
 	Target   types.String `tfsdk:"target"`
 	Weight   types.Int64  `tfsdk:"weight"`
 }
 
-type DnsZoneRecordRRSetSshfpRecord struct {
+type DnsZoneRecordSshfpRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneSSHFPRecordValue struct {
+type DnsZoneRecordSSHFPRecordValue struct {
 	Algorithm             types.List   `tfsdk:"algorithm"`
 	FingerprintTypeChoice types.Object `tfsdk:"fingerprint_type_choice"`
 }
 
-type DnsZoneRecordSSHFPRecordValueFingerprintTypeChoice struct {
+type DnsZoneRecordFingerprintTypeChoice struct {
 	Sha1Fingerprint   types.Object `tfsdk:"sha1_fingerprint"`
 	Sha256Fingerprint types.Object `tfsdk:"sha256_fingerprint"`
 }
 
-type DnsZoneRecordSSHFPRecordValueSha1Fingerprint struct {
+type DnsZoneRecordSha1Fingerprint struct {
 	Fingerprint types.String `tfsdk:"fingerprint"`
 }
 
-type DnsZoneRecordSSHFPRecordValueSha256Fingerprint struct {
+type DnsZoneRecordSha256Fingerprint struct {
 	Fingerprint types.String `tfsdk:"fingerprint"`
 }
 
-type DnsZoneRecordRRSetTlsaRecord struct {
+type DnsZoneRecordTlsaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRecordDnsZoneTLSARecordValue struct {
+type DnsZoneRecordTLSARecordValue struct {
 	CertificateAssociationData types.String `tfsdk:"certificate_association_data"`
 	CertificateUsage           types.List   `tfsdk:"certificate_usage"`
 	MatchingType               types.List   `tfsdk:"matching_type"`
 	Selector                   types.List   `tfsdk:"selector"`
 }
 
-type DnsZoneRecordRRSetTxtRecord struct {
+type DnsZoneRecordTxtRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
@@ -1914,7 +1897,7 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 
 	readRespMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_zone_record", err))
 		return
 	}
 	// Cast the proto.Message to the concrete read response type
@@ -1961,15 +1944,15 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot RequiredPointerField --> Rrset
 	if specData.GetRrset() != nil {
-		var dnsZoneRecordDnsZoneRRSetModel = &DnsZoneRecordDnsZoneRRSet{}
+		var dnsZoneRecordRRSetModel = &DnsZoneRecordRRSet{}
 		rrsetElement := specData.GetRrset()
 
 		// data specToModelNested StringField --> Description
 		// State Healing: preserve empty string — do not convert "" to null for this field.
-		dnsZoneRecordDnsZoneRRSetModel.Description = types.StringValue(rrsetElement.GetDescription())
+		dnsZoneRecordRRSetModel.Description = types.StringValue(rrsetElement.GetDescription())
 
 		// data specToModelNested UintField --> Ttl
-		dnsZoneRecordDnsZoneRRSetModel.Ttl = types.Int64Value(int64(rrsetElement.GetTtl()))
+		dnsZoneRecordRRSetModel.Ttl = types.Int64Value(int64(rrsetElement.GetTtl()))
 
 		// data specToModelNested RequiredOneOfField --> TypeRecordSet
 		// <no value>
@@ -2087,16 +2070,16 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(afsdbRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
 						for _, valuesElement := range afsdbRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneAFSDBRecordValueModel := DnsZoneRecordDnsZoneAFSDBRecordValue{}
+							dnsZoneRecordAFSDBRecordValueModel := DnsZoneRecordAFSDBRecordValue{}
 
 							// data specToModelNested RequiredStringField --> Hostname
 							if valuesElement.GetHostname() != "" {
-								dnsZoneRecordDnsZoneAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
+								dnsZoneRecordAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneAFSDBRecordValueModel.Hostname = types.StringNull()
+								dnsZoneRecordAFSDBRecordValueModel.Hostname = types.StringNull()
 							}
 
 							// data specToModelNested RequiredEnumField --> Subtype
@@ -2108,12 +2091,12 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneAFSDBRecordValueModel.Subtype = listValue
+								dnsZoneRecordAFSDBRecordValueModel.Subtype = listValue
 							} else {
-								dnsZoneRecordDnsZoneAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
+								dnsZoneRecordAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
 							}
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneAFSDBRecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordAFSDBRecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2193,30 +2176,30 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(caaRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneCertificationAuthorityAuthorization, 0, len(caaRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordCertificationAuthorityAuthz, 0, len(caaRecordElement.GetValues()))
 						for _, valuesElement := range caaRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel := DnsZoneRecordDnsZoneCertificationAuthorityAuthorization{}
+							dnsZoneRecordCertificationAuthorityAuthzModel := DnsZoneRecordCertificationAuthorityAuthz{}
 
 							// data specToModelNested UintField --> Flags
-							dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
+							dnsZoneRecordCertificationAuthorityAuthzModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
 
 							// data specToModelNested StringField --> Tag
 							if valuesElement.GetTag() != "" {
-								dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringValue(valuesElement.GetTag())
+								dnsZoneRecordCertificationAuthorityAuthzModel.Tag = types.StringValue(valuesElement.GetTag())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringNull()
+								dnsZoneRecordCertificationAuthorityAuthzModel.Tag = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Value
 							if valuesElement.GetValue() != "" {
-								dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringValue(valuesElement.GetValue())
+								dnsZoneRecordCertificationAuthorityAuthzModel.Value = types.StringValue(valuesElement.GetValue())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringNull()
+								dnsZoneRecordCertificationAuthorityAuthzModel.Value = types.StringNull()
 							}
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneCertificationAuthorityAuthorizationModel)
+							valuesElements = append(valuesElements, dnsZoneRecordCertificationAuthorityAuthzModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2267,9 +2250,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(cdsRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneDSRecordValue, 0, len(cdsRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordDSRecordValue, 0, len(cdsRecordElement.GetValues()))
 						for _, valuesElement := range cdsRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneDSRecordValueModel := DnsZoneRecordDnsZoneDSRecordValue{}
+							dnsZoneRecordDSRecordValueModel := DnsZoneRecordDSRecordValue{}
 
 							// data specToModelNested RequiredOneOfField --> DigestChoice
 							// <no value>
@@ -2383,10 +2366,10 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								dnsZoneRecordDnsZoneDSRecordValueModel.DigestChoice = finalObj
+								dnsZoneRecordDSRecordValueModel.DigestChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								dnsZoneRecordDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
+								dnsZoneRecordDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -2398,15 +2381,15 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+								dnsZoneRecordDSRecordValueModel.DsKeyAlgorithm = listValue
 							} else {
-								dnsZoneRecordDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+								dnsZoneRecordDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredUintField --> KeyTag
-							dnsZoneRecordDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+							dnsZoneRecordDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneDSRecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordDSRecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2457,9 +2440,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(certRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneCERTRecordValue, 0, len(certRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordCERTRecordValue, 0, len(certRecordElement.GetValues()))
 						for _, valuesElement := range certRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneCERTRecordValueModel := DnsZoneRecordDnsZoneCERTRecordValue{}
+							dnsZoneRecordCERTRecordValueModel := DnsZoneRecordCERTRecordValue{}
 
 							// data specToModelNested RequiredEnumField --> Algorithm
 							if valuesElement.GetAlgorithm().String() != "" {
@@ -2470,13 +2453,13 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneCERTRecordValueModel.Algorithm = listValue
+								dnsZoneRecordCERTRecordValueModel.Algorithm = listValue
 							} else {
-								dnsZoneRecordDnsZoneCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
+								dnsZoneRecordCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredUintField --> CertKeyTag
-							dnsZoneRecordDnsZoneCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
+							dnsZoneRecordCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
 
 							// data specToModelNested RequiredEnumField --> CertType
 							if valuesElement.GetCertType().String() != "" {
@@ -2487,20 +2470,20 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneCERTRecordValueModel.CertType = listValue
+								dnsZoneRecordCERTRecordValueModel.CertType = listValue
 							} else {
-								dnsZoneRecordDnsZoneCERTRecordValueModel.CertType = types.ListNull(types.StringType)
+								dnsZoneRecordCERTRecordValueModel.CertType = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredStringField --> Certificate
 							if valuesElement.GetCertificate() != "" {
-								dnsZoneRecordDnsZoneCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
+								dnsZoneRecordCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneCERTRecordValueModel.Certificate = types.StringNull()
+								dnsZoneRecordCERTRecordValueModel.Certificate = types.StringNull()
 							}
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneCERTRecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordCERTRecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2588,9 +2571,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(dsRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneDSRecordValue, 0, len(dsRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordDSRecordValue, 0, len(dsRecordElement.GetValues()))
 						for _, valuesElement := range dsRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneDSRecordValueModel := DnsZoneRecordDnsZoneDSRecordValue{}
+							dnsZoneRecordDSRecordValueModel := DnsZoneRecordDSRecordValue{}
 
 							// data specToModelNested RequiredOneOfField --> DigestChoice
 							// <no value>
@@ -2704,10 +2687,10 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								dnsZoneRecordDnsZoneDSRecordValueModel.DigestChoice = finalObj
+								dnsZoneRecordDSRecordValueModel.DigestChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								dnsZoneRecordDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
+								dnsZoneRecordDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -2719,15 +2702,15 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+								dnsZoneRecordDSRecordValueModel.DsKeyAlgorithm = listValue
 							} else {
-								dnsZoneRecordDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+								dnsZoneRecordDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredUintField --> KeyTag
-							dnsZoneRecordDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+							dnsZoneRecordDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneDSRecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordDSRecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2931,18 +2914,18 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(locRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneLOCValue, 0, len(locRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordLOCValue, 0, len(locRecordElement.GetValues()))
 						for _, valuesElement := range locRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneLOCValueModel := DnsZoneRecordDnsZoneLOCValue{}
+							dnsZoneRecordLOCValueModel := DnsZoneRecordLOCValue{}
 
 							// data specToModelNested RequiredFloatField --> Altitude
-							dnsZoneRecordDnsZoneLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
+							dnsZoneRecordLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
 
 							// data specToModelNested FloatField --> HorizontalPrecision
-							dnsZoneRecordDnsZoneLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
+							dnsZoneRecordLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
 
 							// data specToModelNested RequiredIntField --> LatitudeDegree
-							dnsZoneRecordDnsZoneLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
+							dnsZoneRecordLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
 
 							// data specToModelNested RequiredEnumField --> LatitudeHemisphere
 							if valuesElement.GetLatitudeHemisphere().String() != "" {
@@ -2953,22 +2936,22 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneLOCValueModel.LatitudeHemisphere = listValue
+								dnsZoneRecordLOCValueModel.LatitudeHemisphere = listValue
 							} else {
-								dnsZoneRecordDnsZoneLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
+								dnsZoneRecordLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested IntField --> LatitudeMinute
-							dnsZoneRecordDnsZoneLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
+							dnsZoneRecordLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
 
 							// data specToModelNested FloatField --> LatitudeSecond
-							dnsZoneRecordDnsZoneLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
+							dnsZoneRecordLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
 
 							// data specToModelNested FloatField --> LocationDiameter
-							dnsZoneRecordDnsZoneLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
+							dnsZoneRecordLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
 
 							// data specToModelNested RequiredIntField --> LongitudeDegree
-							dnsZoneRecordDnsZoneLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
+							dnsZoneRecordLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
 
 							// data specToModelNested RequiredEnumField --> LongitudeHemisphere
 							if valuesElement.GetLongitudeHemisphere().String() != "" {
@@ -2979,21 +2962,21 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneLOCValueModel.LongitudeHemisphere = listValue
+								dnsZoneRecordLOCValueModel.LongitudeHemisphere = listValue
 							} else {
-								dnsZoneRecordDnsZoneLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
+								dnsZoneRecordLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested IntField --> LongitudeMinute
-							dnsZoneRecordDnsZoneLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
+							dnsZoneRecordLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
 
 							// data specToModelNested FloatField --> LongitudeSecond
-							dnsZoneRecordDnsZoneLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
+							dnsZoneRecordLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
 
 							// data specToModelNested FloatField --> VerticalPrecision
-							dnsZoneRecordDnsZoneLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
+							dnsZoneRecordLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneLOCValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordLOCValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3044,22 +3027,22 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(mxRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneMailExchanger, 0, len(mxRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordMailExchanger, 0, len(mxRecordElement.GetValues()))
 						for _, valuesElement := range mxRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneMailExchangerModel := DnsZoneRecordDnsZoneMailExchanger{}
+							dnsZoneRecordMailExchangerModel := DnsZoneRecordMailExchanger{}
 
 							// data specToModelNested StringField --> Domain
 							if valuesElement.GetDomain() != "" {
-								dnsZoneRecordDnsZoneMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
+								dnsZoneRecordMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneMailExchangerModel.Domain = types.StringNull()
+								dnsZoneRecordMailExchangerModel.Domain = types.StringNull()
 							}
 
 							// data specToModelNested UintField --> Priority
-							dnsZoneRecordDnsZoneMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+							dnsZoneRecordMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneMailExchangerModel)
+							valuesElements = append(valuesElements, dnsZoneRecordMailExchangerModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3110,49 +3093,37 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(naptrRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneNAPTRValue, 0, len(naptrRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordNAPTRValue, 0, len(naptrRecordElement.GetValues()))
 						for _, valuesElement := range naptrRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneNAPTRValueModel := DnsZoneRecordDnsZoneNAPTRValue{}
+							dnsZoneRecordNAPTRValueModel := DnsZoneRecordNAPTRValue{}
 
 							// data specToModelNested RequiredStringField --> Flags
 							if valuesElement.GetFlags() != "" {
-								dnsZoneRecordDnsZoneNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
+								dnsZoneRecordNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneNAPTRValueModel.Flags = types.StringNull()
+								dnsZoneRecordNAPTRValueModel.Flags = types.StringNull()
 							}
 
 							// data specToModelNested RequiredUintField --> Order
-							dnsZoneRecordDnsZoneNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
+							dnsZoneRecordNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
 
 							// data specToModelNested RequiredUintField --> Preference
-							dnsZoneRecordDnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
+							dnsZoneRecordNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 							// data specToModelNested StringField --> Regexp
-							if valuesElement.GetRegexp() != "" {
-								dnsZoneRecordDnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordDnsZoneNAPTRValueModel.Regexp = types.StringNull()
-							}
+							// The resource defaults this field to "", so API "" must stay "" to match it.
+							dnsZoneRecordNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 							// data specToModelNested StringField --> Replacement
-							if valuesElement.GetReplacement() != "" {
-								dnsZoneRecordDnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordDnsZoneNAPTRValueModel.Replacement = types.StringNull()
-							}
+							// The resource defaults this field to "", so API "" must stay "" to match it.
+							dnsZoneRecordNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 							// data specToModelNested StringField --> Service
-							if valuesElement.GetService() != "" {
-								dnsZoneRecordDnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordDnsZoneNAPTRValueModel.Service = types.StringNull()
-							}
+							// The resource defaults this field to "", so API "" must stay "" to match it.
+							dnsZoneRecordNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneNAPTRValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordNAPTRValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3285,28 +3256,28 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(srvRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneSRVService, 0, len(srvRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordSRVSvc, 0, len(srvRecordElement.GetValues()))
 						for _, valuesElement := range srvRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneSRVServiceModel := DnsZoneRecordDnsZoneSRVService{}
+							dnsZoneRecordSRVSvcModel := DnsZoneRecordSRVSvc{}
 
 							// data specToModelNested UintField --> Port
-							dnsZoneRecordDnsZoneSRVServiceModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
+							dnsZoneRecordSRVSvcModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
 
 							// data specToModelNested UintField --> Priority
-							dnsZoneRecordDnsZoneSRVServiceModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+							dnsZoneRecordSRVSvcModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
 							// data specToModelNested StringField --> Target
 							if valuesElement.GetTarget() != "" {
-								dnsZoneRecordDnsZoneSRVServiceModel.Target = types.StringValue(valuesElement.GetTarget())
+								dnsZoneRecordSRVSvcModel.Target = types.StringValue(valuesElement.GetTarget())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneSRVServiceModel.Target = types.StringNull()
+								dnsZoneRecordSRVSvcModel.Target = types.StringNull()
 							}
 
 							// data specToModelNested UintField --> Weight
-							dnsZoneRecordDnsZoneSRVServiceModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
+							dnsZoneRecordSRVSvcModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneSRVServiceModel)
+							valuesElements = append(valuesElements, dnsZoneRecordSRVSvcModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3357,9 +3328,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(sshfpRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
 						for _, valuesElement := range sshfpRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneSSHFPRecordValueModel := DnsZoneRecordDnsZoneSSHFPRecordValue{}
+							dnsZoneRecordSSHFPRecordValueModel := DnsZoneRecordSSHFPRecordValue{}
 
 							// data specToModelNested RequiredEnumField --> Algorithm
 							if valuesElement.GetAlgorithm().String() != "" {
@@ -3370,9 +3341,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneSSHFPRecordValueModel.Algorithm = listValue
+								dnsZoneRecordSSHFPRecordValueModel.Algorithm = listValue
 							} else {
-								dnsZoneRecordDnsZoneSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
+								dnsZoneRecordSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> FingerprintType
@@ -3458,13 +3429,13 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								dnsZoneRecordDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
+								dnsZoneRecordSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								dnsZoneRecordDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
+								dnsZoneRecordSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
 							}
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneSSHFPRecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordSSHFPRecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3515,16 +3486,16 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 					if len(tlsaRecordElement.GetValues()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						valuesElements := make([]DnsZoneRecordDnsZoneTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
+						valuesElements := make([]DnsZoneRecordTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
 						for _, valuesElement := range tlsaRecordElement.GetValues() {
-							dnsZoneRecordDnsZoneTLSARecordValueModel := DnsZoneRecordDnsZoneTLSARecordValue{}
+							dnsZoneRecordTLSARecordValueModel := DnsZoneRecordTLSARecordValue{}
 
 							// data specToModelNested RequiredStringField --> CertificateAssociationData
 							if valuesElement.GetCertificateAssociationData() != "" {
-								dnsZoneRecordDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
+								dnsZoneRecordTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
 							} else {
 								// Empty string, set to null
-								dnsZoneRecordDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringNull()
+								dnsZoneRecordTLSARecordValueModel.CertificateAssociationData = types.StringNull()
 							}
 
 							// data specToModelNested RequiredEnumField --> CertificateUsage
@@ -3536,9 +3507,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneTLSARecordValueModel.CertificateUsage = listValue
+								dnsZoneRecordTLSARecordValueModel.CertificateUsage = listValue
 							} else {
-								dnsZoneRecordDnsZoneTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
+								dnsZoneRecordTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredEnumField --> MatchingType
@@ -3550,9 +3521,9 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneTLSARecordValueModel.MatchingType = listValue
+								dnsZoneRecordTLSARecordValueModel.MatchingType = listValue
 							} else {
-								dnsZoneRecordDnsZoneTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
+								dnsZoneRecordTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredEnumField --> Selector
@@ -3564,12 +3535,12 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								dnsZoneRecordDnsZoneTLSARecordValueModel.Selector = listValue
+								dnsZoneRecordTLSARecordValueModel.Selector = listValue
 							} else {
-								dnsZoneRecordDnsZoneTLSARecordValueModel.Selector = types.ListNull(types.StringType)
+								dnsZoneRecordTLSARecordValueModel.Selector = types.ListNull(types.StringType)
 							}
 
-							valuesElements = append(valuesElements, dnsZoneRecordDnsZoneTLSARecordValueModel)
+							valuesElements = append(valuesElements, dnsZoneRecordTLSARecordValueModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3652,16 +3623,16 @@ func (d *DataSourceF5XCDnsZoneRecord) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dnsZoneRecordDnsZoneRRSetModel.TypeRecordSetChoice = finalObj
+			dnsZoneRecordRRSetModel.TypeRecordSetChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsZoneRecordDnsZoneRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetModelAttributeMap)
+			dnsZoneRecordRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneRecordRrsetTypeRecordSetModelAttributeMap)
 		}
 
 		rrsetObj, rrsetDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsZoneRecordRrsetModelAttributeMap,
-			dnsZoneRecordDnsZoneRRSetModel,
+			dnsZoneRecordRRSetModel,
 		)
 		response.Diagnostics.Append(rrsetDiags...)
 		if response.Diagnostics.HasError() {

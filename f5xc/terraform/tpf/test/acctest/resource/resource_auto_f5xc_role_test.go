@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCRole_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-role-v2-" + testAccRunSuffix(t)
+	name := "example-role-v2-" + testAccRunSuffix(t)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckRoleDestroyProducer(t),
@@ -39,32 +39,36 @@ func TestAccResourceAutoF5XCRole_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCRoleConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace, []string{"ves-io-web-access-read", "f5xc-console-basic-monitor"}),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCRoleConfig_basic("example-role", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCRole_withApiGroupsTransition_withSingleToMulti(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-role-v2-" + testAccRunSuffix(t)
+	name := "example-role-v2-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,22 +80,22 @@ func TestAccResourceAutoF5XCRole_withApiGroupsTransition_withSingleToMulti(t *te
 				Config: testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace, []string{"ves-io-web-access-read"}),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace, []string{"ves-io-web-access-read", "f5xc-console-basic-monitor"}),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -101,7 +105,7 @@ func TestAccResourceAutoF5XCRole_withApiGroupsTransition_withSingleToMulti(t *te
 func TestAccResourceAutoF5XCRole_withApiGroupsTransition_withMultiToSingle(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-role-v2-" + testAccRunSuffix(t)
+	name := "example-role-v2-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -113,22 +117,22 @@ func TestAccResourceAutoF5XCRole_withApiGroupsTransition_withMultiToSingle(t *te
 				Config: testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace, []string{"f5xc-console-basic-monitor", "ves-io-web-access-read"}),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace, []string{"f5xc-console-basic-monitor"}),
 			},
 			{
-				ResourceName:                         "f5xc_role.test",
+				ResourceName:                         "f5xc_role.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"description"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_role.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -140,7 +144,7 @@ func testAccCheckRoleDestroyProducer(t *testing.T) func(*terraform.State) error 
 
 func testAccResourceAutoF5XCRoleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_role" "test" {
+resource "f5xc_role" "example" {
   name       = %q
   namespace  = %q
   api_groups = ["ves-io-web-access-read"]
@@ -150,7 +154,7 @@ resource "f5xc_role" "test" {
 
 func testAccResourceAutoF5XCRoleConfig_withApiGroups(name, namespace string, apiGroups []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_role" "test" {
+resource "f5xc_role" "example" {
   name       = %q
   namespace  = %q
   api_groups = %s

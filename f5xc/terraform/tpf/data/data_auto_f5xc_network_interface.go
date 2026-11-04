@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -20,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -32,7 +36,7 @@ type DataSourceF5XCNetworkInterface struct {
 	client *client.APIClient
 }
 
-type NetworkInterfaceCreateSpecTypeInterfaceChoice struct {
+type NetIfaceIfaceChoice struct {
 	DedicatedInterface           types.Object `tfsdk:"dedicated_interface"`
 	DedicatedManagementInterface types.Object `tfsdk:"dedicated_management_interface"`
 	EthernetInterface            types.Object `tfsdk:"ethernet_interface"`
@@ -40,7 +44,7 @@ type NetworkInterfaceCreateSpecTypeInterfaceChoice struct {
 	TunnelInterface              types.Object `tfsdk:"tunnel_interface"`
 }
 
-type NetworkInterfaceCreateSpecTypeDedicatedInterface struct {
+type NetIfaceDedicatedIface struct {
 	Device           types.String `tfsdk:"device"`
 	MonitoringChoice types.Object `tfsdk:"monitoring_choice"`
 	Mtu              types.Int64  `tfsdk:"mtu"`
@@ -49,33 +53,33 @@ type NetworkInterfaceCreateSpecTypeDedicatedInterface struct {
 	Priority         types.Int64  `tfsdk:"priority"`
 }
 
-type NetworkInterfaceDedicatedInterfaceTypeMonitoringChoice struct {
+type NetIfaceMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type NetworkInterfaceDedicatedInterfaceTypeNodeChoice struct {
+type NetIfaceNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type NetworkInterfaceDedicatedInterfaceTypePrimaryChoice struct {
+type NetIfacePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type NetworkInterfaceCreateSpecTypeDedicatedManagementInterface struct {
+type NetIfaceDedicatedMgmtIface struct {
 	Device     types.String `tfsdk:"device"`
 	Mtu        types.Int64  `tfsdk:"mtu"`
 	NodeChoice types.Object `tfsdk:"node_choice"`
 }
 
-type NetworkInterfaceDedicatedManagementInterfaceTypeNodeChoice struct {
+type NetIfaceDedicatedMgmtIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type NetworkInterfaceCreateSpecTypeEthernetInterface struct {
+type NetIfaceEthernetIface struct {
 	AddressChoice     types.Object `tfsdk:"address_choice"`
 	Device            types.String `tfsdk:"device"`
 	Ipv6AddressChoice types.Object `tfsdk:"ipv6_address_choice"`
@@ -88,19 +92,19 @@ type NetworkInterfaceCreateSpecTypeEthernetInterface struct {
 	VlanChoice        types.Object `tfsdk:"vlan_choice"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeAddressChoice struct {
+type NetIfaceAddrChoice struct {
 	DhcpClient types.Bool   `tfsdk:"dhcp_client"`
 	DhcpServer types.Object `tfsdk:"dhcp_server"`
 	StaticIp   types.Object `tfsdk:"static_ip"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeDhcpServer struct {
+type NetIfaceDhcpServer struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type NetworkInterfaceNetworkInterfaceDHCPNetworkType struct {
+type NetIfaceDHCPNetType struct {
 	DnsChoice           types.Object `tfsdk:"dns_choice"`
 	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
@@ -108,199 +112,199 @@ type NetworkInterfaceNetworkInterfaceDHCPNetworkType struct {
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type NetworkInterfaceDHCPNetworkTypeDnsChoice struct {
+type NetIfaceDnsChoice struct {
 	DnsAddress types.String `tfsdk:"dns_address"`
 	SameAsDgw  types.Bool   `tfsdk:"same_as_dgw"`
 }
 
-type NetworkInterfaceDHCPNetworkTypeGatewayChoice struct {
+type NetIfaceGatewayChoice struct {
 	DgwAddress   types.String `tfsdk:"dgw_address"`
 	FirstAddress types.Bool   `tfsdk:"first_address"`
 	LastAddress  types.Bool   `tfsdk:"last_address"`
 }
 
-type NetworkInterfaceDHCPNetworkTypeNetworkPrefixChoice struct {
+type NetIfaceNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type NetworkInterfaceNetworkInterfaceDHCPPoolType struct {
+type NetIfaceDHCPPoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
 
-type NetworkInterfaceDHCPServerParametersTypeInterfacesAddressingChoice struct {
+type NetIfaceInterfacesAddressingChoice struct {
 	AutomaticFromEnd   types.Bool   `tfsdk:"automatic_from_end"`
 	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type NetworkInterfaceDHCPServerParametersTypeInterfaceIpMap struct {
+type NetIfaceIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeStaticIp struct {
+type NetIfaceStaticIp struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type NetworkInterfaceStaticIPParametersTypeNetworkPrefixChoice struct {
+type NetIfaceStaticIPParametersTypeNetPrefixChoice struct {
 	ClusterStaticIp types.Object `tfsdk:"cluster_static_ip"`
 	NodeStaticIp    types.Object `tfsdk:"node_static_ip"`
 }
 
-type NetworkInterfaceStaticIPParametersTypeClusterStaticIp struct {
+type NetIfaceClusterStaticIp struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType struct {
+type NetIfaceStaticIpParametersNodeType struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type NetworkInterfaceStaticIPParametersTypeNodeStaticIp struct {
+type NetIfaceNodeStaticIp struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeIpv6AddressChoice struct {
+type NetIfaceIpv6AddrChoice struct {
 	Ipv6AutoConfig    types.Object `tfsdk:"ipv6_auto_config"`
 	NoIpv6Address     types.Bool   `tfsdk:"no_ipv6_address"`
 	StaticIpv6Address types.Object `tfsdk:"static_ipv6_address"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeIpv6AutoConfig struct {
+type NetIfaceIpv6AutoConfig struct {
 	AutoconfigChoice types.Object `tfsdk:"autoconfig_choice"`
 }
 
-type NetworkInterfaceIPV6AutoConfigTypeAutoconfigChoice struct {
+type NetIfaceAutoconfigChoice struct {
 	Host   types.Bool   `tfsdk:"host"`
 	Router types.Object `tfsdk:"router"`
 }
 
-type NetworkInterfaceIPV6AutoConfigTypeRouter struct {
+type NetIfaceRouter struct {
 	AddressChoice types.Object `tfsdk:"address_choice"`
 	DnsConfig     types.Object `tfsdk:"dns_config"`
 }
 
-type NetworkInterfaceIPV6AutoConfigRouterTypeAddressChoice struct {
+type NetIfaceIPV6AutoConfigRouterTypeAddrChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 	Stateful      types.Object `tfsdk:"stateful"`
 }
 
-type NetworkInterfaceIPV6AutoConfigRouterTypeStateful struct {
+type NetIfaceStateful struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type NetworkInterfaceNetworkInterfaceDHCPIPV6NetworkType struct {
+type NetIfaceDHCPIPV6NetType struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 	PoolSettings        types.List   `tfsdk:"pool_settings"`
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type NetworkInterfaceDHCPIPV6NetworkTypeNetworkPrefixChoice struct {
+type NetIfaceDHCPIPV6NetTypeNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type NetworkInterfaceNetworkInterfaceDHCPIPV6PoolType struct {
+type NetIfaceDHCPIPV6PoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
 
-type NetworkInterfaceDHCPIPV6StatefulServerInterfacesAddressingChoice struct {
+type NetIfaceDHCPIPV6StatefulServerInterfacesAddressingChoice struct {
 	AutomaticFromEnd   types.Bool   `tfsdk:"automatic_from_end"`
 	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type NetworkInterfaceDHCPIPV6StatefulServerInterfaceIpMap struct {
+type NetIfaceDHCPIPV6StatefulServerIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type NetworkInterfaceNetworkInterfaceIPV6DnsConfig struct {
+type NetIfaceIPV6DnsConfig struct {
 	DnsChoice types.Object `tfsdk:"dns_choice"`
 }
 
-type NetworkInterfaceIPV6DnsConfigDnsChoice struct {
+type NetIfaceIPV6DnsConfigDnsChoice struct {
 	ConfiguredList types.Object `tfsdk:"configured_list"`
 	LocalDns       types.Object `tfsdk:"local_dns"`
 }
 
-type NetworkInterfaceIPV6DnsConfigConfiguredList struct {
+type NetIfaceConfiguredList struct {
 	DnsList types.List `tfsdk:"dns_list"`
 }
 
-type NetworkInterfaceIPV6DnsConfigLocalDns struct {
+type NetIfaceLocalDns struct {
 	LocalDnsChoice types.Object `tfsdk:"local_dns_choice"`
 }
 
-type NetworkInterfaceIPV6LocalDnsAddressLocalDnsChoice struct {
+type NetIfaceLocalDnsChoice struct {
 	ConfiguredAddress types.String `tfsdk:"configured_address"`
 	FirstAddress      types.Bool   `tfsdk:"first_address"`
 	LastAddress       types.Bool   `tfsdk:"last_address"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeStaticIpv6Address struct {
+type NetIfaceStaticIpv6Addr struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeMonitoringChoice struct {
+type NetIfaceEthernetIfaceTypeMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeNetworkChoice struct {
+type NetIfaceNetChoice struct {
 	SegmentNetwork         types.Object `tfsdk:"segment_network"`
 	SiteLocalInsideNetwork types.Bool   `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool   `tfsdk:"site_local_network"`
 	StorageNetwork         types.Bool   `tfsdk:"storage_network"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeNodeChoice struct {
+type NetIfaceEthernetIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypePrimaryChoice struct {
+type NetIfaceEthernetIfaceTypePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type NetworkInterfaceEthernetInterfaceTypeVlanChoice struct {
+type NetIfaceVlanChoice struct {
 	Untagged types.Bool  `tfsdk:"untagged"`
 	VlanId   types.Int64 `tfsdk:"vlan_id"`
 }
 
-type NetworkInterfaceCreateSpecTypeLayer2Interface struct {
+type NetIfaceLayer2Iface struct {
 	Layer2InterfaceChoice types.Object `tfsdk:"layer2_interface_choice"`
 }
 
-type NetworkInterfaceLayer2InterfaceTypeLayer2InterfaceChoice struct {
+type NetIfaceLayer2IfaceChoice struct {
 	L2SriovInterface   types.Object `tfsdk:"l2sriov_interface"`
 	L2VlanInterface    types.Object `tfsdk:"l2vlan_interface"`
 	L2VlanSloInterface types.Object `tfsdk:"l2vlan_slo_interface"`
 }
 
-type NetworkInterfaceLayer2InterfaceTypeL2SriovInterface struct {
+type NetIfaceL2SriovIface struct {
 	Device     types.String `tfsdk:"device"`
 	VlanChoice types.Object `tfsdk:"vlan_choice"`
 }
 
-type NetworkInterfaceLayer2SriovInterfaceTypeVlanChoice struct {
+type NetIfaceLayer2SriovIfaceTypeVlanChoice struct {
 	Untagged types.Bool  `tfsdk:"untagged"`
 	VlanId   types.Int64 `tfsdk:"vlan_id"`
 }
 
-type NetworkInterfaceLayer2InterfaceTypeL2VlanInterface struct {
+type NetIfaceL2VlanIface struct {
 	Device types.String `tfsdk:"device"`
 	VlanId types.Int64  `tfsdk:"vlan_id"`
 }
 
-type NetworkInterfaceLayer2InterfaceTypeL2VlanSloInterface struct {
+type NetIfaceL2VlanSloIface struct {
 	VlanId types.Int64 `tfsdk:"vlan_id"`
 }
 
-type NetworkInterfaceCreateSpecTypeTunnelInterface struct {
+type NetIfaceTunnelIface struct {
 	Mtu           types.Int64  `tfsdk:"mtu"`
 	NetworkChoice types.Object `tfsdk:"network_choice"`
 	NodeChoice    types.Object `tfsdk:"node_choice"`
@@ -309,16 +313,16 @@ type NetworkInterfaceCreateSpecTypeTunnelInterface struct {
 	Tunnel        types.Object `tfsdk:"tunnel"`
 }
 
-type NetworkInterfaceTunnelInterfaceTypeNetworkChoice struct {
+type NetIfaceTunnelIfaceTypeNetChoice struct {
 	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
 }
 
-type NetworkInterfaceTunnelInterfaceTypeNodeChoice struct {
+type NetIfaceTunnelIfaceTypeNodeChoice struct {
 	Node types.String `tfsdk:"node"`
 }
 
-type NetworkInterfaceNetworkInterfaceStaticIPParametersType struct {
+type NetIfaceStaticIPParametersType struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
@@ -1025,8 +1029,8 @@ func (d *DataSourceF5XCNetworkInterface) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCNetworkInterface) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_interface This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_interface) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_interface This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_interface) etc. can be fetched",
+		MarkdownDescription: "Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.",
+		Description:         "Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1106,7 +1110,7 @@ func (r *DataSourceF5XCNetworkInterface) Schema(ctx context.Context, request dat
 								},
 							},
 							"mtu": schema.Int64Attribute{
-								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -1172,7 +1176,7 @@ func (r *DataSourceF5XCNetworkInterface) Schema(ctx context.Context, request dat
 								Computed:    true,
 							},
 							"mtu": schema.Int64Attribute{
-								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -1753,7 +1757,7 @@ func (r *DataSourceF5XCNetworkInterface) Schema(ctx context.Context, request dat
 								},
 							},
 							"mtu": schema.Int64Attribute{
-								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -1969,7 +1973,7 @@ func (r *DataSourceF5XCNetworkInterface) Schema(ctx context.Context, request dat
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
 							"mtu": schema.Int64Attribute{
-								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -2165,9 +2169,15 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_interface.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_network_interface.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_interface.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_interface", err))
 		return
 	}
 
@@ -2175,7 +2185,41 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_network_interface.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -2198,8 +2242,14 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -2208,6 +2258,7 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -2300,10 +2351,15 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 	if oneofInterfaceChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		interfaceChoiceChoices := rawSpecMap["interface_choice"]
+		var interfaceChoiceChoices interface{}
+		if v := rawSpecMap["interface_choice"]; v != nil {
+			interfaceChoiceChoices = v
+		} else {
+			interfaceChoiceChoices = specData.GetInterfaceChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var interfaceChoiceChoicesModel = &NetworkInterfaceCreateSpecTypeInterfaceChoice{}
+		var interfaceChoiceChoicesModel = &NetIfaceIfaceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2708,9 +2764,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 							if len(dhcpServerElement.GetDhcpNetworks()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								dhcpNetworksElements := make([]NetworkInterfaceNetworkInterfaceDHCPNetworkType, 0, len(dhcpServerElement.GetDhcpNetworks()))
+								dhcpNetworksElements := make([]NetIfaceDHCPNetType, 0, len(dhcpServerElement.GetDhcpNetworks()))
 								for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
-									networkInterfaceNetworkInterfaceDHCPNetworkTypeModel := NetworkInterfaceNetworkInterfaceDHCPNetworkType{}
+									netIfaceDHCPNetTypeModel := NetIfaceDHCPNetType{}
 
 									// data specToModelNested RequiredOneOfField --> DnsChoice
 									// CreateSpecType
@@ -2770,9 +2826,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = finalObj
+										netIfaceDHCPNetTypeModel.DnsChoice = finalObj
 									} else {
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+										netIfaceDHCPNetTypeModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> GatewayChoice
@@ -2855,9 +2911,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = finalObj
+										netIfaceDHCPNetTypeModel.GatewayChoice = finalObj
 									} else {
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+										netIfaceDHCPNetTypeModel.GatewayChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -2896,9 +2952,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 									} else {
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredEnumField --> PoolSettings
@@ -2910,36 +2966,36 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										if response.Diagnostics.HasError() {
 											return
 										}
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = listValue
+										netIfaceDHCPNetTypeModel.PoolSettings = listValue
 									} else {
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+										netIfaceDHCPNetTypeModel.PoolSettings = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested ArrayOfPointerField --> Pools
 									if len(dhcpNetworksElement.GetPools()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										poolsElements := make([]NetworkInterfaceNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+										poolsElements := make([]NetIfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
 										for _, poolsElement := range dhcpNetworksElement.GetPools() {
-											networkInterfaceNetworkInterfaceDHCPPoolTypeModel := NetworkInterfaceNetworkInterfaceDHCPPoolType{}
+											netIfaceDHCPPoolTypeModel := NetIfaceDHCPPoolType{}
 
 											// data specToModelNested StringField --> EndIp
 											if poolsElement.GetEndIp() != "" {
-												networkInterfaceNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+												netIfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 											} else {
 												// Empty string, set to null
-												networkInterfaceNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+												netIfaceDHCPPoolTypeModel.EndIp = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> StartIp
 											if poolsElement.GetStartIp() != "" {
-												networkInterfaceNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+												netIfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 											} else {
 												// Empty string, set to null
-												networkInterfaceNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+												netIfaceDHCPPoolTypeModel.StartIp = types.StringNull()
 											}
 
-											poolsElements = append(poolsElements, networkInterfaceNetworkInterfaceDHCPPoolTypeModel)
+											poolsElements = append(poolsElements, netIfaceDHCPPoolTypeModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2948,16 +3004,16 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										if response.Diagnostics.HasError() {
 											return
 										}
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+										netIfaceDHCPNetTypeModel.Pools = poolsListValue
 
 									} else {
 										// The source list is empty or nil.
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// Assign a null `types.ListValue`.
-										networkInterfaceNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
+										netIfaceDHCPNetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
 									}
 
-									dhcpNetworksElements = append(dhcpNetworksElements, networkInterfaceNetworkInterfaceDHCPNetworkTypeModel)
+									dhcpNetworksElements = append(dhcpNetworksElements, netIfaceDHCPNetTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3153,10 +3209,10 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 
 										// data specToModelNested MapOfPointerField --> InterfaceIpMap
 										if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-											interfaceIpMapGoMap := make(map[string]NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+											interfaceIpMapGoMap := make(map[string]NetIfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 											for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-												interfaceIpMapItem := NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType{}
+												interfaceIpMapItem := NetIfaceStaticIpParametersNodeType{}
 
 												// data specToModelNested StringField --> DefaultGw
 												if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -3400,9 +3456,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 													if len(statefulElement.GetDhcpNetworks()) > 0 {
 														// Step 1: Always create a slice of model structs from the spec data.
 														// This slice serves as an intermediate representation.
-														dhcpNetworksElements := make([]NetworkInterfaceNetworkInterfaceDHCPIPV6NetworkType, 0, len(statefulElement.GetDhcpNetworks()))
+														dhcpNetworksElements := make([]NetIfaceDHCPIPV6NetType, 0, len(statefulElement.GetDhcpNetworks()))
 														for _, dhcpNetworksElement := range statefulElement.GetDhcpNetworks() {
-															networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel := NetworkInterfaceNetworkInterfaceDHCPIPV6NetworkType{}
+															netIfaceDHCPIPV6NetTypeModel := NetIfaceDHCPIPV6NetType{}
 
 															// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
 															// CreateSpecType
@@ -3440,9 +3496,9 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = finalObj
+																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 															} else {
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested RequiredEnumField --> PoolSettings
@@ -3454,36 +3510,36 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = listValue
+																netIfaceDHCPIPV6NetTypeModel.PoolSettings = listValue
 															} else {
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																netIfaceDHCPIPV6NetTypeModel.PoolSettings = types.ListNull(types.StringType)
 															}
 
 															// data specToModelNested ArrayOfPointerField --> Pools
 															if len(dhcpNetworksElement.GetPools()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																poolsElements := make([]NetworkInterfaceNetworkInterfaceDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
+																poolsElements := make([]NetIfaceDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
 																for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																	networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel := NetworkInterfaceNetworkInterfaceDHCPIPV6PoolType{}
+																	netIfaceDHCPIPV6PoolTypeModel := NetIfaceDHCPIPV6PoolType{}
 
 																	// data specToModelNested StringField --> EndIp
 																	if poolsElement.GetEndIp() != "" {
-																		networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																		netIfaceDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																	} else {
 																		// Empty string, set to null
-																		networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
+																		netIfaceDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
 																	}
 
 																	// data specToModelNested StringField --> StartIp
 																	if poolsElement.GetStartIp() != "" {
-																		networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																		netIfaceDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																	} else {
 																		// Empty string, set to null
-																		networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
+																		netIfaceDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
 																	}
 
-																	poolsElements = append(poolsElements, networkInterfaceNetworkInterfaceDHCPIPV6PoolTypeModel)
+																	poolsElements = append(poolsElements, netIfaceDHCPIPV6PoolTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3492,16 +3548,16 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = poolsListValue
+																netIfaceDHCPIPV6NetTypeModel.Pools = poolsListValue
 
 															} else {
 																// The source list is empty or nil.
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// Assign a null `types.ListValue`.
-																networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
+																netIfaceDHCPIPV6NetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
 															}
 
-															dhcpNetworksElements = append(dhcpNetworksElements, networkInterfaceNetworkInterfaceDHCPIPV6NetworkTypeModel)
+															dhcpNetworksElements = append(dhcpNetworksElements, netIfaceDHCPIPV6NetTypeModel)
 														}
 														// CASE 1: The target field is a `types.List` or an attribute map.
 														// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3683,7 +3739,7 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 										// data specToModelNested PointerField --> DnsConfig
 										if routerElement.GetDnsConfig() != nil {
 											// Create the nested Go struct
-											networkInterfaceNetworkInterfaceIPV6DnsConfigModel := &NetworkInterfaceNetworkInterfaceIPV6DnsConfig{}
+											netIfaceIPV6DnsConfigModel := &NetIfaceIPV6DnsConfig{}
 											dnsConfigElement := routerElement.GetDnsConfig()
 
 											// Recursively populate the nested struct
@@ -3853,18 +3909,18 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												networkInterfaceNetworkInterfaceIPV6DnsConfigModel.DnsChoice = finalObj
+												netIfaceIPV6DnsConfigModel.DnsChoice = finalObj
 											} else {
-												networkInterfaceNetworkInterfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+												netIfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											networkInterfaceNetworkInterfaceIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, networkInterfaceNetworkInterfaceIPV6DnsConfigModel)
+											netIfaceIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, netIfaceIPV6DnsConfigModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											routerAttributeMap["dns_config"] = networkInterfaceNetworkInterfaceIPV6DnsConfigModelObj
+											routerAttributeMap["dns_config"] = netIfaceIPV6DnsConfigModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -3973,10 +4029,10 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 
 										// data specToModelNested MapOfPointerField --> InterfaceIpMap
 										if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-											interfaceIpMapGoMap := make(map[string]NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+											interfaceIpMapGoMap := make(map[string]NetIfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 											for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-												interfaceIpMapItem := NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType{}
+												interfaceIpMapItem := NetIfaceStaticIpParametersNodeType{}
 
 												// data specToModelNested StringField --> DefaultGw
 												if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -4877,7 +4933,7 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 				// data specToModelNested RequiredPointerField --> StaticIp
 				if tunnelInterfaceElement.GetStaticIp() != nil {
 					// Create the nested Go struct
-					networkInterfaceNetworkInterfaceStaticIPParametersTypeModel := &NetworkInterfaceNetworkInterfaceStaticIPParametersType{}
+					netIfaceStaticIPParametersTypeModel := &NetIfaceStaticIPParametersType{}
 					staticIpElement := tunnelInterfaceElement.GetStaticIp()
 
 					// Recursively populate the nested struct
@@ -4907,10 +4963,10 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 
 								// data specToModelNested MapOfPointerField --> InterfaceIpMap
 								if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-									interfaceIpMapGoMap := make(map[string]NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+									interfaceIpMapGoMap := make(map[string]NetIfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 									for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-										interfaceIpMapItem := NetworkInterfaceNetworkInterfaceStaticIpParametersNodeType{}
+										interfaceIpMapItem := NetIfaceStaticIpParametersNodeType{}
 
 										// data specToModelNested StringField --> DefaultGw
 										if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -5008,18 +5064,18 @@ func (d *DataSourceF5XCNetworkInterface) Read(ctx context.Context, request datas
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						networkInterfaceNetworkInterfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
+						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
 					} else {
-						networkInterfaceNetworkInterfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
+						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					networkInterfaceNetworkInterfaceStaticIPParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpModelAttributeMap, networkInterfaceNetworkInterfaceStaticIPParametersTypeModel)
+					netIfaceStaticIPParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpModelAttributeMap, netIfaceStaticIPParametersTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					tunnelInterfaceAttributeMap["static_ip"] = networkInterfaceNetworkInterfaceStaticIPParametersTypeModelObj
+					tunnelInterfaceAttributeMap["static_ip"] = netIfaceStaticIPParametersTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).

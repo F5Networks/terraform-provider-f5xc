@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCMaliciousUserMitigation_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-mum-" + acctest.RandString(t, 8)
+	name := "example-mum-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckMaliciousUserMitigationDestroyProducer(t),
@@ -39,30 +39,34 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCMaliciousUserMitigationConfig_basic("example-mum", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCMaliciousUserMitigation_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-mum-" + acctest.RandString(t, 8)
+	name := "example-mum-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +101,7 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCMaliciousUserMitigation_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-mum-" + acctest.RandString(t, 8)
+	name := "example-mum-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_withAnnotations(t *testing.T
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,10 +136,10 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_withAnnotations(t *testing.T
 func TestAccResourceAutoF5XCMaliciousUserMitigation_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-mum-" + acctest.RandString(t, 8)
+	name := "example-mum-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckMaliciousUserMitigationDestroyProducer(t),
@@ -144,24 +148,28 @@ func TestAccResourceAutoF5XCMaliciousUserMitigation_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCMaliciousUserMitigationConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_malicious_user_mitigation.test",
+				ResourceName:                         "f5xc_malicious_user_mitigation.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_malicious_user_mitigation.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCMaliciousUserMitigationConfig_full("example-mum", "default"),
+		})
 }
 
 func testAccCheckMaliciousUserMitigationDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -170,10 +178,10 @@ func testAccCheckMaliciousUserMitigationDestroyProducer(t *testing.T) func(*terr
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test malicious user mitigation"
+  description = "Basic malicious user mitigation example"
 
   mitigation_type = {
     rules = [
@@ -197,10 +205,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test malicious user mitigation updated"
+  description = "Updated basic malicious user mitigation example"
 
   mitigation_type = {
     rules = [
@@ -236,10 +244,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Malicious user mitigation with labels"
+  description = "Malicious user mitigation example with labels"
 
   mitigation_type = {
     rules = [
@@ -259,7 +267,7 @@ resource "f5xc_malicious_user_mitigation" "test" {
   }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -267,10 +275,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Malicious user mitigation with labels updated"
+  description = "Updated malicious user mitigation example with labels"
 
   mitigation_type = {
     rules = [
@@ -290,7 +298,7 @@ resource "f5xc_malicious_user_mitigation" "test" {
   }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 }
@@ -299,10 +307,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Malicious user mitigation with annotations"
+  description = "Malicious user mitigation example with annotations"
 
   mitigation_type = {
     rules = [
@@ -330,10 +338,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Malicious user mitigation with annotations updated"
+  description = "Updated malicious user mitigation example with annotations"
 
   mitigation_type = {
     rules = [
@@ -353,7 +361,7 @@ resource "f5xc_malicious_user_mitigation" "test" {
   }
 
   annotations = {
-    owner = "security-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)
@@ -361,10 +369,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full malicious user mitigation"
+  description = "Full malicious user mitigation example"
 
   mitigation_type = {
     rules = [
@@ -408,7 +416,7 @@ resource "f5xc_malicious_user_mitigation" "test" {
   }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -420,10 +428,10 @@ resource "f5xc_malicious_user_mitigation" "test" {
 
 func testAccResourceAutoF5XCMaliciousUserMitigationConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_malicious_user_mitigation" "test" {
+resource "f5xc_malicious_user_mitigation" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full malicious user mitigation updated"
+  description = "Updated full malicious user mitigation example"
 
   mitigation_type = {
     rules = [
@@ -467,12 +475,12 @@ resource "f5xc_malicious_user_mitigation" "test" {
   }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 
   annotations = {
-    owner = "security-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)

@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -149,6 +150,7 @@ type GlobalLogReceiverSecretType struct {
 type GlobalLogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type GlobalLogReceiverBlindfoldSecretInfo struct {
@@ -581,6 +583,7 @@ var GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOne
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -698,6 +701,7 @@ var GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofModelAt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -831,6 +835,7 @@ var GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -925,6 +930,7 @@ var GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableK
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1131,6 +1137,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOn
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1175,6 +1182,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneof
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1313,6 +1321,7 @@ var GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyU
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1493,6 +1502,7 @@ var GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKey
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1554,6 +1564,7 @@ var GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofModelAttribute
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1724,6 +1735,7 @@ var GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1961,6 +1973,7 @@ var GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2048,6 +2061,7 @@ var GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2106,6 +2120,7 @@ var GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofModelAttributeMa
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2134,8 +2149,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
+		MarkdownDescription: "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
+		Description:         "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2406,14 +2421,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
 							},
 							"aws_region": schema.StringAttribute{
 								Description:         "AWS Region AWS Region Name",
-								MarkdownDescription: "AWS Region AWS Region Name",
+								MarkdownDescription: "AWS Region AWS Region Name<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2641,6 +2656,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -2664,6 +2680,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2716,6 +2733,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -2942,6 +2969,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -2965,6 +2993,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3017,6 +3046,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -3287,6 +3326,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -3310,6 +3350,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3362,6 +3403,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -3529,6 +3580,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
@@ -3552,6 +3604,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3604,6 +3657,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -3963,7 +4026,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -4015,6 +4078,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
@@ -4038,6 +4102,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4092,16 +4157,27 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																	},
 																},
 															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
+																},
+															},
 														},
 													},
 												},
 											},
 											"user_name": schema.StringAttribute{
 												Description:         "username HTTP Basic Auth User Name",
-												MarkdownDescription: "username HTTP Basic Auth User Name<br>**Validation:** `Length LengthAtMost(64)`",
+												MarkdownDescription: "username HTTP Basic Auth User Name<br>**Validation:** `Length LengthAtMost(64)`<br>**Default:** ``",
 												Required:            false,
 												Optional:            true,
-												Computed:            false,
+												Computed:            true,
+												Default:             stringdefault.StaticString(""),
 												Validators: []validator.String{
 													stringvalidator.LengthAtMost(64),
 												},
@@ -4142,6 +4218,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
@@ -4165,6 +4242,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4217,6 +4295,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			),
 																		},
 																	},
+																},
+															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
 																},
 															},
 														},
@@ -4519,6 +4607,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
@@ -4542,6 +4631,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4594,6 +4684,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -5023,6 +5123,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
@@ -5046,6 +5147,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5098,6 +5200,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -5208,6 +5320,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -5231,6 +5344,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5283,6 +5397,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -5625,6 +5749,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
@@ -5648,6 +5773,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5700,6 +5826,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -5834,14 +5970,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
 							},
 							"aws_region": schema.StringAttribute{
 								Description:         "AWS Region AWS Region Name",
-								MarkdownDescription: "AWS Region AWS Region Name",
+								MarkdownDescription: "AWS Region AWS Region Name<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -6292,6 +6428,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -6315,6 +6452,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6367,6 +6505,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -6499,6 +6647,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
@@ -6522,6 +6671,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6574,6 +6724,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -6684,6 +6844,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -6707,6 +6868,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6759,6 +6921,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -6831,9 +7003,17 @@ func (r *ResourceF5XCGlobalLogReceiver) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCGlobalLogReceiverModel
 
 	// Read Terraform plan data into the model
@@ -6841,6 +7021,17 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCGlobalLogReceiverModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -7299,6 +7490,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -7523,6 +7721,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -7790,6 +7995,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !datadogApiKeySecretInfoChoiceModel.None.IsNull() && !datadogApiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						datadogApiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -7967,6 +8179,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -8345,6 +8564,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwordSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -8352,6 +8578,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					// resource modelToSpecNested StringField --> UserName
 					if !globalLogReceiverAuthBasicModel.UserName.IsNull() && !globalLogReceiverAuthBasicModel.UserName.IsUnknown() {
 						authBasicOneOfSpec.AuthBasic.UserName = string(globalLogReceiverAuthBasicModel.UserName.ValueString())
+					} else {
+						authBasicOneOfSpec.AuthBasic.UserName = ""
 					}
 
 				}
@@ -8442,6 +8670,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								tokenSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -8730,6 +8965,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -9106,6 +9348,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -9247,6 +9496,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -9568,6 +9824,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -10071,6 +10334,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !splunkHecTokenSecretInfoChoiceModel.None.IsNull() && !splunkHecTokenSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						splunkHecTokenSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -10226,6 +10496,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -10369,6 +10646,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -10379,7 +10663,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -10402,7 +10686,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_global_log_receiver.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "global_log_receiver", err),
 		)
 		return
 	}
@@ -11211,6 +11495,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -11637,6 +11930,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -12142,6 +12444,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -12445,6 +12756,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -13196,6 +13516,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -13234,12 +13563,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -13370,6 +13695,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 										} else {
 											tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -13908,6 +14242,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -14623,6 +14966,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -14934,6 +15286,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							} else {
 								apiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -15511,6 +15872,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -16518,6 +16888,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -16771,6 +17150,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -17086,6 +17474,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -17207,7 +17604,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "global_log_receiver", err),
 		)
 		return
 	}
@@ -17410,7 +17807,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.FilterChoice = types.ObjectNull(GlobalLogReceiverFilterChoiceModelAttributeMap)
+
+		if data.FilterChoice.IsNull() || data.FilterChoice.IsUnknown() || ((data.FilterChoice.Attributes()["ns_all"].IsNull() || data.FilterChoice.Attributes()["ns_all"].IsUnknown()) && (data.FilterChoice.Attributes()["ns_current"].IsNull() || data.FilterChoice.Attributes()["ns_current"].IsUnknown()) && (data.FilterChoice.Attributes()["ns_list"].(types.Object).IsNull() || data.FilterChoice.Attributes()["ns_list"].(types.Object).IsUnknown() || (data.FilterChoice.Attributes()["ns_list"].(types.Object).Attributes()["namespaces"].IsNull() || data.FilterChoice.Attributes()["ns_list"].(types.Object).Attributes()["namespaces"].IsUnknown()))) {
+			data.FilterChoice = types.ObjectValueMust(GlobalLogReceiverFilterChoiceModelAttributeMap, map[string]attr.Value{
+				"ns_all":     types.BoolNull(),
+				"ns_current": types.BoolValue(true),
+				"ns_list":    types.ObjectNull(GlobalLogReceiverFilterChoiceNsListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogType
@@ -17499,7 +17903,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					requestLogsAttributeMap["sampling_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					requestLogsAttributeMap["sampling_choice"] = types.ObjectNull(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap)
+					requestLogsAttributeMap["sampling_choice"] = types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap, map[string]attr.Value{
+						"sampled":   types.BoolValue(true),
+						"unsampled": types.BoolNull(),
+					})
 				}
 
 				requestLogsObj, requestLogsObjDiags := types.ObjectValue(GlobalLogReceiverLogTypeRequestLogsModelAttributeMap, requestLogsAttributeMap)
@@ -17541,7 +17948,20 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogTypeChoice = types.ObjectNull(GlobalLogReceiverLogTypeModelAttributeMap)
+
+		if data.LogTypeChoice.IsNull() || data.LogTypeChoice.IsUnknown() || ((data.LogTypeChoice.Attributes()["audit_logs"].IsNull() || data.LogTypeChoice.Attributes()["audit_logs"].IsUnknown()) && (data.LogTypeChoice.Attributes()["dns_logs"].IsNull() || data.LogTypeChoice.Attributes()["dns_logs"].IsUnknown()) && (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).IsUnknown() || (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).IsUnknown() || ((data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["sampled"].IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["sampled"].IsUnknown()) && (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["unsampled"].IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["unsampled"].IsUnknown())))) && (data.LogTypeChoice.Attributes()["security_events"].IsNull() || data.LogTypeChoice.Attributes()["security_events"].IsUnknown())) {
+			data.LogTypeChoice = types.ObjectValueMust(GlobalLogReceiverLogTypeModelAttributeMap, map[string]attr.Value{
+				"audit_logs": types.BoolNull(),
+				"dns_logs":   types.BoolNull(),
+				"request_logs": types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsModelAttributeMap, map[string]attr.Value{
+					"sampling_choice": types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap, map[string]attr.Value{
+						"sampled":   types.BoolValue(true),
+						"unsampled": types.BoolNull(),
+					}),
+				}),
+				"security_events": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> Receiver
@@ -17857,7 +18277,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18014,6 +18438,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -18334,7 +18767,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18454,6 +18891,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -18849,7 +19295,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18969,6 +19419,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								datadogApiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -19146,7 +19605,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -19288,6 +19750,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -19364,7 +19835,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -19488,7 +19962,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					datadogReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					datadogReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceModelAttributeMap)
+					datadogReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				datadogReceiverObj, datadogReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverDatadogReceiverModelAttributeMap, datadogReceiverAttributeMap)
@@ -19752,7 +20229,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -20049,6 +20530,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20099,12 +20589,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -20237,6 +20723,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20313,7 +20808,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					httpReceiverAttributeMap["auth_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpReceiverAttributeMap["auth_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceModelAttributeMap)
+					httpReceiverAttributeMap["auth_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverAuthChoiceModelAttributeMap, map[string]attr.Value{
+						"auth_basic": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap),
+						"auth_none":  types.BoolValue(true),
+						"auth_token": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> Batch
@@ -20548,7 +21047,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -20645,7 +21148,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -20787,6 +21293,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -20863,7 +21378,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -20987,7 +21505,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					httpReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceModelAttributeMap)
+					httpReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Uri
@@ -21265,7 +21786,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -21370,7 +21895,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -21512,6 +22040,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -21588,7 +22125,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -21712,7 +22252,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					kafkaReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					kafkaReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceModelAttributeMap)
+					kafkaReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				kafkaReceiverObj, kafkaReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverKafkaReceiverModelAttributeMap, kafkaReceiverAttributeMap)
@@ -21837,6 +22380,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -21931,7 +22483,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					newRelicReceiverAttributeMap["endpoint_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					newRelicReceiverAttributeMap["endpoint_choice"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverEndpointChoiceModelAttributeMap)
+					newRelicReceiverAttributeMap["endpoint_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverNewRelicReceiverEndpointChoiceModelAttributeMap, map[string]attr.Value{
+						"eu": types.BoolNull(),
+						"us": types.BoolValue(true),
+					})
 				}
 
 				newRelicReceiverObj, newRelicReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverNewRelicReceiverModelAttributeMap, newRelicReceiverAttributeMap)
@@ -22187,7 +22742,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -22284,7 +22843,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -22426,6 +22988,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -22502,7 +23073,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -22626,7 +23200,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					qradarReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					qradarReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceModelAttributeMap)
+					qradarReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Uri
@@ -22956,7 +23533,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -23313,7 +23894,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -23443,6 +24028,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -23568,7 +24162,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -23710,6 +24307,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -23786,7 +24392,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -23910,7 +24519,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					splunkReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					splunkReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceModelAttributeMap)
+					splunkReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				splunkReceiverObj, splunkReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverSplunkReceiverModelAttributeMap, splunkReceiverAttributeMap)
@@ -24035,6 +24647,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -24132,6 +24753,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCGlobalLogReceiverModel
@@ -24141,6 +24768,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planReceiverChoice := data.ReceiverChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -24160,7 +24788,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planReceiverChoice := data.ReceiverChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -24618,6 +25250,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -24842,6 +25481,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -25109,6 +25755,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !datadogApiKeySecretInfoChoiceModel.None.IsNull() && !datadogApiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						datadogApiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -25286,6 +25939,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -25664,6 +26324,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwordSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -25671,6 +26338,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					// resource modelToSpecNested StringField --> UserName
 					if !globalLogReceiverAuthBasicModel.UserName.IsNull() && !globalLogReceiverAuthBasicModel.UserName.IsUnknown() {
 						authBasicOneOfSpec.AuthBasic.UserName = string(globalLogReceiverAuthBasicModel.UserName.ValueString())
+					} else {
+						authBasicOneOfSpec.AuthBasic.UserName = ""
 					}
 
 				}
@@ -25761,6 +26430,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								tokenSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -26049,6 +26725,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -26425,6 +27108,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -26566,6 +27256,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -26887,6 +27584,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -27390,6 +28094,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !splunkHecTokenSecretInfoChoiceModel.None.IsNull() && !splunkHecTokenSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						splunkHecTokenSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -27545,6 +28256,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -27688,6 +28406,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -27698,7 +28423,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -27714,7 +28439,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_global_log_receiver.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "global_log_receiver", err),
 		)
 		return
 	}
@@ -27723,7 +28448,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "global_log_receiver", err),
 		)
 		return
 	}
@@ -28531,6 +29256,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -28957,6 +29691,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -29462,6 +30205,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -29765,6 +30517,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -30516,6 +31277,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -30554,12 +31324,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -30690,6 +31456,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 										} else {
 											tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -31228,6 +32003,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -31943,6 +32727,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -32254,6 +33047,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							} else {
 								apiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -32831,6 +33633,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -33838,6 +34649,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -34091,6 +34911,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -34406,6 +35235,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -34503,7 +35341,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	}
 	// Restore plan value for ReceiverChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.ReceiverChoice = planReceiverChoice
+	data.ReceiverChoice = utils.ResolveUnknowns(planReceiverChoice, data.ReceiverChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -34551,7 +35389,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "global_log_receiver", err),
 		)
 		return
 	}

@@ -39,6 +39,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -50,6 +51,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_cluster "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cluster"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -292,8 +294,7 @@ type OriginPoolPublicIp struct {
 }
 
 type OriginPoolPublicIpChoice struct {
-	Ip   types.String `tfsdk:"ip"`
-	Ipv6 types.String `tfsdk:"ipv6"`
+	Ip types.String `tfsdk:"ip"`
 }
 
 type OriginPoolPublicName struct {
@@ -375,6 +376,7 @@ type OriginPoolSecretType struct {
 type OriginPoolSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type OriginPoolBlindfoldSecretInfo struct {
@@ -1160,8 +1162,7 @@ var OriginPoolOriginServersChoicePublicIpModelAttributeMap = map[string]attr.Typ
 // Attribute map for RequiredOneOfField --> PublicIpChoice
 var OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
+	"ip": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> PublicName
@@ -1349,6 +1350,7 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInf
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1476,8 +1478,8 @@ func (r *ResourceF5XCOriginPool) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
+		MarkdownDescription: "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck",
+		Description:         "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects cluster endpoints healthcheck",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1894,50 +1896,55 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"base_ejection_time": schema.Int64Attribute{
 										Description:         "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
-										MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
+										MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1800000),
 										},
 									},
 									"consecutive_5xx": schema.Int64Attribute{
 										Description:         "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
-										MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
+										MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1024),
 										},
 									},
 									"consecutive_gateway_failure": schema.Int64Attribute{
 										Description:         "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
-										MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
+										MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1024),
 										},
 									},
 									"interval": schema.Int64Attribute{
 										Description:         "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
-										MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
+										MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(600000),
 										},
 									},
 									"max_ejection_percent": schema.Int64Attribute{
 										Description:         "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
-										MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
+										MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(100),
 										},
@@ -2225,7 +2232,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -2389,7 +2396,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2422,7 +2429,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2478,7 +2485,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -2543,7 +2550,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2636,8 +2643,8 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?/[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?$`),
-															"must be a valid F5XC service namespace name (namespace/name)",
+															regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)?(:[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)?$`),
+															"must be a valid F5XC service name (servicename[.namespace][:cluster-id])",
 														),
 													},
 												},
@@ -2691,7 +2698,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2724,7 +2731,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2780,7 +2787,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -2879,7 +2886,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -2975,7 +2982,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3008,7 +3015,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3064,7 +3071,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -3170,7 +3177,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -3239,7 +3246,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3272,7 +3279,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3328,7 +3335,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -3374,7 +3381,6 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Validators: []validator.Object{
 												exactlyoneofvalidator.RequiredExactlyOneOf(
 													"ip",
-													"ipv6",
 												),
 											},
 											Attributes: map[string]schema.Attribute{
@@ -3388,19 +3394,6 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														stringvalidator.RegexMatches(
 															regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 															"must be a valid IPv4 address",
-														),
-													},
-												},
-												"ipv6": schema.StringAttribute{
-													Description:         "IPV6 Public IPV6 address",
-													MarkdownDescription: "IPV6 Public IPV6 address",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.String{
-														stringvalidator.RegexMatches(
-															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-															"must be a valid IPv6 address",
 														),
 													},
 												},
@@ -3480,7 +3473,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -3570,7 +3563,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -3813,6 +3806,8 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+																				listvalidator.SizeBetween(1, 4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																	},
@@ -3856,6 +3851,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																		exactlyoneofvalidator.RequiredExactlyOneOf(
 																			"blindfold_secret_info",
 																			"clear_secret_info",
+																			"none",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
@@ -3879,6 +3875,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
+																					WriteOnly:           true,
 																					Validators: []validator.String{
 																						stringvalidator.RegexMatches(
 																							regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3933,6 +3930,16 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																				},
 																			},
 																		},
+																		"none": schema.BoolAttribute{
+																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																			Validators: []validator.Bool{
+																				boolvalidator.Equals(true),
+																			},
+																		},
 																	},
 																},
 															},
@@ -3970,7 +3977,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -4049,7 +4056,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -4161,7 +4168,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												Attributes: map[string]schema.Attribute{
 													"cipher_suites": schema.ListAttribute{
 														Description:         "cipher_suites The TLS listener will only support the specified cipher list.",
-														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.",
+														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 														ElementType:         types.StringType,
 														Required:            true,
 														Optional:            false,
@@ -4343,9 +4350,17 @@ func (r *ResourceF5XCOriginPool) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCOriginPoolModel
 
 	// Read Terraform plan data into the model
@@ -4353,6 +4368,17 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCOriginPoolModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.TlsChoice.IsNull() && !configData.TlsChoice.IsUnknown() {
+		data.TlsChoice = configData.TlsChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -4721,26 +4747,36 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					// resource modelToSpecNested UintField --> BaseEjectionTime
 					if !originPoolOutlierDetectionModel.BaseEjectionTime.IsNull() && !originPoolOutlierDetectionModel.BaseEjectionTime.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(uint32(originPoolOutlierDetectionModel.BaseEjectionTime.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Consecutive_5Xx
 					if !originPoolOutlierDetectionModel.Consecutive_5Xx.IsNull() && !originPoolOutlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(uint32(originPoolOutlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 					if !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(uint32(originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Interval
 					if !originPoolOutlierDetectionModel.Interval.IsNull() && !originPoolOutlierDetectionModel.Interval.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(uint32(originPoolOutlierDetectionModel.Interval.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> MaxEjectionPercent
 					if !originPoolOutlierDetectionModel.MaxEjectionPercent.IsNull() && !originPoolOutlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(uint32(originPoolOutlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(0)
 					}
 
 				}
@@ -5959,13 +5995,6 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipSpecStr
 						}
 
-						// resource modelToSpecNested StringOfOneOfField --> Ipv6
-						if !publicIpPublicIpChoiceModel.Ipv6.IsNull() && !publicIpPublicIpChoiceModel.Ipv6.IsUnknown() {
-							ipv6SpecStr := &ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6{}
-							ipv6SpecStr.Ipv6 = string(publicIpPublicIpChoiceModel.Ipv6.ValueString())
-							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipv6SpecStr
-						}
-
 					}
 
 				}
@@ -6105,6 +6134,13 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				response.Diagnostics.Append(diags...)
 				if response.Diagnostics.HasError() {
 					return
+				}
+				delete(mapOfString, "ves.io/config-propagation-destination")
+				delete(mapOfString, "ves.io/app_type")
+				delete(mapOfString, "ves.io/api-scope")
+				delete(mapOfString, "ves.io/provider")
+				if len(mapOfString) == 0 {
+					mapOfString = nil
 				}
 
 				originServersSpec[i].Labels = mapOfString
@@ -6389,6 +6425,13 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(originPoolClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -6697,7 +6740,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6720,7 +6763,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_origin_pool.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "origin_pool", err),
 		)
 		return
 	}
@@ -7719,14 +7762,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -9428,16 +9469,6 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -9721,15 +9752,16 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-				// They will be picked up during the next Read.
-				filteredMap := make(map[string]string)
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
 				for k, v := range originServersElement.GetLabels() {
-					if !strings.HasPrefix(k, "ves.io/") {
-						filteredMap[k] = v
-					}
+					filteredMap[k] = v
 				}
-
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
 				if len(filteredMap) > 0 {
 					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
@@ -10158,6 +10190,15 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 												} else {
 													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -10804,7 +10845,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "origin_pool", err),
 		)
 		return
 	}
@@ -11021,7 +11062,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap, map[string]attr.Value{
+				"circuit_breaker":         types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap),
+				"default_circuit_breaker": types.BoolValue(true),
+				"disable_circuit_breaker": types.BoolNull(),
+			})
 		}
 
 		// resource specToModelNested UintField --> ConnectionTimeout
@@ -11131,7 +11176,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
+							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, map[string]attr.Value{
+								"default_header_transformation":       types.BoolNull(),
+								"legacy_header_transformation":        types.BoolValue(true),
+								"preserve_case_header_transformation": types.BoolNull(),
+								"proper_case_header_transformation":   types.BoolNull(),
+							})
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
@@ -11203,7 +11253,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap, map[string]attr.Value{
+				"auto_http_config": types.BoolValue(true),
+				"http1_config":     types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap),
+				"http2_options":    types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested OneOfField --> LbSourceIpPersistanceChoice
@@ -11299,7 +11353,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap, map[string]attr.Value{
+				"max_requests_per_connection":     types.Int64Null(),
+				"no_request_limit_per_connection": types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> OutlierDetectionChoice
@@ -11374,7 +11431,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_outlier_detection": types.BoolValue(true),
+				"outlier_detection":         types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> PanicThresholdType
@@ -11423,7 +11483,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap, map[string]attr.Value{
+				"no_panic_threshold": types.BoolValue(true),
+				"panic_threshold":    types.Int64Null(),
+			})
 		}
 
 		// resource specToModelNested OneOfField --> ProxyProtocolChoice
@@ -11635,7 +11698,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 						enableSubsetsAttributeMap["fallback_policy_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap)
+						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectValueMust(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap, map[string]attr.Value{
+							"any_endpoint":   types.BoolValue(true),
+							"default_subset": types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap),
+							"fail_request":   types.BoolNull(),
+						})
 					}
 
 					enableSubsetsObj, enableSubsetsObjDiags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap, enableSubsetsAttributeMap)
@@ -11665,7 +11732,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_subsets": types.BoolValue(true),
+				"enable_subsets":  types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap),
+			})
 		}
 
 		advancedOptionsObj, advancedOptionsDiags := utils.GoStructToObjectValue(
@@ -11803,14 +11873,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.State.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -11931,7 +11999,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							consulServiceAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							consulServiceAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap)
+							consulServiceAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested RequiredStringField --> ServiceName
@@ -12347,7 +12418,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							k8sServiceAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							k8sServiceAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap)
+							k8sServiceAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"vk8s_networks":   types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested EnumField --> Protocol
@@ -12775,7 +12850,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							privateIpAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							privateIpAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap)
+							privateIpAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"segment":         types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested RequiredOneOfField --> PrivateIpChoice
@@ -13205,7 +13284,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							privateNameAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							privateNameAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap)
+							privateNameAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"segment":         types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested UintField --> RefreshInterval
@@ -13512,16 +13595,6 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -13805,10 +13878,18 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// READ operation: keep backend-injected keys so they enter the state.
-				// Optional+Computed: preserve null when API returns an empty map.
-				if len(originServersElement.GetLabels()) > 0 {
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(originServersElement.GetLabels())
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
+				for k, v := range originServersElement.GetLabels() {
+					filteredMap[k] = v
+				}
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
+				if len(filteredMap) > 0 {
+					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
 					if response.Diagnostics.HasError() {
 						return
@@ -13900,7 +13981,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.PortChoice = types.ObjectNull(OriginPoolPortChoiceModelAttributeMap)
+
+		if data.PortChoice.IsNull() || data.PortChoice.IsUnknown() || ((data.PortChoice.Attributes()["automatic_port"].IsNull() || data.PortChoice.Attributes()["automatic_port"].IsUnknown()) && (data.PortChoice.Attributes()["lb_port"].IsNull() || data.PortChoice.Attributes()["lb_port"].IsUnknown()) && (data.PortChoice.Attributes()["port"].IsNull() || data.PortChoice.Attributes()["port"].IsUnknown())) {
+			data.PortChoice = types.ObjectValueMust(OriginPoolPortChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic_port": types.BoolNull(),
+				"lb_port":        types.BoolNull(),
+				"port":           types.Int64Value(443),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> TlsChoice
@@ -13990,7 +14078,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["max_session_keys_type_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["max_session_keys_type_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap)
+					useTlsAttributeMap["max_session_keys_type_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap, map[string]attr.Value{
+						"default_session_key_caching": types.BoolValue(true),
+						"disable_session_key_caching": types.BoolNull(),
+						"max_session_keys":            types.Int64Null(),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -14237,6 +14329,15 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -14377,7 +14478,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["mtls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["mtls_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+					useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_mtls":      types.BoolValue(true),
+						"use_mtls":     types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap),
+						"use_mtls_obj": types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
@@ -14531,7 +14636,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["server_validation_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
+					useTlsAttributeMap["server_validation_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap, map[string]attr.Value{
+						"skip_server_verification": types.BoolNull(),
+						"use_server_verification":  types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap),
+						"volterra_trusted_ca":      types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> SniChoice
@@ -14589,7 +14698,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["sni_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["sni_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap)
+					useTlsAttributeMap["sni_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_sni":            types.BoolNull(),
+						"sni":                    types.StringNull(),
+						"use_host_header_as_sni": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredPointerField --> TlsConfig
@@ -14721,7 +14834,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 						originPoolTlsConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						originPoolTlsConfigModel.Choice = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap)
+						originPoolTlsConfigModel.Choice = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+							"custom_security":  types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap),
+							"default_security": types.BoolValue(true),
+							"low_security":     types.BoolNull(),
+							"medium_security":  types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -14738,8 +14856,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					useTlsAttributeMap["tls_config"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap)
+					useTlsAttributeMap["tls_config"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap, map[string]attr.Value{
+						"choice": types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+							"custom_security":  types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap),
+							"default_security": types.BoolValue(true),
+							"low_security":     types.BoolNull(),
+							"medium_security":  types.BoolNull(),
+						}),
+					})
 				}
 
 				useTlsObj, useTlsObjDiags := types.ObjectValue(OriginPoolTlsChoiceUseTlsModelAttributeMap, useTlsAttributeMap)
@@ -14772,7 +14896,13 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.TlsChoice = types.ObjectNull(OriginPoolTlsChoiceModelAttributeMap)
+
+		if data.TlsChoice.IsNull() || data.TlsChoice.IsUnknown() || ((data.TlsChoice.Attributes()["no_tls"].IsNull() || data.TlsChoice.Attributes()["no_tls"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["default_session_key_caching"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["default_session_key_caching"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["disable_session_key_caching"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["disable_session_key_caching"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["max_session_keys"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["max_session_keys"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["tls_certificates"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["tls_certificates"].IsUnknown())) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["name"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["name"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["namespace"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["tenant"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["tenant"].IsUnknown()))))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["skip_server_verification"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["skip_server_verification"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsUnknown())))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["volterra_trusted_ca"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["volterra_trusted_ca"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["disable_sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["disable_sni"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["sni"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["use_host_header_as_sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["use_host_header_as_sni"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsUnknown()))))))) {
+			data.TlsChoice = types.ObjectValueMust(OriginPoolTlsChoiceModelAttributeMap, map[string]attr.Value{
+				"no_tls":  types.BoolValue(true),
+				"use_tls": types.ObjectNull(OriginPoolTlsChoiceUseTlsModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> UpstreamConnPoolReuseType
@@ -14825,7 +14955,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
+			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+				"disable_conn_pool_reuse": types.BoolNull(),
+				"enable_conn_pool_reuse":  types.BoolValue(true),
+			})
 		}
 
 		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
@@ -14839,7 +14972,15 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		}
 		data.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeObj
 	} else {
-		data.UpstreamConnPoolReuseType = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap)
+
+		if data.UpstreamConnPoolReuseType.IsNull() || data.UpstreamConnPoolReuseType.IsUnknown() || (data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).IsUnknown() || ((data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["disable_conn_pool_reuse"].IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["disable_conn_pool_reuse"].IsUnknown()) && (data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["enable_conn_pool_reuse"].IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["enable_conn_pool_reuse"].IsUnknown()))) {
+			data.UpstreamConnPoolReuseType = types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap, map[string]attr.Value{
+				"map_downstream_to_upstream_conn_pool_type_choice": types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+					"disable_conn_pool_reuse": types.BoolNull(),
+					"enable_conn_pool_reuse":  types.BoolValue(true),
+				}),
+			})
+		}
 	}
 
 	// Restore prior state for TlsChoice. The API redacts sensitive fields
@@ -14857,6 +14998,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCOriginPoolModel
@@ -14866,6 +15013,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planTlsChoice := data.TlsChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -14885,7 +15033,11 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planTlsChoice := data.TlsChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.TlsChoice.IsNull() && !configData.TlsChoice.IsUnknown() {
+		data.TlsChoice = configData.TlsChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -15253,26 +15405,36 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					// resource modelToSpecNested UintField --> BaseEjectionTime
 					if !originPoolOutlierDetectionModel.BaseEjectionTime.IsNull() && !originPoolOutlierDetectionModel.BaseEjectionTime.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(uint32(originPoolOutlierDetectionModel.BaseEjectionTime.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Consecutive_5Xx
 					if !originPoolOutlierDetectionModel.Consecutive_5Xx.IsNull() && !originPoolOutlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(uint32(originPoolOutlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 					if !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(uint32(originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Interval
 					if !originPoolOutlierDetectionModel.Interval.IsNull() && !originPoolOutlierDetectionModel.Interval.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(uint32(originPoolOutlierDetectionModel.Interval.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> MaxEjectionPercent
 					if !originPoolOutlierDetectionModel.MaxEjectionPercent.IsNull() && !originPoolOutlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(uint32(originPoolOutlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(0)
 					}
 
 				}
@@ -16491,13 +16653,6 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipSpecStr
 						}
 
-						// resource modelToSpecNested StringOfOneOfField --> Ipv6
-						if !publicIpPublicIpChoiceModel.Ipv6.IsNull() && !publicIpPublicIpChoiceModel.Ipv6.IsUnknown() {
-							ipv6SpecStr := &ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6{}
-							ipv6SpecStr.Ipv6 = string(publicIpPublicIpChoiceModel.Ipv6.ValueString())
-							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipv6SpecStr
-						}
-
 					}
 
 				}
@@ -16637,6 +16792,13 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				response.Diagnostics.Append(diags...)
 				if response.Diagnostics.HasError() {
 					return
+				}
+				delete(mapOfString, "ves.io/config-propagation-destination")
+				delete(mapOfString, "ves.io/app_type")
+				delete(mapOfString, "ves.io/api-scope")
+				delete(mapOfString, "ves.io/provider")
+				if len(mapOfString) == 0 {
+					mapOfString = nil
 				}
 
 				originServersSpec[i].Labels = mapOfString
@@ -16921,6 +17083,13 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(originPoolClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -17229,7 +17398,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -17245,7 +17414,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_origin_pool.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "origin_pool", err),
 		)
 		return
 	}
@@ -17254,7 +17423,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "origin_pool", err),
 		)
 		return
 	}
@@ -18252,14 +18421,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -19961,16 +20128,6 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -20254,15 +20411,16 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-				// They will be picked up during the next Read.
-				filteredMap := make(map[string]string)
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
 				for k, v := range originServersElement.GetLabels() {
-					if !strings.HasPrefix(k, "ves.io/") {
-						filteredMap[k] = v
-					}
+					filteredMap[k] = v
 				}
-
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
 				if len(filteredMap) > 0 {
 					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
@@ -20691,6 +20849,15 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 												} else {
 													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -21313,7 +21480,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	}
 	// Restore plan value for TlsChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.TlsChoice = planTlsChoice
+	data.TlsChoice = utils.ResolveUnknowns(planTlsChoice, data.TlsChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -21351,8 +21518,26 @@ func (r *ResourceF5XCOriginPool) Delete(ctx context.Context, request resource.De
 	// Standard Delete Logic
 	opts := []vesapi.CallOpt{}
 	opts = append(opts, vesapi.WithFailIfReferred())
+	deleteFn := func() error {
+		return r.client.DeleteObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	}
 
-	err = r.client.DeleteObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	err = deleteFn()
+	if err != nil && strings.Contains(err.Error(), "is still being referred by") {
+		// The object is still referenced by a parent object (e.g. the user is deleting it
+		// and re-pointing the parent to another object in the same apply). Reactively
+		// detach it from any referring parents Terraform manages, then retry.
+		tflog.Info(ctx, fmt.Sprintf("[hook] origin_pool delete hit 409, attempting reactive unbind: %s", err))
+		if unbindErr := hook.OriginPoolUnbindReferencingObjects(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), err.Error()); unbindErr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("[hook] origin_pool reactive unbind failed: %s", unbindErr))
+		}
+		// Retry immediately: the unbind above (when it applies) removes the reference
+		// that caused the conflict, so there is nothing to gain from sleeping first.
+		err = deleteFn()
+	}
+	if err != nil {
+		err = utils.DeleteWithTransientRetry(ctx, "origin_pool", deleteFn)
+	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") || strings.Contains(err.Error(), "NotFound") {
@@ -21361,7 +21546,7 @@ func (r *ResourceF5XCOriginPool) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "origin_pool", err),
 		)
 		return
 	}

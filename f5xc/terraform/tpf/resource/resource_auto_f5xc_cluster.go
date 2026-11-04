@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -38,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -207,6 +209,7 @@ type ClusterSecretType struct {
 type ClusterSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type ClusterBlindfoldSecretInfo struct {
@@ -246,8 +249,6 @@ type ResourceF5XCClusterModel struct {
 	CircuitBreaker                 types.Object   `tfsdk:"circuit_breaker"`
 	ConnectionTimeout              types.Int64    `tfsdk:"connection_timeout"`
 	DefaultSubset                  types.Map      `tfsdk:"default_subset"`
-	DnsDiscoveryType               types.List     `tfsdk:"dns_discovery_type"`
-	DnsLookupFamily                types.List     `tfsdk:"dns_lookup_family"`
 	EndpointSelection              types.List     `tfsdk:"endpoint_selection"`
 	EndpointSubsets                types.List     `tfsdk:"endpoint_subsets"`
 	Endpoints                      types.List     `tfsdk:"endpoints"`
@@ -616,6 +617,7 @@ var ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -695,8 +697,8 @@ func (r *ResourceF5XCCluster) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
-		Description:         "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
+		MarkdownDescription: "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host<br>Cluster has list of references to Endpoint which forms the set<br>Cluster has common properties for this collection<br>* Reference to healthcheck object<br>* load balancer algorithm<br>* Circuit breaker based on<br>* Number of concurrent connections<br>* Outstanding requests<br>* Number of retries<br>* Subset of endpoints<br>* TLS parameter for the endpoints<br>* Protocol Timeouts",
+		Description:         "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host Cluster has list of references to Endpoint which forms the set Cluster has common properties for this collection Reference to healthcheck object load balancer algorithm Circuit breaker based on Number of concurrent connections Outstanding requests Number of retries Subset of endpoints TLS parameter for the endpoints Protocol Timeouts",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -830,10 +832,11 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"connection_timeout": schema.Int64Attribute{
 				Description:         "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
-				MarkdownDescription: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
+				MarkdownDescription: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             int64default.StaticInt64(0),
 				Validators: []validator.Int64{
 					int64validator.AtMost(600000),
 				},
@@ -851,32 +854,6 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				},
 				PlanModifiers: []planmodifier.Map{
 					mapplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"dns_discovery_type": schema.ListAttribute{
-				Description:         "dns_discovery_type Specifies how DNS resolution has to be done on members of cluster",
-				MarkdownDescription: "dns_discovery_type Specifies how DNS resolution has to be done on members of cluster<br>**Allowed Values (choose one):** `['LOGICAL_DNS', 'STRICT_DNS']`<br>**Default:** `STRICT_DNS`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("STRICT_DNS")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"LOGICAL_DNS", "STRICT_DNS"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
-			"dns_lookup_family": schema.ListAttribute{
-				Description:         "dns_lookup_family IP address family within which the DNS resolution is attempted. Default is AUTO mode",
-				MarkdownDescription: "dns_lookup_family IP address family within which the DNS resolution is attempted. Default is AUTO mode<br>**Allowed Values (choose one):** `['AUTO', 'V4_ONLY', 'V6_ONLY']`<br>**Default:** `AUTO`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTO")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTO", "V4_ONLY", "V6_ONLY"}...)),
-					listvalidator.SizeAtMost(1),
 				},
 			},
 			"endpoint_selection": schema.ListAttribute{
@@ -950,7 +927,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -1001,7 +978,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -1009,10 +986,11 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"http_idle_timeout": schema.Int64Attribute{
 				Description:         "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
-				MarkdownDescription: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
+				MarkdownDescription: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             int64default.StaticInt64(0),
 				Validators: []validator.Int64{
 					int64validator.AtMost(600000),
 				},
@@ -1139,34 +1117,25 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Description:         "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
 				MarkdownDescription: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.Object{
-					exactlyoneofvalidator.ExactlyOneOf(
-						"disable_lb_source_ip_persistance",
-						"enable_lb_source_ip_persistance",
-					),
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"disable_lb_source_ip_persistance": schema.BoolAttribute{
 						Description:         "disable_lb_source_ip_persistence Disable LB source IP persistence",
 						MarkdownDescription: "disable_lb_source_ip_persistence Disable LB source IP persistence",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
+						Optional:            false,
+						Computed:            true,
 					},
 					"enable_lb_source_ip_persistance": schema.BoolAttribute{
 						Description:         "enable_lb_source_ip_persistence Enable LB source IP persistence",
 						MarkdownDescription: "enable_lb_source_ip_persistence Enable LB source IP persistence",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
+						Optional:            false,
+						Computed:            true,
 					},
 				},
 			},
@@ -1227,50 +1196,55 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"base_ejection_time": schema.Int64Attribute{
 						Description:         "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
-						MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
+						MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1800000),
 						},
 					},
 					"consecutive_5xx": schema.Int64Attribute{
 						Description:         "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
-						MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
+						MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1024),
 						},
 					},
 					"consecutive_gateway_failure": schema.Int64Attribute{
 						Description:         "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
-						MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
+						MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1024),
 						},
 					},
 					"interval": schema.Int64Attribute{
 						Description:         "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
-						MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
+						MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(600000),
 						},
 					},
 					"max_ejection_percent": schema.Int64Attribute{
 						Description:         "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
-						MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
+						MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(100),
 						},
@@ -1510,7 +1484,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1518,7 +1492,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 									},
 									"cipher_suites": schema.ListAttribute{
 										Description:         "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
-										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
+										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 										ElementType:         types.StringType,
 										Required:            false,
 										Optional:            true,
@@ -1645,7 +1619,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -1698,7 +1672,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 								Attributes: map[string]schema.Attribute{
 									"cipher_suites": schema.ListAttribute{
 										Description:         "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
-										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
+										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 										ElementType:         types.StringType,
 										Required:            false,
 										Optional:            true,
@@ -1793,6 +1767,8 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																	Computed:            false,
 																	Validators: []validator.List{
 																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+																		listvalidator.SizeBetween(1, 4),
+																		listvalidator.UniqueValues(),
 																	},
 																},
 															},
@@ -1836,6 +1812,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																exactlyoneofvalidator.RequiredExactlyOneOf(
 																	"blindfold_secret_info",
 																	"clear_secret_info",
+																	"none",
 																),
 															},
 															Attributes: map[string]schema.Attribute{
@@ -1859,6 +1836,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
+																			WriteOnly:           true,
 																			Validators: []validator.String{
 																				stringvalidator.RegexMatches(
 																					regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1911,6 +1889,16 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																				),
 																			},
 																		},
+																	},
+																},
+																"none": schema.BoolAttribute{
+																	Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.Bool{
+																		boolvalidator.Equals(true),
 																	},
 																},
 															},
@@ -1987,7 +1975,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -2129,9 +2117,17 @@ func (r *ResourceF5XCCluster) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCClusterModel
 
 	// Read Terraform plan data into the model
@@ -2139,6 +2135,17 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCClusterModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.TlsParameters.IsNull() && !configData.TlsParameters.IsUnknown() {
+		data.TlsParameters = configData.TlsParameters
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2617,26 +2624,36 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			// resource modelToSpecNested UintField --> BaseEjectionTime
 			if !outlierDetectionModel.BaseEjectionTime.IsNull() && !outlierDetectionModel.BaseEjectionTime.IsUnknown() {
 				outlierDetectionSpec.BaseEjectionTime = uint32(uint32(outlierDetectionModel.BaseEjectionTime.ValueInt64()))
+			} else {
+				outlierDetectionSpec.BaseEjectionTime = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Consecutive_5Xx
 			if !outlierDetectionModel.Consecutive_5Xx.IsNull() && !outlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 				outlierDetectionSpec.Consecutive_5Xx = uint32(uint32(outlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Consecutive_5Xx = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 			if !outlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !outlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(uint32(outlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+			} else {
+				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Interval
 			if !outlierDetectionModel.Interval.IsNull() && !outlierDetectionModel.Interval.IsUnknown() {
 				outlierDetectionSpec.Interval = uint32(uint32(outlierDetectionModel.Interval.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Interval = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> MaxEjectionPercent
 			if !outlierDetectionModel.MaxEjectionPercent.IsNull() && !outlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 				outlierDetectionSpec.MaxEjectionPercent = uint32(uint32(outlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+			} else {
+				outlierDetectionSpec.MaxEjectionPercent = uint32(0)
 			}
 
 		}
@@ -3240,6 +3257,13 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -3394,7 +3418,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3417,7 +3441,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cluster.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cluster", err),
 		)
 		return
 	}
@@ -3586,7 +3610,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -3607,46 +3631,11 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -3709,14 +3698,12 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -3771,14 +3758,12 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -3850,21 +3835,19 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -5028,6 +5011,15 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -5400,7 +5392,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cluster", err),
 		)
 		return
 	}
@@ -5569,7 +5561,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -5590,46 +5582,11 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -5692,14 +5649,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.State.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -5754,14 +5709,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.State.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -5833,21 +5786,19 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.State.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -5954,7 +5905,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
+						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectValueMust(ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, map[string]attr.Value{
+							"default_header_transformation":       types.BoolNull(),
+							"legacy_header_transformation":        types.BoolValue(true),
+							"preserve_case_header_transformation": types.BoolNull(),
+							"proper_case_header_transformation":   types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -6356,7 +6312,11 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = types.ObjectNull(ClusterTlsParametersMaxSessionKeysTypeModelAttributeMap)
+			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = types.ObjectValueMust(ClusterTlsParametersMaxSessionKeysTypeModelAttributeMap, map[string]attr.Value{
+				"default_session_key_caching": types.BoolValue(true),
+				"disable_session_key_caching": types.BoolNull(),
+				"max_session_keys":            types.Int64Null(),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> SniChoice
@@ -7011,6 +6971,15 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -7327,7 +7296,10 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
+			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectValueMust(ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+				"disable_conn_pool_reuse": types.BoolNull(),
+				"enable_conn_pool_reuse":  types.BoolValue(true),
+			})
 		}
 
 		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
@@ -7359,6 +7331,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCClusterModel
@@ -7368,6 +7346,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planTlsParameters := data.TlsParameters
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -7387,7 +7366,11 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planTlsParameters := data.TlsParameters
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.TlsParameters.IsNull() && !configData.TlsParameters.IsUnknown() {
+		data.TlsParameters = configData.TlsParameters
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -7865,26 +7848,36 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			// resource modelToSpecNested UintField --> BaseEjectionTime
 			if !outlierDetectionModel.BaseEjectionTime.IsNull() && !outlierDetectionModel.BaseEjectionTime.IsUnknown() {
 				outlierDetectionSpec.BaseEjectionTime = uint32(uint32(outlierDetectionModel.BaseEjectionTime.ValueInt64()))
+			} else {
+				outlierDetectionSpec.BaseEjectionTime = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Consecutive_5Xx
 			if !outlierDetectionModel.Consecutive_5Xx.IsNull() && !outlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 				outlierDetectionSpec.Consecutive_5Xx = uint32(uint32(outlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Consecutive_5Xx = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 			if !outlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !outlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(uint32(outlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+			} else {
+				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Interval
 			if !outlierDetectionModel.Interval.IsNull() && !outlierDetectionModel.Interval.IsUnknown() {
 				outlierDetectionSpec.Interval = uint32(uint32(outlierDetectionModel.Interval.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Interval = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> MaxEjectionPercent
 			if !outlierDetectionModel.MaxEjectionPercent.IsNull() && !outlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 				outlierDetectionSpec.MaxEjectionPercent = uint32(uint32(outlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+			} else {
+				outlierDetectionSpec.MaxEjectionPercent = uint32(0)
 			}
 
 		}
@@ -8488,6 +8481,13 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -8642,7 +8642,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -8658,7 +8658,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	err = r.client.ReplaceObject(ctx, ves_io_schema_cluster.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cluster", err),
 		)
 		return
 	}
@@ -8667,7 +8667,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cluster", err),
 		)
 		return
 	}
@@ -8835,7 +8835,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -8856,46 +8856,11 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -8958,14 +8923,12 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -9020,14 +8983,12 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -9099,21 +9060,19 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -10277,6 +10236,15 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -10625,7 +10593,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	}
 	// Restore plan value for TlsParameters. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.TlsParameters = planTlsParameters
+	data.TlsParameters = utils.ResolveUnknowns(planTlsParameters, data.TlsParameters)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -10673,7 +10641,7 @@ func (r *ResourceF5XCCluster) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "cluster", err),
 		)
 		return
 	}

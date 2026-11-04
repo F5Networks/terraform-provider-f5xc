@@ -28,36 +28,36 @@ type DataSourceF5XCAlertPolicy struct {
 	client *client.APIClient
 }
 
-type AlertPolicyAlertPolicyNotificationParameters struct {
+type AlertPolicyNotificationParameters struct {
 	GroupByChoice  types.Object `tfsdk:"group_by_choice"`
 	GroupInterval  types.String `tfsdk:"group_interval"`
 	GroupWait      types.String `tfsdk:"group_wait"`
 	RepeatInterval types.String `tfsdk:"repeat_interval"`
 }
 
-type AlertPolicyNotificationParametersGroupByChoice struct {
+type AlertPolicyGroupByChoice struct {
 	Custom     types.Object `tfsdk:"custom"`
 	Default    types.Bool   `tfsdk:"default"`
 	Individual types.Bool   `tfsdk:"individual"`
 	VesIoGroup types.Bool   `tfsdk:"ves_io_group"`
 }
 
-type AlertPolicyNotificationParametersCustom struct {
+type AlertPolicyCustom struct {
 	Labels types.List `tfsdk:"labels"`
 }
 
-type AlertPolicyAlertPolicyRoute struct {
+type AlertPolicyRoute struct {
 	ActionChoice           types.Object `tfsdk:"action_choice"`
 	MatcherChoice          types.Object `tfsdk:"matcher_choice"`
 	NotificationParameters types.Object `tfsdk:"notification_parameters"`
 }
 
-type AlertPolicyRouteActionChoice struct {
+type AlertPolicyActionChoice struct {
 	DontSend types.Bool `tfsdk:"dont_send"`
 	Send     types.Bool `tfsdk:"send"`
 }
 
-type AlertPolicyRouteMatcherChoice struct {
+type AlertPolicyMatcherChoice struct {
 	Alertname      types.List   `tfsdk:"alertname"`
 	AlertnameRegex types.String `tfsdk:"alertname_regex"`
 	Any            types.Bool   `tfsdk:"any"`
@@ -73,20 +73,20 @@ type AlertPolicyRouteCustom struct {
 	Severity   types.Object `tfsdk:"severity"`
 }
 
-type AlertPolicyAlertPolicyLabelMatcher struct {
+type AlertPolicyLabelMatcher struct {
 	MatcherTypeChoice types.Object `tfsdk:"matcher_type_choice"`
 }
 
-type AlertPolicyLabelMatcherMatcherTypeChoice struct {
+type AlertPolicyMatcherTypeChoice struct {
 	ExactMatch types.String `tfsdk:"exact_match"`
 	RegexMatch types.String `tfsdk:"regex_match"`
 }
 
-type AlertPolicyRouteGroup struct {
+type AlertPolicyGroup struct {
 	Groups types.List `tfsdk:"groups"`
 }
 
-type AlertPolicyRouteSeverity struct {
+type AlertPolicySeverity struct {
 	Severities types.List `tfsdk:"severities"`
 }
 
@@ -333,8 +333,8 @@ func (d *DataSourceF5XCAlertPolicy) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
+		MarkdownDescription: "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to<br>send the alert notification if there is a match.<br>An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the<br>routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send,<br>then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent<br>to any receiver.",
+		Description:         "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to send the alert notification if there is a match. An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send, then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent to any receiver.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -805,7 +805,7 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "alert_policy", err))
 		return
 	}
 
@@ -868,7 +868,7 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 	// data SpecToModelRoot PointerField --> NotificationParameters
 	if specData.GetNotificationParameters() != nil {
-		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
+		var alertPolicyNotificationParametersModel = &AlertPolicyNotificationParameters{}
 		notificationParametersElement := specData.GetNotificationParameters()
 
 		// data specToModelNested RequiredOneOfField --> GroupBy
@@ -956,40 +956,40 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
+			alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+			alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
 		}
 
 		// data specToModelNested StringField --> GroupInterval
 		if notificationParametersElement.GetGroupInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
+			alertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
 		} else {
 			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
+			alertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> GroupWait
 		if notificationParametersElement.GetGroupWait() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+			alertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
 		} else {
 			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+			alertPolicyNotificationParametersModel.GroupWait = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> RepeatInterval
 		if notificationParametersElement.GetRepeatInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
+			alertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
 		} else {
 			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
+			alertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
 		}
 
 		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
 			ctx,
 			AlertPolicyNotificationParametersModelAttributeMap,
-			alertPolicyAlertPolicyNotificationParametersModel,
+			alertPolicyNotificationParametersModel,
 		)
 		response.Diagnostics.Append(notificationParametersDiags...)
 		data.NotificationParameters = notificationParametersObj
@@ -1046,10 +1046,10 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Routes
-	routesElementsSpectToModel := make([]AlertPolicyAlertPolicyRoute, 0, len(specData.GetRoutes()))
+	routesElementsSpectToModel := make([]AlertPolicyRoute, 0, len(specData.GetRoutes()))
 
 	for _, routesElement := range specData.GetRoutes() {
-		alertPolicyAlertPolicyRouteModel := AlertPolicyAlertPolicyRoute{}
+		alertPolicyRouteModel := AlertPolicyRoute{}
 
 		// data specToModelNested RequiredOneOfField --> Action
 		// <no value>
@@ -1094,10 +1094,10 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyRouteModel.ActionChoice = finalObj
+			alertPolicyRouteModel.ActionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyRouteModel.ActionChoice = types.ObjectNull(AlertPolicyRoutesActionModelAttributeMap)
+			alertPolicyRouteModel.ActionChoice = types.ObjectNull(AlertPolicyRoutesActionModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> Matcher
@@ -1170,10 +1170,10 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 					// data specToModelNested MapOfPointerField --> Alertlabel
 					if len(customElement.GetAlertlabel()) > 0 {
-						alertlabelGoMap := make(map[string]AlertPolicyAlertPolicyLabelMatcher, len(customElement.GetAlertlabel()))
+						alertlabelGoMap := make(map[string]AlertPolicyLabelMatcher, len(customElement.GetAlertlabel()))
 
 						for key, alertlabelElement := range customElement.GetAlertlabel() {
-							alertlabelItem := AlertPolicyAlertPolicyLabelMatcher{}
+							alertlabelItem := AlertPolicyLabelMatcher{}
 
 							// data specToModelNested RequiredOneOfField --> MatcherType
 							// <no value>
@@ -1248,7 +1248,7 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 					// data specToModelNested PointerField --> Alertname
 					if customElement.GetAlertname() != nil {
 						// Create the nested Go struct
-						alertPolicyAlertPolicyLabelMatcherModel := &AlertPolicyAlertPolicyLabelMatcher{}
+						alertPolicyLabelMatcherModel := &AlertPolicyLabelMatcher{}
 						alertnameElement := customElement.GetAlertname()
 
 						// Recursively populate the nested struct
@@ -1298,19 +1298,19 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomAlertnameMatcherTypeModelAttributeMap)
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomAlertnameMatcherTypeModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						alertPolicyAlertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomAlertnameModelAttributeMap, alertPolicyAlertPolicyLabelMatcherModel)
+						alertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomAlertnameModelAttributeMap, alertPolicyLabelMatcherModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						customAttributeMap["alertname"] = alertPolicyAlertPolicyLabelMatcherModelObj
+						customAttributeMap["alertname"] = alertPolicyLabelMatcherModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1325,7 +1325,7 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 					// data specToModelNested PointerField --> Group
 					if customElement.GetGroup() != nil {
 						// Create the nested Go struct
-						alertPolicyAlertPolicyLabelMatcherModel := &AlertPolicyAlertPolicyLabelMatcher{}
+						alertPolicyLabelMatcherModel := &AlertPolicyLabelMatcher{}
 						groupElement := customElement.GetGroup()
 
 						// Recursively populate the nested struct
@@ -1375,19 +1375,19 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomGroupMatcherTypeModelAttributeMap)
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomGroupMatcherTypeModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						alertPolicyAlertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomGroupModelAttributeMap, alertPolicyAlertPolicyLabelMatcherModel)
+						alertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomGroupModelAttributeMap, alertPolicyLabelMatcherModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						customAttributeMap["group"] = alertPolicyAlertPolicyLabelMatcherModelObj
+						customAttributeMap["group"] = alertPolicyLabelMatcherModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1402,7 +1402,7 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 					// data specToModelNested PointerField --> Severity
 					if customElement.GetSeverity() != nil {
 						// Create the nested Go struct
-						alertPolicyAlertPolicyLabelMatcherModel := &AlertPolicyAlertPolicyLabelMatcher{}
+						alertPolicyLabelMatcherModel := &AlertPolicyLabelMatcher{}
 						severityElement := customElement.GetSeverity()
 
 						// Recursively populate the nested struct
@@ -1452,19 +1452,19 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							alertPolicyAlertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomSeverityMatcherTypeModelAttributeMap)
+							alertPolicyLabelMatcherModel.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomSeverityMatcherTypeModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						alertPolicyAlertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomSeverityModelAttributeMap, alertPolicyAlertPolicyLabelMatcherModel)
+						alertPolicyLabelMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesMatcherCustomSeverityModelAttributeMap, alertPolicyLabelMatcherModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						customAttributeMap["severity"] = alertPolicyAlertPolicyLabelMatcherModelObj
+						customAttributeMap["severity"] = alertPolicyLabelMatcherModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1578,16 +1578,16 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyRouteModel.MatcherChoice = finalObj
+			alertPolicyRouteModel.MatcherChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyRouteModel.MatcherChoice = types.ObjectNull(AlertPolicyRoutesMatcherModelAttributeMap)
+			alertPolicyRouteModel.MatcherChoice = types.ObjectNull(AlertPolicyRoutesMatcherModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> NotificationParameters
 		if routesElement.GetNotificationParameters() != nil {
 			// Create the nested Go struct
-			alertPolicyAlertPolicyNotificationParametersModel := &AlertPolicyAlertPolicyNotificationParameters{}
+			alertPolicyNotificationParametersModel := &AlertPolicyNotificationParameters{}
 			notificationParametersElement := routesElement.GetNotificationParameters()
 
 			// Recursively populate the nested struct
@@ -1677,43 +1677,43 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
+				alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
+				alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
 			}
 
 			// data specToModelNested StringField --> GroupInterval
 			if notificationParametersElement.GetGroupInterval() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
+				alertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
 			} else {
 				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
+				alertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> GroupWait
 			if notificationParametersElement.GetGroupWait() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+				alertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
 			} else {
 				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+				alertPolicyNotificationParametersModel.GroupWait = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> RepeatInterval
 			if notificationParametersElement.GetRepeatInterval() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
+				alertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
 			} else {
 				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
+				alertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			alertPolicyAlertPolicyNotificationParametersModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesNotificationParametersModelAttributeMap, alertPolicyAlertPolicyNotificationParametersModel)
+			alertPolicyNotificationParametersModelObj, objDiags := types.ObjectValueFrom(ctx, AlertPolicyRoutesNotificationParametersModelAttributeMap, alertPolicyNotificationParametersModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			alertPolicyAlertPolicyRouteModel.NotificationParameters = alertPolicyAlertPolicyNotificationParametersModelObj
+			alertPolicyRouteModel.NotificationParameters = alertPolicyNotificationParametersModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -1722,10 +1722,10 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			alertPolicyAlertPolicyRouteModel.NotificationParameters = types.ObjectNull(AlertPolicyRoutesNotificationParametersModelAttributeMap)
+			alertPolicyRouteModel.NotificationParameters = types.ObjectNull(AlertPolicyRoutesNotificationParametersModelAttributeMap)
 		}
 
-		routesElementsSpectToModel = append(routesElementsSpectToModel, alertPolicyAlertPolicyRouteModel)
+		routesElementsSpectToModel = append(routesElementsSpectToModel, alertPolicyRouteModel)
 	}
 
 	{

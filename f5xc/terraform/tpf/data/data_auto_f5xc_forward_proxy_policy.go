@@ -30,32 +30,32 @@ type DataSourceF5XCForwardProxyPolicy struct {
 	client *client.APIClient
 }
 
-type ForwardProxyPolicyGlobalSpecTypeProxyChoice struct {
+type ForwardProxyPolicyProxyChoice struct {
 	AnyProxy           types.Bool   `tfsdk:"any_proxy"`
 	DrpHttpConnect     types.Bool   `tfsdk:"drp_http_connect"`
 	NetworkConnector   types.Object `tfsdk:"network_connector"`
 	ProxyLabelSelector types.Object `tfsdk:"proxy_label_selector"`
 }
 
-type ForwardProxyPolicyGlobalSpecTypeProxyLabelSelector struct {
+type ForwardProxyPolicyProxyLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type ForwardProxyPolicyGlobalSpecTypeRuleChoice struct {
+type ForwardProxyPolicyRuleChoice struct {
 	AllowAll  types.Bool   `tfsdk:"allow_all"`
 	AllowList types.Object `tfsdk:"allow_list"`
 	DenyList  types.Object `tfsdk:"deny_list"`
 	RuleList  types.Object `tfsdk:"rule_list"`
 }
 
-type ForwardProxyPolicyGlobalSpecTypeAllowList struct {
+type ForwardProxyPolicyAllowList struct {
 	DefaultActionChoice types.Object `tfsdk:"default_action_choice"`
 	DestList            types.List   `tfsdk:"dest_list"`
 	HttpList            types.List   `tfsdk:"http_list"`
 	TlsList             types.List   `tfsdk:"tls_list"`
 }
 
-type ForwardProxyPolicyForwardProxySimpleRuleTypeDefaultActionChoice struct {
+type ForwardProxyPolicyDefaultActionChoice struct {
 	DefaultActionAllow      types.Bool `tfsdk:"default_action_allow"`
 	DefaultActionDeny       types.Bool `tfsdk:"default_action_deny"`
 	DefaultActionNextPolicy types.Bool `tfsdk:"default_action_next_policy"`
@@ -67,18 +67,18 @@ type ForwardProxyPolicyL4DestType struct {
 	Prefixes     types.List   `tfsdk:"prefixes"`
 }
 
-type ForwardProxyPolicyForwardProxyPolicyURLType struct {
+type ForwardProxyPolicyURLType struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 	PathChoice   types.Object `tfsdk:"path_choice"`
 }
 
-type ForwardProxyPolicyURLTypeDomainChoice struct {
+type ForwardProxyPolicyDomainChoice struct {
 	ExactValue  types.String `tfsdk:"exact_value"`
 	RegexValue  types.String `tfsdk:"regex_value"`
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type ForwardProxyPolicyURLTypePathChoice struct {
+type ForwardProxyPolicyPathChoice struct {
 	AnyPath         types.Bool   `tfsdk:"any_path"`
 	PathExactValue  types.String `tfsdk:"path_exact_value"`
 	PathPrefixValue types.String `tfsdk:"path_prefix_value"`
@@ -95,18 +95,18 @@ type ForwardProxyPolicyDomainTypeDomainChoice struct {
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type ForwardProxyPolicyGlobalSpecTypeDenyList struct {
+type ForwardProxyPolicyDenyList struct {
 	DefaultActionChoice types.Object `tfsdk:"default_action_choice"`
 	DestList            types.List   `tfsdk:"dest_list"`
 	HttpList            types.List   `tfsdk:"http_list"`
 	TlsList             types.List   `tfsdk:"tls_list"`
 }
 
-type ForwardProxyPolicyGlobalSpecTypeRuleList struct {
+type ForwardProxyPolicyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType struct {
+type ForwardProxyPolicyForwardProxyAdvancedRuleType struct {
 	Action            types.List   `tfsdk:"action"`
 	DestinationChoice types.Object `tfsdk:"destination_choice"`
 	HttpConnectChoice types.Object `tfsdk:"http_connect_choice"`
@@ -114,7 +114,7 @@ type ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType struct {
 	SourceChoice      types.Object `tfsdk:"source_choice"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDestinationChoice struct {
+type ForwardProxyPolicyDestChoice struct {
 	AllDestinations  types.Bool   `tfsdk:"all_destinations"`
 	DstAsnList       types.Object `tfsdk:"dst_asn_list"`
 	DstAsnSet        types.Object `tfsdk:"dst_asn_set"`
@@ -126,37 +126,37 @@ type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDestinationChoice struct {
 	UrlCategoryList  types.Object `tfsdk:"url_category_list"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstAsnList struct {
+type ForwardProxyPolicyDstAsnList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstLabelSelector struct {
+type ForwardProxyPolicyDstLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstPrefixList struct {
+type ForwardProxyPolicyDstPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeHttpList struct {
+type ForwardProxyPolicyHttpList struct {
 	HttpList types.List `tfsdk:"http_list"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeTlsList struct {
+type ForwardProxyPolicyTlsList struct {
 	TlsList types.List `tfsdk:"tls_list"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeUrlCategoryList struct {
+type ForwardProxyPolicyUrlCategoryList struct {
 	UrlCategories types.List `tfsdk:"url_categories"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeHttpConnectChoice struct {
+type ForwardProxyPolicyHttpConnectChoice struct {
 	NoHttpConnectPort types.Bool   `tfsdk:"no_http_connect_port"`
 	PortMatcher       types.Object `tfsdk:"port_matcher"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypePortMatcher struct {
+type ForwardProxyPolicyPortMatcher struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	Ports         types.List `tfsdk:"ports"`
 }
@@ -166,43 +166,43 @@ type ForwardProxyPolicyMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeSourceChoice struct {
+type ForwardProxyPolicySrcChoice struct {
 	AllSources    types.Bool   `tfsdk:"all_sources"`
 	IpPrefixSet   types.Object `tfsdk:"ip_prefix_set"`
 	LabelSelector types.Object `tfsdk:"label_selector"`
 	PrefixList    types.Object `tfsdk:"prefix_list"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeLabelSelector struct {
+type ForwardProxyPolicyLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypePrefixList struct {
+type ForwardProxyPolicyPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type ForwardProxyPolicyPolicySegmentPolicyType struct {
+type ForwardProxyPolicySegmentPolicyType struct {
 	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
 }
 
-type ForwardProxyPolicySegmentPolicyTypeDstSegmentChoice struct {
+type ForwardProxyPolicyDstSegmentChoice struct {
 	DstAny       types.Bool   `tfsdk:"dst_any"`
 	DstSegments  types.Object `tfsdk:"dst_segments"`
 	IntraSegment types.Bool   `tfsdk:"intra_segment"`
 }
 
-type ForwardProxyPolicySegmentPolicyTypeDstSegments struct {
+type ForwardProxyPolicyDstSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
-type ForwardProxyPolicySegmentPolicyTypeSrcSegmentChoice struct {
+type ForwardProxyPolicySrcSegmentChoice struct {
 	SrcAny      types.Bool   `tfsdk:"src_any"`
 	SrcSegments types.Object `tfsdk:"src_segments"`
 }
 
-type ForwardProxyPolicySegmentPolicyTypeSrcSegments struct {
+type ForwardProxyPolicySrcSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
@@ -839,8 +839,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Forward Proxy policy defines access control rules for connections going via forward<br>Proxy. It is view type of config object that uses service policy mechanism to achieve<br>Required functionality.<br><br>View will create following child objects.<br><br>* Service Policy<br>* Service Policy Rule",
+		Description:         "Forward Proxy policy defines access control rules for connections going via forward Proxy. It is view type of config object that uses service policy mechanism to achieve Required functionality. View will create following child objects. Service Policy Service Policy Rule",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1873,7 +1873,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "forward_proxy_policy", err))
 		return
 	}
 
@@ -1944,7 +1944,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		proxyChoiceChoices := specData.GetProxyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var proxyChoiceChoicesModel = &ForwardProxyPolicyGlobalSpecTypeProxyChoice{}
+		var proxyChoiceChoicesModel = &ForwardProxyPolicyProxyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2074,7 +2074,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &ForwardProxyPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &ForwardProxyPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2217,9 +2217,9 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 				if len(allowListElement.GetHttpList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(allowListElement.GetHttpList()))
+					httpListElements := make([]ForwardProxyPolicyURLType, 0, len(allowListElement.GetHttpList()))
 					for _, httpListElement := range allowListElement.GetHttpList() {
-						forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
+						forwardProxyPolicyURLTypeModel := ForwardProxyPolicyURLType{}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
 						// <no value>
@@ -2276,10 +2276,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = finalObj
+							forwardProxyPolicyURLTypeModel.DomainChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListHttpListDomainChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListHttpListDomainChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> PathChoice
@@ -2346,13 +2346,13 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = finalObj
+							forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListHttpListPathChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListHttpListPathChoiceModelAttributeMap)
 						}
 
-						httpListElements = append(httpListElements, forwardProxyPolicyForwardProxyPolicyURLTypeModel)
+						httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2598,9 +2598,9 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 				if len(denyListElement.GetHttpList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(denyListElement.GetHttpList()))
+					httpListElements := make([]ForwardProxyPolicyURLType, 0, len(denyListElement.GetHttpList()))
 					for _, httpListElement := range denyListElement.GetHttpList() {
-						forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
+						forwardProxyPolicyURLTypeModel := ForwardProxyPolicyURLType{}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
 						// <no value>
@@ -2657,10 +2657,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = finalObj
+							forwardProxyPolicyURLTypeModel.DomainChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListHttpListDomainChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListHttpListDomainChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> PathChoice
@@ -2727,13 +2727,13 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = finalObj
+							forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListHttpListPathChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListHttpListPathChoiceModelAttributeMap)
 						}
 
-						httpListElements = append(httpListElements, forwardProxyPolicyForwardProxyPolicyURLTypeModel)
+						httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2863,9 +2863,9 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType, 0, len(ruleListElement.GetRules()))
+					rulesElements := make([]ForwardProxyPolicyForwardProxyAdvancedRuleType, 0, len(ruleListElement.GetRules()))
 					for _, rulesElement := range ruleListElement.GetRules() {
-						forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel := ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType{}
+						forwardProxyPolicyForwardProxyAdvancedRuleTypeModel := ForwardProxyPolicyForwardProxyAdvancedRuleType{}
 
 						// data specToModelNested RequiredEnumField --> Action
 						if rulesElement.GetAction().String() != "" {
@@ -2876,9 +2876,9 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = listValue
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = listValue
 						} else {
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = types.ListNull(types.StringType)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DestinationChoice
@@ -3118,9 +3118,9 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 									if len(httpListElement.GetHttpList()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(httpListElement.GetHttpList()))
+										httpListElements := make([]ForwardProxyPolicyURLType, 0, len(httpListElement.GetHttpList()))
 										for _, httpListElement := range httpListElement.GetHttpList() {
-											forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
+											forwardProxyPolicyURLTypeModel := ForwardProxyPolicyURLType{}
 
 											// data specToModelNested RequiredOneOfField --> DomainChoice
 											// <no value>
@@ -3177,10 +3177,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = finalObj
+												forwardProxyPolicyURLTypeModel.DomainChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												forwardProxyPolicyForwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
+												forwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredOneOfField --> PathChoice
@@ -3247,13 +3247,13 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = finalObj
+												forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												forwardProxyPolicyForwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
+												forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
 											}
 
-											httpListElements = append(httpListElements, forwardProxyPolicyForwardProxyPolicyURLTypeModel)
+											httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3442,10 +3442,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = finalObj
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> HttpConnectChoice
@@ -3517,10 +3517,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.HttpConnectChoice = finalObj
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.HttpConnectChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.HttpConnectChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.HttpConnectChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -3553,7 +3553,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Metadata = forwardProxyPolicyMessageMetaTypeModelObj
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Metadata = forwardProxyPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -3562,7 +3562,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Metadata = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Metadata = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> SourceChoice
@@ -3722,13 +3722,13 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = finalObj
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel)
+						rulesElements = append(rulesElements, forwardProxyPolicyForwardProxyAdvancedRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3779,7 +3779,7 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot PointerField --> SegmentPolicy
 	if specData.GetSegmentPolicy() != nil {
-		var forwardProxyPolicyPolicySegmentPolicyTypeModel = &ForwardProxyPolicyPolicySegmentPolicyType{}
+		var forwardProxyPolicySegmentPolicyTypeModel = &ForwardProxyPolicySegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
 
 		// data specToModelNested OneOfField --> DstSegmentChoice
@@ -3895,10 +3895,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
+			forwardProxyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
+			forwardProxyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> SrcSegmentChoice
@@ -4005,16 +4005,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
+			forwardProxyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
+			forwardProxyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
 		segmentPolicyObj, segmentPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ForwardProxyPolicySegmentPolicyModelAttributeMap,
-			forwardProxyPolicyPolicySegmentPolicyTypeModel,
+			forwardProxyPolicySegmentPolicyTypeModel,
 		)
 		response.Diagnostics.Append(segmentPolicyDiags...)
 		data.SegmentPolicy = segmentPolicyObj

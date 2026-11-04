@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -29,21 +30,33 @@ type DataSourceF5XCAuthorizationServer struct {
 	client *client.APIClient
 }
 
+type AuthzServerIssuerValChoice struct {
+	Issuer        types.String `tfsdk:"issuer"`
+	IssuerDisable types.Bool   `tfsdk:"issuer_disable"`
+}
+
 // DataSourceF5XCAuthorizationServerModel describes the resource data model.
 type DataSourceF5XCAuthorizationServerModel struct {
-	Annotations         types.Map         `tfsdk:"annotations"`
-	Description         types.String      `tfsdk:"description"`
-	Labels              types.Map         `tfsdk:"labels"`
-	Name                types.String      `tfsdk:"name"`
-	Namespace           types.String      `tfsdk:"namespace"`
-	Uid                 types.String      `tfsdk:"uid"`
-	JwksUri             types.String      `tfsdk:"jwks_uri"`
-	LastFetchStatus     types.List        `tfsdk:"last_fetch_status"`
-	LastSuccessfulFetch timetypes.RFC3339 `tfsdk:"last_successful_fetch"`
-	Timeouts            timeouts.Value    `tfsdk:"timeouts"`
+	Annotations            types.Map         `tfsdk:"annotations"`
+	Description            types.String      `tfsdk:"description"`
+	Labels                 types.Map         `tfsdk:"labels"`
+	Name                   types.String      `tfsdk:"name"`
+	Namespace              types.String      `tfsdk:"namespace"`
+	Uid                    types.String      `tfsdk:"uid"`
+	IssuerValidationChoice types.Object      `tfsdk:"issuer_validation_choice"`
+	JwksUri                types.String      `tfsdk:"jwks_uri"`
+	LastFetchStatus        types.List        `tfsdk:"last_fetch_status"`
+	LastSuccessfulFetch    timetypes.RFC3339 `tfsdk:"last_successful_fetch"`
+	Timeouts               timeouts.Value    `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for OneOfField --> IssuerValidation
+var AuthorizationServerIssuerValidationModelAttributeMap = map[string]attr.Type{
+
+	"issuer":         types.StringType,
+	"issuer_disable": types.BoolType,
+}
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCAuthorizationServer{}
@@ -59,8 +72,8 @@ func (d *DataSourceF5XCAuthorizationServer) Metadata(ctx context.Context, reques
 func (r *DataSourceF5XCAuthorizationServer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a authorization_server This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of authorization_server) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a authorization_server This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of authorization_server) etc. can be fetched",
+		MarkdownDescription: "Authorization Server Configuration",
+		Description:         "Authorization Server Configuration",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -100,6 +113,26 @@ func (r *DataSourceF5XCAuthorizationServer) Schema(ctx context.Context, request 
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"issuer_validation_choice": schema.SingleNestedAttribute{
+				Description: "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"issuer": schema.StringAttribute{
+						Description: "issuer",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"issuer_disable": schema.BoolAttribute{
+						Description: "issuer_disable",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
 			},
 			"jwks_uri": schema.StringAttribute{
 				Description: "jwks_uri Automatic fetching of JWKS will happen once daily. You can also do it manually from the list of Authorization Servers at any time.",
@@ -178,7 +211,7 @@ func (d *DataSourceF5XCAuthorizationServer) Read(ctx context.Context, request da
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "authorization_server", err))
 		return
 	}
 
@@ -238,6 +271,59 @@ func (d *DataSourceF5XCAuthorizationServer) Read(ctx context.Context, request da
 
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot OneOfField --> IssuerValidation
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIssuerValidation() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		issuerValidationChoiceChoices := specData.GetIssuerValidation()
+
+		// The model struct that will be populated by the nested template.
+		var issuerValidationChoiceChoicesModel = &AuthzServerIssuerValChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested StringOfOneOfField --> Issuer
+		issuerItem, isIssuer := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_Issuer)
+
+		if isIssuer {
+			issuerValidationChoiceChoicesModel.Issuer = types.StringValue(string(issuerItem.Issuer))
+		} else {
+			// Empty string, set to null
+			issuerValidationChoiceChoicesModel.Issuer = types.StringNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> IssuerDisable
+		_, isIssuerDisable := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_IssuerDisable)
+
+		if isIssuerDisable {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolValue(true)
+		} else {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			issuerValidationChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AuthorizationServerIssuerValidationModelAttributeMap,
+				issuerValidationChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IssuerValidationChoice = issuerValidationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IssuerValidationChoice = types.ObjectNull(AuthorizationServerIssuerValidationModelAttributeMap)
+	}
 
 	// data SpecToModelRoot RequiredStringField --> JwksUri
 	if specData.GetJwksUri() != "" {

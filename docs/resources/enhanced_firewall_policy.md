@@ -14,18 +14,102 @@
 page_title: "f5xc_enhanced_firewall_policy Resource - F5 XC Distributed Cloud"
 subcategory: "Network Security & Firewalls"
 description: |-
-  Enhanced Firewall Policy Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet
+  Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet
 ---
 
 # f5xc_enhanced_firewall_policy (Resource)
 
-Enhanced Firewall Policy Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet
+Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet
 
 To get more information about f5xc_enhanced_firewall_policy, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/enhanced-firewall-policy)
 
+## Example Usage
 
+```terraform
+# Example: Enhanced Firewall Policy - Basic
+
+resource "f5xc_enhanced_firewall_policy" "example" {
+  name      = "example-enhanced-firewall-policy"
+  namespace = "system"
+
+  rule_choice = {
+    deny_all = true
+  }
+}
+```
+
+```terraform
+# Example: Enhanced Firewall Policy - Full
+
+resource "f5xc_enhanced_firewall_policy" "example" {
+  name        = "example-enhanced-firewall-policy"
+  namespace   = "system"
+  description = "Full enhanced firewall policy example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  rule_choice = {
+    rule_list = {
+      rules = [
+        {
+          metadata = {
+            name        = "example-rule-full"
+            description = "Full rule example"
+          }
+
+          action_choice = {
+            allow = true
+          }
+
+          source_choice = {
+            source_prefix_list = {
+              prefixes      = ["10.0.0.0/8"]
+              ipv6_prefixes = ["2001:0db8:0002:0000:0000:0000:0000:0000/64"]
+            }
+          }
+
+          destination_choice = {
+            destination_prefix_list = {
+              prefixes      = ["172.16.0.0/12"]
+              ipv6_prefixes = ["2001:0db8:0003:0000:0000:0000:0000:0000/64"]
+            }
+          }
+
+          traffic_choice = {
+            all_tcp_traffic = true
+          }
+
+          advanced_action = {
+            action = ["NOLOG"]
+          }
+
+          label_matcher = {
+            keys = ["env"]
+          }
+        }
+      ]
+    }
+  }
+
+  segment_policy = {
+    src_segment_choice = {
+      src_any = true
+    }
+
+    dst_segment_choice = {
+      dst_any = true
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -301,7 +385,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`
+- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--traffic_choice--protocol_port_range"></a>
@@ -310,7 +394,7 @@ Optional:
 Optional:
 
 - `port_ranges` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
-- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`
+- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
 
 
 
@@ -418,7 +502,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -426,7 +510,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_enhanced_firewall_policy.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

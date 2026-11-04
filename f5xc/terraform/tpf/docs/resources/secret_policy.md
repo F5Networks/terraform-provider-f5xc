@@ -14,18 +14,89 @@
 page_title: "f5xc_secret_policy Resource - F5 XC Distributed Cloud"
 subcategory: "Identity & Secret Management"
 description: |-
-  Secret Policy Config Object A Secret Policy defines who gets access to a secret. A secret_policy object consists of an unordered list of predicates and a list of secret policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.
+  A Secret Policy defines who gets access to a secret.<br>A secret_policy object consists of an unordered list of predicates and a list of secret policy rules.<br>The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate.<br>Any predicates that are not specified in a policy are implicitly considered to be true.<br>The rules in the policy are also evaluated against the input fields.<br>They are treated as an ordered or unordered list depending on the value of the rule combining algorithm.<br>A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified.<br>If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action.<br>If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.
 ---
 
 # f5xc_secret_policy (Resource)
 
-Secret Policy Config Object A Secret Policy defines who gets access to a secret. A secret_policy object consists of an unordered list of predicates and a list of secret policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.
+A Secret Policy defines who gets access to a secret.<br>A secret_policy object consists of an unordered list of predicates and a list of secret policy rules.<br>The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate.<br>Any predicates that are not specified in a policy are implicitly considered to be true.<br>The rules in the policy are also evaluated against the input fields.<br>They are treated as an ordered or unordered list depending on the value of the rule combining algorithm.<br>A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified.<br>If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action.<br>If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.
 
 To get more information about f5xc_secret_policy, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/secret-policy)
 
+## Example Usage
 
+```terraform
+# Example: Secret Policy - Basic
+
+resource "f5xc_secret_policy" "example" {
+  name        = "example-secret-policy"
+  namespace   = "default"
+  description = "Secret policy example"
+
+  rule_choice = {
+    rule_list = {
+      rules = [
+        {
+          metadata = {
+            name = "example-rule"
+          }
+          spec = {
+            action = ["ALLOW"]
+            client_choice = {
+              client_name = "example-client"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+```terraform
+# Example: Secret Policy - Full
+
+resource "f5xc_secret_policy" "example" {
+  name                  = "example-secret-policy"
+  namespace             = "default"
+  description           = "Secret policy full example"
+  allow_f5xc            = true
+  decrypt_cache_timeout = "2h0m0s"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  rule_choice = {
+    rule_list = {
+      rules = [
+        {
+          metadata = {
+            name        = "example-rule"
+            description = "Secret policy rule example"
+          }
+          spec = {
+            action = ["ALLOW"]
+            client_choice = {
+              client_name_matcher = {
+                regex_values = ["^example-client-.*"]
+                transformers = ["LOWER_CASE"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -129,7 +200,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`
+- `transformers` (List of String) transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_selector"></a>
@@ -160,7 +231,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -168,7 +239,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_secret_policy.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

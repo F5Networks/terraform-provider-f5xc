@@ -26,7 +26,7 @@ import (
 
 func TestAccResourceAutoF5XCNamespace_basic(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-namespace-" + testAccRunSuffix(t)
+	name := "example-namespace-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,7 +37,7 @@ func TestAccResourceAutoF5XCNamespace_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_basic(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -47,7 +47,7 @@ func TestAccResourceAutoF5XCNamespace_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_basicUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -59,7 +59,7 @@ func TestAccResourceAutoF5XCNamespace_basic(t *testing.T) {
 
 func TestAccResourceAutoF5XCNamespace_withLabels(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-namespace-" + testAccRunSuffix(t)
+	name := "example-namespace-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -70,7 +70,7 @@ func TestAccResourceAutoF5XCNamespace_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_withLabels(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -80,7 +80,7 @@ func TestAccResourceAutoF5XCNamespace_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_withLabelsUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -92,7 +92,7 @@ func TestAccResourceAutoF5XCNamespace_withLabels(t *testing.T) {
 
 func TestAccResourceAutoF5XCNamespace_withAnnotations(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-namespace-" + testAccRunSuffix(t)
+	name := "example-namespace-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -103,7 +103,7 @@ func TestAccResourceAutoF5XCNamespace_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_withAnnotations(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -113,7 +113,7 @@ func TestAccResourceAutoF5XCNamespace_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_withAnnotationsUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -125,9 +125,9 @@ func TestAccResourceAutoF5XCNamespace_withAnnotations(t *testing.T) {
 
 func TestAccResourceAutoF5XCNamespace_full(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-namespace-" + testAccRunSuffix(t)
+	name := "example-namespace-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNamespaceDestroyProducer(t),
@@ -136,7 +136,7 @@ func TestAccResourceAutoF5XCNamespace_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_full(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
@@ -146,14 +146,18 @@ func TestAccResourceAutoF5XCNamespace_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNamespaceConfig_fullUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_namespace.test",
+				ResourceName:                         "f5xc_namespace.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        fmt.Sprintf("%s", name),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNamespaceConfig_full("example-namespace"),
+		})
 }
 
 func testAccCheckNamespaceDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -162,30 +166,30 @@ func testAccCheckNamespaceDestroyProducer(t *testing.T) func(*terraform.State) e
 
 func testAccResourceAutoF5XCNamespaceConfig_basic(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Basic namespace example"
 }
 `, name)
 }
 
 func testAccResourceAutoF5XCNamespaceConfig_basicUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace updated"
+  description = "Updated basic namespace example"
 }
 `, name)
 }
 
 func testAccResourceAutoF5XCNamespaceConfig_withLabels(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Namespace example with labels"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name)
@@ -193,12 +197,12 @@ resource "f5xc_namespace" "test" {
 
 func testAccResourceAutoF5XCNamespaceConfig_withLabelsUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Namespace example with labels"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "shared"
   }
 }
@@ -207,9 +211,9 @@ resource "f5xc_namespace" "test" {
 
 func testAccResourceAutoF5XCNamespaceConfig_withAnnotations(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Namespace example with annotations"
 
   annotations = {
     owner = "platform-team"
@@ -220,12 +224,12 @@ resource "f5xc_namespace" "test" {
 
 func testAccResourceAutoF5XCNamespaceConfig_withAnnotationsUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Namespace example with annotations"
 
   annotations = {
-    owner = "infra-team"
+    owner = "netsec-team"
   }
 }
 `, name)
@@ -233,12 +237,12 @@ resource "f5xc_namespace" "test" {
 
 func testAccResourceAutoF5XCNamespaceConfig_full(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Full namespace example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -250,17 +254,17 @@ resource "f5xc_namespace" "test" {
 
 func testAccResourceAutoF5XCNamespaceConfig_fullUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_namespace" "test" {
+resource "f5xc_namespace" "example" {
   name        = %q
-  description = "Acceptance test namespace"
+  description = "Updated full namespace example"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "shared"
   }
 
   annotations = {
-    owner = "infra-team"
+    owner = "netsec-team"
   }
 }
 `, name)

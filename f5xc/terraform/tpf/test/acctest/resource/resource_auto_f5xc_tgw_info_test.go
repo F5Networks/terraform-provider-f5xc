@@ -27,9 +27,9 @@ func TestAccResourceAutoF5XCTgwInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-aws-tgw-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-info-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_tgw_info", "", "tgw info"),
@@ -41,14 +41,18 @@ func TestAccResourceAutoF5XCTgwInfo_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCTgwInfoConfig_withTgwTransition(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCTgwInfoConfig_basic("example-aws-tgw-info", acctest.SystemNamespace()),
+		})
 }
 
 func TestAccResourceAutoF5XCTgwInfo_withDirectConnect(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-aws-tgw-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -69,7 +73,7 @@ func TestAccResourceAutoF5XCTgwInfo_withIpTransitions(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-aws-tgw-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -90,7 +94,7 @@ func TestAccResourceAutoF5XCTgwInfo_withSubnetVariants(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-aws-tgw-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,7 +115,7 @@ func TestAccResourceAutoF5XCTgwInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-aws-tgw-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -132,7 +136,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -157,12 +161,12 @@ func testAccResourceAutoF5XCTgwInfoConfig_withDirectConnect(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
   direct_connect_info = {
-    direct_connect_gateway_id = "dcg-acc-test-01"
+    direct_connect_gateway_id = "example-dcg-01"
     vgw_id                    = "vgw-1234abcd"
     asn                       = 65010
   }
@@ -188,7 +192,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_withTgwTransition(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -213,7 +217,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_withIpSetA(name, namespace string) str
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -238,7 +242,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_withIpSetB(name, namespace string) str
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -263,7 +267,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_withSubnetIDs(name, namespace string) 
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -289,7 +293,7 @@ func testAccResourceAutoF5XCTgwInfoConfig_withNestedSubnets(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -327,12 +331,12 @@ func testAccResourceAutoF5XCTgwInfoConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_info" "test" {
+resource "f5xc_tgw_info" "example" {
   name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
   direct_connect_info = {
-    direct_connect_gateway_id = "dcg-acc-test-02"
+    direct_connect_gateway_id = "example-dcg-02"
     vgw_id                    = "vgw-2234abcd"
     asn                       = 65020
   }
@@ -340,7 +344,7 @@ resource "f5xc_tgw_info" "test" {
   tgw_info = {
     tgw_id      = "tgw-8888abcd"
     vpc_id      = "vpc-8888abcd"
-    vpc_name    = "acc-vpc-full"
+    vpc_name    = "example-vpc-full"
     private_ips = ["10.80.80.80", "10.80.80.81", "10.80.80.82"]
     public_ips  = ["104.80.80.80", "104.80.80.81", "104.80.80.82"]
     subnet_ids = [

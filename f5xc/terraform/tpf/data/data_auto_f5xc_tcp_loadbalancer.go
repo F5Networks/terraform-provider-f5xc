@@ -34,168 +34,144 @@ type DataSourceF5XCTcpLoadbalancer struct {
 	client *client.APIClient
 }
 
-type TcpLoadbalancerGlobalSpecTypeAdvertiseChoice struct {
+type TcpLoadbalancerAdvertiseChoice struct {
 	AdvertiseCustom             types.Object `tfsdk:"advertise_custom"`
 	AdvertiseOnPublic           types.Object `tfsdk:"advertise_on_public"`
 	AdvertiseOnPublicDefaultVip types.Bool   `tfsdk:"advertise_on_public_default_vip"`
 	DoNotAdvertise              types.Bool   `tfsdk:"do_not_advertise"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeAdvertiseCustom struct {
+type TcpLoadbalancerAdvertiseCustom struct {
 	AdvertiseWhere types.List `tfsdk:"advertise_where"`
 }
 
-type TcpLoadbalancerViewsWhereType struct {
+type TcpLoadbalancerWhereType struct {
 	Choice     types.Object `tfsdk:"choice"`
 	PortChoice types.Object `tfsdk:"port_choice"`
 }
 
-type TcpLoadbalancerWhereTypeChoice struct {
-	AdvertiseDualstackOnPublic types.Object `tfsdk:"advertise_dualstack_on_public"`
-	AdvertiseOnPublic          types.Object `tfsdk:"advertise_on_public"`
-	AdvertiseV6OnPublic        types.Object `tfsdk:"advertise_v6_on_public"`
-	CloudEdgeSegment           types.Object `tfsdk:"cloud_edge_segment"`
-	Segment                    types.Object `tfsdk:"segment"`
-	Site                       types.Object `tfsdk:"site"`
-	SiteSegment                types.Object `tfsdk:"site_segment"`
-	VirtualNetwork             types.Object `tfsdk:"virtual_network"`
-	VirtualSite                types.Object `tfsdk:"virtual_site"`
-	VirtualSiteSegment         types.Object `tfsdk:"virtual_site_segment"`
-	VirtualSiteWithVip         types.Object `tfsdk:"virtual_site_with_vip"`
-	Vk8SService                types.Object `tfsdk:"vk8s_service"`
+type TcpLoadbalancerChoice struct {
+	AdvertiseOnPublic  types.Object `tfsdk:"advertise_on_public"`
+	Site               types.Object `tfsdk:"site"`
+	SiteSegment        types.Object `tfsdk:"site_segment"`
+	VirtualNetwork     types.Object `tfsdk:"virtual_network"`
+	VirtualSite        types.Object `tfsdk:"virtual_site"`
+	VirtualSiteSegment types.Object `tfsdk:"virtual_site_segment"`
+	VirtualSiteWithVip types.Object `tfsdk:"virtual_site_with_vip"`
+	Vk8SService        types.Object `tfsdk:"vk8s_service"`
 }
 
-type TcpLoadbalancerWhereTypeAdvertiseDualstackOnPublic struct {
+type TcpLoadbalancerAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
-type TcpLoadbalancerWhereTypeAdvertiseOnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type TcpLoadbalancerWhereTypeAdvertiseV6OnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type TcpLoadbalancerWhereTypeCloudEdgeSegment struct {
-	CloudEdge types.Object `tfsdk:"cloud_edge"`
-	Ip        types.String `tfsdk:"ip"`
-	Ipv6      types.String `tfsdk:"ipv6"`
-	Segment   types.Object `tfsdk:"segment"`
-}
-
-type TcpLoadbalancerWhereTypeSegment struct {
-	Ipv4Vip types.String `tfsdk:"ipv4_vip"`
-	Ipv6Vip types.String `tfsdk:"ipv6_vip"`
-	Segment types.Object `tfsdk:"segment"`
-}
-
-type TcpLoadbalancerWhereTypeSite struct {
+type TcpLoadbalancerSite struct {
 	Ip      types.String `tfsdk:"ip"`
 	Ipv6    types.String `tfsdk:"ipv6"`
 	Network types.List   `tfsdk:"network"`
 	Site    types.Object `tfsdk:"site"`
 }
 
-type TcpLoadbalancerWhereTypeSiteSegment struct {
+type TcpLoadbalancerSiteSegment struct {
 	Ip      types.String `tfsdk:"ip"`
 	Ipv6    types.String `tfsdk:"ipv6"`
 	Segment types.Object `tfsdk:"segment"`
 	Site    types.Object `tfsdk:"site"`
 }
 
-type TcpLoadbalancerWhereTypeVirtualNetwork struct {
+type TcpLoadbalancerVirtualNet struct {
 	V6VipChoice    types.Object `tfsdk:"v6_vip_choice"`
 	VipChoice      types.Object `tfsdk:"vip_choice"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 }
 
-type TcpLoadbalancerWhereVirtualNetworkV6VipChoice struct {
+type TcpLoadbalancerV6VipChoice struct {
 	DefaultV6Vip  types.Bool   `tfsdk:"default_v6_vip"`
 	SpecificV6Vip types.String `tfsdk:"specific_v6_vip"`
 }
 
-type TcpLoadbalancerWhereVirtualNetworkVipChoice struct {
+type TcpLoadbalancerVipChoice struct {
 	DefaultVip  types.Bool   `tfsdk:"default_vip"`
 	SpecificVip types.String `tfsdk:"specific_vip"`
 }
 
-type TcpLoadbalancerWhereTypeVirtualSite struct {
+type TcpLoadbalancerVirtualSite struct {
 	Network     types.List   `tfsdk:"network"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type TcpLoadbalancerWhereTypeVirtualSiteSegment struct {
+type TcpLoadbalancerVirtualSiteSegment struct {
 	Ip          types.String `tfsdk:"ip"`
 	Ipv6        types.String `tfsdk:"ipv6"`
 	Segment     types.Object `tfsdk:"segment"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type TcpLoadbalancerWhereTypeVirtualSiteWithVip struct {
+type TcpLoadbalancerVirtualSiteWithVip struct {
 	Ip          types.String `tfsdk:"ip"`
 	Ipv6        types.String `tfsdk:"ipv6"`
 	Network     types.List   `tfsdk:"network"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type TcpLoadbalancerWhereTypeVk8SService struct {
+type TcpLoadbalancerVk8SSvc struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type TcpLoadbalancerWhereVK8SServiceChoice struct {
+type TcpLoadbalancerWhereVK8SSvcChoice struct {
 	Site        types.Object `tfsdk:"site"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type TcpLoadbalancerWhereTypePortChoice struct {
+type TcpLoadbalancerPortChoice struct {
 	Port           types.Int64  `tfsdk:"port"`
 	PortRanges     types.String `tfsdk:"port_ranges"`
 	UseDefaultPort types.Bool   `tfsdk:"use_default_port"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeAdvertiseOnPublic struct {
+type TcpLoadbalancerGstAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
-type TcpLoadbalancerVirtualHostAutoCertInfoType struct {
+type TcpLoadbalancerAutoCertInfoType struct {
 	AutoCertExpiry  timetypes.RFC3339 `tfsdk:"auto_cert_expiry"`
 	AutoCertIssuer  types.String      `tfsdk:"auto_cert_issuer"`
 	AutoCertState   types.List        `tfsdk:"auto_cert_state"`
 	AutoCertSubject types.String      `tfsdk:"auto_cert_subject"`
 	DnsRecords      types.List        `tfsdk:"dns_records"`
+	DnsZones        types.List        `tfsdk:"dns_zones"`
 }
 
-type TcpLoadbalancerVirtualHostDNSRecord struct {
+type TcpLoadbalancerDNSRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Type  types.String `tfsdk:"type"`
 	Value types.String `tfsdk:"value"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeClusterRetractChoice struct {
+type TcpLoadbalancerClusterRetractChoice struct {
 	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
 	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
 }
 
-type TcpLoadbalancerVirtualHostDnsInfoDnsInfo struct {
+type TcpLoadbalancerDnsInfo struct {
 	IpAddress   types.String `tfsdk:"ip_address"`
 	Ipv6Address types.String `tfsdk:"ipv6_address"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeHashPolicyChoice struct {
+type TcpLoadbalancerHashPolicyChoice struct {
 	HashPolicyChoiceLeastActive        types.Bool `tfsdk:"hash_policy_choice_least_active"`
 	HashPolicyChoiceRandom             types.Bool `tfsdk:"hash_policy_choice_random"`
 	HashPolicyChoiceRoundRobin         types.Bool `tfsdk:"hash_policy_choice_round_robin"`
 	HashPolicyChoiceSourceIpStickiness types.Bool `tfsdk:"hash_policy_choice_source_ip_stickiness"`
 }
 
-type TcpLoadbalancerViewsInternetVIPInfo struct {
+type TcpLoadbalancerInternetVIPInfo struct {
 	SiteName        types.String `tfsdk:"site_name"`
 	SiteNetworkType types.List   `tfsdk:"site_network_type"`
 	Status          types.Object `tfsdk:"status"`
 }
 
-type TcpLoadbalancerViewsInternetVIPStatus struct {
+type TcpLoadbalancerInternetVIPStatus struct {
 	Arn               types.String `tfsdk:"arn"`
 	Name              types.String `tfsdk:"name"`
 	NlbCname          types.String `tfsdk:"nlb_cname"`
@@ -204,7 +180,7 @@ type TcpLoadbalancerViewsInternetVIPStatus struct {
 	TargetGroupStatus types.List   `tfsdk:"target_group_status"`
 }
 
-type TcpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
+type TcpLoadbalancerInternetVIPTargetGroupStatusType struct {
 	Arn            types.String `tfsdk:"arn"`
 	ListenerStatus types.List   `tfsdk:"listener_status"`
 	Name           types.String `tfsdk:"name"`
@@ -213,7 +189,7 @@ type TcpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
 	Status         types.String `tfsdk:"status"`
 }
 
-type TcpLoadbalancerViewsInternetVIPListenerStatusType struct {
+type TcpLoadbalancerInternetVIPListenerStatusType struct {
 	Arn      types.String `tfsdk:"arn"`
 	Port     types.Int64  `tfsdk:"port"`
 	Protocol types.String `tfsdk:"protocol"`
@@ -221,59 +197,49 @@ type TcpLoadbalancerViewsInternetVIPListenerStatusType struct {
 	Status   types.String `tfsdk:"status"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice struct {
+type TcpLoadbalancerLoadbalancerTypeChoice struct {
 	Tcp            types.Bool   `tfsdk:"tcp"`
 	TlsTcp         types.Object `tfsdk:"tls_tcp"`
 	TlsTcpAutoCert types.Object `tfsdk:"tls_tcp_auto_cert"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeTlsTcp struct {
+type TcpLoadbalancerTlsTcp struct {
 	TlsCertificatesChoice types.Object `tfsdk:"tls_certificates_choice"`
 }
 
-type TcpLoadbalancerProxyTypeTLSTCPTlsCertificatesChoice struct {
+type TcpLoadbalancerTlsCertificatesChoice struct {
 	TlsCertParams types.Object `tfsdk:"tls_cert_params"`
 	TlsParameters types.Object `tfsdk:"tls_parameters"`
 }
 
-type TcpLoadbalancerProxyTypeTLSTCPTlsCertParams struct {
+type TcpLoadbalancerTlsCertParams struct {
 	Certificates types.List   `tfsdk:"certificates"`
 	MtlsChoice   types.Object `tfsdk:"mtls_choice"`
 	TlsConfig    types.Object `tfsdk:"tls_config"`
 }
 
-type TcpLoadbalancerDownstreamTLSCertsParamsMtlsChoice struct {
+type TcpLoadbalancerMtlsChoice struct {
 	NoMtls  types.Bool   `tfsdk:"no_mtls"`
 	UseMtls types.Object `tfsdk:"use_mtls"`
 }
 
-type TcpLoadbalancerDownstreamTLSCertsParamsUseMtls struct {
+type TcpLoadbalancerUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type TcpLoadbalancerDownstreamTlsValidationContextCrlChoice struct {
+type TcpLoadbalancerCrlChoice struct {
 	Crl   types.Object `tfsdk:"crl"`
 	NoCrl types.Bool   `tfsdk:"no_crl"`
 }
 
-type TcpLoadbalancerDownstreamTlsValidationContextTrustedCaChoice struct {
+type TcpLoadbalancerTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type TcpLoadbalancerDownstreamTlsValidationContextXfccHeaderChoice struct {
-	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
-	XfccOptions  types.Object `tfsdk:"xfcc_options"`
-}
-
-type TcpLoadbalancerDownstreamTlsValidationContextXfccOptions struct {
-	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
-}
-
-type TcpLoadbalancerViewsTlsConfig struct {
+type TcpLoadbalancerTlsConfig struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -284,13 +250,13 @@ type TcpLoadbalancerTlsConfigChoice struct {
 	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
 }
 
-type TcpLoadbalancerTlsConfigCustomSecurity struct {
+type TcpLoadbalancerCustomSec struct {
 	CipherSuites types.List `tfsdk:"cipher_suites"`
 	MaxVersion   types.List `tfsdk:"max_version"`
 	MinVersion   types.List `tfsdk:"min_version"`
 }
 
-type TcpLoadbalancerProxyTypeTLSTCPTlsParameters struct {
+type TcpLoadbalancerTlsParameters struct {
 	MtlsChoice      types.Object `tfsdk:"mtls_choice"`
 	TlsCertificates types.List   `tfsdk:"tls_certificates"`
 	TlsConfig       types.Object `tfsdk:"tls_config"`
@@ -305,23 +271,22 @@ type TcpLoadbalancerDownstreamTlsParamsTypeUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type TcpLoadbalancerTlsCertificateType struct {
+type TcpLoadbalancerTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type TcpLoadbalancerTlsCertificateTypeOcspStaplingChoice struct {
+type TcpLoadbalancerOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type TcpLoadbalancerTlsCertificateTypeCustomHashAlgorithms struct {
+type TcpLoadbalancerCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -329,23 +294,24 @@ type TcpLoadbalancerSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type TcpLoadbalancerSecretTypeSecretInfoChoice struct {
+type TcpLoadbalancerSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type TcpLoadbalancerSecretTypeBlindfoldSecretInfo struct {
+type TcpLoadbalancerBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type TcpLoadbalancerSecretTypeClearSecretInfo struct {
+type TcpLoadbalancerClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeTlsTcpAutoCert struct {
+type TcpLoadbalancerTlsTcpAutoCert struct {
 	MtlsChoice types.Object `tfsdk:"mtls_choice"`
 	TlsConfig  types.Object `tfsdk:"tls_config"`
 }
@@ -359,37 +325,36 @@ type TcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
 	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type TcpLoadbalancerViewsOriginPoolWithWeight struct {
+type TcpLoadbalancerOriginPoolWithWeight struct {
 	EndpointSubsets types.Map    `tfsdk:"endpoint_subsets"`
 	PoolChoice      types.Object `tfsdk:"pool_choice"`
 	Priority        types.Int64  `tfsdk:"priority"`
 	Weight          types.Int64  `tfsdk:"weight"`
 }
 
-type TcpLoadbalancerOriginPoolWithWeightPoolChoice struct {
+type TcpLoadbalancerPoolChoice struct {
 	Cluster types.Object `tfsdk:"cluster"`
 	Pool    types.Object `tfsdk:"pool"`
 }
 
-type TcpLoadbalancerGlobalSpecTypePortChoice struct {
+type TcpLoadbalancerGstPortChoice struct {
 	ListenPort types.Int64  `tfsdk:"listen_port"`
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeServicePolicyChoice struct {
+type TcpLoadbalancerSvcPolicyChoice struct {
 	ActiveServicePolicies        types.Object `tfsdk:"active_service_policies"`
 	NoServicePolicies            types.Bool   `tfsdk:"no_service_policies"`
 	ServicePoliciesFromNamespace types.Bool   `tfsdk:"service_policies_from_namespace"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeActiveServicePolicies struct {
+type TcpLoadbalancerActiveSvcPolicies struct {
 	Policies types.List `tfsdk:"policies"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice struct {
+type TcpLoadbalancerSniDefaultLbChoice struct {
 	DefaultLbWithSni types.Bool `tfsdk:"default_lb_with_sni"`
 	NoSni            types.Bool `tfsdk:"no_sni"`
 	Sni              types.Bool `tfsdk:"sni"`
@@ -468,20 +433,8 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap
 // Attribute map for RequiredOneOfField --> Choice
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap = map[string]attr.Type{
 
-	"advertise_dualstack_on_public": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap,
-	},
 	"advertise_on_public": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap,
-	},
-	"advertise_v6_on_public": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap,
-	},
-	"cloud_edge_segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap,
-	},
-	"segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap,
 	},
 	"site": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap,
@@ -506,24 +459,6 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttrib
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> AdvertiseDualstackOnPublic
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Attribute map for PointerOfOneOfField --> AdvertiseOnPublic
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap = map[string]attr.Type{
 	"public_ip": types.ObjectType{
@@ -536,77 +471,6 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOn
 
 // Attribute map for RequiredPointerField --> PublicIp
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> AdvertiseV6OnPublic
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CloudEdgeSegment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap = map[string]attr.Type{
-	"cloud_edge": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> CloudEdge
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap = map[string]attr.Type{
-
-	"ipv4_vip": types.StringType,
-	"ipv6_vip": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"namespace": types.StringType,
@@ -864,6 +728,16 @@ var TcpLoadbalancerAutoCertInfoModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
+	"dns_zones": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
 }
 
 // Attribute map for ArrayOfPointerField --> DnsRecords
@@ -872,6 +746,14 @@ var TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap = map[string]attr.Typ
 	"name":  types.StringType,
 	"type":  types.StringType,
 	"value": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> DnsZones
+var TcpLoadbalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> ClusterRetractChoice
@@ -1084,9 +966,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1121,23 +1000,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -1222,9 +1084,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsC
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1259,23 +1118,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsC
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
@@ -1328,6 +1170,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1410,9 +1253,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttribute
 	"trusted_ca_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1447,23 +1287,6 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoic
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -1546,7 +1369,7 @@ var TcpLoadbalancerPortChoiceModelAttributeMap = map[string]attr.Type{
 	"port_ranges": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ServicePolicyChoice
+// Attribute map for OneOfField --> ServicePolicyChoice
 var TcpLoadbalancerServicePolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_service_policies": types.ObjectType{
@@ -1601,8 +1424,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
+		MarkdownDescription: "TCP load balancer view defines a required parameters that can be used in CRUD, to create and manage TCP load balancer.<br>It can be used to create TCP load balancer and TCP load balancer with SNI.<br><br>View will create following child objects.<br><br>* Virtual-host<br>* default route<br>* clusters<br>* endpoints<br>* advertise policy",
+		Description:         "TCP load balancer view defines a required parameters that can be used in CRUD, to create and manage TCP load balancer. It can be used to create TCP load balancer and TCP load balancer with SNI. View will create following child objects. Virtual-host default route clusters endpoints advertise policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1668,40 +1491,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"advertise_dualstack_on_public": schema.SingleNestedAttribute{
-													Description: "Advertise DualStack On Public Advertise this load balancer with Dualstack VIP on public network",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description: "Advertise On Public Advertise this load balancer on public network",
 													Required:    false,
@@ -1710,158 +1499,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 													Attributes: map[string]schema.Attribute{
 														"public_ip": schema.SingleNestedAttribute{
 															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"advertise_v6_on_public": schema.SingleNestedAttribute{
-													Description: "Advertise IPv6 On Public Advertise this load balancer with IPv6 VIP on public network",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"cloud_edge_segment": schema.SingleNestedAttribute{
-													Description: "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"cloud_edge": schema.SingleNestedAttribute{
-															Description: "Site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"ip": schema.StringAttribute{
-															Description: "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"segment": schema.SingleNestedAttribute{
-													Description: "Segment Advertise on a segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"ipv4_vip": schema.StringAttribute{
-															Description: "IPv4 VIP Configure IPV4 VIP address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6_vip": schema.StringAttribute{
-															Description: "IPv6 VIP Configure IPV6 VIP address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -2462,6 +2099,34 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 							},
 						},
 					},
+					"dns_zones": schema.ListNestedAttribute{
+						Description: "DNS Zone References DNS Zone references in use by this object",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"namespace": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"tenant": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
+						},
+					},
 				},
 			},
 			"cert_state": schema.ListAttribute{
@@ -2873,35 +2538,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	},
 																},
 															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
 														},
 													},
 												},
@@ -3081,35 +2717,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	},
 																},
 															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
 														},
 													},
 												},
@@ -3223,8 +2830,15 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
+																					Sensitive:   true,
 																				},
 																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
 																		},
 																	},
 																},
@@ -3409,35 +3023,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
-													},
-												},
-											},
-											"xfcc_header_choice": schema.SingleNestedAttribute{
-												Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"xfcc_disabled": schema.BoolAttribute{
-														Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"xfcc_options": schema.SingleNestedAttribute{
-														Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"xfcc_header_elements": schema.ListAttribute{
-																Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
 													},
 												},
 											},
@@ -3760,7 +3345,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "tcp_loadbalancer", err))
 		return
 	}
 
@@ -3831,7 +3416,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		advertiseChoiceChoices := specData.GetAdvertiseChoice()
 
 		// The model struct that will be populated by the nested template.
-		var advertiseChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeAdvertiseChoice{}
+		var advertiseChoiceChoicesModel = &TcpLoadbalancerAdvertiseChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3849,9 +3434,9 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 				if len(advertiseCustomElement.GetAdvertiseWhere()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					advertiseWhereElements := make([]TcpLoadbalancerViewsWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
+					advertiseWhereElements := make([]TcpLoadbalancerWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
 					for _, advertiseWhereElement := range advertiseCustomElement.GetAdvertiseWhere() {
-						tcpLoadbalancerViewsWhereTypeModel := TcpLoadbalancerViewsWhereType{}
+						tcpLoadbalancerWhereTypeModel := TcpLoadbalancerWhereType{}
 
 						// data specToModelNested RequiredOneOfField --> Choice
 						// <no value>
@@ -3864,77 +3449,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							advertiseWherechoiceChoices := advertiseWhereElement.GetChoice()
 
 							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-							// <no value>
-							// false
-							{
-								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
-								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
-									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
-
-									// data specToModelNested RequiredPointerField --> PublicIp
-									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
-								}
-							}
 
 							// data specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 							// <no value>
@@ -4004,301 +3518,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = advertiseOnPublicObj
 								} else {
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
-							// <no value>
-							// false
-							{
-								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
-								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
-									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
-
-									// data specToModelNested RequiredPointerField --> PublicIp
-									if advertiseV6OnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> CloudEdgeSegment
-							// <no value>
-							// false
-							{
-								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
-									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
-
-									// data specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// data specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentElement.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentElement.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
-									}
-
-									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> Segment
-							// <no value>
-							// false
-							{
-								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
-
-								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
-									segmentElement := segmentOptionsWrapper.Segment
-
-									// data specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentElement.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6Vip
-									if segmentElement.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredPointerField --> Segment
-									if segmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
-									}
-
-									segmentObj, segmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(segmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
@@ -5187,10 +4406,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							tcpLoadbalancerViewsWhereTypeModel.Choice = finalObj
+							tcpLoadbalancerWhereTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							tcpLoadbalancerViewsWhereTypeModel.Choice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
+							tcpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> PortChoice
@@ -5247,13 +4466,13 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							tcpLoadbalancerViewsWhereTypeModel.PortChoice = finalObj
+							tcpLoadbalancerWhereTypeModel.PortChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							tcpLoadbalancerViewsWhereTypeModel.PortChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap)
+							tcpLoadbalancerWhereTypeModel.PortChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap)
 						}
 
-						advertiseWhereElements = append(advertiseWhereElements, tcpLoadbalancerViewsWhereTypeModel)
+						advertiseWhereElements = append(advertiseWhereElements, tcpLoadbalancerWhereTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5393,22 +4612,22 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> AutoCertInfo
 	if specData.GetAutoCertInfo() != nil {
-		var tcpLoadbalancerVirtualHostAutoCertInfoTypeModel = &TcpLoadbalancerVirtualHostAutoCertInfoType{}
+		var tcpLoadbalancerAutoCertInfoTypeModel = &TcpLoadbalancerAutoCertInfoType{}
 		autoCertInfoElement := specData.GetAutoCertInfo()
 
 		// data specToModelNested TimeStampField --> AutoCertExpiry
 		if autoCertInfoElement.GetAutoCertExpiry() != nil {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339ProtobufPointerValue(autoCertInfoElement.GetAutoCertExpiry())
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339ProtobufPointerValue(autoCertInfoElement.GetAutoCertExpiry())
 		} else {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339Null()
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339Null()
 		}
 
 		// data specToModelNested StringField --> AutoCertIssuer
 		if autoCertInfoElement.GetAutoCertIssuer() != "" {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringValue(autoCertInfoElement.GetAutoCertIssuer())
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertIssuer = types.StringValue(autoCertInfoElement.GetAutoCertIssuer())
 		} else {
 			// Empty string, set to null
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringNull()
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertIssuer = types.StringNull()
 		}
 
 		// data specToModelNested EnumField --> AutoCertState
@@ -5420,52 +4639,52 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = listValue
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertState = listValue
 		} else {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested StringField --> AutoCertSubject
 		if autoCertInfoElement.GetAutoCertSubject() != "" {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
 		} else {
 			// Empty string, set to null
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
+			tcpLoadbalancerAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
 		}
 
 		// data specToModelNested ArrayOfPointerField --> DnsRecords
 		if len(autoCertInfoElement.GetDnsRecords()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			dnsRecordsElements := make([]TcpLoadbalancerVirtualHostDNSRecord, 0, len(autoCertInfoElement.GetDnsRecords()))
+			dnsRecordsElements := make([]TcpLoadbalancerDNSRecord, 0, len(autoCertInfoElement.GetDnsRecords()))
 			for _, dnsRecordsElement := range autoCertInfoElement.GetDnsRecords() {
-				tcpLoadbalancerVirtualHostDNSRecordModel := TcpLoadbalancerVirtualHostDNSRecord{}
+				tcpLoadbalancerDNSRecordModel := TcpLoadbalancerDNSRecord{}
 
 				// data specToModelNested StringField --> Name
 				if dnsRecordsElement.GetName() != "" {
-					tcpLoadbalancerVirtualHostDNSRecordModel.Name = types.StringValue(dnsRecordsElement.GetName())
+					tcpLoadbalancerDNSRecordModel.Name = types.StringValue(dnsRecordsElement.GetName())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerVirtualHostDNSRecordModel.Name = types.StringNull()
+					tcpLoadbalancerDNSRecordModel.Name = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Type
 				if dnsRecordsElement.GetType() != "" {
-					tcpLoadbalancerVirtualHostDNSRecordModel.Type = types.StringValue(dnsRecordsElement.GetType())
+					tcpLoadbalancerDNSRecordModel.Type = types.StringValue(dnsRecordsElement.GetType())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerVirtualHostDNSRecordModel.Type = types.StringNull()
+					tcpLoadbalancerDNSRecordModel.Type = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Value
 				if dnsRecordsElement.GetValue() != "" {
-					tcpLoadbalancerVirtualHostDNSRecordModel.Value = types.StringValue(dnsRecordsElement.GetValue())
+					tcpLoadbalancerDNSRecordModel.Value = types.StringValue(dnsRecordsElement.GetValue())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerVirtualHostDNSRecordModel.Value = types.StringNull()
+					tcpLoadbalancerDNSRecordModel.Value = types.StringNull()
 				}
 
-				dnsRecordsElements = append(dnsRecordsElements, tcpLoadbalancerVirtualHostDNSRecordModel)
+				dnsRecordsElements = append(dnsRecordsElements, tcpLoadbalancerDNSRecordModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5474,19 +4693,69 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.DnsRecords = dnsRecordsListValue
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsRecords = dnsRecordsListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
+		}
+
+		// data specToModelNested ArrayOfPointerField --> DnsZones
+		if len(autoCertInfoElement.GetDnsZones()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			dnsZonesElements := make([]ObjectRefTypeModel, 0, len(autoCertInfoElement.GetDnsZones()))
+			for _, dnsZonesElement := range autoCertInfoElement.GetDnsZones() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// data specToModelNested RequiredStringField --> Name
+				if dnsZonesElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested RequiredStringField --> Namespace
+				if dnsZonesElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Tenant
+				if dnsZonesElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			dnsZonesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap}, dnsZonesElements)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = dnsZonesListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			tcpLoadbalancerAutoCertInfoTypeModel.DnsZones = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerDnsZonesObjectRefModelAttributeMap})
 		}
 
 		autoCertInfoObj, autoCertInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			TcpLoadbalancerAutoCertInfoModelAttributeMap,
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel,
+			tcpLoadbalancerAutoCertInfoTypeModel,
 		)
 		response.Diagnostics.Append(autoCertInfoDiags...)
 		data.AutoCertInfo = autoCertInfoObj
@@ -5521,7 +4790,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		clusterRetractChoiceChoices := specData.GetClusterRetractChoice()
 
 		// The model struct that will be populated by the nested template.
-		var clusterRetractChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeClusterRetractChoice{}
+		var clusterRetractChoiceChoicesModel = &TcpLoadbalancerClusterRetractChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5565,28 +4834,28 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> DnsInfo
 	if len(specData.GetDnsInfo()) > 0 {
-		dnsInfoElements := make([]TcpLoadbalancerVirtualHostDnsInfoDnsInfo, 0, len(specData.GetDnsInfo()))
+		dnsInfoElements := make([]TcpLoadbalancerDnsInfo, 0, len(specData.GetDnsInfo()))
 
 		for _, dnsInfoElement := range specData.GetDnsInfo() {
-			tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel := TcpLoadbalancerVirtualHostDnsInfoDnsInfo{}
+			tcpLoadbalancerDnsInfoModel := TcpLoadbalancerDnsInfo{}
 
 			// data specToModelNested StringField --> IpAddress
 			if dnsInfoElement.GetIpAddress() != "" {
-				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
+				tcpLoadbalancerDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
 			} else {
 				// Empty string, set to null
-				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringNull()
+				tcpLoadbalancerDnsInfoModel.IpAddress = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Ipv6Address
 			if dnsInfoElement.GetIpv6Address() != "" {
-				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
+				tcpLoadbalancerDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
 			} else {
 				// Empty string, set to null
-				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringNull()
+				tcpLoadbalancerDnsInfoModel.Ipv6Address = types.StringNull()
 			}
 
-			dnsInfoElements = append(dnsInfoElements, tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel)
+			dnsInfoElements = append(dnsInfoElements, tcpLoadbalancerDnsInfoModel)
 		}
 
 		{
@@ -5638,7 +4907,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		hashPolicyChoiceChoices := specData.GetHashPolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var hashPolicyChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeHashPolicyChoice{}
+		var hashPolicyChoiceChoicesModel = &TcpLoadbalancerHashPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5716,17 +4985,17 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> InternetVipInfo
 	if len(specData.GetInternetVipInfo()) > 0 {
-		internetVipInfoElements := make([]TcpLoadbalancerViewsInternetVIPInfo, 0, len(specData.GetInternetVipInfo()))
+		internetVipInfoElements := make([]TcpLoadbalancerInternetVIPInfo, 0, len(specData.GetInternetVipInfo()))
 
 		for _, internetVipInfoElement := range specData.GetInternetVipInfo() {
-			tcpLoadbalancerViewsInternetVIPInfoModel := TcpLoadbalancerViewsInternetVIPInfo{}
+			tcpLoadbalancerInternetVIPInfoModel := TcpLoadbalancerInternetVIPInfo{}
 
 			// data specToModelNested StringField --> SiteName
 			if internetVipInfoElement.GetSiteName() != "" {
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
+				tcpLoadbalancerInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
 			} else {
 				// Empty string, set to null
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringNull()
+				tcpLoadbalancerInternetVIPInfoModel.SiteName = types.StringNull()
 			}
 
 			// data specToModelNested EnumField --> SiteNetworkType
@@ -5738,119 +5007,119 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = listValue
+				tcpLoadbalancerInternetVIPInfoModel.SiteNetworkType = listValue
 			} else {
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
+				tcpLoadbalancerInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested PointerField --> Status
 			if internetVipInfoElement.GetStatus() != nil {
 				// Create the nested Go struct
-				tcpLoadbalancerViewsInternetVIPStatusModel := &TcpLoadbalancerViewsInternetVIPStatus{}
+				tcpLoadbalancerInternetVIPStatusModel := &TcpLoadbalancerInternetVIPStatus{}
 				statusElement := internetVipInfoElement.GetStatus()
 
 				// Recursively populate the nested struct
 
 				// data specToModelNested StringField --> Arn
 				if statusElement.GetArn() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
+					tcpLoadbalancerInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringNull()
+					tcpLoadbalancerInternetVIPStatusModel.Arn = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Name
 				if statusElement.GetName() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
+					tcpLoadbalancerInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringNull()
+					tcpLoadbalancerInternetVIPStatusModel.Name = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> NlbCname
 				if statusElement.GetNlbCname() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
+					tcpLoadbalancerInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringNull()
+					tcpLoadbalancerInternetVIPStatusModel.NlbCname = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> NlbStatus
 				if statusElement.GetNlbStatus() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
+					tcpLoadbalancerInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringNull()
+					tcpLoadbalancerInternetVIPStatusModel.NlbStatus = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Reason
 				if statusElement.GetReason() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
+					tcpLoadbalancerInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
 				} else {
 					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringNull()
+					tcpLoadbalancerInternetVIPStatusModel.Reason = types.StringNull()
 				}
 
 				// data specToModelNested ArrayOfPointerField --> TargetGroupStatus
 				if len(statusElement.GetTargetGroupStatus()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					targetGroupStatusElements := make([]TcpLoadbalancerViewsInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
+					targetGroupStatusElements := make([]TcpLoadbalancerInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
 					for _, targetGroupStatusElement := range statusElement.GetTargetGroupStatus() {
-						tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel := TcpLoadbalancerViewsInternetVIPTargetGroupStatusType{}
+						tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel := TcpLoadbalancerInternetVIPTargetGroupStatusType{}
 
 						// data specToModelNested StringField --> Arn
 						if targetGroupStatusElement.GetArn() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
 						}
 
 						// data specToModelNested ArrayOfPointerField --> ListenerStatus
 						if len(targetGroupStatusElement.GetListenerStatus()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							listenerStatusElements := make([]TcpLoadbalancerViewsInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
+							listenerStatusElements := make([]TcpLoadbalancerInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
 							for _, listenerStatusElement := range targetGroupStatusElement.GetListenerStatus() {
-								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel := TcpLoadbalancerViewsInternetVIPListenerStatusType{}
+								tcpLoadbalancerInternetVIPListenerStatusTypeModel := TcpLoadbalancerInternetVIPListenerStatusType{}
 
 								// data specToModelNested StringField --> Arn
 								if listenerStatusElement.GetArn() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
 								} else {
 									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
 								}
 
 								// data specToModelNested UintField --> Port
-								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
+								tcpLoadbalancerInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
 
 								// data specToModelNested StringField --> Protocol
 								if listenerStatusElement.GetProtocol() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
 								} else {
 									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
 								}
 
 								// data specToModelNested StringField --> Reason
 								if listenerStatusElement.GetReason() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
 								} else {
 									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
 								}
 
 								// data specToModelNested StringField --> Status
 								if listenerStatusElement.GetStatus() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
 								} else {
 									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringNull()
+									tcpLoadbalancerInternetVIPListenerStatusTypeModel.Status = types.StringNull()
 								}
 
-								listenerStatusElements = append(listenerStatusElements, tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel)
+								listenerStatusElements = append(listenerStatusElements, tcpLoadbalancerInternetVIPListenerStatusTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5859,48 +5128,48 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							if response.Diagnostics.HasError() {
 								return
 							}
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap})
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap})
 						}
 
 						// data specToModelNested StringField --> Name
 						if targetGroupStatusElement.GetName() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Protocol
 						if targetGroupStatusElement.GetProtocol() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Reason
 						if targetGroupStatusElement.GetReason() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Status
 						if targetGroupStatusElement.GetStatus() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
+							tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
 						}
 
-						targetGroupStatusElements = append(targetGroupStatusElements, tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel)
+						targetGroupStatusElements = append(targetGroupStatusElements, tcpLoadbalancerInternetVIPTargetGroupStatusTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5909,22 +5178,22 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					if response.Diagnostics.HasError() {
 						return
 					}
-					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
+					tcpLoadbalancerInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap})
+					tcpLoadbalancerInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap})
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				tcpLoadbalancerViewsInternetVIPStatusModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerInternetVipInfoStatusModelAttributeMap, tcpLoadbalancerViewsInternetVIPStatusModel)
+				tcpLoadbalancerInternetVIPStatusModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerInternetVipInfoStatusModelAttributeMap, tcpLoadbalancerInternetVIPStatusModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				tcpLoadbalancerViewsInternetVIPInfoModel.Status = tcpLoadbalancerViewsInternetVIPStatusModelObj
+				tcpLoadbalancerInternetVIPInfoModel.Status = tcpLoadbalancerInternetVIPStatusModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -5933,10 +5202,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				tcpLoadbalancerViewsInternetVIPInfoModel.Status = types.ObjectNull(TcpLoadbalancerInternetVipInfoStatusModelAttributeMap)
+				tcpLoadbalancerInternetVIPInfoModel.Status = types.ObjectNull(TcpLoadbalancerInternetVipInfoStatusModelAttributeMap)
 			}
 
-			internetVipInfoElements = append(internetVipInfoElements, tcpLoadbalancerViewsInternetVIPInfoModel)
+			internetVipInfoElements = append(internetVipInfoElements, tcpLoadbalancerInternetVIPInfoModel)
 		}
 
 		{
@@ -5971,7 +5240,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		loadbalancerTypeChoiceChoices := specData.GetLoadbalancerType()
 
 		// The model struct that will be populated by the nested template.
-		var loadbalancerTypeChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice{}
+		var loadbalancerTypeChoiceChoicesModel = &TcpLoadbalancerLoadbalancerTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6270,84 +5539,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// data specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-														for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-													} else {
-														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -6381,7 +5572,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							// data specToModelNested PointerField --> TlsConfig
 							if tlsCertParamsElement.GetTlsConfig() != nil {
 								// Create the nested Go struct
-								tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
+								tcpLoadbalancerTlsConfigModel := &TcpLoadbalancerTlsConfig{}
 								tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 								// Recursively populate the nested struct
@@ -6499,19 +5690,19 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
+									tcpLoadbalancerTlsConfigModel.Choice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+								tcpLoadbalancerTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, tcpLoadbalancerTlsConfigModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								tlsCertParamsAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
+								tlsCertParamsAttributeMap["tls_config"] = tcpLoadbalancerTlsConfigModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6748,84 +5939,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 										}
 
-										// data specToModelNested OneOfField --> XfccHeader
-										if useMtlsElement.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-														for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-													} else {
-														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-													}
-
-													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(xfccOptionsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
 										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -6860,24 +5973,24 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								tlsCertificatesElements := make([]TcpLoadbalancerTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+								tlsCertificatesElements := make([]TcpLoadbalancerTlsCertType, 0, len(tlsParametersElement.GetTlsCertificates()))
 								for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
-									tcpLoadbalancerTlsCertificateTypeModel := TcpLoadbalancerTlsCertificateType{}
+									tcpLoadbalancerTlsCertTypeModel := TcpLoadbalancerTlsCertType{}
 
 									// data specToModelNested RequiredStringField --> CertificateUrl
 									if tlsCertificatesElement.GetCertificateUrl() != "" {
-										tcpLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+										tcpLoadbalancerTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 									} else {
 										// Empty string, set to null
-										tcpLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+										tcpLoadbalancerTlsCertTypeModel.CertificateUrl = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> Description
 									if tlsCertificatesElement.GetDescription() != "" {
-										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+										tcpLoadbalancerTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringNull()
+										tcpLoadbalancerTlsCertTypeModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -6961,10 +6074,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+										tcpLoadbalancerTlsCertTypeModel.OcspStaplingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+										tcpLoadbalancerTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> PrivateKey
@@ -7069,6 +6182,15 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -7106,7 +6228,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										tcpLoadbalancerTlsCertificateTypeModel.PrivateKey = tcpLoadbalancerSecretTypeModelObj
+										tcpLoadbalancerTlsCertTypeModel.PrivateKey = tcpLoadbalancerSecretTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -7115,10 +6237,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										tcpLoadbalancerTlsCertificateTypeModel.PrivateKey = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
+										tcpLoadbalancerTlsCertTypeModel.PrivateKey = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 									}
 
-									tlsCertificatesElements = append(tlsCertificatesElements, tcpLoadbalancerTlsCertificateTypeModel)
+									tlsCertificatesElements = append(tlsCertificatesElements, tcpLoadbalancerTlsCertTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7139,7 +6261,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							// data specToModelNested PointerField --> TlsConfig
 							if tlsParametersElement.GetTlsConfig() != nil {
 								// Create the nested Go struct
-								tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
+								tcpLoadbalancerTlsConfigModel := &TcpLoadbalancerTlsConfig{}
 								tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
 								// Recursively populate the nested struct
@@ -7257,19 +6379,19 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
+									tcpLoadbalancerTlsConfigModel.Choice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
+									tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+								tcpLoadbalancerTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, tcpLoadbalancerTlsConfigModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								tlsParametersAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
+								tlsParametersAttributeMap["tls_config"] = tcpLoadbalancerTlsConfigModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -7536,84 +6658,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
 							}
 
-							// data specToModelNested OneOfField --> XfccHeader
-							if useMtlsElement.GetXfccHeader() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-								if isXfccDisabled {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-								} else {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-								}
-
-								// data specToModelNested PointerOfOneOfField --> XfccOptions
-								// <no value>
-								// false
-								{
-									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-												}
-											}
-											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-											response.Diagnostics.Append(listDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-										} else {
-											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-										}
-
-										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-										response.Diagnostics.Append(xfccOptionsObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-									} else {
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-							}
-
 							useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
 							response.Diagnostics.Append(useMtlsObjDiags...)
 							if response.Diagnostics.HasError() {
@@ -7647,7 +6691,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 				// data specToModelNested PointerField --> TlsConfig
 				if tlsTcpAutoCertElement.GetTlsConfig() != nil {
 					// Create the nested Go struct
-					tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
+					tcpLoadbalancerTlsConfigModel := &TcpLoadbalancerTlsConfig{}
 					tlsConfigElement := tlsTcpAutoCertElement.GetTlsConfig()
 
 					// Recursively populate the nested struct
@@ -7765,19 +6809,19 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
+						tcpLoadbalancerTlsConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap)
+						tcpLoadbalancerTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+					tcpLoadbalancerTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap, tcpLoadbalancerTlsConfigModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					tlsTcpAutoCertAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
+					tlsTcpAutoCertAttributeMap["tls_config"] = tcpLoadbalancerTlsConfigModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7822,10 +6866,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> OriginPoolsWeights
 	if len(specData.GetOriginPoolsWeights()) > 0 {
-		originPoolsWeightsElements := make([]TcpLoadbalancerViewsOriginPoolWithWeight, 0, len(specData.GetOriginPoolsWeights()))
+		originPoolsWeightsElements := make([]TcpLoadbalancerOriginPoolWithWeight, 0, len(specData.GetOriginPoolsWeights()))
 
 		for _, originPoolsWeightsElement := range specData.GetOriginPoolsWeights() {
-			tcpLoadbalancerViewsOriginPoolWithWeightModel := TcpLoadbalancerViewsOriginPoolWithWeight{}
+			tcpLoadbalancerOriginPoolWithWeightModel := TcpLoadbalancerOriginPoolWithWeight{}
 
 			// data specToModelNested MapOfStringField --> EndpointSubsets
 			if originPoolsWeightsElement.GetEndpointSubsets() != nil {
@@ -7836,13 +6880,13 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					return
 				}
 				// Assign the typed map to the model
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = endpointSubsetsMap
+				tcpLoadbalancerOriginPoolWithWeightModel.EndpointSubsets = endpointSubsetsMap
 			} else {
 				// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 				// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 				// API returned nil (Protobuf omits empty maps). Set to null.
 				// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = types.MapNull(types.StringType)
+				tcpLoadbalancerOriginPoolWithWeightModel.EndpointSubsets = types.MapNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredOneOfField --> PoolChoice
@@ -7960,19 +7004,19 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = finalObj
+				tcpLoadbalancerOriginPoolWithWeightModel.PoolChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
+				tcpLoadbalancerOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested UintField --> Priority
-			tcpLoadbalancerViewsOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
+			tcpLoadbalancerOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
 
 			// data specToModelNested UintField --> Weight
-			tcpLoadbalancerViewsOriginPoolWithWeightModel.Weight = types.Int64Value(int64(originPoolsWeightsElement.GetWeight()))
+			tcpLoadbalancerOriginPoolWithWeightModel.Weight = types.Int64Value(int64(originPoolsWeightsElement.GetWeight()))
 
-			originPoolsWeightsElements = append(originPoolsWeightsElements, tcpLoadbalancerViewsOriginPoolWithWeightModel)
+			originPoolsWeightsElements = append(originPoolsWeightsElements, tcpLoadbalancerOriginPoolWithWeightModel)
 		}
 
 		{
@@ -8007,7 +7051,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		portChoiceChoices := specData.GetPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypePortChoice{}
+		var portChoiceChoicesModel = &TcpLoadbalancerGstPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -8051,7 +7095,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// data SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// data SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -8061,7 +7105,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		servicePolicyChoiceChoices := specData.GetServicePolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var servicePolicyChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeServicePolicyChoice{}
+		var servicePolicyChoiceChoicesModel = &TcpLoadbalancerSvcPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -8184,7 +7228,7 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		sniDefaultLbChoiceChoices := specData.GetSniDefaultLbChoice()
 
 		// The model struct that will be populated by the nested template.
-		var sniDefaultLbChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice{}
+		var sniDefaultLbChoiceChoicesModel = &TcpLoadbalancerSniDefaultLbChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

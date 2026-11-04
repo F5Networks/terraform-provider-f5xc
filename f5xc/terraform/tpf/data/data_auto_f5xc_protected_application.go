@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -20,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -35,7 +39,7 @@ type DataSourceF5XCProtectedApplication struct {
 	client *client.APIClient
 }
 
-type ProtectedApplicationCreateSpecTypeConnectorTypeChoice struct {
+type ProtectedAppConnectorTypeChoice struct {
 	AdobeCommerceConnector      types.Bool   `tfsdk:"adobe_commerce_connector"`
 	BigIpIapp                   types.Bool   `tfsdk:"big_ip_iapp"`
 	Cloudflare                  types.Object `tfsdk:"cloudflare"`
@@ -45,7 +49,7 @@ type ProtectedApplicationCreateSpecTypeConnectorTypeChoice struct {
 	SalesforceCommerceConnector types.Bool   `tfsdk:"salesforce_commerce_connector"`
 }
 
-type ProtectedApplicationCreateSpecTypeCloudflare struct {
+type ProtectedAppCloudflare struct {
 	ContinueMitigationActionHdr types.String `tfsdk:"continue_mitigation_action_hdr"`
 	JavaScriptChoice            types.Object `tfsdk:"java_script_choice"`
 	Loglevel                    types.List   `tfsdk:"loglevel"`
@@ -55,104 +59,104 @@ type ProtectedApplicationCreateSpecTypeCloudflare struct {
 	TrustedClients              types.List   `tfsdk:"trusted_clients"`
 }
 
-type ProtectedApplicationCloudflareTypeJavaScriptChoice struct {
+type ProtectedAppJavaScriptChoice struct {
 	DisableJsInsert  types.Bool   `tfsdk:"disable_js_insert"`
 	JsInsertionRules types.Object `tfsdk:"js_insertion_rules"`
 	ManualJsInsert   types.Object `tfsdk:"manual_js_insert"`
 }
 
-type ProtectedApplicationCloudflareTypeJsInsertionRules struct {
+type ProtectedAppJsInsertionRules struct {
 	ExcludeList        types.List   `tfsdk:"exclude_list"`
 	JavascriptLocation types.List   `tfsdk:"javascript_location"`
 	JsDownloadPath     types.String `tfsdk:"js_download_path"`
 	Rules              types.List   `tfsdk:"rules"`
 }
 
-type ProtectedApplicationCloudflareJavaScriptExclusionRule struct {
+type ProtectedAppJavaScriptExclusionRule struct {
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	Path                types.Object `tfsdk:"path"`
 }
 
-type ProtectedApplicationJavaScriptExclusionRuleDomainMatcherChoice struct {
+type ProtectedAppDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationJavaScriptExclusionRuleDomain struct {
+type ProtectedAppDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationDomainTypeDomainChoice struct {
+type ProtectedAppDomainChoice struct {
 	ExactValue  types.String `tfsdk:"exact_value"`
 	RegexValue  types.String `tfsdk:"regex_value"`
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type ProtectedApplicationMessageMetaType struct {
+type ProtectedAppMessageMetaType struct {
 	Description types.String `tfsdk:"description"`
 	Name        types.String `tfsdk:"name"`
 }
 
-type ProtectedApplicationPathMatcherType struct {
+type ProtectedAppPathMatcherType struct {
 	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
 }
 
-type ProtectedApplicationPathMatcherTypePathMatchChoice struct {
+type ProtectedAppPathMatchChoice struct {
 	Path   types.String `tfsdk:"path"`
 	Prefix types.String `tfsdk:"prefix"`
 	Regex  types.String `tfsdk:"regex"`
 }
 
-type ProtectedApplicationCloudflareJavaScriptInsertionRule struct {
+type ProtectedAppJavaScriptInsertionRule struct {
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	UriPathChoice       types.Object `tfsdk:"uri_path_choice"`
 }
 
-type ProtectedApplicationJavaScriptInsertionRuleDomainMatcherChoice struct {
+type ProtectedAppJavaScriptInsertionRuleDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationJavaScriptInsertionRuleDomain struct {
+type ProtectedAppJavaScriptInsertionRuleDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationJavaScriptInsertionRuleUriPathChoice struct {
+type ProtectedAppUriPathChoice struct {
 	ExactPath types.String `tfsdk:"exact_path"`
 	Glob      types.String `tfsdk:"glob"`
 	Prefix    types.String `tfsdk:"prefix"`
 }
 
-type ProtectedApplicationCloudflareTypeManualJsInsert struct {
+type ProtectedAppManualJsInsert struct {
 	JsDownloadPath types.String `tfsdk:"js_download_path"`
 }
 
-type ProtectedApplicationCloudflareTypeMobileSdkChoice struct {
+type ProtectedAppMobileSdkChoice struct {
 	DisableMobileSdk types.Bool   `tfsdk:"disable_mobile_sdk"`
 	MobileSdkConfig  types.Object `tfsdk:"mobile_sdk_config"`
 }
 
-type ProtectedApplicationCloudflareTypeMobileSdkConfig struct {
+type ProtectedAppMobileSdkConfig struct {
 	MobileIdentifier types.Object `tfsdk:"mobile_identifier"`
 }
 
-type ProtectedApplicationCloudflareMobileTrafficIdentifierType struct {
+type ProtectedAppMobileTrafficIdentifierType struct {
 	Headers types.List `tfsdk:"headers"`
 }
 
-type ProtectedApplicationCloudflareHeaderMatcherType struct {
+type ProtectedAppHeaderMatcherType struct {
 	Name             types.String `tfsdk:"name"`
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type ProtectedApplicationHeaderMatcherTypeValueMatchChoice struct {
+type ProtectedAppValueMatchChoice struct {
 	Exact types.String `tfsdk:"exact"`
 	Regex types.String `tfsdk:"regex"`
 }
 
-type ProtectedApplicationCloudflareProtectedEndpointType struct {
+type ProtectedAppProtectedEndpointType struct {
 	ClientTypeChoice    types.Object `tfsdk:"client_type_choice"`
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	HttpMethods         types.List   `tfsdk:"http_methods"`
@@ -161,131 +165,131 @@ type ProtectedApplicationCloudflareProtectedEndpointType struct {
 	Query               types.String `tfsdk:"query"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeClientTypeChoice struct {
+type ProtectedAppClientTypeChoice struct {
 	MobileClient    types.Object `tfsdk:"mobile_client"`
 	WebClient       types.Object `tfsdk:"web_client"`
 	WebMobileClient types.Object `tfsdk:"web_mobile_client"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeMobileClient struct {
+type ProtectedAppMobileClient struct {
 	MitigationChoice types.Object `tfsdk:"mitigation_choice"`
 }
 
-type ProtectedApplicationMobileClientTypeMitigationChoice struct {
+type ProtectedAppMitigationChoice struct {
 	Block    types.Object `tfsdk:"block"`
 	Continue types.Object `tfsdk:"continue"`
 }
 
-type ProtectedApplicationMobileClientTypeBlock struct {
+type ProtectedAppBlock struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationMobileClientTypeContinue struct {
+type ProtectedAppContinue struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationContinueMitigationChoiceTypeAddHeaderChoice struct {
+type ProtectedAppAddHeaderChoice struct {
 	AddHeader types.Bool `tfsdk:"add_header"`
 	NoHeader  types.Bool `tfsdk:"no_header"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeWebClient struct {
+type ProtectedAppWebClient struct {
 	MitigationChoice types.Object `tfsdk:"mitigation_choice"`
 }
 
-type ProtectedApplicationWebClientTypeMitigationChoice struct {
+type ProtectedAppWebClientTypeMitigationChoice struct {
 	Block    types.Object `tfsdk:"block"`
 	Continue types.Object `tfsdk:"continue"`
 	Redirect types.Object `tfsdk:"redirect"`
 }
 
-type ProtectedApplicationWebClientTypeBlock struct {
+type ProtectedAppWebClientTypeBlock struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationWebClientTypeContinue struct {
+type ProtectedAppWebClientTypeContinue struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationWebClientTypeRedirect struct {
+type ProtectedAppRedirect struct {
 	Location types.String `tfsdk:"location"`
 	Status   types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeWebMobileClient struct {
+type ProtectedAppWebMobileClient struct {
 	MobileMitigationChoice types.Object `tfsdk:"mobile_mitigation_choice"`
 	WebMitigationChoice    types.Object `tfsdk:"web_mitigation_choice"`
 }
 
-type ProtectedApplicationWebMobileClientTypeMobileMitigationChoice struct {
+type ProtectedAppMobileMitigationChoice struct {
 	BlockMobile    types.Object `tfsdk:"block_mobile"`
 	ContinueMobile types.Object `tfsdk:"continue_mobile"`
 }
 
-type ProtectedApplicationWebMobileClientTypeBlockMobile struct {
+type ProtectedAppBlockMobile struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationWebMobileClientTypeContinueMobile struct {
+type ProtectedAppContinueMobile struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationWebMobileClientTypeWebMitigationChoice struct {
+type ProtectedAppWebMitigationChoice struct {
 	BlockWeb    types.Object `tfsdk:"block_web"`
 	ContinueWeb types.Object `tfsdk:"continue_web"`
 	RedirectWeb types.Object `tfsdk:"redirect_web"`
 }
 
-type ProtectedApplicationWebMobileClientTypeBlockWeb struct {
+type ProtectedAppBlockWeb struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationWebMobileClientTypeContinueWeb struct {
+type ProtectedAppContinueWeb struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationWebMobileClientTypeRedirectWeb struct {
+type ProtectedAppRedirectWeb struct {
 	Location types.String `tfsdk:"location"`
 	Status   types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeDomainMatcherChoice struct {
+type ProtectedAppProtectedEndpointTypeDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeDomain struct {
+type ProtectedAppProtectedEndpointTypeDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationCloudflarePathType struct {
+type ProtectedAppPathType struct {
 	Caseinsensitive types.Bool   `tfsdk:"caseinsensitive"`
 	Path            types.String `tfsdk:"path"`
 }
 
-type ProtectedApplicationCloudflareClientBypassRule struct {
+type ProtectedAppClientBypassRule struct {
 	ClientSourceChoice types.Object `tfsdk:"client_source_choice"`
 	Metadata           types.Object `tfsdk:"metadata"`
 }
 
-type ProtectedApplicationClientBypassRuleClientSourceChoice struct {
+type ProtectedAppClientSrcChoice struct {
 	HttpHeader types.Object `tfsdk:"http_header"`
 	IpPrefix   types.String `tfsdk:"ip_prefix"`
 }
 
-type ProtectedApplicationClientBypassRuleHttpHeader struct {
+type ProtectedAppHttpHeader struct {
 	Headers types.List `tfsdk:"headers"`
 }
 
-type ProtectedApplicationCreateSpecTypeCloudfront struct {
+type ProtectedAppCloudfront struct {
 	AwsConfigurationTypeChoice  types.Object `tfsdk:"aws_configuration_type_choice"`
 	ContinueMitigationActionHdr types.String `tfsdk:"continue_mitigation_action_hdr"`
 	DataSample                  types.Int64  `tfsdk:"data_sample"`
@@ -297,27 +301,27 @@ type ProtectedApplicationCreateSpecTypeCloudfront struct {
 	TrustedClients              types.List   `tfsdk:"trusted_clients"`
 }
 
-type ProtectedApplicationCloudfrontTypeAwsConfigurationTypeChoice struct {
+type ProtectedAppAwsCfgTypeChoice struct {
 	AwsConfigurationIdSelector  types.Object `tfsdk:"aws_configuration_id_selector"`
 	AwsConfigurationTagSelector types.Object `tfsdk:"aws_configuration_tag_selector"`
 	DisableAwsConfiguration     types.Bool   `tfsdk:"disable_aws_configuration"`
 }
 
-type ProtectedApplicationCloudfrontTypeAwsConfigurationIdSelector struct {
+type ProtectedAppAwsCfgIdSelector struct {
 	Ids types.List `tfsdk:"ids"`
 }
 
-type ProtectedApplicationCloudfrontTypeAwsConfigurationTagSelector struct {
+type ProtectedAppAwsCfgTagSelector struct {
 	Tags types.Map `tfsdk:"tags"`
 }
 
-type ProtectedApplicationCloudfrontTypeJavaScriptChoice struct {
+type ProtectedAppCloudfrontTypeJavaScriptChoice struct {
 	DisableJsInsert  types.Bool   `tfsdk:"disable_js_insert"`
 	JsInsertionRules types.Object `tfsdk:"js_insertion_rules"`
 	ManualJsInsert   types.Object `tfsdk:"manual_js_insert"`
 }
 
-type ProtectedApplicationCloudfrontTypeJsInsertionRules struct {
+type ProtectedAppCloudfrontTypeJsInsertionRules struct {
 	ExcludeList        types.List   `tfsdk:"exclude_list"`
 	JavascriptLocation types.List   `tfsdk:"javascript_location"`
 	JavascriptMode     types.List   `tfsdk:"javascript_mode"`
@@ -325,71 +329,71 @@ type ProtectedApplicationCloudfrontTypeJsInsertionRules struct {
 	Rules              types.List   `tfsdk:"rules"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptExclusionRule struct {
+type ProtectedAppCloudfrontJavaScriptExclusionRule struct {
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	Path                types.Object `tfsdk:"path"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptExclusionRuleDomainMatcherChoice struct {
+type ProtectedAppJavaScriptExclusionRuleDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptExclusionRuleDomain struct {
+type ProtectedAppJavaScriptExclusionRuleDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptInsertionRule struct {
+type ProtectedAppCloudfrontJavaScriptInsertionRule struct {
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	UriPathChoice       types.Object `tfsdk:"uri_path_choice"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptInsertionRuleDomainMatcherChoice struct {
+type ProtectedAppCloudfrontJavaScriptInsertionRuleDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptInsertionRuleDomain struct {
+type ProtectedAppCloudfrontJavaScriptInsertionRuleDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationCloudfrontJavaScriptInsertionRuleUriPathChoice struct {
+type ProtectedAppJavaScriptInsertionRuleUriPathChoice struct {
 	ExactPath types.String `tfsdk:"exact_path"`
 	Glob      types.String `tfsdk:"glob"`
 	Prefix    types.String `tfsdk:"prefix"`
 }
 
-type ProtectedApplicationCloudfrontTypeManualJsInsert struct {
+type ProtectedAppCloudfrontTypeManualJsInsert struct {
 	JavascriptMode types.List   `tfsdk:"javascript_mode"`
 	JsDownloadPath types.String `tfsdk:"js_download_path"`
 }
 
-type ProtectedApplicationCloudfrontTypeMobileSdkChoice struct {
+type ProtectedAppCloudfrontTypeMobileSdkChoice struct {
 	DisableMobileSdk types.Bool   `tfsdk:"disable_mobile_sdk"`
 	MobileSdkConfig  types.Object `tfsdk:"mobile_sdk_config"`
 }
 
-type ProtectedApplicationCloudfrontTypeMobileSdkConfig struct {
+type ProtectedAppCloudfrontTypeMobileSdkConfig struct {
 	MobileIdentifier types.Object `tfsdk:"mobile_identifier"`
 }
 
-type ProtectedApplicationCloudfrontMobileTrafficIdentifierType struct {
+type ProtectedAppCloudfrontMobileTrafficIdentifierType struct {
 	Headers types.List `tfsdk:"headers"`
 }
 
-type ProtectedApplicationCloudfrontHeaderMatcherType struct {
+type ProtectedAppCloudfrontHeaderMatcherType struct {
 	Name             types.String `tfsdk:"name"`
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type ProtectedApplicationCloudfrontHeaderMatcherTypeValueMatchChoice struct {
+type ProtectedAppHeaderMatcherTypeValueMatchChoice struct {
 	Exact types.String `tfsdk:"exact"`
 	Regex types.String `tfsdk:"regex"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointType struct {
+type ProtectedAppCloudfrontProtectedEndpointType struct {
 	ClientTypeChoice    types.Object `tfsdk:"client_type_choice"`
 	DomainMatcherChoice types.Object `tfsdk:"domain_matcher_choice"`
 	FlowLabelChoice     types.Object `tfsdk:"flow_label_choice"`
@@ -399,121 +403,121 @@ type ProtectedApplicationCloudfrontProtectedEndpointType struct {
 	Query               types.String `tfsdk:"query"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeClientTypeChoice struct {
+type ProtectedAppProtectedEndpointTypeClientTypeChoice struct {
 	MobileClient    types.Object `tfsdk:"mobile_client"`
 	WebClient       types.Object `tfsdk:"web_client"`
 	WebMobileClient types.Object `tfsdk:"web_mobile_client"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeMobileClient struct {
+type ProtectedAppProtectedEndpointTypeMobileClient struct {
 	MitigationChoice types.Object `tfsdk:"mitigation_choice"`
 }
 
-type ProtectedApplicationCloudfrontMobileClientTypeMitigationChoice struct {
+type ProtectedAppMobileClientTypeMitigationChoice struct {
 	Block    types.Object `tfsdk:"block"`
 	Continue types.Object `tfsdk:"continue"`
 }
 
-type ProtectedApplicationCloudfrontMobileClientTypeBlock struct {
+type ProtectedAppMobileClientTypeBlock struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontMobileClientTypeContinue struct {
+type ProtectedAppMobileClientTypeContinue struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationCloudfrontContinueMitigationChoiceTypeAddHeaderChoice struct {
+type ProtectedAppContinueMitigationChoiceTypeAddHeaderChoice struct {
 	AddHeader types.Bool `tfsdk:"add_header"`
 	NoHeader  types.Bool `tfsdk:"no_header"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeWebClient struct {
+type ProtectedAppProtectedEndpointTypeWebClient struct {
 	MitigationChoice types.Object `tfsdk:"mitigation_choice"`
 }
 
-type ProtectedApplicationCloudfrontWebClientTypeMitigationChoice struct {
+type ProtectedAppCloudfrontWebClientTypeMitigationChoice struct {
 	Block    types.Object `tfsdk:"block"`
 	Continue types.Object `tfsdk:"continue"`
 	Redirect types.Object `tfsdk:"redirect"`
 }
 
-type ProtectedApplicationCloudfrontWebClientTypeBlock struct {
+type ProtectedAppCloudfrontWebClientTypeBlock struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontWebClientTypeContinue struct {
+type ProtectedAppCloudfrontWebClientTypeContinue struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationCloudfrontWebClientTypeRedirect struct {
+type ProtectedAppWebClientTypeRedirect struct {
 	Location types.String `tfsdk:"location"`
 	Status   types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeWebMobileClient struct {
+type ProtectedAppProtectedEndpointTypeWebMobileClient struct {
 	MobileMitigationChoice types.Object `tfsdk:"mobile_mitigation_choice"`
 	WebMitigationChoice    types.Object `tfsdk:"web_mitigation_choice"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeMobileMitigationChoice struct {
+type ProtectedAppWebMobileClientTypeMobileMitigationChoice struct {
 	BlockMobile    types.Object `tfsdk:"block_mobile"`
 	ContinueMobile types.Object `tfsdk:"continue_mobile"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeBlockMobile struct {
+type ProtectedAppWebMobileClientTypeBlockMobile struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeContinueMobile struct {
+type ProtectedAppWebMobileClientTypeContinueMobile struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeWebMitigationChoice struct {
+type ProtectedAppWebMobileClientTypeWebMitigationChoice struct {
 	BlockWeb    types.Object `tfsdk:"block_web"`
 	ContinueWeb types.Object `tfsdk:"continue_web"`
 	RedirectWeb types.Object `tfsdk:"redirect_web"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeBlockWeb struct {
+type ProtectedAppWebMobileClientTypeBlockWeb struct {
 	Body        types.String `tfsdk:"body"`
 	ContentType types.String `tfsdk:"content_type"`
 	Status      types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeContinueWeb struct {
+type ProtectedAppWebMobileClientTypeContinueWeb struct {
 	AddHeaderChoice types.Object `tfsdk:"add_header_choice"`
 }
 
-type ProtectedApplicationCloudfrontWebMobileClientTypeRedirectWeb struct {
+type ProtectedAppWebMobileClientTypeRedirectWeb struct {
 	Location types.String `tfsdk:"location"`
 	Status   types.List   `tfsdk:"status"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeDomainMatcherChoice struct {
+type ProtectedAppCloudfrontProtectedEndpointTypeDomainMatcherChoice struct {
 	AnyDomain types.Bool   `tfsdk:"any_domain"`
 	Domain    types.Object `tfsdk:"domain"`
 }
 
-type ProtectedApplicationCloudfrontProtectedEndpointTypeDomain struct {
+type ProtectedAppCloudfrontProtectedEndpointTypeDomain struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeFlowLabelChoice struct {
+type ProtectedAppFlowLabelChoice struct {
 	FlowLabel          types.Object `tfsdk:"flow_label"`
 	UndefinedFlowLabel types.Bool   `tfsdk:"undefined_flow_label"`
 }
 
-type ProtectedApplicationProtectedEndpointTypeFlowLabel struct {
+type ProtectedAppFlowLabel struct {
 	FlowLabelChoice types.Object `tfsdk:"flow_label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeFlowLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelCategoriesChoiceTypeFlowLabelChoice struct {
 	AccountManagement types.Object `tfsdk:"account_management"`
 	Authentication    types.Object `tfsdk:"authentication"`
 	FinancialServices types.Object `tfsdk:"financial_services"`
@@ -523,90 +527,70 @@ type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeFlowLabelChoice 
 	ShoppingGiftCards types.Object `tfsdk:"shopping_gift_cards"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeAccountManagement struct {
+type ProtectedAppAccountMgmt struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelAccountManagementChoiceTypeLabelChoice struct {
+type ProtectedAppLabelChoice struct {
 	Create        types.Bool `tfsdk:"create"`
 	PasswordReset types.Bool `tfsdk:"password_reset"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeAuthentication struct {
+type ProtectedAppAuth struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelAuthenticationChoiceTypeLabelChoice struct {
-	Login        types.Object `tfsdk:"login"`
-	LoginMfa     types.Bool   `tfsdk:"login_mfa"`
-	LoginPartner types.Bool   `tfsdk:"login_partner"`
-	Logout       types.Bool   `tfsdk:"logout"`
-	TokenRefresh types.Bool   `tfsdk:"token_refresh"`
+type ProtectedAppBotDefenseFlowLabelAuthChoiceTypeLabelChoice struct {
+	Login        types.Bool `tfsdk:"login"`
+	LoginMfa     types.Bool `tfsdk:"login_mfa"`
+	LoginPartner types.Bool `tfsdk:"login_partner"`
+	Logout       types.Bool `tfsdk:"logout"`
+	TokenRefresh types.Bool `tfsdk:"token_refresh"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelAuthenticationChoiceTypeLogin struct {
-	TransactionResultChoice types.Object `tfsdk:"transaction_result_choice"`
-}
-
-type ProtectedApplicationBotDefenseTransactionResultTransactionResultChoice struct {
-	DisableTransactionResult types.Bool   `tfsdk:"disable_transaction_result"`
-	TransactionResult        types.Object `tfsdk:"transaction_result"`
-}
-
-type ProtectedApplicationBotDefenseTransactionResultTransactionResult struct {
-	FailureConditions types.List `tfsdk:"failure_conditions"`
-	SuccessConditions types.List `tfsdk:"success_conditions"`
-}
-
-type ProtectedApplicationBotDefenseTransactionResultCondition struct {
-	Name        types.String `tfsdk:"name"`
-	RegexValues types.List   `tfsdk:"regex_values"`
-	Status      types.List   `tfsdk:"status"`
-}
-
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeFinancialServices struct {
+type ProtectedAppFinancialServices struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelFinancialServicesChoiceTypeLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelFinancialServicesChoiceTypeLabelChoice struct {
 	Apply         types.Bool `tfsdk:"apply"`
 	MoneyTransfer types.Bool `tfsdk:"money_transfer"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeFlight struct {
+type ProtectedAppFlight struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelFlightChoiceTypeLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelFlightChoiceTypeLabelChoice struct {
 	Checkin types.Bool `tfsdk:"checkin"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeProfileManagement struct {
+type ProtectedAppProfileMgmt struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelProfileManagementChoiceTypeLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelProfileMgmtChoiceTypeLabelChoice struct {
 	Create types.Bool `tfsdk:"create"`
 	Update types.Bool `tfsdk:"update"`
 	View   types.Bool `tfsdk:"view"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeSearch struct {
+type ProtectedAppSearch struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelSearchChoiceTypeLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelSearchChoiceTypeLabelChoice struct {
 	FlightSearch      types.Bool `tfsdk:"flight_search"`
 	ProductSearch     types.Bool `tfsdk:"product_search"`
 	ReservationSearch types.Bool `tfsdk:"reservation_search"`
 	RoomSearch        types.Bool `tfsdk:"room_search"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelCategoriesChoiceTypeShoppingGiftCards struct {
+type ProtectedAppShoppingGiftCards struct {
 	LabelChoice types.Object `tfsdk:"label_choice"`
 }
 
-type ProtectedApplicationBotDefenseFlowLabelShoppingGiftCardsChoiceTypeLabelChoice struct {
+type ProtectedAppBotDefenseFlowLabelShoppingGiftCardsChoiceTypeLabelChoice struct {
 	GiftCardMakePurchaseWithGiftCard types.Bool `tfsdk:"gift_card_make_purchase_with_gift_card"`
 	GiftCardValidation               types.Bool `tfsdk:"gift_card_validation"`
 	ShopAddToCart                    types.Bool `tfsdk:"shop_add_to_cart"`
@@ -621,17 +605,17 @@ type ProtectedApplicationBotDefenseFlowLabelShoppingGiftCardsChoiceTypeLabelChoi
 	ShopUpdateQuantity               types.Bool `tfsdk:"shop_update_quantity"`
 }
 
-type ProtectedApplicationCloudfrontClientBypassRule struct {
+type ProtectedAppCloudfrontClientBypassRule struct {
 	ClientSourceChoice types.Object `tfsdk:"client_source_choice"`
 	Metadata           types.Object `tfsdk:"metadata"`
 }
 
-type ProtectedApplicationCloudfrontClientBypassRuleClientSourceChoice struct {
+type ProtectedAppClientBypassRuleClientSrcChoice struct {
 	HttpHeader types.Object `tfsdk:"http_header"`
 	IpPrefix   types.String `tfsdk:"ip_prefix"`
 }
 
-type ProtectedApplicationCloudfrontClientBypassRuleHttpHeader struct {
+type ProtectedAppClientBypassRuleHttpHeader struct {
 	Headers types.List `tfsdk:"headers"`
 }
 
@@ -1954,87 +1938,11 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabel
 // Attribute map for RequiredOneOfField --> LabelChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap = map[string]attr.Type{
 
-	"login": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap,
-	},
+	"login":         types.BoolType,
 	"login_mfa":     types.BoolType,
 	"login_partner": types.BoolType,
 	"logout":        types.BoolType,
 	"token_refresh": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Login
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap = map[string]attr.Type{
-
-	"transaction_result_choice": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> TransactionResultChoice
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_transaction_result": types.BoolType,
-	"transaction_result": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TransactionResult
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap = map[string]attr.Type{
-
-	"failure_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"success_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> FailureConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> SuccessConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> FinancialServices
@@ -2205,8 +2113,8 @@ func (d *DataSourceF5XCProtectedApplication) Metadata(ctx context.Context, reque
 func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
+		MarkdownDescription: "Configures application protected by Bot Defense",
+		Description:         "Configures application protected by Bot Defense",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -3968,7 +3876,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -3996,100 +3904,16 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
 																			Attributes: map[string]schema.Attribute{
-																				"login": schema.SingleNestedAttribute{
+																				"login": schema.BoolAttribute{
 																					Description: "Login",
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
-																					Attributes: map[string]schema.Attribute{
-																						"transaction_result_choice": schema.SingleNestedAttribute{
-																							Description: "Transaction result Transaction Result",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																							Attributes: map[string]schema.Attribute{
-																								"disable_transaction_result": schema.BoolAttribute{
-																									Description: "Disable Disable collection of transaction result.",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																								},
-																								"transaction_result": schema.SingleNestedAttribute{
-																									Description: "Transaction result Collect transaction result.",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"failure_conditions": schema.ListNestedAttribute{
-																											Description: "Failure Conditions Failure Conditions",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description: "name A case-insensitive HTTP header name.",
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description: "regex values A list of regular expressions to match the input against.",
-																														ElementType: types.StringType,
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																													"status": schema.ListAttribute{
-																														Description: "HTTP Status code for response HTTP Status code",
-																														ElementType: types.StringType,
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																												},
-																											},
-																										},
-																										"success_conditions": schema.ListNestedAttribute{
-																											Description: "Success Conditions Success Conditions",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description: "name A case-insensitive HTTP header name.",
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description: "regex values A list of regular expressions to match the input against.",
-																														ElementType: types.StringType,
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																													"status": schema.ListAttribute{
-																														Description: "HTTP Status code for response HTTP Status code",
-																														ElementType: types.StringType,
-																														Required:    false,
-																														Optional:    false,
-																														Computed:    true,
-																													},
-																												},
-																											},
-																										},
-																									},
-																								},
-																							},
-																						},
-																					},
 																				},
 																				"login_mfa": schema.BoolAttribute{
 																					Description: "LoginMFA",
@@ -4126,7 +3950,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -4154,7 +3978,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -4176,7 +4000,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -4210,7 +4034,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -4250,7 +4074,7 @@ func (r *DataSourceF5XCProtectedApplication) Schema(ctx context.Context, request
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description: "Flow label Flow label category",
+																			Description: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -4563,9 +4387,15 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_shape_bot_defense_protected_application.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "protected_application", err))
 		return
 	}
 
@@ -4573,7 +4403,41 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_shape_bot_defense_protected_application.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -4596,8 +4460,14 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -4606,6 +4476,7 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -4706,10 +4577,15 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 	if oneofConnectorTypeChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		connectorTypeChoiceChoices := rawSpecMap["connector_type_choice"]
+		var connectorTypeChoiceChoices interface{}
+		if v := rawSpecMap["connector_type_choice"]; v != nil {
+			connectorTypeChoiceChoices = v
+		} else {
+			connectorTypeChoiceChoices = specData.GetConnectorTypeChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var connectorTypeChoiceChoicesModel = &ProtectedApplicationCreateSpecTypeConnectorTypeChoice{}
+		var connectorTypeChoiceChoicesModel = &ProtectedAppConnectorTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4824,9 +4700,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if len(jsInsertionRulesElement.GetExcludeList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								excludeListElements := make([]ProtectedApplicationCloudflareJavaScriptExclusionRule, 0, len(jsInsertionRulesElement.GetExcludeList()))
+								excludeListElements := make([]ProtectedAppJavaScriptExclusionRule, 0, len(jsInsertionRulesElement.GetExcludeList()))
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
-									protectedApplicationCloudflareJavaScriptExclusionRuleModel := ProtectedApplicationCloudflareJavaScriptExclusionRule{}
+									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
 									// data specToModelNested RequiredOneOfField --> DomainMatcherChoice
 									// CreateSpecType
@@ -4958,42 +4834,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
+										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
 									if excludeListElement.GetMetadata() != nil {
 										// Create the nested Go struct
-										protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+										protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 										metadataElement := excludeListElement.GetMetadata()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested StringField --> Description
 										if metadataElement.GetDescription() != "" {
-											protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+											protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+											protectedAppMessageMetaTypeModel.Description = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if metadataElement.GetName() != "" {
-											protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+											protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+											protectedAppMessageMetaTypeModel.Name = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+										protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+										protectedAppJavaScriptExclusionRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -5002,13 +4878,13 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap)
+										protectedAppJavaScriptExclusionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Path
 									if excludeListElement.GetPath() != nil {
 										// Create the nested Go struct
-										protectedApplicationPathMatcherTypeModel := &ProtectedApplicationPathMatcherType{}
+										protectedAppPathMatcherTypeModel := &ProtectedAppPathMatcherType{}
 										pathElement := excludeListElement.GetPath()
 
 										// Recursively populate the nested struct
@@ -5069,18 +4945,18 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											protectedApplicationPathMatcherTypeModel.PathMatchChoice = finalObj
+											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
-											protectedApplicationPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
+											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap, protectedApplicationPathMatcherTypeModel)
+										protectedAppPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap, protectedAppPathMatcherTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.Path = protectedApplicationPathMatcherTypeModelObj
+										protectedAppJavaScriptExclusionRuleModel.Path = protectedAppPathMatcherTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -5089,10 +4965,10 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudflareJavaScriptExclusionRuleModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap)
+										protectedAppJavaScriptExclusionRuleModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap)
 									}
 
-									excludeListElements = append(excludeListElements, protectedApplicationCloudflareJavaScriptExclusionRuleModel)
+									excludeListElements = append(excludeListElements, protectedAppJavaScriptExclusionRuleModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5136,9 +5012,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if len(jsInsertionRulesElement.GetRules()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								rulesElements := make([]ProtectedApplicationCloudflareJavaScriptInsertionRule, 0, len(jsInsertionRulesElement.GetRules()))
+								rulesElements := make([]ProtectedAppJavaScriptInsertionRule, 0, len(jsInsertionRulesElement.GetRules()))
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
-									protectedApplicationCloudflareJavaScriptInsertionRuleModel := ProtectedApplicationCloudflareJavaScriptInsertionRule{}
+									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
 									// data specToModelNested RequiredOneOfField --> DomainMatcherChoice
 									// CreateSpecType
@@ -5270,42 +5146,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
+										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
 									if rulesElement.GetMetadata() != nil {
 										// Create the nested Go struct
-										protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+										protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 										metadataElement := rulesElement.GetMetadata()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested StringField --> Description
 										if metadataElement.GetDescription() != "" {
-											protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+											protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+											protectedAppMessageMetaTypeModel.Description = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if metadataElement.GetName() != "" {
-											protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+											protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+											protectedAppMessageMetaTypeModel.Name = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+										protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+										protectedAppJavaScriptInsertionRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -5314,7 +5190,7 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap)
+										protectedAppJavaScriptInsertionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> UriPath
@@ -5373,12 +5249,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.UriPathChoice = finalObj
+										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
-										protectedApplicationCloudflareJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
+										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
-									rulesElements = append(rulesElements, protectedApplicationCloudflareJavaScriptInsertionRuleModel)
+									rulesElements = append(rulesElements, protectedAppJavaScriptInsertionRuleModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5516,7 +5392,7 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// data specToModelNested PointerField --> MobileIdentifier
 							if mobileSdkConfigElement.GetMobileIdentifier() != nil {
 								// Create the nested Go struct
-								protectedApplicationCloudflareMobileTrafficIdentifierTypeModel := &ProtectedApplicationCloudflareMobileTrafficIdentifierType{}
+								protectedAppMobileTrafficIdentifierTypeModel := &ProtectedAppMobileTrafficIdentifierType{}
 								mobileIdentifierElement := mobileSdkConfigElement.GetMobileIdentifier()
 
 								// Recursively populate the nested struct
@@ -5525,16 +5401,16 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 								if len(mobileIdentifierElement.GetHeaders()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									headersElements := make([]ProtectedApplicationCloudflareHeaderMatcherType, 0, len(mobileIdentifierElement.GetHeaders()))
+									headersElements := make([]ProtectedAppHeaderMatcherType, 0, len(mobileIdentifierElement.GetHeaders()))
 									for _, headersElement := range mobileIdentifierElement.GetHeaders() {
-										protectedApplicationCloudflareHeaderMatcherTypeModel := ProtectedApplicationCloudflareHeaderMatcherType{}
+										protectedAppHeaderMatcherTypeModel := ProtectedAppHeaderMatcherType{}
 
 										// data specToModelNested RequiredStringField --> Name
 										if headersElement.GetName() != "" {
-											protectedApplicationCloudflareHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+											protectedAppHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationCloudflareHeaderMatcherTypeModel.Name = types.StringNull()
+											protectedAppHeaderMatcherTypeModel.Name = types.StringNull()
 										}
 
 										// data specToModelNested OneOfField --> ValueMatch
@@ -5582,12 +5458,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											protectedApplicationCloudflareHeaderMatcherTypeModel.ValueMatchChoice = finalObj
+											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
-											protectedApplicationCloudflareHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
+											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
-										headersElements = append(headersElements, protectedApplicationCloudflareHeaderMatcherTypeModel)
+										headersElements = append(headersElements, protectedAppHeaderMatcherTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5596,22 +5472,22 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 									if response.Diagnostics.HasError() {
 										return
 									}
-									protectedApplicationCloudflareMobileTrafficIdentifierTypeModel.Headers = headersListValue
+									protectedAppMobileTrafficIdentifierTypeModel.Headers = headersListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									protectedApplicationCloudflareMobileTrafficIdentifierTypeModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersModelAttributeMap})
+									protectedAppMobileTrafficIdentifierTypeModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersModelAttributeMap})
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								protectedApplicationCloudflareMobileTrafficIdentifierTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierModelAttributeMap, protectedApplicationCloudflareMobileTrafficIdentifierTypeModel)
+								protectedAppMobileTrafficIdentifierTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierModelAttributeMap, protectedAppMobileTrafficIdentifierTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								mobileSdkConfigAttributeMap["mobile_identifier"] = protectedApplicationCloudflareMobileTrafficIdentifierTypeModelObj
+								mobileSdkConfigAttributeMap["mobile_identifier"] = protectedAppMobileTrafficIdentifierTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -5656,9 +5532,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 				if len(cloudflareElement.GetProtectedEndpoints()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					protectedEndpointsElements := make([]ProtectedApplicationCloudflareProtectedEndpointType, 0, len(cloudflareElement.GetProtectedEndpoints()))
+					protectedEndpointsElements := make([]ProtectedAppProtectedEndpointType, 0, len(cloudflareElement.GetProtectedEndpoints()))
 					for _, protectedEndpointsElement := range cloudflareElement.GetProtectedEndpoints() {
-						protectedApplicationCloudflareProtectedEndpointTypeModel := ProtectedApplicationCloudflareProtectedEndpointType{}
+						protectedAppProtectedEndpointTypeModel := ProtectedAppProtectedEndpointType{}
 
 						// data specToModelNested RequiredOneOfField --> ClientTypeChoice
 						// CreateSpecType
@@ -6543,9 +6419,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudflareProtectedEndpointTypeModel.ClientTypeChoice = finalObj
+							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
-							protectedApplicationCloudflareProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
+							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> DomainMatcherChoice
@@ -6677,9 +6553,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudflareProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
+							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
-							protectedApplicationCloudflareProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
+							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
 						// data SpecToModelNested RequiredArrayOfEnumField --> HttpMethods
@@ -6695,42 +6571,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudflareProtectedEndpointTypeModel.HttpMethods = listValue
+							protectedAppProtectedEndpointTypeModel.HttpMethods = listValue
 						} else {
-							protectedApplicationCloudflareProtectedEndpointTypeModel.HttpMethods = types.ListNull(types.StringType)
+							protectedAppProtectedEndpointTypeModel.HttpMethods = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if protectedEndpointsElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+							protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 							metadataElement := protectedEndpointsElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+								protectedAppMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+								protectedAppMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+							protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+							protectedAppProtectedEndpointTypeModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -6739,35 +6615,35 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsMetadataModelAttributeMap)
+							protectedAppProtectedEndpointTypeModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Path
 						if protectedEndpointsElement.GetPath() != nil {
 							// Create the nested Go struct
-							protectedApplicationCloudflarePathTypeModel := &ProtectedApplicationCloudflarePathType{}
+							protectedAppPathTypeModel := &ProtectedAppPathType{}
 							pathElement := protectedEndpointsElement.GetPath()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested BoolField --> Caseinsensitive
-							protectedApplicationCloudflarePathTypeModel.Caseinsensitive = types.BoolValue(bool(pathElement.GetCaseinsensitive()))
+							protectedAppPathTypeModel.Caseinsensitive = types.BoolValue(bool(pathElement.GetCaseinsensitive()))
 
 							// data specToModelNested RequiredStringField --> Path
 							if pathElement.GetPath() != "" {
-								protectedApplicationCloudflarePathTypeModel.Path = types.StringValue(pathElement.GetPath())
+								protectedAppPathTypeModel.Path = types.StringValue(pathElement.GetPath())
 							} else {
 								// Empty string, set to null
-								protectedApplicationCloudflarePathTypeModel.Path = types.StringNull()
+								protectedAppPathTypeModel.Path = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							protectedApplicationCloudflarePathTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsPathModelAttributeMap, protectedApplicationCloudflarePathTypeModel)
+							protectedAppPathTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsPathModelAttributeMap, protectedAppPathTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Path = protectedApplicationCloudflarePathTypeModelObj
+							protectedAppProtectedEndpointTypeModel.Path = protectedAppPathTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -6776,18 +6652,18 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsPathModelAttributeMap)
+							protectedAppProtectedEndpointTypeModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsPathModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> Query
 						if protectedEndpointsElement.GetQuery() != "" {
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Query = types.StringValue(protectedEndpointsElement.GetQuery())
+							protectedAppProtectedEndpointTypeModel.Query = types.StringValue(protectedEndpointsElement.GetQuery())
 						} else {
 							// Empty string, set to null
-							protectedApplicationCloudflareProtectedEndpointTypeModel.Query = types.StringNull()
+							protectedAppProtectedEndpointTypeModel.Query = types.StringNull()
 						}
 
-						protectedEndpointsElements = append(protectedEndpointsElements, protectedApplicationCloudflareProtectedEndpointTypeModel)
+						protectedEndpointsElements = append(protectedEndpointsElements, protectedAppProtectedEndpointTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6812,9 +6688,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 				if len(cloudflareElement.GetTrustedClients()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					trustedClientsElements := make([]ProtectedApplicationCloudflareClientBypassRule, 0, len(cloudflareElement.GetTrustedClients()))
+					trustedClientsElements := make([]ProtectedAppClientBypassRule, 0, len(cloudflareElement.GetTrustedClients()))
 					for _, trustedClientsElement := range cloudflareElement.GetTrustedClients() {
-						protectedApplicationCloudflareClientBypassRuleModel := ProtectedApplicationCloudflareClientBypassRule{}
+						protectedAppClientBypassRuleModel := ProtectedAppClientBypassRule{}
 
 						// data specToModelNested RequiredOneOfField --> ClientSourceChoice
 						// CreateSpecType
@@ -6843,16 +6719,16 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 									if len(httpHeaderElement.GetHeaders()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										headersElements := make([]ProtectedApplicationCloudflareHeaderMatcherType, 0, len(httpHeaderElement.GetHeaders()))
+										headersElements := make([]ProtectedAppHeaderMatcherType, 0, len(httpHeaderElement.GetHeaders()))
 										for _, headersElement := range httpHeaderElement.GetHeaders() {
-											protectedApplicationCloudflareHeaderMatcherTypeModel := ProtectedApplicationCloudflareHeaderMatcherType{}
+											protectedAppHeaderMatcherTypeModel := ProtectedAppHeaderMatcherType{}
 
 											// data specToModelNested RequiredStringField --> Name
 											if headersElement.GetName() != "" {
-												protectedApplicationCloudflareHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+												protectedAppHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
 											} else {
 												// Empty string, set to null
-												protectedApplicationCloudflareHeaderMatcherTypeModel.Name = types.StringNull()
+												protectedAppHeaderMatcherTypeModel.Name = types.StringNull()
 											}
 
 											// data specToModelNested OneOfField --> ValueMatch
@@ -6900,12 +6776,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												protectedApplicationCloudflareHeaderMatcherTypeModel.ValueMatchChoice = finalObj
+												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
-												protectedApplicationCloudflareHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
+												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
-											headersElements = append(headersElements, protectedApplicationCloudflareHeaderMatcherTypeModel)
+											headersElements = append(headersElements, protectedAppHeaderMatcherTypeModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6957,42 +6833,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudflareClientBypassRuleModel.ClientSourceChoice = finalObj
+							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
-							protectedApplicationCloudflareClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
+							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if trustedClientsElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+							protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 							metadataElement := trustedClientsElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+								protectedAppMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+								protectedAppMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+							protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudflareClientBypassRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+							protectedAppClientBypassRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -7001,10 +6877,10 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							protectedApplicationCloudflareClientBypassRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsMetadataModelAttributeMap)
+							protectedAppClientBypassRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsMetadataModelAttributeMap)
 						}
 
-						trustedClientsElements = append(trustedClientsElements, protectedApplicationCloudflareClientBypassRuleModel)
+						trustedClientsElements = append(trustedClientsElements, protectedAppClientBypassRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7225,9 +7101,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if len(jsInsertionRulesElement.GetExcludeList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								excludeListElements := make([]ProtectedApplicationCloudfrontJavaScriptExclusionRule, 0, len(jsInsertionRulesElement.GetExcludeList()))
+								excludeListElements := make([]ProtectedAppCloudfrontJavaScriptExclusionRule, 0, len(jsInsertionRulesElement.GetExcludeList()))
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
-									protectedApplicationCloudfrontJavaScriptExclusionRuleModel := ProtectedApplicationCloudfrontJavaScriptExclusionRule{}
+									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
 									// data specToModelNested RequiredOneOfField --> DomainMatcherChoice
 									// CreateSpecType
@@ -7359,42 +7235,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
 									if excludeListElement.GetMetadata() != nil {
 										// Create the nested Go struct
-										protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+										protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 										metadataElement := excludeListElement.GetMetadata()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested StringField --> Description
 										if metadataElement.GetDescription() != "" {
-											protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+											protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+											protectedAppMessageMetaTypeModel.Description = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if metadataElement.GetName() != "" {
-											protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+											protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+											protectedAppMessageMetaTypeModel.Name = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+										protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -7403,13 +7279,13 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap)
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Path
 									if excludeListElement.GetPath() != nil {
 										// Create the nested Go struct
-										protectedApplicationPathMatcherTypeModel := &ProtectedApplicationPathMatcherType{}
+										protectedAppPathMatcherTypeModel := &ProtectedAppPathMatcherType{}
 										pathElement := excludeListElement.GetPath()
 
 										// Recursively populate the nested struct
@@ -7470,18 +7346,18 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											protectedApplicationPathMatcherTypeModel.PathMatchChoice = finalObj
+											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
-											protectedApplicationPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
+											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap, protectedApplicationPathMatcherTypeModel)
+										protectedAppPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap, protectedAppPathMatcherTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.Path = protectedApplicationPathMatcherTypeModelObj
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.Path = protectedAppPathMatcherTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -7490,10 +7366,10 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudfrontJavaScriptExclusionRuleModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap)
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.Path = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathModelAttributeMap)
 									}
 
-									excludeListElements = append(excludeListElements, protectedApplicationCloudfrontJavaScriptExclusionRuleModel)
+									excludeListElements = append(excludeListElements, protectedAppCloudfrontJavaScriptExclusionRuleModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7551,9 +7427,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if len(jsInsertionRulesElement.GetRules()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								rulesElements := make([]ProtectedApplicationCloudfrontJavaScriptInsertionRule, 0, len(jsInsertionRulesElement.GetRules()))
+								rulesElements := make([]ProtectedAppCloudfrontJavaScriptInsertionRule, 0, len(jsInsertionRulesElement.GetRules()))
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
-									protectedApplicationCloudfrontJavaScriptInsertionRuleModel := ProtectedApplicationCloudfrontJavaScriptInsertionRule{}
+									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
 									// data specToModelNested RequiredOneOfField --> DomainMatcherChoice
 									// CreateSpecType
@@ -7685,42 +7561,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
 									if rulesElement.GetMetadata() != nil {
 										// Create the nested Go struct
-										protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+										protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 										metadataElement := rulesElement.GetMetadata()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested StringField --> Description
 										if metadataElement.GetDescription() != "" {
-											protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+											protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+											protectedAppMessageMetaTypeModel.Description = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if metadataElement.GetName() != "" {
-											protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+											protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+											protectedAppMessageMetaTypeModel.Name = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+										protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -7729,7 +7605,7 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap)
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> UriPath
@@ -7788,12 +7664,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
-										protectedApplicationCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
-									rulesElements = append(rulesElements, protectedApplicationCloudfrontJavaScriptInsertionRuleModel)
+									rulesElements = append(rulesElements, protectedAppCloudfrontJavaScriptInsertionRuleModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7945,7 +7821,7 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// data specToModelNested PointerField --> MobileIdentifier
 							if mobileSdkConfigElement.GetMobileIdentifier() != nil {
 								// Create the nested Go struct
-								protectedApplicationCloudfrontMobileTrafficIdentifierTypeModel := &ProtectedApplicationCloudfrontMobileTrafficIdentifierType{}
+								protectedAppCloudfrontMobileTrafficIdentifierTypeModel := &ProtectedAppCloudfrontMobileTrafficIdentifierType{}
 								mobileIdentifierElement := mobileSdkConfigElement.GetMobileIdentifier()
 
 								// Recursively populate the nested struct
@@ -7954,16 +7830,16 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 								if len(mobileIdentifierElement.GetHeaders()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									headersElements := make([]ProtectedApplicationCloudfrontHeaderMatcherType, 0, len(mobileIdentifierElement.GetHeaders()))
+									headersElements := make([]ProtectedAppCloudfrontHeaderMatcherType, 0, len(mobileIdentifierElement.GetHeaders()))
 									for _, headersElement := range mobileIdentifierElement.GetHeaders() {
-										protectedApplicationCloudfrontHeaderMatcherTypeModel := ProtectedApplicationCloudfrontHeaderMatcherType{}
+										protectedAppCloudfrontHeaderMatcherTypeModel := ProtectedAppCloudfrontHeaderMatcherType{}
 
 										// data specToModelNested RequiredStringField --> Name
 										if headersElement.GetName() != "" {
-											protectedApplicationCloudfrontHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+											protectedAppCloudfrontHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
 										} else {
 											// Empty string, set to null
-											protectedApplicationCloudfrontHeaderMatcherTypeModel.Name = types.StringNull()
+											protectedAppCloudfrontHeaderMatcherTypeModel.Name = types.StringNull()
 										}
 
 										// data specToModelNested OneOfField --> ValueMatch
@@ -8011,12 +7887,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											protectedApplicationCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
+											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
-											protectedApplicationCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
+											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
-										headersElements = append(headersElements, protectedApplicationCloudfrontHeaderMatcherTypeModel)
+										headersElements = append(headersElements, protectedAppCloudfrontHeaderMatcherTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8025,22 +7901,22 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 									if response.Diagnostics.HasError() {
 										return
 									}
-									protectedApplicationCloudfrontMobileTrafficIdentifierTypeModel.Headers = headersListValue
+									protectedAppCloudfrontMobileTrafficIdentifierTypeModel.Headers = headersListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									protectedApplicationCloudfrontMobileTrafficIdentifierTypeModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersModelAttributeMap})
+									protectedAppCloudfrontMobileTrafficIdentifierTypeModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersModelAttributeMap})
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								protectedApplicationCloudfrontMobileTrafficIdentifierTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierModelAttributeMap, protectedApplicationCloudfrontMobileTrafficIdentifierTypeModel)
+								protectedAppCloudfrontMobileTrafficIdentifierTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierModelAttributeMap, protectedAppCloudfrontMobileTrafficIdentifierTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								mobileSdkConfigAttributeMap["mobile_identifier"] = protectedApplicationCloudfrontMobileTrafficIdentifierTypeModelObj
+								mobileSdkConfigAttributeMap["mobile_identifier"] = protectedAppCloudfrontMobileTrafficIdentifierTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -8085,9 +7961,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 				if len(cloudfrontElement.GetProtectedEndpoints()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					protectedEndpointsElements := make([]ProtectedApplicationCloudfrontProtectedEndpointType, 0, len(cloudfrontElement.GetProtectedEndpoints()))
+					protectedEndpointsElements := make([]ProtectedAppCloudfrontProtectedEndpointType, 0, len(cloudfrontElement.GetProtectedEndpoints()))
 					for _, protectedEndpointsElement := range cloudfrontElement.GetProtectedEndpoints() {
-						protectedApplicationCloudfrontProtectedEndpointTypeModel := ProtectedApplicationCloudfrontProtectedEndpointType{}
+						protectedAppCloudfrontProtectedEndpointTypeModel := ProtectedAppCloudfrontProtectedEndpointType{}
 
 						// data specToModelNested RequiredOneOfField --> ClientTypeChoice
 						// CreateSpecType
@@ -8972,9 +8848,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
+							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
+							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> DomainMatcherChoice
@@ -9106,9 +8982,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
+							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
+							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> FlowLabelChoice
@@ -9265,218 +9141,26 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 
 													// Process nested choices, populating the temporary attribute map
 
-													// data specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// data specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// data specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// data specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// data specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// data specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedApplicationBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedApplicationBotDefenseTransactionResultConditionModel := ProtectedApplicationBotDefenseTransactionResultCondition{}
-
-																				// data specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// data specToModelNested ArrayOfStringField --> RegexValues
-																				if len(failureConditionsElement.GetRegexValues()) > 0 {
-																					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																					response.Diagnostics.Append(listDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-																					protectedApplicationBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																				} else {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																				}
-
-																				// data specToModelNested RequiredEnumField --> Status
-																				if failureConditionsElement.GetStatus().String() != "" {
-																					stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																					stringSlice := []types.String{stringValue}
-																					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																					response.Diagnostics.Append(listDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Status = listValue
-																				} else {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedApplicationBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(listDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// data specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedApplicationBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedApplicationBotDefenseTransactionResultConditionModel := ProtectedApplicationBotDefenseTransactionResultCondition{}
-
-																				// data specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// data specToModelNested ArrayOfStringField --> RegexValues
-																				if len(successConditionsElement.GetRegexValues()) > 0 {
-																					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																					response.Diagnostics.Append(listDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-																					protectedApplicationBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																				} else {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																				}
-
-																				// data specToModelNested RequiredEnumField --> Status
-																				if successConditionsElement.GetStatus().String() != "" {
-																					stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																					stringSlice := []types.String{stringValue}
-																					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																					response.Diagnostics.Append(listDiags...)
-																					if response.Diagnostics.HasError() {
-																						return
-																					}
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Status = listValue
-																				} else {
-																					protectedApplicationBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedApplicationBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(listDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// data specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -10402,9 +10086,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
+							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
+							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
 						// data SpecToModelNested RequiredArrayOfEnumField --> HttpMethods
@@ -10420,42 +10104,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.HttpMethods = listValue
+							protectedAppCloudfrontProtectedEndpointTypeModel.HttpMethods = listValue
 						} else {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.HttpMethods = types.ListNull(types.StringType)
+							protectedAppCloudfrontProtectedEndpointTypeModel.HttpMethods = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if protectedEndpointsElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+							protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 							metadataElement := protectedEndpointsElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+								protectedAppMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+								protectedAppMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+							protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+							protectedAppCloudfrontProtectedEndpointTypeModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -10464,26 +10148,26 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsMetadataModelAttributeMap)
+							protectedAppCloudfrontProtectedEndpointTypeModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> Path
 						if protectedEndpointsElement.GetPath() != "" {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Path = types.StringValue(protectedEndpointsElement.GetPath())
+							protectedAppCloudfrontProtectedEndpointTypeModel.Path = types.StringValue(protectedEndpointsElement.GetPath())
 						} else {
 							// Empty string, set to null
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Path = types.StringNull()
+							protectedAppCloudfrontProtectedEndpointTypeModel.Path = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Query
 						if protectedEndpointsElement.GetQuery() != "" {
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Query = types.StringValue(protectedEndpointsElement.GetQuery())
+							protectedAppCloudfrontProtectedEndpointTypeModel.Query = types.StringValue(protectedEndpointsElement.GetQuery())
 						} else {
 							// Empty string, set to null
-							protectedApplicationCloudfrontProtectedEndpointTypeModel.Query = types.StringNull()
+							protectedAppCloudfrontProtectedEndpointTypeModel.Query = types.StringNull()
 						}
 
-						protectedEndpointsElements = append(protectedEndpointsElements, protectedApplicationCloudfrontProtectedEndpointTypeModel)
+						protectedEndpointsElements = append(protectedEndpointsElements, protectedAppCloudfrontProtectedEndpointTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10508,9 +10192,9 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 				if len(cloudfrontElement.GetTrustedClients()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					trustedClientsElements := make([]ProtectedApplicationCloudfrontClientBypassRule, 0, len(cloudfrontElement.GetTrustedClients()))
+					trustedClientsElements := make([]ProtectedAppCloudfrontClientBypassRule, 0, len(cloudfrontElement.GetTrustedClients()))
 					for _, trustedClientsElement := range cloudfrontElement.GetTrustedClients() {
-						protectedApplicationCloudfrontClientBypassRuleModel := ProtectedApplicationCloudfrontClientBypassRule{}
+						protectedAppCloudfrontClientBypassRuleModel := ProtectedAppCloudfrontClientBypassRule{}
 
 						// data specToModelNested RequiredOneOfField --> ClientSourceChoice
 						// CreateSpecType
@@ -10539,16 +10223,16 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 									if len(httpHeaderElement.GetHeaders()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										headersElements := make([]ProtectedApplicationCloudfrontHeaderMatcherType, 0, len(httpHeaderElement.GetHeaders()))
+										headersElements := make([]ProtectedAppCloudfrontHeaderMatcherType, 0, len(httpHeaderElement.GetHeaders()))
 										for _, headersElement := range httpHeaderElement.GetHeaders() {
-											protectedApplicationCloudfrontHeaderMatcherTypeModel := ProtectedApplicationCloudfrontHeaderMatcherType{}
+											protectedAppCloudfrontHeaderMatcherTypeModel := ProtectedAppCloudfrontHeaderMatcherType{}
 
 											// data specToModelNested RequiredStringField --> Name
 											if headersElement.GetName() != "" {
-												protectedApplicationCloudfrontHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+												protectedAppCloudfrontHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
 											} else {
 												// Empty string, set to null
-												protectedApplicationCloudfrontHeaderMatcherTypeModel.Name = types.StringNull()
+												protectedAppCloudfrontHeaderMatcherTypeModel.Name = types.StringNull()
 											}
 
 											// data specToModelNested OneOfField --> ValueMatch
@@ -10596,12 +10280,12 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												protectedApplicationCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
+												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
-												protectedApplicationCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
+												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
-											headersElements = append(headersElements, protectedApplicationCloudfrontHeaderMatcherTypeModel)
+											headersElements = append(headersElements, protectedAppCloudfrontHeaderMatcherTypeModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10653,42 +10337,42 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							protectedApplicationCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
+							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
-							protectedApplicationCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
+							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if trustedClientsElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							protectedApplicationMessageMetaTypeModel := &ProtectedApplicationMessageMetaType{}
+							protectedAppMessageMetaTypeModel := &ProtectedAppMessageMetaType{}
 							metadataElement := trustedClientsElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								protectedApplicationMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								protectedAppMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Description = types.StringNull()
+								protectedAppMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								protectedApplicationMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								protectedAppMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								protectedApplicationMessageMetaTypeModel.Name = types.StringNull()
+								protectedAppMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							protectedApplicationMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsMetadataModelAttributeMap, protectedApplicationMessageMetaTypeModel)
+							protectedAppMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsMetadataModelAttributeMap, protectedAppMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							protectedApplicationCloudfrontClientBypassRuleModel.Metadata = protectedApplicationMessageMetaTypeModelObj
+							protectedAppCloudfrontClientBypassRuleModel.Metadata = protectedAppMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -10697,10 +10381,10 @@ func (d *DataSourceF5XCProtectedApplication) Read(ctx context.Context, request d
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							protectedApplicationCloudfrontClientBypassRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsMetadataModelAttributeMap)
+							protectedAppCloudfrontClientBypassRuleModel.Metadata = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsMetadataModelAttributeMap)
 						}
 
-						trustedClientsElements = append(trustedClientsElements, protectedApplicationCloudfrontClientBypassRuleModel)
+						trustedClientsElements = append(trustedClientsElements, protectedAppCloudfrontClientBypassRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

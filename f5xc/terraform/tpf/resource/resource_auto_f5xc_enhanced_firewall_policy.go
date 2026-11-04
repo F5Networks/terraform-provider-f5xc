@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +46,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_enhanced_firewall_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/enhanced_firewall_policy"
 	ves_io_schema_network_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_policy"
@@ -675,8 +677,8 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Metadata(ctx context.Context, reque
 func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet",
+		Description:         "Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -787,7 +789,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -826,7 +828,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -865,7 +867,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -904,7 +906,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -1023,7 +1025,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1169,7 +1171,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1215,7 +1217,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1429,7 +1431,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1475,7 +1477,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1556,12 +1558,11 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													Attributes: map[string]schema.Attribute{
 														"applications": schema.ListAttribute{
 															Description:         "Applications Application protocols like HTTP, SNMP",
-															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 															},
@@ -1592,7 +1593,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 														},
 														"protocol": schema.StringAttribute{
 															Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 															Required:            false,
 															Optional:            true,
 															Computed:            true,
@@ -1679,7 +1680,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1758,7 +1759,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1832,9 +1833,17 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) ModifyPlan(ctx context.Context, req
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCEnhancedFirewallPolicyModel
 
 	// Read Terraform plan data into the model
@@ -2874,7 +2883,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2897,7 +2906,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -3055,29 +3064,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3124,29 +3135,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3193,29 +3206,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3262,29 +3277,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4583,7 +4600,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -4741,29 +4758,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4810,29 +4829,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4879,29 +4900,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4948,29 +4971,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -5142,7 +5167,11 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap, map[string]attr.Value{
+								"allow":          types.BoolNull(),
+								"deny":           types.BoolValue(true),
+								"insert_service": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceInsertServiceModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested PointerField --> AdvancedAction
@@ -5449,7 +5478,17 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap, map[string]attr.Value{
+								"all_destinations":           types.BoolValue(true),
+								"all_sli_vips":               types.BoolNull(),
+								"all_slo_vips":               types.BoolNull(),
+								"destination_aws_vpc_ids":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap),
+								"destination_ip_prefix_set":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationIpPrefixSetModelAttributeMap),
+								"destination_label_selector": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationLabelSelectorModelAttributeMap),
+								"destination_prefix_list":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationPrefixListModelAttributeMap),
+								"inside_destinations":        types.BoolNull(),
+								"outside_destinations":       types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested PointerField --> LabelMatcher
@@ -5778,7 +5817,15 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, map[string]attr.Value{
+								"all_sources":           types.BoolValue(true),
+								"inside_sources":        types.BoolNull(),
+								"outside_sources":       types.BoolNull(),
+								"source_aws_vpc_ids":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap),
+								"source_ip_prefix_set":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap),
+								"source_label_selector": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap),
+								"source_prefix_list":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested RequiredOneOfField --> TrafficChoice
@@ -5919,7 +5966,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap, map[string]attr.Value{
+								"all_tcp_traffic":     types.BoolNull(),
+								"all_traffic":         types.BoolValue(true),
+								"all_udp_traffic":     types.BoolNull(),
+								"applications":        types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceApplicationsModelAttributeMap),
+								"protocol_port_range": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap),
+							})
 						}
 
 						rulesElements = append(rulesElements, enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel)
@@ -5970,7 +6023,18 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.RuleChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceModelAttributeMap)
+
+		if data.RuleChoice.IsNull() || data.RuleChoice.IsUnknown() || ((data.RuleChoice.Attributes()["allow_all"].IsNull() || data.RuleChoice.Attributes()["allow_all"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["allowed_sources"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["denied_destinations"].(types.Object).IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["denied_sources"].(types.Object).IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["deny_all"].IsNull() || data.RuleChoice.Attributes()["deny_all"].IsUnknown()) && (data.RuleChoice.Attributes()["rule_list"].(types.Object).IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).IsUnknown() || (data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsUnknown()))) {
+			data.RuleChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceModelAttributeMap, map[string]attr.Value{
+				"allow_all":            types.BoolValue(true),
+				"allowed_destinations": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceAllowedDestinationsModelAttributeMap),
+				"allowed_sources":      types.ObjectNull(EnhancedFirewallPolicyRuleChoiceAllowedSourcesModelAttributeMap),
+				"denied_destinations":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedDestinationsModelAttributeMap),
+				"denied_sources":       types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap),
+				"deny_all":             types.BoolNull(),
+				"rule_list":            types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> SegmentPolicy
@@ -6228,6 +6292,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 }
 
 func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCEnhancedFirewallPolicyModel
@@ -7287,7 +7357,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7303,7 +7373,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 	err = r.client.ReplaceObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -7312,7 +7382,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -7469,29 +7539,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7538,29 +7610,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7607,29 +7681,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7676,29 +7752,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -9009,8 +9087,26 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Delete(ctx context.Context, request
 	// Standard Delete Logic
 	opts := []vesapi.CallOpt{}
 	opts = append(opts, vesapi.WithFailIfReferred())
+	deleteFn := func() error {
+		return r.client.DeleteObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	}
 
-	err = r.client.DeleteObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	err = deleteFn()
+	if err != nil && strings.Contains(err.Error(), "is still being referred by") {
+		// The object is still referenced by a parent object (e.g. the user is deleting it
+		// and re-pointing the parent to another object in the same apply). Reactively
+		// detach it from any referring parents Terraform manages, then retry.
+		tflog.Info(ctx, fmt.Sprintf("[hook] enhanced_firewall_policy delete hit 409, attempting reactive unbind: %s", err))
+		if unbindErr := hook.EnhancedFirewallPolicyUnbindReferencingObjects(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), err.Error()); unbindErr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("[hook] enhanced_firewall_policy reactive unbind failed: %s", unbindErr))
+		}
+		// Retry immediately: the unbind above (when it applies) removes the reference
+		// that caused the conflict, so there is nothing to gain from sleeping first.
+		err = deleteFn()
+	}
+	if err != nil {
+		err = utils.DeleteWithTransientRetry(ctx, "enhanced_firewall_policy", deleteFn)
+	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") || strings.Contains(err.Error(), "NotFound") {
@@ -9019,7 +9115,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Delete(ctx context.Context, request
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "enhanced_firewall_policy", err),
 		)
 		return
 	}

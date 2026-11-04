@@ -32,12 +32,12 @@ type DataSourceF5XCDnsZone struct {
 	client *client.APIClient
 }
 
-type DnsZoneGlobalSpecTypeDnsTypeChoice struct {
+type DnsZoneDnsTypeChoice struct {
 	Primary   types.Object `tfsdk:"primary"`
 	Secondary types.Object `tfsdk:"secondary"`
 }
 
-type DnsZoneGlobalSpecTypePrimary struct {
+type DnsZonePrimary struct {
 	Admin                     types.String `tfsdk:"admin"`
 	AllowHttpLbManagedRecords types.Bool   `tfsdk:"allow_http_lb_managed_records"`
 	DefaultRrSetGroup         types.List   `tfsdk:"default_rr_set_group"`
@@ -47,13 +47,13 @@ type DnsZoneGlobalSpecTypePrimary struct {
 	SoaRecordParametersChoice types.Object `tfsdk:"soa_record_parameters_choice"`
 }
 
-type DnsZoneDnsZoneRRSet struct {
+type DnsZoneRRSet struct {
 	Description         types.String `tfsdk:"description"`
 	Ttl                 types.Int64  `tfsdk:"ttl"`
 	TypeRecordSetChoice types.Object `tfsdk:"type_record_set_choice"`
 }
 
-type DnsZoneRRSetTypeRecordSetChoice struct {
+type DnsZoneTypeRecordSetChoice struct {
 	ARecord     types.Object `tfsdk:"a_record"`
 	AaaaRecord  types.Object `tfsdk:"aaaa_record"`
 	AfsdbRecord types.Object `tfsdk:"afsdb_record"`
@@ -77,113 +77,113 @@ type DnsZoneRRSetTypeRecordSetChoice struct {
 	TxtRecord   types.Object `tfsdk:"txt_record"`
 }
 
-type DnsZoneRRSetARecord struct {
+type DnsZoneARecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRRSetAaaaRecord struct {
+type DnsZoneAaaaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRRSetAfsdbRecord struct {
+type DnsZoneAfsdbRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneAFSDBRecordValue struct {
+type DnsZoneAFSDBRecordValue struct {
 	Hostname types.String `tfsdk:"hostname"`
 	Subtype  types.List   `tfsdk:"subtype"`
 }
 
-type DnsZoneRRSetAliasRecord struct {
+type DnsZoneAliasRecord struct {
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRRSetCaaRecord struct {
+type DnsZoneCaaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneCertificationAuthorityAuthorization struct {
+type DnsZoneCertificationAuthorityAuthz struct {
 	Flags types.Int64  `tfsdk:"flags"`
 	Tag   types.String `tfsdk:"tag"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRRSetCdsRecord struct {
+type DnsZoneCdsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneDSRecordValue struct {
+type DnsZoneDSRecordValue struct {
 	DigestChoice   types.Object `tfsdk:"digest_choice"`
 	DsKeyAlgorithm types.List   `tfsdk:"ds_key_algorithm"`
 	KeyTag         types.Int64  `tfsdk:"key_tag"`
 }
 
-type DnsZoneDSRecordValueDigestChoice struct {
+type DnsZoneDigestChoice struct {
 	Sha1Digest   types.Object `tfsdk:"sha1_digest"`
 	Sha256Digest types.Object `tfsdk:"sha256_digest"`
 	Sha384Digest types.Object `tfsdk:"sha384_digest"`
 }
 
-type DnsZoneDSRecordValueSha1Digest struct {
+type DnsZoneSha1Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneDSRecordValueSha256Digest struct {
+type DnsZoneSha256Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneDSRecordValueSha384Digest struct {
+type DnsZoneSha384Digest struct {
 	Digest types.String `tfsdk:"digest"`
 }
 
-type DnsZoneRRSetCertRecord struct {
+type DnsZoneCertRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneCERTRecordValue struct {
+type DnsZoneCERTRecordValue struct {
 	Algorithm   types.List   `tfsdk:"algorithm"`
 	CertKeyTag  types.Int64  `tfsdk:"cert_key_tag"`
 	CertType    types.List   `tfsdk:"cert_type"`
 	Certificate types.String `tfsdk:"certificate"`
 }
 
-type DnsZoneRRSetCnameRecord struct {
+type DnsZoneCnameRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRRSetDsRecord struct {
+type DnsZoneDsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRRSetEui48Record struct {
+type DnsZoneEui48Record struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRRSetEui64Record struct {
+type DnsZoneEui64Record struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }
 
-type DnsZoneRRSetLbRecord struct {
+type DnsZoneLbRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.Object `tfsdk:"value"`
 }
 
-type DnsZoneRRSetLocRecord struct {
+type DnsZoneLocRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneLOCValue struct {
+type DnsZoneLOCValue struct {
 	Altitude            types.Float32 `tfsdk:"altitude"`
 	HorizontalPrecision types.Float32 `tfsdk:"horizontal_precision"`
 	LatitudeDegree      types.Int32   `tfsdk:"latitude_degree"`
@@ -198,22 +198,22 @@ type DnsZoneDnsZoneLOCValue struct {
 	VerticalPrecision   types.Float32 `tfsdk:"vertical_precision"`
 }
 
-type DnsZoneRRSetMxRecord struct {
+type DnsZoneMxRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneMailExchanger struct {
+type DnsZoneMailExchanger struct {
 	Domain   types.String `tfsdk:"domain"`
 	Priority types.Int64  `tfsdk:"priority"`
 }
 
-type DnsZoneRRSetNaptrRecord struct {
+type DnsZoneNaptrRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneNAPTRValue struct {
+type DnsZoneNAPTRValue struct {
 	Flags       types.String `tfsdk:"flags"`
 	Order       types.Int64  `tfsdk:"order"`
 	Preference  types.Int64  `tfsdk:"preference"`
@@ -222,77 +222,78 @@ type DnsZoneDnsZoneNAPTRValue struct {
 	Service     types.String `tfsdk:"service"`
 }
 
-type DnsZoneRRSetNsRecord struct {
+type DnsZoneNsRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRRSetPtrRecord struct {
+type DnsZonePtrRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneRRSetSrvRecord struct {
+type DnsZoneSrvRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneSRVService struct {
+type DnsZoneSRVSvc struct {
 	Port     types.Int64  `tfsdk:"port"`
 	Priority types.Int64  `tfsdk:"priority"`
 	Target   types.String `tfsdk:"target"`
 	Weight   types.Int64  `tfsdk:"weight"`
 }
 
-type DnsZoneRRSetSshfpRecord struct {
+type DnsZoneSshfpRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneSSHFPRecordValue struct {
+type DnsZoneSSHFPRecordValue struct {
 	Algorithm             types.List   `tfsdk:"algorithm"`
 	FingerprintTypeChoice types.Object `tfsdk:"fingerprint_type_choice"`
 }
 
-type DnsZoneSSHFPRecordValueFingerprintTypeChoice struct {
+type DnsZoneFingerprintTypeChoice struct {
 	Sha1Fingerprint   types.Object `tfsdk:"sha1_fingerprint"`
 	Sha256Fingerprint types.Object `tfsdk:"sha256_fingerprint"`
 }
 
-type DnsZoneSSHFPRecordValueSha1Fingerprint struct {
+type DnsZoneSha1Fingerprint struct {
 	Fingerprint types.String `tfsdk:"fingerprint"`
 }
 
-type DnsZoneSSHFPRecordValueSha256Fingerprint struct {
+type DnsZoneSha256Fingerprint struct {
 	Fingerprint types.String `tfsdk:"fingerprint"`
 }
 
-type DnsZoneRRSetTlsaRecord struct {
+type DnsZoneTlsaRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneTLSARecordValue struct {
+type DnsZoneTLSARecordValue struct {
 	CertificateAssociationData types.String `tfsdk:"certificate_association_data"`
 	CertificateUsage           types.List   `tfsdk:"certificate_usage"`
 	MatchingType               types.List   `tfsdk:"matching_type"`
 	Selector                   types.List   `tfsdk:"selector"`
 }
 
-type DnsZoneRRSetTxtRecord struct {
+type DnsZoneTxtRecord struct {
 	Name   types.String `tfsdk:"name"`
 	Values types.List   `tfsdk:"values"`
 }
 
-type DnsZoneDnsZoneDNSSECMode struct {
+type DnsZoneDNSSECMode struct {
 	ModeChoice types.Object `tfsdk:"mode_choice"`
 }
 
-type DnsZoneDNSSECModeModeChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+type DnsZoneModeChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
-type DnsZoneDnsZoneRRSetGroup struct {
+type DnsZoneRRSetGroup struct {
 	Metadata types.Object `tfsdk:"metadata"`
 	RrSet    types.List   `tfsdk:"rr_set"`
 }
@@ -302,12 +303,12 @@ type DnsZoneMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type DnsZonePrimaryDNSConfigSoaRecordParametersChoice struct {
+type DnsZoneSoaRecordParametersChoice struct {
 	DefaultSoaParameters types.Bool   `tfsdk:"default_soa_parameters"`
 	SoaParameters        types.Object `tfsdk:"soa_parameters"`
 }
 
-type DnsZonePrimaryDNSConfigSoaParameters struct {
+type DnsZoneSoaParameters struct {
 	Expire      types.Int64 `tfsdk:"expire"`
 	NegativeTtl types.Int64 `tfsdk:"negative_ttl"`
 	Refresh     types.Int64 `tfsdk:"refresh"`
@@ -315,7 +316,7 @@ type DnsZonePrimaryDNSConfigSoaParameters struct {
 	Ttl         types.Int64 `tfsdk:"ttl"`
 }
 
-type DnsZoneGlobalSpecTypeSecondary struct {
+type DnsZoneSecondary struct {
 	LastAxfrTimestamp timetypes.RFC3339 `tfsdk:"last_axfr_timestamp"`
 	PrimaryServers    types.List        `tfsdk:"primary_servers"`
 	TsigKeyAlgorithm  types.List        `tfsdk:"tsig_key_algorithm"`
@@ -327,20 +328,34 @@ type DnsZoneSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type DnsZoneSecretTypeSecretInfoChoice struct {
+type DnsZoneSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type DnsZoneSecretTypeBlindfoldSecretInfo struct {
+type DnsZoneBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type DnsZoneSecretTypeClearSecretInfo struct {
+type DnsZoneClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
+}
+
+type DnsZoneNsRBAC struct {
+	ModeChoice types.Object `tfsdk:"mode_choice"`
+}
+
+type DnsZoneNsRBACModeChoice struct {
+	Disabled types.Bool   `tfsdk:"disabled"`
+	Enabled  types.Object `tfsdk:"enabled"`
+}
+
+type DnsZoneEnabled struct {
+	Namespaces types.List `tfsdk:"namespaces"`
 }
 
 // DataSourceF5XCDnsZoneModel describes the resource data model.
@@ -352,6 +367,7 @@ type DataSourceF5XCDnsZoneModel struct {
 	Namespace         types.String   `tfsdk:"namespace"`
 	Uid               types.String   `tfsdk:"uid"`
 	DnsTypeChoice     types.Object   `tfsdk:"dns_type_choice"`
+	NamespaceRbac     types.Object   `tfsdk:"namespace_rbac"`
 	NumOfDnsRecords   types.Int64    `tfsdk:"num_of_dns_records"`
 	ServiceInstanceId types.String   `tfsdk:"service_instance_id"`
 	SubscriptionId    types.String   `tfsdk:"subscription_id"`
@@ -1032,7 +1048,8 @@ var DnsZoneDnsTypePrimaryDnssecModeModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> Mode
 var DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> RrSetGroup
@@ -1717,6 +1734,7 @@ var DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofModelAttributeMap = map[st
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1734,6 +1752,31 @@ var DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofClearSecretInfoModelAttrib
 	"url":      types.StringType,
 }
 
+// Attribute map for PointerField --> NamespaceRbac
+var DnsZoneNamespaceRbacModelAttributeMap = map[string]attr.Type{
+
+	"mode_choice": types.ObjectType{
+		AttrTypes: DnsZoneNamespaceRbacModeModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> Mode
+var DnsZoneNamespaceRbacModeModelAttributeMap = map[string]attr.Type{
+
+	"disabled": types.BoolType,
+	"enabled": types.ObjectType{
+		AttrTypes: DnsZoneNamespaceRbacModeEnabledModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Enabled
+var DnsZoneNamespaceRbacModeEnabledModelAttributeMap = map[string]attr.Type{
+
+	"namespaces": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCDnsZone{}
 
@@ -1748,8 +1791,8 @@ func (d *DataSourceF5XCDnsZone) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCDnsZone) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_zone This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_zone) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_zone This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_zone) etc. can be fetched",
+		MarkdownDescription: "DNS Zone object is used for configuring Primary and Secondary DNS zones.<br><br>User configures zone 'example.com'<br><br>Status for this object will show following<br><br>* List of nameservers<br><br>User can configure DNS records for a Primary zone and a Secondary zone will<br>transfer the DNS records from the primary DNS servers.",
+		Description:         "DNS Zone object is used for configuring Primary and Secondary DNS zones. User configures zone 'example.com' Status for this object will show following List of nameservers User can configure DNS records for a Primary zone and a Secondary zone will transfer the DNS records from the primary DNS servers.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1809,7 +1852,7 @@ func (r *DataSourceF5XCDnsZone) Schema(ctx context.Context, request datasource.S
 								Computed:    true,
 							},
 							"allow_http_lb_managed_records": schema.BoolAttribute{
-								Description: "Allow HTTP Load Balancer Managed Records Option to allow user-created HTTP, TCP, and CDN load balancer related resource records to be automatically managed in a protected RRset.",
+								Description: "Allow Application Managed Records Allow F5 Distributed Cloud services to automatically create and manage resource records in a protected RRset.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -2738,6 +2781,12 @@ func (r *DataSourceF5XCDnsZone) Schema(ctx context.Context, request datasource.S
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable DNSSEC disabled",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable DNSSEC enable",
 												Required:    false,
@@ -3838,10 +3887,54 @@ func (r *DataSourceF5XCDnsZone) Schema(ctx context.Context, request datasource.S
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"namespace_rbac": schema.SingleNestedAttribute{
+				Description: "Namespace RBAC Namespace-based access control configuration for the DNS zone. Updates require a role that carries the f5xc-dns-standard-admin API group, such as f5xc-dns-management-admin.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"mode_choice": schema.SingleNestedAttribute{
+						Description: "Namespace RBAC Mode Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and who can manage DNS records in this zone. When disabled, any namespace can use this zone. Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert. Changes are restricted to DNS administrators. When disabled, any namespace can use this zone.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"disabled": schema.BoolAttribute{
+								Description: "Disabled Any namespace can use this DNS zone for HTTP Load Balancer domains and auto-cert. DNS records can be managed based on existing DNS permissions",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"enabled": schema.SingleNestedAttribute{
+								Description: "Enabled Map this DNS zone to authorized namespaces (up to 64). Only mapped namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and manage DNS records in this zone.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"namespaces": schema.ListAttribute{
+										Description: "Authorized namespaces",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
 									},
 								},
 							},
@@ -3924,7 +4017,7 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_zone.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_zone", err))
 		return
 	}
 
@@ -3995,7 +4088,7 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 		dnsTypeChoiceChoices := specData.GetDnsType()
 
 		// The model struct that will be populated by the nested template.
-		var dnsTypeChoiceChoicesModel = &DnsZoneGlobalSpecTypeDnsTypeChoice{}
+		var dnsTypeChoiceChoicesModel = &DnsZoneDnsTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4024,16 +4117,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 				if len(primaryElement.GetDefaultRrSetGroup()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					defaultRrSetGroupElements := make([]DnsZoneDnsZoneRRSet, 0, len(primaryElement.GetDefaultRrSetGroup()))
+					defaultRrSetGroupElements := make([]DnsZoneRRSet, 0, len(primaryElement.GetDefaultRrSetGroup()))
 					for _, defaultRrSetGroupElement := range primaryElement.GetDefaultRrSetGroup() {
-						dnsZoneDnsZoneRRSetModel := DnsZoneDnsZoneRRSet{}
+						dnsZoneRRSetModel := DnsZoneRRSet{}
 
 						// data specToModelNested StringField --> Description
 						// State Healing: preserve empty string — do not convert "" to null for this field.
-						dnsZoneDnsZoneRRSetModel.Description = types.StringValue(defaultRrSetGroupElement.GetDescription())
+						dnsZoneRRSetModel.Description = types.StringValue(defaultRrSetGroupElement.GetDescription())
 
 						// data specToModelNested UintField --> Ttl
-						dnsZoneDnsZoneRRSetModel.Ttl = types.Int64Value(int64(defaultRrSetGroupElement.GetTtl()))
+						dnsZoneRRSetModel.Ttl = types.Int64Value(int64(defaultRrSetGroupElement.GetTtl()))
 
 						// data specToModelNested RequiredOneOfField --> TypeRecordSet
 						// <no value>
@@ -4151,16 +4244,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(afsdbRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
 										for _, valuesElement := range afsdbRecordElement.GetValues() {
-											dnsZoneDnsZoneAFSDBRecordValueModel := DnsZoneDnsZoneAFSDBRecordValue{}
+											dnsZoneAFSDBRecordValueModel := DnsZoneAFSDBRecordValue{}
 
 											// data specToModelNested RequiredStringField --> Hostname
 											if valuesElement.GetHostname() != "" {
-												dnsZoneDnsZoneAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
+												dnsZoneAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneAFSDBRecordValueModel.Hostname = types.StringNull()
+												dnsZoneAFSDBRecordValueModel.Hostname = types.StringNull()
 											}
 
 											// data specToModelNested RequiredEnumField --> Subtype
@@ -4172,12 +4265,12 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneAFSDBRecordValueModel.Subtype = listValue
+												dnsZoneAFSDBRecordValueModel.Subtype = listValue
 											} else {
-												dnsZoneDnsZoneAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
+												dnsZoneAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
 											}
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneAFSDBRecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneAFSDBRecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4257,30 +4350,30 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(caaRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneCertificationAuthorityAuthorization, 0, len(caaRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneCertificationAuthorityAuthz, 0, len(caaRecordElement.GetValues()))
 										for _, valuesElement := range caaRecordElement.GetValues() {
-											dnsZoneDnsZoneCertificationAuthorityAuthorizationModel := DnsZoneDnsZoneCertificationAuthorityAuthorization{}
+											dnsZoneCertificationAuthorityAuthzModel := DnsZoneCertificationAuthorityAuthz{}
 
 											// data specToModelNested UintField --> Flags
-											dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
+											dnsZoneCertificationAuthorityAuthzModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
 
 											// data specToModelNested StringField --> Tag
 											if valuesElement.GetTag() != "" {
-												dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringValue(valuesElement.GetTag())
+												dnsZoneCertificationAuthorityAuthzModel.Tag = types.StringValue(valuesElement.GetTag())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringNull()
+												dnsZoneCertificationAuthorityAuthzModel.Tag = types.StringNull()
 											}
 
 											// data specToModelNested StringField --> Value
 											if valuesElement.GetValue() != "" {
-												dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringValue(valuesElement.GetValue())
+												dnsZoneCertificationAuthorityAuthzModel.Value = types.StringValue(valuesElement.GetValue())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringNull()
+												dnsZoneCertificationAuthorityAuthzModel.Value = types.StringNull()
 											}
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneCertificationAuthorityAuthorizationModel)
+											valuesElements = append(valuesElements, dnsZoneCertificationAuthorityAuthzModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4331,9 +4424,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(cdsRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneDSRecordValue, 0, len(cdsRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneDSRecordValue, 0, len(cdsRecordElement.GetValues()))
 										for _, valuesElement := range cdsRecordElement.GetValues() {
-											dnsZoneDnsZoneDSRecordValueModel := DnsZoneDnsZoneDSRecordValue{}
+											dnsZoneDSRecordValueModel := DnsZoneDSRecordValue{}
 
 											// data specToModelNested RequiredOneOfField --> DigestChoice
 											// <no value>
@@ -4447,10 +4540,10 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												dnsZoneDnsZoneDSRecordValueModel.DigestChoice = finalObj
+												dnsZoneDSRecordValueModel.DigestChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												dnsZoneDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
+												dnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -4462,15 +4555,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+												dnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
 											} else {
-												dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+												dnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredUintField --> KeyTag
-											dnsZoneDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+											dnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneDSRecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneDSRecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4521,9 +4614,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(certRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneCERTRecordValue, 0, len(certRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneCERTRecordValue, 0, len(certRecordElement.GetValues()))
 										for _, valuesElement := range certRecordElement.GetValues() {
-											dnsZoneDnsZoneCERTRecordValueModel := DnsZoneDnsZoneCERTRecordValue{}
+											dnsZoneCERTRecordValueModel := DnsZoneCERTRecordValue{}
 
 											// data specToModelNested RequiredEnumField --> Algorithm
 											if valuesElement.GetAlgorithm().String() != "" {
@@ -4534,13 +4627,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneCERTRecordValueModel.Algorithm = listValue
+												dnsZoneCERTRecordValueModel.Algorithm = listValue
 											} else {
-												dnsZoneDnsZoneCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
+												dnsZoneCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredUintField --> CertKeyTag
-											dnsZoneDnsZoneCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
+											dnsZoneCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
 
 											// data specToModelNested RequiredEnumField --> CertType
 											if valuesElement.GetCertType().String() != "" {
@@ -4551,20 +4644,20 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneCERTRecordValueModel.CertType = listValue
+												dnsZoneCERTRecordValueModel.CertType = listValue
 											} else {
-												dnsZoneDnsZoneCERTRecordValueModel.CertType = types.ListNull(types.StringType)
+												dnsZoneCERTRecordValueModel.CertType = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredStringField --> Certificate
 											if valuesElement.GetCertificate() != "" {
-												dnsZoneDnsZoneCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
+												dnsZoneCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneCERTRecordValueModel.Certificate = types.StringNull()
+												dnsZoneCERTRecordValueModel.Certificate = types.StringNull()
 											}
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneCERTRecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneCERTRecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4652,9 +4745,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(dsRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneDSRecordValue, 0, len(dsRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneDSRecordValue, 0, len(dsRecordElement.GetValues()))
 										for _, valuesElement := range dsRecordElement.GetValues() {
-											dnsZoneDnsZoneDSRecordValueModel := DnsZoneDnsZoneDSRecordValue{}
+											dnsZoneDSRecordValueModel := DnsZoneDSRecordValue{}
 
 											// data specToModelNested RequiredOneOfField --> DigestChoice
 											// <no value>
@@ -4768,10 +4861,10 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												dnsZoneDnsZoneDSRecordValueModel.DigestChoice = finalObj
+												dnsZoneDSRecordValueModel.DigestChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												dnsZoneDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
+												dnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -4783,15 +4876,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+												dnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
 											} else {
-												dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+												dnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredUintField --> KeyTag
-											dnsZoneDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+											dnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneDSRecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneDSRecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4995,18 +5088,18 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(locRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneLOCValue, 0, len(locRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneLOCValue, 0, len(locRecordElement.GetValues()))
 										for _, valuesElement := range locRecordElement.GetValues() {
-											dnsZoneDnsZoneLOCValueModel := DnsZoneDnsZoneLOCValue{}
+											dnsZoneLOCValueModel := DnsZoneLOCValue{}
 
 											// data specToModelNested RequiredFloatField --> Altitude
-											dnsZoneDnsZoneLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
+											dnsZoneLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
 
 											// data specToModelNested FloatField --> HorizontalPrecision
-											dnsZoneDnsZoneLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
+											dnsZoneLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
 
 											// data specToModelNested RequiredIntField --> LatitudeDegree
-											dnsZoneDnsZoneLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
+											dnsZoneLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
 
 											// data specToModelNested RequiredEnumField --> LatitudeHemisphere
 											if valuesElement.GetLatitudeHemisphere().String() != "" {
@@ -5017,22 +5110,22 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneLOCValueModel.LatitudeHemisphere = listValue
+												dnsZoneLOCValueModel.LatitudeHemisphere = listValue
 											} else {
-												dnsZoneDnsZoneLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
+												dnsZoneLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested IntField --> LatitudeMinute
-											dnsZoneDnsZoneLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
+											dnsZoneLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
 
 											// data specToModelNested FloatField --> LatitudeSecond
-											dnsZoneDnsZoneLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
+											dnsZoneLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
 
 											// data specToModelNested FloatField --> LocationDiameter
-											dnsZoneDnsZoneLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
+											dnsZoneLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
 
 											// data specToModelNested RequiredIntField --> LongitudeDegree
-											dnsZoneDnsZoneLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
+											dnsZoneLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
 
 											// data specToModelNested RequiredEnumField --> LongitudeHemisphere
 											if valuesElement.GetLongitudeHemisphere().String() != "" {
@@ -5043,21 +5136,21 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneLOCValueModel.LongitudeHemisphere = listValue
+												dnsZoneLOCValueModel.LongitudeHemisphere = listValue
 											} else {
-												dnsZoneDnsZoneLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
+												dnsZoneLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested IntField --> LongitudeMinute
-											dnsZoneDnsZoneLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
+											dnsZoneLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
 
 											// data specToModelNested FloatField --> LongitudeSecond
-											dnsZoneDnsZoneLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
+											dnsZoneLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
 
 											// data specToModelNested FloatField --> VerticalPrecision
-											dnsZoneDnsZoneLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
+											dnsZoneLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneLOCValueModel)
+											valuesElements = append(valuesElements, dnsZoneLOCValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5108,22 +5201,22 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(mxRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneMailExchanger, 0, len(mxRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneMailExchanger, 0, len(mxRecordElement.GetValues()))
 										for _, valuesElement := range mxRecordElement.GetValues() {
-											dnsZoneDnsZoneMailExchangerModel := DnsZoneDnsZoneMailExchanger{}
+											dnsZoneMailExchangerModel := DnsZoneMailExchanger{}
 
 											// data specToModelNested StringField --> Domain
 											if valuesElement.GetDomain() != "" {
-												dnsZoneDnsZoneMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
+												dnsZoneMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneMailExchangerModel.Domain = types.StringNull()
+												dnsZoneMailExchangerModel.Domain = types.StringNull()
 											}
 
 											// data specToModelNested UintField --> Priority
-											dnsZoneDnsZoneMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+											dnsZoneMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneMailExchangerModel)
+											valuesElements = append(valuesElements, dnsZoneMailExchangerModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5174,49 +5267,37 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(naptrRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneNAPTRValue, 0, len(naptrRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneNAPTRValue, 0, len(naptrRecordElement.GetValues()))
 										for _, valuesElement := range naptrRecordElement.GetValues() {
-											dnsZoneDnsZoneNAPTRValueModel := DnsZoneDnsZoneNAPTRValue{}
+											dnsZoneNAPTRValueModel := DnsZoneNAPTRValue{}
 
 											// data specToModelNested RequiredStringField --> Flags
 											if valuesElement.GetFlags() != "" {
-												dnsZoneDnsZoneNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
+												dnsZoneNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneNAPTRValueModel.Flags = types.StringNull()
+												dnsZoneNAPTRValueModel.Flags = types.StringNull()
 											}
 
 											// data specToModelNested RequiredUintField --> Order
-											dnsZoneDnsZoneNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
+											dnsZoneNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
 
 											// data specToModelNested RequiredUintField --> Preference
-											dnsZoneDnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
+											dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 											// data specToModelNested StringField --> Regexp
-											if valuesElement.GetRegexp() != "" {
-												dnsZoneDnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-											} else {
-												// Empty string, set to null
-												dnsZoneDnsZoneNAPTRValueModel.Regexp = types.StringNull()
-											}
+											// The resource defaults this field to "", so API "" must stay "" to match it.
+											dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 											// data specToModelNested StringField --> Replacement
-											if valuesElement.GetReplacement() != "" {
-												dnsZoneDnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-											} else {
-												// Empty string, set to null
-												dnsZoneDnsZoneNAPTRValueModel.Replacement = types.StringNull()
-											}
+											// The resource defaults this field to "", so API "" must stay "" to match it.
+											dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 											// data specToModelNested StringField --> Service
-											if valuesElement.GetService() != "" {
-												dnsZoneDnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-											} else {
-												// Empty string, set to null
-												dnsZoneDnsZoneNAPTRValueModel.Service = types.StringNull()
-											}
+											// The resource defaults this field to "", so API "" must stay "" to match it.
+											dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneNAPTRValueModel)
+											valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5349,28 +5430,28 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(srvRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneSRVService, 0, len(srvRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneSRVSvc, 0, len(srvRecordElement.GetValues()))
 										for _, valuesElement := range srvRecordElement.GetValues() {
-											dnsZoneDnsZoneSRVServiceModel := DnsZoneDnsZoneSRVService{}
+											dnsZoneSRVSvcModel := DnsZoneSRVSvc{}
 
 											// data specToModelNested UintField --> Port
-											dnsZoneDnsZoneSRVServiceModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
+											dnsZoneSRVSvcModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
 
 											// data specToModelNested UintField --> Priority
-											dnsZoneDnsZoneSRVServiceModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+											dnsZoneSRVSvcModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
 											// data specToModelNested StringField --> Target
 											if valuesElement.GetTarget() != "" {
-												dnsZoneDnsZoneSRVServiceModel.Target = types.StringValue(valuesElement.GetTarget())
+												dnsZoneSRVSvcModel.Target = types.StringValue(valuesElement.GetTarget())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneSRVServiceModel.Target = types.StringNull()
+												dnsZoneSRVSvcModel.Target = types.StringNull()
 											}
 
 											// data specToModelNested UintField --> Weight
-											dnsZoneDnsZoneSRVServiceModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
+											dnsZoneSRVSvcModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneSRVServiceModel)
+											valuesElements = append(valuesElements, dnsZoneSRVSvcModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5421,9 +5502,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(sshfpRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
 										for _, valuesElement := range sshfpRecordElement.GetValues() {
-											dnsZoneDnsZoneSSHFPRecordValueModel := DnsZoneDnsZoneSSHFPRecordValue{}
+											dnsZoneSSHFPRecordValueModel := DnsZoneSSHFPRecordValue{}
 
 											// data specToModelNested RequiredEnumField --> Algorithm
 											if valuesElement.GetAlgorithm().String() != "" {
@@ -5434,9 +5515,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneSSHFPRecordValueModel.Algorithm = listValue
+												dnsZoneSSHFPRecordValueModel.Algorithm = listValue
 											} else {
-												dnsZoneDnsZoneSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
+												dnsZoneSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredOneOfField --> FingerprintType
@@ -5522,13 +5603,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												dnsZoneDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
+												dnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												dnsZoneDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
+												dnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
 											}
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneSSHFPRecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneSSHFPRecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5579,16 +5660,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									if len(tlsaRecordElement.GetValues()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										valuesElements := make([]DnsZoneDnsZoneTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
+										valuesElements := make([]DnsZoneTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
 										for _, valuesElement := range tlsaRecordElement.GetValues() {
-											dnsZoneDnsZoneTLSARecordValueModel := DnsZoneDnsZoneTLSARecordValue{}
+											dnsZoneTLSARecordValueModel := DnsZoneTLSARecordValue{}
 
 											// data specToModelNested RequiredStringField --> CertificateAssociationData
 											if valuesElement.GetCertificateAssociationData() != "" {
-												dnsZoneDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
+												dnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
 											} else {
 												// Empty string, set to null
-												dnsZoneDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringNull()
+												dnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringNull()
 											}
 
 											// data specToModelNested RequiredEnumField --> CertificateUsage
@@ -5600,9 +5681,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneTLSARecordValueModel.CertificateUsage = listValue
+												dnsZoneTLSARecordValueModel.CertificateUsage = listValue
 											} else {
-												dnsZoneDnsZoneTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
+												dnsZoneTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredEnumField --> MatchingType
@@ -5614,9 +5695,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneTLSARecordValueModel.MatchingType = listValue
+												dnsZoneTLSARecordValueModel.MatchingType = listValue
 											} else {
-												dnsZoneDnsZoneTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
+												dnsZoneTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested RequiredEnumField --> Selector
@@ -5628,12 +5709,12 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dnsZoneDnsZoneTLSARecordValueModel.Selector = listValue
+												dnsZoneTLSARecordValueModel.Selector = listValue
 											} else {
-												dnsZoneDnsZoneTLSARecordValueModel.Selector = types.ListNull(types.StringType)
+												dnsZoneTLSARecordValueModel.Selector = types.ListNull(types.StringType)
 											}
 
-											valuesElements = append(valuesElements, dnsZoneDnsZoneTLSARecordValueModel)
+											valuesElements = append(valuesElements, dnsZoneTLSARecordValueModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5716,13 +5797,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							dnsZoneDnsZoneRRSetModel.TypeRecordSetChoice = finalObj
+							dnsZoneRRSetModel.TypeRecordSetChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							dnsZoneDnsZoneRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetModelAttributeMap)
+							dnsZoneRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDefaultRrSetGroupTypeRecordSetModelAttributeMap)
 						}
 
-						defaultRrSetGroupElements = append(defaultRrSetGroupElements, dnsZoneDnsZoneRRSetModel)
+						defaultRrSetGroupElements = append(defaultRrSetGroupElements, dnsZoneRRSetModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5743,7 +5824,7 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 				// data specToModelNested PointerField --> DnssecMode
 				if primaryElement.GetDnssecMode() != nil {
 					// Create the nested Go struct
-					dnsZoneDnsZoneDNSSECModeModel := &DnsZoneDnsZoneDNSSECMode{}
+					dnsZoneDNSSECModeModel := &DnsZoneDNSSECMode{}
 					dnssecModeElement := primaryElement.GetDnssecMode()
 
 					// Recursively populate the nested struct
@@ -5759,6 +5840,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 						dnssecModemodeChoiceChoices := dnssecModeElement.GetMode()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Disable)
+
+						if isDisable {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Enable)
@@ -5782,19 +5872,19 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						dnsZoneDnsZoneDNSSECModeModel.ModeChoice = finalObj
+						dnsZoneDNSSECModeModel.ModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						dnsZoneDnsZoneDNSSECModeModel.ModeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap)
+						dnsZoneDNSSECModeModel.ModeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					dnsZoneDnsZoneDNSSECModeModelObj, objDiags := types.ObjectValueFrom(ctx, DnsZoneDnsTypePrimaryDnssecModeModelAttributeMap, dnsZoneDnsZoneDNSSECModeModel)
+					dnsZoneDNSSECModeModelObj, objDiags := types.ObjectValueFrom(ctx, DnsZoneDnsTypePrimaryDnssecModeModelAttributeMap, dnsZoneDNSSECModeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					primaryAttributeMap["dnssec_mode"] = dnsZoneDnsZoneDNSSECModeModelObj
+					primaryAttributeMap["dnssec_mode"] = dnsZoneDNSSECModeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5810,9 +5900,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 				if len(primaryElement.GetRrSetGroup()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rrSetGroupElements := make([]DnsZoneDnsZoneRRSetGroup, 0, len(primaryElement.GetRrSetGroup()))
+					rrSetGroupElements := make([]DnsZoneRRSetGroup, 0, len(primaryElement.GetRrSetGroup()))
 					for _, rrSetGroupElement := range primaryElement.GetRrSetGroup() {
-						dnsZoneDnsZoneRRSetGroupModel := DnsZoneDnsZoneRRSetGroup{}
+						dnsZoneRRSetGroupModel := DnsZoneRRSetGroup{}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if rrSetGroupElement.GetMetadata() != nil {
@@ -5844,7 +5934,7 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							dnsZoneDnsZoneRRSetGroupModel.Metadata = dnsZoneMessageMetaTypeModelObj
+							dnsZoneRRSetGroupModel.Metadata = dnsZoneMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -5853,23 +5943,23 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							dnsZoneDnsZoneRRSetGroupModel.Metadata = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupMetadataModelAttributeMap)
+							dnsZoneRRSetGroupModel.Metadata = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested ArrayOfPointerField --> RrSet
 						if len(rrSetGroupElement.GetRrSet()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							rrSetElements := make([]DnsZoneDnsZoneRRSet, 0, len(rrSetGroupElement.GetRrSet()))
+							rrSetElements := make([]DnsZoneRRSet, 0, len(rrSetGroupElement.GetRrSet()))
 							for _, rrSetElement := range rrSetGroupElement.GetRrSet() {
-								dnsZoneDnsZoneRRSetModel := DnsZoneDnsZoneRRSet{}
+								dnsZoneRRSetModel := DnsZoneRRSet{}
 
 								// data specToModelNested StringField --> Description
 								// State Healing: preserve empty string — do not convert "" to null for this field.
-								dnsZoneDnsZoneRRSetModel.Description = types.StringValue(rrSetElement.GetDescription())
+								dnsZoneRRSetModel.Description = types.StringValue(rrSetElement.GetDescription())
 
 								// data specToModelNested UintField --> Ttl
-								dnsZoneDnsZoneRRSetModel.Ttl = types.Int64Value(int64(rrSetElement.GetTtl()))
+								dnsZoneRRSetModel.Ttl = types.Int64Value(int64(rrSetElement.GetTtl()))
 
 								// data specToModelNested RequiredOneOfField --> TypeRecordSet
 								// <no value>
@@ -5987,16 +6077,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(afsdbRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneAFSDBRecordValue, 0, len(afsdbRecordElement.GetValues()))
 												for _, valuesElement := range afsdbRecordElement.GetValues() {
-													dnsZoneDnsZoneAFSDBRecordValueModel := DnsZoneDnsZoneAFSDBRecordValue{}
+													dnsZoneAFSDBRecordValueModel := DnsZoneAFSDBRecordValue{}
 
 													// data specToModelNested RequiredStringField --> Hostname
 													if valuesElement.GetHostname() != "" {
-														dnsZoneDnsZoneAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
+														dnsZoneAFSDBRecordValueModel.Hostname = types.StringValue(valuesElement.GetHostname())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneAFSDBRecordValueModel.Hostname = types.StringNull()
+														dnsZoneAFSDBRecordValueModel.Hostname = types.StringNull()
 													}
 
 													// data specToModelNested RequiredEnumField --> Subtype
@@ -6008,12 +6098,12 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneAFSDBRecordValueModel.Subtype = listValue
+														dnsZoneAFSDBRecordValueModel.Subtype = listValue
 													} else {
-														dnsZoneDnsZoneAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
+														dnsZoneAFSDBRecordValueModel.Subtype = types.ListNull(types.StringType)
 													}
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneAFSDBRecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneAFSDBRecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6093,30 +6183,30 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(caaRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneCertificationAuthorityAuthorization, 0, len(caaRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneCertificationAuthorityAuthz, 0, len(caaRecordElement.GetValues()))
 												for _, valuesElement := range caaRecordElement.GetValues() {
-													dnsZoneDnsZoneCertificationAuthorityAuthorizationModel := DnsZoneDnsZoneCertificationAuthorityAuthorization{}
+													dnsZoneCertificationAuthorityAuthzModel := DnsZoneCertificationAuthorityAuthz{}
 
 													// data specToModelNested UintField --> Flags
-													dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
+													dnsZoneCertificationAuthorityAuthzModel.Flags = types.Int64Value(int64(valuesElement.GetFlags()))
 
 													// data specToModelNested StringField --> Tag
 													if valuesElement.GetTag() != "" {
-														dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringValue(valuesElement.GetTag())
+														dnsZoneCertificationAuthorityAuthzModel.Tag = types.StringValue(valuesElement.GetTag())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Tag = types.StringNull()
+														dnsZoneCertificationAuthorityAuthzModel.Tag = types.StringNull()
 													}
 
 													// data specToModelNested StringField --> Value
 													if valuesElement.GetValue() != "" {
-														dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringValue(valuesElement.GetValue())
+														dnsZoneCertificationAuthorityAuthzModel.Value = types.StringValue(valuesElement.GetValue())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneCertificationAuthorityAuthorizationModel.Value = types.StringNull()
+														dnsZoneCertificationAuthorityAuthzModel.Value = types.StringNull()
 													}
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneCertificationAuthorityAuthorizationModel)
+													valuesElements = append(valuesElements, dnsZoneCertificationAuthorityAuthzModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6167,9 +6257,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(cdsRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneDSRecordValue, 0, len(cdsRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneDSRecordValue, 0, len(cdsRecordElement.GetValues()))
 												for _, valuesElement := range cdsRecordElement.GetValues() {
-													dnsZoneDnsZoneDSRecordValueModel := DnsZoneDnsZoneDSRecordValue{}
+													dnsZoneDSRecordValueModel := DnsZoneDSRecordValue{}
 
 													// data specToModelNested RequiredOneOfField --> DigestChoice
 													// <no value>
@@ -6283,10 +6373,10 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														dnsZoneDnsZoneDSRecordValueModel.DigestChoice = finalObj
+														dnsZoneDSRecordValueModel.DigestChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														dnsZoneDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
+														dnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetCdsRecordValuesDigestChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -6298,15 +6388,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+														dnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
 													} else {
-														dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+														dnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredUintField --> KeyTag
-													dnsZoneDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+													dnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneDSRecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneDSRecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6357,9 +6447,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(certRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneCERTRecordValue, 0, len(certRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneCERTRecordValue, 0, len(certRecordElement.GetValues()))
 												for _, valuesElement := range certRecordElement.GetValues() {
-													dnsZoneDnsZoneCERTRecordValueModel := DnsZoneDnsZoneCERTRecordValue{}
+													dnsZoneCERTRecordValueModel := DnsZoneCERTRecordValue{}
 
 													// data specToModelNested RequiredEnumField --> Algorithm
 													if valuesElement.GetAlgorithm().String() != "" {
@@ -6370,13 +6460,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneCERTRecordValueModel.Algorithm = listValue
+														dnsZoneCERTRecordValueModel.Algorithm = listValue
 													} else {
-														dnsZoneDnsZoneCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
+														dnsZoneCERTRecordValueModel.Algorithm = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredUintField --> CertKeyTag
-													dnsZoneDnsZoneCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
+													dnsZoneCERTRecordValueModel.CertKeyTag = types.Int64Value(int64(valuesElement.GetCertKeyTag()))
 
 													// data specToModelNested RequiredEnumField --> CertType
 													if valuesElement.GetCertType().String() != "" {
@@ -6387,20 +6477,20 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneCERTRecordValueModel.CertType = listValue
+														dnsZoneCERTRecordValueModel.CertType = listValue
 													} else {
-														dnsZoneDnsZoneCERTRecordValueModel.CertType = types.ListNull(types.StringType)
+														dnsZoneCERTRecordValueModel.CertType = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredStringField --> Certificate
 													if valuesElement.GetCertificate() != "" {
-														dnsZoneDnsZoneCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
+														dnsZoneCERTRecordValueModel.Certificate = types.StringValue(valuesElement.GetCertificate())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneCERTRecordValueModel.Certificate = types.StringNull()
+														dnsZoneCERTRecordValueModel.Certificate = types.StringNull()
 													}
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneCERTRecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneCERTRecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6488,9 +6578,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(dsRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneDSRecordValue, 0, len(dsRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneDSRecordValue, 0, len(dsRecordElement.GetValues()))
 												for _, valuesElement := range dsRecordElement.GetValues() {
-													dnsZoneDnsZoneDSRecordValueModel := DnsZoneDnsZoneDSRecordValue{}
+													dnsZoneDSRecordValueModel := DnsZoneDSRecordValue{}
 
 													// data specToModelNested RequiredOneOfField --> DigestChoice
 													// <no value>
@@ -6604,10 +6694,10 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														dnsZoneDnsZoneDSRecordValueModel.DigestChoice = finalObj
+														dnsZoneDSRecordValueModel.DigestChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														dnsZoneDnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
+														dnsZoneDSRecordValueModel.DigestChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetDsRecordValuesDigestChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredEnumField --> DsKeyAlgorithm
@@ -6619,15 +6709,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
+														dnsZoneDSRecordValueModel.DsKeyAlgorithm = listValue
 													} else {
-														dnsZoneDnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
+														dnsZoneDSRecordValueModel.DsKeyAlgorithm = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredUintField --> KeyTag
-													dnsZoneDnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
+													dnsZoneDSRecordValueModel.KeyTag = types.Int64Value(int64(valuesElement.GetKeyTag()))
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneDSRecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneDSRecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6831,18 +6921,18 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(locRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneLOCValue, 0, len(locRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneLOCValue, 0, len(locRecordElement.GetValues()))
 												for _, valuesElement := range locRecordElement.GetValues() {
-													dnsZoneDnsZoneLOCValueModel := DnsZoneDnsZoneLOCValue{}
+													dnsZoneLOCValueModel := DnsZoneLOCValue{}
 
 													// data specToModelNested RequiredFloatField --> Altitude
-													dnsZoneDnsZoneLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
+													dnsZoneLOCValueModel.Altitude = types.Float32Value(float32(valuesElement.GetAltitude()))
 
 													// data specToModelNested FloatField --> HorizontalPrecision
-													dnsZoneDnsZoneLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
+													dnsZoneLOCValueModel.HorizontalPrecision = types.Float32Value(float32(valuesElement.GetHorizontalPrecision()))
 
 													// data specToModelNested RequiredIntField --> LatitudeDegree
-													dnsZoneDnsZoneLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
+													dnsZoneLOCValueModel.LatitudeDegree = types.Int32Value(valuesElement.GetLatitudeDegree())
 
 													// data specToModelNested RequiredEnumField --> LatitudeHemisphere
 													if valuesElement.GetLatitudeHemisphere().String() != "" {
@@ -6853,22 +6943,22 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneLOCValueModel.LatitudeHemisphere = listValue
+														dnsZoneLOCValueModel.LatitudeHemisphere = listValue
 													} else {
-														dnsZoneDnsZoneLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
+														dnsZoneLOCValueModel.LatitudeHemisphere = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested IntField --> LatitudeMinute
-													dnsZoneDnsZoneLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
+													dnsZoneLOCValueModel.LatitudeMinute = types.Int32Value(valuesElement.GetLatitudeMinute())
 
 													// data specToModelNested FloatField --> LatitudeSecond
-													dnsZoneDnsZoneLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
+													dnsZoneLOCValueModel.LatitudeSecond = types.Float32Value(float32(valuesElement.GetLatitudeSecond()))
 
 													// data specToModelNested FloatField --> LocationDiameter
-													dnsZoneDnsZoneLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
+													dnsZoneLOCValueModel.LocationDiameter = types.Float32Value(float32(valuesElement.GetLocationDiameter()))
 
 													// data specToModelNested RequiredIntField --> LongitudeDegree
-													dnsZoneDnsZoneLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
+													dnsZoneLOCValueModel.LongitudeDegree = types.Int32Value(valuesElement.GetLongitudeDegree())
 
 													// data specToModelNested RequiredEnumField --> LongitudeHemisphere
 													if valuesElement.GetLongitudeHemisphere().String() != "" {
@@ -6879,21 +6969,21 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneLOCValueModel.LongitudeHemisphere = listValue
+														dnsZoneLOCValueModel.LongitudeHemisphere = listValue
 													} else {
-														dnsZoneDnsZoneLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
+														dnsZoneLOCValueModel.LongitudeHemisphere = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested IntField --> LongitudeMinute
-													dnsZoneDnsZoneLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
+													dnsZoneLOCValueModel.LongitudeMinute = types.Int32Value(valuesElement.GetLongitudeMinute())
 
 													// data specToModelNested FloatField --> LongitudeSecond
-													dnsZoneDnsZoneLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
+													dnsZoneLOCValueModel.LongitudeSecond = types.Float32Value(float32(valuesElement.GetLongitudeSecond()))
 
 													// data specToModelNested FloatField --> VerticalPrecision
-													dnsZoneDnsZoneLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
+													dnsZoneLOCValueModel.VerticalPrecision = types.Float32Value(float32(valuesElement.GetVerticalPrecision()))
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneLOCValueModel)
+													valuesElements = append(valuesElements, dnsZoneLOCValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6944,22 +7034,22 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(mxRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneMailExchanger, 0, len(mxRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneMailExchanger, 0, len(mxRecordElement.GetValues()))
 												for _, valuesElement := range mxRecordElement.GetValues() {
-													dnsZoneDnsZoneMailExchangerModel := DnsZoneDnsZoneMailExchanger{}
+													dnsZoneMailExchangerModel := DnsZoneMailExchanger{}
 
 													// data specToModelNested StringField --> Domain
 													if valuesElement.GetDomain() != "" {
-														dnsZoneDnsZoneMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
+														dnsZoneMailExchangerModel.Domain = types.StringValue(valuesElement.GetDomain())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneMailExchangerModel.Domain = types.StringNull()
+														dnsZoneMailExchangerModel.Domain = types.StringNull()
 													}
 
 													// data specToModelNested UintField --> Priority
-													dnsZoneDnsZoneMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+													dnsZoneMailExchangerModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneMailExchangerModel)
+													valuesElements = append(valuesElements, dnsZoneMailExchangerModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7010,49 +7100,37 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(naptrRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneNAPTRValue, 0, len(naptrRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneNAPTRValue, 0, len(naptrRecordElement.GetValues()))
 												for _, valuesElement := range naptrRecordElement.GetValues() {
-													dnsZoneDnsZoneNAPTRValueModel := DnsZoneDnsZoneNAPTRValue{}
+													dnsZoneNAPTRValueModel := DnsZoneNAPTRValue{}
 
 													// data specToModelNested RequiredStringField --> Flags
 													if valuesElement.GetFlags() != "" {
-														dnsZoneDnsZoneNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
+														dnsZoneNAPTRValueModel.Flags = types.StringValue(valuesElement.GetFlags())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneNAPTRValueModel.Flags = types.StringNull()
+														dnsZoneNAPTRValueModel.Flags = types.StringNull()
 													}
 
 													// data specToModelNested RequiredUintField --> Order
-													dnsZoneDnsZoneNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
+													dnsZoneNAPTRValueModel.Order = types.Int64Value(int64(valuesElement.GetOrder()))
 
 													// data specToModelNested RequiredUintField --> Preference
-													dnsZoneDnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
+													dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 													// data specToModelNested StringField --> Regexp
-													if valuesElement.GetRegexp() != "" {
-														dnsZoneDnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-													} else {
-														// Empty string, set to null
-														dnsZoneDnsZoneNAPTRValueModel.Regexp = types.StringNull()
-													}
+													// The resource defaults this field to "", so API "" must stay "" to match it.
+													dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 													// data specToModelNested StringField --> Replacement
-													if valuesElement.GetReplacement() != "" {
-														dnsZoneDnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-													} else {
-														// Empty string, set to null
-														dnsZoneDnsZoneNAPTRValueModel.Replacement = types.StringNull()
-													}
+													// The resource defaults this field to "", so API "" must stay "" to match it.
+													dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 													// data specToModelNested StringField --> Service
-													if valuesElement.GetService() != "" {
-														dnsZoneDnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-													} else {
-														// Empty string, set to null
-														dnsZoneDnsZoneNAPTRValueModel.Service = types.StringNull()
-													}
+													// The resource defaults this field to "", so API "" must stay "" to match it.
+													dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneNAPTRValueModel)
+													valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7185,28 +7263,28 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(srvRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneSRVService, 0, len(srvRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneSRVSvc, 0, len(srvRecordElement.GetValues()))
 												for _, valuesElement := range srvRecordElement.GetValues() {
-													dnsZoneDnsZoneSRVServiceModel := DnsZoneDnsZoneSRVService{}
+													dnsZoneSRVSvcModel := DnsZoneSRVSvc{}
 
 													// data specToModelNested UintField --> Port
-													dnsZoneDnsZoneSRVServiceModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
+													dnsZoneSRVSvcModel.Port = types.Int64Value(int64(valuesElement.GetPort()))
 
 													// data specToModelNested UintField --> Priority
-													dnsZoneDnsZoneSRVServiceModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
+													dnsZoneSRVSvcModel.Priority = types.Int64Value(int64(valuesElement.GetPriority()))
 
 													// data specToModelNested StringField --> Target
 													if valuesElement.GetTarget() != "" {
-														dnsZoneDnsZoneSRVServiceModel.Target = types.StringValue(valuesElement.GetTarget())
+														dnsZoneSRVSvcModel.Target = types.StringValue(valuesElement.GetTarget())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneSRVServiceModel.Target = types.StringNull()
+														dnsZoneSRVSvcModel.Target = types.StringNull()
 													}
 
 													// data specToModelNested UintField --> Weight
-													dnsZoneDnsZoneSRVServiceModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
+													dnsZoneSRVSvcModel.Weight = types.Int64Value(int64(valuesElement.GetWeight()))
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneSRVServiceModel)
+													valuesElements = append(valuesElements, dnsZoneSRVSvcModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7257,9 +7335,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(sshfpRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneSSHFPRecordValue, 0, len(sshfpRecordElement.GetValues()))
 												for _, valuesElement := range sshfpRecordElement.GetValues() {
-													dnsZoneDnsZoneSSHFPRecordValueModel := DnsZoneDnsZoneSSHFPRecordValue{}
+													dnsZoneSSHFPRecordValueModel := DnsZoneSSHFPRecordValue{}
 
 													// data specToModelNested RequiredEnumField --> Algorithm
 													if valuesElement.GetAlgorithm().String() != "" {
@@ -7270,9 +7348,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneSSHFPRecordValueModel.Algorithm = listValue
+														dnsZoneSSHFPRecordValueModel.Algorithm = listValue
 													} else {
-														dnsZoneDnsZoneSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
+														dnsZoneSSHFPRecordValueModel.Algorithm = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredOneOfField --> FingerprintType
@@ -7358,13 +7436,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														dnsZoneDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
+														dnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														dnsZoneDnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
+														dnsZoneSSHFPRecordValueModel.FingerprintTypeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetSshfpRecordValuesFingerprintTypeModelAttributeMap)
 													}
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneSSHFPRecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneSSHFPRecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7415,16 +7493,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 											if len(tlsaRecordElement.GetValues()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												valuesElements := make([]DnsZoneDnsZoneTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
+												valuesElements := make([]DnsZoneTLSARecordValue, 0, len(tlsaRecordElement.GetValues()))
 												for _, valuesElement := range tlsaRecordElement.GetValues() {
-													dnsZoneDnsZoneTLSARecordValueModel := DnsZoneDnsZoneTLSARecordValue{}
+													dnsZoneTLSARecordValueModel := DnsZoneTLSARecordValue{}
 
 													// data specToModelNested RequiredStringField --> CertificateAssociationData
 													if valuesElement.GetCertificateAssociationData() != "" {
-														dnsZoneDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
+														dnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringValue(valuesElement.GetCertificateAssociationData())
 													} else {
 														// Empty string, set to null
-														dnsZoneDnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringNull()
+														dnsZoneTLSARecordValueModel.CertificateAssociationData = types.StringNull()
 													}
 
 													// data specToModelNested RequiredEnumField --> CertificateUsage
@@ -7436,9 +7514,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneTLSARecordValueModel.CertificateUsage = listValue
+														dnsZoneTLSARecordValueModel.CertificateUsage = listValue
 													} else {
-														dnsZoneDnsZoneTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
+														dnsZoneTLSARecordValueModel.CertificateUsage = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredEnumField --> MatchingType
@@ -7450,9 +7528,9 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneTLSARecordValueModel.MatchingType = listValue
+														dnsZoneTLSARecordValueModel.MatchingType = listValue
 													} else {
-														dnsZoneDnsZoneTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
+														dnsZoneTLSARecordValueModel.MatchingType = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredEnumField --> Selector
@@ -7464,12 +7542,12 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 														if response.Diagnostics.HasError() {
 															return
 														}
-														dnsZoneDnsZoneTLSARecordValueModel.Selector = listValue
+														dnsZoneTLSARecordValueModel.Selector = listValue
 													} else {
-														dnsZoneDnsZoneTLSARecordValueModel.Selector = types.ListNull(types.StringType)
+														dnsZoneTLSARecordValueModel.Selector = types.ListNull(types.StringType)
 													}
 
-													valuesElements = append(valuesElements, dnsZoneDnsZoneTLSARecordValueModel)
+													valuesElements = append(valuesElements, dnsZoneTLSARecordValueModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7552,13 +7630,13 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									dnsZoneDnsZoneRRSetModel.TypeRecordSetChoice = finalObj
+									dnsZoneRRSetModel.TypeRecordSetChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									dnsZoneDnsZoneRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetModelAttributeMap)
+									dnsZoneRRSetModel.TypeRecordSetChoice = types.ObjectNull(DnsZoneDnsTypePrimaryRrSetGroupRrSetTypeRecordSetModelAttributeMap)
 								}
 
-								rrSetElements = append(rrSetElements, dnsZoneDnsZoneRRSetModel)
+								rrSetElements = append(rrSetElements, dnsZoneRRSetModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7567,16 +7645,16 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							dnsZoneDnsZoneRRSetGroupModel.RrSet = rrSetListValue
+							dnsZoneRRSetGroupModel.RrSet = rrSetListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							dnsZoneDnsZoneRRSetGroupModel.RrSet = types.ListNull(types.ObjectType{AttrTypes: DnsZoneDnsTypePrimaryRrSetGroupRrSetModelAttributeMap})
+							dnsZoneRRSetGroupModel.RrSet = types.ListNull(types.ObjectType{AttrTypes: DnsZoneDnsTypePrimaryRrSetGroupRrSetModelAttributeMap})
 						}
 
-						rrSetGroupElements = append(rrSetGroupElements, dnsZoneDnsZoneRRSetGroupModel)
+						rrSetGroupElements = append(rrSetGroupElements, dnsZoneRRSetGroupModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7728,12 +7806,8 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 				}
 
 				// data specToModelNested StringField --> TsigKeyName
-				if secondaryElement.GetTsigKeyName() != "" {
-					secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
-				} else {
-					// Empty string, set to null
-					secondaryAttributeMap["tsig_key_name"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
 
 				// data specToModelNested PointerField --> TsigKeyValue
 				if secondaryElement.GetTsigKeyValue() != nil {
@@ -7837,6 +7911,15 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := tsigKeyValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -7915,6 +7998,94 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.DnsTypeChoice = types.ObjectNull(DnsZoneDnsTypeModelAttributeMap)
+	}
+
+	// data SpecToModelRoot PointerField --> NamespaceRbac
+	if specData.GetNamespaceRbac() != nil {
+		var dnsZoneNsRBACModel = &DnsZoneNsRBAC{}
+		namespaceRbacElement := specData.GetNamespaceRbac()
+
+		// data specToModelNested OneOfField --> Mode
+		if namespaceRbacElement.GetMode() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			namespaceRbacmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			namespaceRbacmodeChoiceChoices := namespaceRbacElement.GetMode()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> Disabled
+			_, isDisabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Disabled)
+
+			if isDisabled {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
+			} else {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> Enabled
+			// <no value>
+			// false
+			{
+				enabledOptionsWrapper, isEnabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Enabled)
+				enabledAttributeMap := make(map[string]attr.Value)
+
+				if isEnabled && enabledOptionsWrapper != nil && enabledOptionsWrapper.Enabled != nil {
+					enabledElement := enabledOptionsWrapper.Enabled
+
+					// data specToModelNested RequiredArrayOfStringField --> Namespaces
+					if len(enabledElement.GetNamespaces()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, enabledElement.GetNamespaces())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						enabledAttributeMap["namespaces"] = listValue
+					} else {
+						enabledAttributeMap["namespaces"] = types.ListNull(types.StringType)
+					}
+
+					enabledObj, enabledObjDiags := types.ObjectValue(DnsZoneNamespaceRbacModeEnabledModelAttributeMap, enabledAttributeMap)
+					response.Diagnostics.Append(enabledObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = enabledObj
+				} else {
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = types.ObjectNull(DnsZoneNamespaceRbacModeEnabledModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, namespaceRbacmodeChoiceChoicesObjDiags := types.ObjectValue(
+				DnsZoneNamespaceRbacModeModelAttributeMap, // The attribute schema for the OneOf choices
+				namespaceRbacmodeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(namespaceRbacmodeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			dnsZoneNsRBACModel.ModeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			dnsZoneNsRBACModel.ModeChoice = types.ObjectNull(DnsZoneNamespaceRbacModeModelAttributeMap)
+		}
+
+		namespaceRbacObj, namespaceRbacDiags := utils.GoStructToObjectValue(
+			ctx,
+			DnsZoneNamespaceRbacModelAttributeMap,
+			dnsZoneNsRBACModel,
+		)
+		response.Diagnostics.Append(namespaceRbacDiags...)
+		data.NamespaceRbac = namespaceRbacObj
+	} else {
+		data.NamespaceRbac = types.ObjectNull(DnsZoneNamespaceRbacModelAttributeMap)
 	}
 
 	// data SpecToModelRoot UintField --> NumOfDnsRecords

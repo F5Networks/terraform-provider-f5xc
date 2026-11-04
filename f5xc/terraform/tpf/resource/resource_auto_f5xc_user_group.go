@@ -15,12 +15,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -82,23 +85,25 @@ func (r *ResourceF5XCUserGroup) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCUserGroup) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a user_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a user_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_group) etc. can be fetched",
+		MarkdownDescription: "Represents group for a given tenant",
+		Description:         "Represents group for a given tenant",
 
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
 				Description:         "description The description set for this user_group",
-				MarkdownDescription: "description The description set for this user_group",
+				MarkdownDescription: "description The description set for this user_group<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"display_name": schema.StringAttribute{
 				Description:         "Display Name Display name of the group used as well for scim sync.",
-				MarkdownDescription: "Display Name Display name of the group used as well for scim sync.",
+				MarkdownDescription: "Display Name Display name of the group used as well for scim sync.<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"name": schema.StringAttribute{
 				Description:         "Name Internal name of the group.",
@@ -144,10 +149,11 @@ func (r *ResourceF5XCUserGroup) Schema(ctx context.Context, request resource.Sch
 			},
 			"sync_id": schema.StringAttribute{
 				Description:         "Sync Id Sync id of the user group.",
-				MarkdownDescription: "Sync Id Sync id of the user group.",
+				MarkdownDescription: "Sync Id Sync id of the user group.<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"usernames": schema.ListAttribute{
 				Description:         "Usernames List of the users enumerated by name.",
@@ -219,9 +225,17 @@ func (r *ResourceF5XCUserGroup) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCUserGroup) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCUserGroupModel
 
 	// Read Terraform plan data into the model
@@ -333,7 +347,7 @@ func (r *ResourceF5XCUserGroup) Create(ctx context.Context, request resource.Cre
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "user_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "user_group", err),
 		)
 		return
 	}
@@ -397,7 +411,7 @@ func (r *ResourceF5XCUserGroup) Read(ctx context.Context, request resource.ReadR
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "user_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "user_group", err),
 		)
 		return
 	}
@@ -426,20 +440,12 @@ func (r *ResourceF5XCUserGroup) Read(ctx context.Context, request resource.ReadR
 	specData := readRespItem
 
 	// resource SpecToModelRoot StringField --> Description
-	if specData.GetDescription() != "" {
-		data.Description = types.StringValue(specData.GetDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Description = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Description = types.StringValue(specData.GetDescription())
 
 	// resource SpecToModelRoot StringField --> DisplayName
-	if specData.GetDisplayName() != "" {
-		data.DisplayName = types.StringValue(specData.GetDisplayName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.DisplayName = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.DisplayName = types.StringValue(specData.GetDisplayName())
 
 	// resource SpecToModelRoot StringField --> Name
 	if specData.GetName() != "" {
@@ -494,16 +500,17 @@ func (r *ResourceF5XCUserGroup) Read(ctx context.Context, request resource.ReadR
 			AttrTypes: UserGroupNamespaceRolesModelAttributeMap,
 		}
 		nullNamespaceRolesSet := basetypes.NewSetNull(namespaceRolesObjectType)
-		data.NamespaceRoles = nullNamespaceRolesSet
+		if !data.NamespaceRoles.IsNull() && !data.NamespaceRoles.IsUnknown() && len(data.NamespaceRoles.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty set.
+			data.NamespaceRoles = basetypes.NewSetValueMust(namespaceRolesObjectType, nil)
+		} else {
+			data.NamespaceRoles = nullNamespaceRolesSet
+		}
 	}
 
 	// resource SpecToModelRoot StringField --> SyncId
-	if specData.GetSyncId() != "" {
-		data.SyncId = types.StringValue(specData.GetSyncId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SyncId = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SyncId = types.StringValue(specData.GetSyncId())
 
 	// resource specToModelRootOld ArrayOfStringField --> Usernames
 	{
@@ -515,7 +522,12 @@ func (r *ResourceF5XCUserGroup) Read(ctx context.Context, request resource.ReadR
 			}
 			data.Usernames = listValue
 		} else {
-			data.Usernames = types.ListNull(types.StringType)
+			if !data.Usernames.IsNull() && !data.Usernames.IsUnknown() && len(data.Usernames.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Usernames = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Usernames = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -528,6 +540,12 @@ func (r *ResourceF5XCUserGroup) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCUserGroup) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCUserGroupModel
@@ -641,7 +659,7 @@ func (r *ResourceF5XCUserGroup) Update(ctx context.Context, request resource.Upd
 	_, err = r.client.CustomAPI(ctx, "PUT", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "user_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "user_group", err),
 		)
 		return
 	}
@@ -704,7 +722,7 @@ func (r *ResourceF5XCUserGroup) Delete(ctx context.Context, request resource.Del
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "user_group", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "user_group", err),
 			)
 			return
 		}
@@ -720,7 +738,7 @@ func (r *ResourceF5XCUserGroup) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "user_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "user_group", err),
 		)
 		return
 	}

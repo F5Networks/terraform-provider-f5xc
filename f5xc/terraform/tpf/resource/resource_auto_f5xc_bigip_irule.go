@@ -29,6 +29,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -84,8 +85,8 @@ func (r *ResourceF5XCBigipIrule) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCBigipIrule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bigip_irule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bigip_irule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bigip_irule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bigip_irule) etc. can be fetched",
+		MarkdownDescription: "BIG-IP iRule Service manages iRule Library for customers",
+		Description:         "BIG-IP iRule Service manages iRule Library for customers",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -163,17 +164,18 @@ func (r *ResourceF5XCBigipIrule) Schema(ctx context.Context, request resource.Sc
 			},
 			"irule_name": schema.StringAttribute{
 				Description:         "iRule name iRule name",
-				MarkdownDescription: "iRule name iRule name<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "iRule name iRule name<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
 			},
 			"source": schema.StringAttribute{
 				Description:         "iRule source iRule generation/updation source",
-				MarkdownDescription: "iRule source iRule generation/updation source",
+				MarkdownDescription: "iRule source iRule generation/updation source<br>**Allowed Values (choose one):** `['AI', 'Human', 'Mix']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -250,9 +252,17 @@ func (r *ResourceF5XCBigipIrule) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCBigipIrule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCBigipIruleModel
 
 	// Read Terraform plan data into the model
@@ -351,7 +361,7 @@ func (r *ResourceF5XCBigipIrule) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -374,7 +384,7 @@ func (r *ResourceF5XCBigipIrule) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_bigip_irule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "bigip_irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "bigip_irule", err),
 		)
 		return
 	}
@@ -508,12 +518,8 @@ func (r *ResourceF5XCBigipIrule) Create(ctx context.Context, request resource.Cr
 	}
 
 	// resource SpecToModelRoot StringField --> IruleName
-	if specData.GetIruleName() != "" {
-		data.IruleName = types.StringValue(specData.GetIruleName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.IruleName = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.IruleName = types.StringValue(specData.GetIruleName())
 
 	// resource SpecToModelRoot StringField --> Source
 	if specData.GetSource() != "" {
@@ -577,7 +583,7 @@ func (r *ResourceF5XCBigipIrule) Read(ctx context.Context, request resource.Read
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "bigip_irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "bigip_irule", err),
 		)
 		return
 	}
@@ -711,12 +717,8 @@ func (r *ResourceF5XCBigipIrule) Read(ctx context.Context, request resource.Read
 	}
 
 	// resource SpecToModelRoot StringField --> IruleName
-	if specData.GetIruleName() != "" {
-		data.IruleName = types.StringValue(specData.GetIruleName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.IruleName = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.IruleName = types.StringValue(specData.GetIruleName())
 
 	// resource SpecToModelRoot StringField --> Source
 	if specData.GetSource() != "" {
@@ -735,6 +737,12 @@ func (r *ResourceF5XCBigipIrule) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCBigipIruleModel
@@ -871,7 +879,7 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -887,7 +895,7 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 	err = r.client.ReplaceObject(ctx, ves_io_schema_bigip_irule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "bigip_irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bigip_irule", err),
 		)
 		return
 	}
@@ -896,7 +904,7 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "bigip_irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bigip_irule", err),
 		)
 		return
 	}
@@ -1029,12 +1037,8 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 	}
 
 	// resource SpecToModelRoot StringField --> IruleName
-	if specData.GetIruleName() != "" {
-		data.IruleName = types.StringValue(specData.GetIruleName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.IruleName = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.IruleName = types.StringValue(specData.GetIruleName())
 
 	// resource SpecToModelRoot StringField --> Source
 	if specData.GetSource() != "" {
@@ -1120,7 +1124,7 @@ func (r *ResourceF5XCBigipIrule) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "bigip_irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "bigip_irule", err),
 		)
 		return
 	}

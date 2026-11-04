@@ -28,13 +28,13 @@ type DataSourceF5XCHealthcheck struct {
 	client *client.APIClient
 }
 
-type HealthcheckGlobalSpecTypeHealthCheckChoice struct {
+type HealthcheckHealthCheckChoice struct {
 	HttpHealthCheck    types.Object `tfsdk:"http_health_check"`
 	TcpHealthCheck     types.Object `tfsdk:"tcp_health_check"`
 	UdpIcmpHealthCheck types.Bool   `tfsdk:"udp_icmp_health_check"`
 }
 
-type HealthcheckGlobalSpecTypeHttpHealthCheck struct {
+type HealthcheckHttpHealthCheck struct {
 	ExpectedResponse       types.String `tfsdk:"expected_response"`
 	ExpectedStatusCodes    types.List   `tfsdk:"expected_status_codes"`
 	Headers                types.Map    `tfsdk:"headers"`
@@ -44,17 +44,17 @@ type HealthcheckGlobalSpecTypeHttpHealthCheck struct {
 	UseHttp2               types.Bool   `tfsdk:"use_http2"`
 }
 
-type HealthcheckHttpHealthCheckHostHeaderChoice struct {
+type HealthcheckHostHeaderChoice struct {
 	HostHeader          types.String `tfsdk:"host_header"`
 	UseOriginServerName types.Bool   `tfsdk:"use_origin_server_name"`
 }
 
-type HealthcheckGlobalSpecTypeTcpHealthCheck struct {
+type HealthcheckTcpHealthCheck struct {
 	ExpectedResponse types.String `tfsdk:"expected_response"`
 	SendPayload      types.String `tfsdk:"send_payload"`
 }
 
-type HealthcheckGlobalSpecTypeJitterChoice struct {
+type HealthcheckJitterChoice struct {
 	DefaultJitter types.Bool  `tfsdk:"default_jitter"`
 	JitterPercent types.Int64 `tfsdk:"jitter_percent"`
 }
@@ -144,8 +144,8 @@ func (d *DataSourceF5XCHealthcheck) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
+		MarkdownDescription: "Health check configuration for a given cluster.",
+		Description:         "Health check configuration for a given cluster.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -388,7 +388,7 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "healthcheck", err))
 		return
 	}
 
@@ -459,7 +459,7 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		healthCheckChoiceChoices := specData.GetHealthCheck()
 
 		// The model struct that will be populated by the nested template.
-		var healthCheckChoiceChoicesModel = &HealthcheckGlobalSpecTypeHealthCheckChoice{}
+		var healthCheckChoiceChoicesModel = &HealthcheckHealthCheckChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -683,7 +683,7 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		jitterChoiceChoices := specData.GetJitterChoice()
 
 		// The model struct that will be populated by the nested template.
-		var jitterChoiceChoicesModel = &HealthcheckGlobalSpecTypeJitterChoice{}
+		var jitterChoiceChoicesModel = &HealthcheckJitterChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

@@ -31,7 +31,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -52,7 +52,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_withExpressRouteTransi
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -73,7 +73,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_withNodeInfoTransition
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -94,7 +94,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_withSpokeRoutingTransi
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,9 +115,9 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-cloud-info-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAzureVnetSiteSetCloudSiteInfoDestroyProducer(t),
@@ -129,7 +129,11 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfo_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_withVnetIdentity(name, namespace, "services-vnet-c", "/subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/rg-c/providers/Microsoft.Network/virtualNetworks/services-vnet-c"),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_full(name, namespace),
+		})
 }
 
 func testAccCheckAzureVnetSiteSetCloudSiteInfoDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -145,7 +149,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoAzureCredName() string 
 		return name
 	}
 
-	return "tf-acc-azure-cred"
+	return "example-azure-cred"
 }
 
 func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_site(name, namespace string) string {
@@ -154,7 +158,7 @@ resource "f5xc_azure_vnet_site" "site" {
 	name      = %q
 	namespace = %q
 
-	resource_group = "tf-acc-azure-rg"
+	resource_group = "example-azure-rg"
 
 	region_choice = {
 		azure_region = "eastus2"
@@ -220,7 +224,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_basic(name, name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 
@@ -236,7 +240,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_withVnetIdentity
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 
@@ -256,7 +260,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_withExpressRoute
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 
@@ -276,7 +280,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_withNodeInfo(nam
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 
@@ -301,7 +305,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_withSpokeRouting
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 
@@ -327,7 +331,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_full(name, names
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_azure_vnet_site_set_cloud_site_info" "test" {
+resource "f5xc_azure_vnet_site_set_cloud_site_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = %q
 

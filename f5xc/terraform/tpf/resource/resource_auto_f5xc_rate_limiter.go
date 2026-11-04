@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -56,7 +57,6 @@ type ResourceF5XCRateLimiter struct {
 
 type RateLimiterRateLimitValue struct {
 	ActionChoice     types.Object `tfsdk:"action_choice"`
-	AlgorithmChoice  types.Object `tfsdk:"algorithm_choice"`
 	BurstMultiplier  types.Int64  `tfsdk:"burst_multiplier"`
 	PeriodMultiplier types.Int64  `tfsdk:"period_multiplier"`
 	TotalNumber      types.Int64  `tfsdk:"total_number"`
@@ -90,11 +90,6 @@ type RateLimiterSeconds struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type RateLimiterAlgorithmChoice struct {
-	LeakyBucket types.Bool `tfsdk:"leaky_bucket"`
-	TokenBucket types.Bool `tfsdk:"token_bucket"`
-}
-
 // ResourceF5XCRateLimiterModel describes the resource data model.
 type ResourceF5XCRateLimiterModel struct {
 	Annotations        types.Map      `tfsdk:"annotations"`
@@ -123,9 +118,6 @@ var RateLimiterLimitsModelAttributeMap = map[string]attr.Type{
 
 	"action_choice": types.ObjectType{
 		AttrTypes: RateLimiterLimitsActionChoiceModelAttributeMap,
-	},
-	"algorithm_choice": types.ObjectType{
-		AttrTypes: RateLimiterLimitsAlgorithmModelAttributeMap,
 	},
 	"burst_multiplier":  types.Int64Type,
 	"period_multiplier": types.Int64Type,
@@ -184,13 +176,6 @@ var RateLimiterLimitsActionChoiceActionBlockBlockDurationChoiceSecondsModelAttri
 	"duration": types.Int64Type,
 }
 
-// Attribute map for OneOfField --> Algorithm
-var RateLimiterLimitsAlgorithmModelAttributeMap = map[string]attr.Type{
-
-	"leaky_bucket": types.BoolType,
-	"token_bucket": types.BoolType,
-}
-
 // Attribute map for ArrayOfPointerField --> UserIdentification
 var RateLimiterUserIdentificationObjectRefModelAttributeMap = map[string]attr.Type{
 
@@ -210,8 +195,8 @@ func (r *ResourceF5XCRateLimiter) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a rate_limiter This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a rate_limiter This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter) etc. can be fetched",
+		MarkdownDescription: "A rate_limiter specifies a list of rate limit unit periods and the corresponding value of the total number of requests to be allowed in that period. It<br>also contains an optional reference to a user_identification object which determines how the user identifier for rate limiting is obtained from the input<br>fields extracted from the request.",
+		Description:         "A rate_limiter specifies a list of rate limit unit periods and the corresponding value of the total number of requests to be allowed in that period. It also contains an optional reference to a user_identification object which determines how the user identifier for rate limiting is obtained from the input fields extracted from the request.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -401,41 +386,6 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 								},
 							},
 						},
-						"algorithm_choice": schema.SingleNestedAttribute{
-							Description:         "algorithm The algorithm used for the RateLimitValue, learn more: https://gitlab.com/f5/volterra/ves.io/opera/-/wikis/Rate-limiting-explanations",
-							MarkdownDescription: "algorithm The algorithm used for the RateLimitValue, learn more: https://gitlab.com/f5/volterra/ves.io/opera/-/wikis/Rate-limiting-explanations",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.Object{
-								exactlyoneofvalidator.ExactlyOneOf(
-									"leaky_bucket",
-									"token_bucket",
-								),
-							},
-							Attributes: map[string]schema.Attribute{
-								"leaky_bucket": schema.BoolAttribute{
-									Description:         "LeakyBucketRateLimiter Leaky-Bucket is the default rate limiter algorithm for F5",
-									MarkdownDescription: "LeakyBucketRateLimiter Leaky-Bucket is the default rate limiter algorithm for F5",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.Bool{
-										boolvalidator.Equals(true),
-									},
-								},
-								"token_bucket": schema.BoolAttribute{
-									Description:         "TokenBucketRateLimiter Token-Bucket is a rate limiter algorithm that is stricter with enforcing limits",
-									MarkdownDescription: "TokenBucketRateLimiter Token-Bucket is a rate limiter algorithm that is stricter with enforcing limits",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.Bool{
-										boolvalidator.Equals(true),
-									},
-								},
-							},
-						},
 						"burst_multiplier": schema.Int64Attribute{
 							Description:         "burst_multiplier The maximum burst of requests to accommodate, expressed as a multiple of the rate.",
 							MarkdownDescription: "burst_multiplier The maximum burst of requests to accommodate, expressed as a multiple of the rate.<br>**Default:** `1`",
@@ -518,7 +468,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -586,9 +536,17 @@ func (r *ResourceF5XCRateLimiter) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCRateLimiterModel
 
 	// Read Terraform plan data into the model
@@ -681,6 +639,9 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 
 		for i, limitsElement := range limitsElementsModelToSpec {
 			limitsSpec[i] = &ves_io_schema_rate_limiter.RateLimitValue{}
+			limitsSpec[i].Algorithm = &ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket{
+				LeakyBucket: &ves_io_schema_rate_limiter.LeakyBucketRateLimiter{},
+			}
 
 			// resource modelToSpecNested OneOfField --> ActionChoice
 			if !limitsElement.ActionChoice.IsNull() && !limitsElement.ActionChoice.IsUnknown() {
@@ -782,30 +743,6 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 
 			}
 
-			// resource modelToSpecNested OneOfField --> Algorithm
-			if !limitsElement.AlgorithmChoice.IsNull() && !limitsElement.AlgorithmChoice.IsUnknown() {
-				limitsAlgorithmChoiceModel := RateLimiterAlgorithmChoice{}
-				response.Diagnostics.Append(limitsElement.AlgorithmChoice.As(ctx, &limitsAlgorithmChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> LeakyBucket
-				if !limitsAlgorithmChoiceModel.LeakyBucket.IsNull() && !limitsAlgorithmChoiceModel.LeakyBucket.IsUnknown() {
-					leakyBucketSpecBool := &ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket{}
-					leakyBucketSpecBool.LeakyBucket = &ves_io_schema_rate_limiter.LeakyBucketRateLimiter{}
-					limitsSpec[i].Algorithm = leakyBucketSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> TokenBucket
-				if !limitsAlgorithmChoiceModel.TokenBucket.IsNull() && !limitsAlgorithmChoiceModel.TokenBucket.IsUnknown() {
-					tokenBucketSpecBool := &ves_io_schema_rate_limiter.RateLimitValue_TokenBucket{}
-					tokenBucketSpecBool.TokenBucket = &ves_io_schema_rate_limiter.TokenBucketRateLimiter{}
-					limitsSpec[i].Algorithm = tokenBucketSpecBool
-				}
-
-			}
-
 			// resource modelToSpecNested UintField --> BurstMultiplier
 			if !limitsElement.BurstMultiplier.IsNull() && !limitsElement.BurstMultiplier.IsUnknown() {
 				limitsSpec[i].BurstMultiplier = uint32(uint32(limitsElement.BurstMultiplier.ValueInt64()))
@@ -886,7 +823,7 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -909,7 +846,7 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_rate_limiter.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "rate_limiter", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "rate_limiter", err),
 		)
 		return
 	}
@@ -1193,53 +1130,6 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 				rateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(RateLimiterLimitsActionChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested OneOfField --> Algorithm
-			if limitsElement.GetAlgorithm() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				limitsalgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				limitsalgorithmChoiceChoices := limitsElement.GetAlgorithm()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> LeakyBucket
-				_, isLeakyBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket)
-
-				if isLeakyBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> TokenBucket
-				_, isTokenBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_TokenBucket)
-
-				if isTokenBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, limitsalgorithmChoiceChoicesObjDiags := types.ObjectValue(
-					RateLimiterLimitsAlgorithmModelAttributeMap, // The attribute schema for the OneOf choices
-					limitsalgorithmChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(limitsalgorithmChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				rateLimiterRateLimitValueModel.AlgorithmChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				rateLimiterRateLimitValueModel.AlgorithmChoice = types.ObjectNull(RateLimiterLimitsAlgorithmModelAttributeMap)
-			}
-
 			// resource specToModelNested UintField --> BurstMultiplier
 			rateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(limitsElement.GetBurstMultiplier()))
 
@@ -1334,14 +1224,12 @@ func (r *ResourceF5XCRateLimiter) Create(ctx context.Context, request resource.C
 			AttrTypes: RateLimiterUserIdentificationObjectRefModelAttributeMap,
 		}
 		nullUserIdentificationList := basetypes.NewListNull(userIdentificationObjectType)
-		var priorValUserIdentification types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("user_identification"), &priorValUserIdentification)
-		if !priorValUserIdentification.IsNull() && !priorValUserIdentification.IsUnknown() {
-			data.UserIdentification = priorValUserIdentification
+		if !data.UserIdentification.IsNull() && !data.UserIdentification.IsUnknown() && len(data.UserIdentification.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.UserIdentification = basetypes.NewListValueMust(userIdentificationObjectType, nil)
 		} else {
 			data.UserIdentification = nullUserIdentificationList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1394,7 +1282,7 @@ func (r *ResourceF5XCRateLimiter) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "rate_limiter", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "rate_limiter", err),
 		)
 		return
 	}
@@ -1678,53 +1566,6 @@ func (r *ResourceF5XCRateLimiter) Read(ctx context.Context, request resource.Rea
 				rateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(RateLimiterLimitsActionChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested OneOfField --> Algorithm
-			if limitsElement.GetAlgorithm() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				limitsalgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				limitsalgorithmChoiceChoices := limitsElement.GetAlgorithm()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> LeakyBucket
-				_, isLeakyBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket)
-
-				if isLeakyBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> TokenBucket
-				_, isTokenBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_TokenBucket)
-
-				if isTokenBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, limitsalgorithmChoiceChoicesObjDiags := types.ObjectValue(
-					RateLimiterLimitsAlgorithmModelAttributeMap, // The attribute schema for the OneOf choices
-					limitsalgorithmChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(limitsalgorithmChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				rateLimiterRateLimitValueModel.AlgorithmChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				rateLimiterRateLimitValueModel.AlgorithmChoice = types.ObjectNull(RateLimiterLimitsAlgorithmModelAttributeMap)
-			}
-
 			// resource specToModelNested UintField --> BurstMultiplier
 			rateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(limitsElement.GetBurstMultiplier()))
 
@@ -1819,14 +1660,12 @@ func (r *ResourceF5XCRateLimiter) Read(ctx context.Context, request resource.Rea
 			AttrTypes: RateLimiterUserIdentificationObjectRefModelAttributeMap,
 		}
 		nullUserIdentificationList := basetypes.NewListNull(userIdentificationObjectType)
-		var priorValUserIdentification types.List
-		_ = request.State.GetAttribute(ctx, path.Root("user_identification"), &priorValUserIdentification)
-		if !priorValUserIdentification.IsNull() && !priorValUserIdentification.IsUnknown() {
-			data.UserIdentification = priorValUserIdentification
+		if !data.UserIdentification.IsNull() && !data.UserIdentification.IsUnknown() && len(data.UserIdentification.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.UserIdentification = basetypes.NewListValueMust(userIdentificationObjectType, nil)
 		} else {
 			data.UserIdentification = nullUserIdentificationList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1838,6 +1677,12 @@ func (r *ResourceF5XCRateLimiter) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCRateLimiterModel
@@ -1950,6 +1795,9 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 
 		for i, limitsElement := range limitsElementsModelToSpec {
 			limitsSpec[i] = &ves_io_schema_rate_limiter.RateLimitValue{}
+			limitsSpec[i].Algorithm = &ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket{
+				LeakyBucket: &ves_io_schema_rate_limiter.LeakyBucketRateLimiter{},
+			}
 
 			// resource modelToSpecNested OneOfField --> ActionChoice
 			if !limitsElement.ActionChoice.IsNull() && !limitsElement.ActionChoice.IsUnknown() {
@@ -2051,30 +1899,6 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 
 			}
 
-			// resource modelToSpecNested OneOfField --> Algorithm
-			if !limitsElement.AlgorithmChoice.IsNull() && !limitsElement.AlgorithmChoice.IsUnknown() {
-				limitsAlgorithmChoiceModel := RateLimiterAlgorithmChoice{}
-				response.Diagnostics.Append(limitsElement.AlgorithmChoice.As(ctx, &limitsAlgorithmChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> LeakyBucket
-				if !limitsAlgorithmChoiceModel.LeakyBucket.IsNull() && !limitsAlgorithmChoiceModel.LeakyBucket.IsUnknown() {
-					leakyBucketSpecBool := &ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket{}
-					leakyBucketSpecBool.LeakyBucket = &ves_io_schema_rate_limiter.LeakyBucketRateLimiter{}
-					limitsSpec[i].Algorithm = leakyBucketSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> TokenBucket
-				if !limitsAlgorithmChoiceModel.TokenBucket.IsNull() && !limitsAlgorithmChoiceModel.TokenBucket.IsUnknown() {
-					tokenBucketSpecBool := &ves_io_schema_rate_limiter.RateLimitValue_TokenBucket{}
-					tokenBucketSpecBool.TokenBucket = &ves_io_schema_rate_limiter.TokenBucketRateLimiter{}
-					limitsSpec[i].Algorithm = tokenBucketSpecBool
-				}
-
-			}
-
 			// resource modelToSpecNested UintField --> BurstMultiplier
 			if !limitsElement.BurstMultiplier.IsNull() && !limitsElement.BurstMultiplier.IsUnknown() {
 				limitsSpec[i].BurstMultiplier = uint32(uint32(limitsElement.BurstMultiplier.ValueInt64()))
@@ -2155,7 +1979,7 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2171,7 +1995,7 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_rate_limiter.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "rate_limiter", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "rate_limiter", err),
 		)
 		return
 	}
@@ -2180,7 +2004,7 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "rate_limiter", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "rate_limiter", err),
 		)
 		return
 	}
@@ -2463,53 +2287,6 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 				rateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(RateLimiterLimitsActionChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested OneOfField --> Algorithm
-			if limitsElement.GetAlgorithm() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				limitsalgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				limitsalgorithmChoiceChoices := limitsElement.GetAlgorithm()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> LeakyBucket
-				_, isLeakyBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket)
-
-				if isLeakyBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> TokenBucket
-				_, isTokenBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_TokenBucket)
-
-				if isTokenBucket {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolValue(true)
-				} else {
-					limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, limitsalgorithmChoiceChoicesObjDiags := types.ObjectValue(
-					RateLimiterLimitsAlgorithmModelAttributeMap, // The attribute schema for the OneOf choices
-					limitsalgorithmChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(limitsalgorithmChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				rateLimiterRateLimitValueModel.AlgorithmChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				rateLimiterRateLimitValueModel.AlgorithmChoice = types.ObjectNull(RateLimiterLimitsAlgorithmModelAttributeMap)
-			}
-
 			// resource specToModelNested UintField --> BurstMultiplier
 			rateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(limitsElement.GetBurstMultiplier()))
 
@@ -2604,14 +2381,12 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 			AttrTypes: RateLimiterUserIdentificationObjectRefModelAttributeMap,
 		}
 		nullUserIdentificationList := basetypes.NewListNull(userIdentificationObjectType)
-		var priorValUserIdentification types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("user_identification"), &priorValUserIdentification)
-		if !priorValUserIdentification.IsNull() && !priorValUserIdentification.IsUnknown() {
-			data.UserIdentification = priorValUserIdentification
+		if !data.UserIdentification.IsNull() && !data.UserIdentification.IsUnknown() && len(data.UserIdentification.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.UserIdentification = basetypes.NewListValueMust(userIdentificationObjectType, nil)
 		} else {
 			data.UserIdentification = nullUserIdentificationList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -2686,7 +2461,7 @@ func (r *ResourceF5XCRateLimiter) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "rate_limiter", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "rate_limiter", err),
 		)
 		return
 	}

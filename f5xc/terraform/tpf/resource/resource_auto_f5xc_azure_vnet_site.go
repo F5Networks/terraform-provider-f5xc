@@ -40,6 +40,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -52,6 +53,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_fleet "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fleet"
 	ves_io_schema_network_firewall "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_firewall"
@@ -73,6 +75,7 @@ type AzureVnetSiteSecretType struct {
 type AzureVnetSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type AzureVnetSiteBlindfoldSecretInfo struct {
@@ -102,9 +105,8 @@ type AzureVnetSiteFleetBlockedServices struct {
 }
 
 type AzureVnetSiteBlockedServicesValueTypeChoice struct {
-	Dns              types.Bool `tfsdk:"dns"`
-	Ssh              types.Bool `tfsdk:"ssh"`
-	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
+	Dns types.Bool `tfsdk:"dns"`
+	Ssh types.Bool `tfsdk:"ssh"`
 }
 
 type AzureVnetSiteAzureVnetSiteInfoType struct {
@@ -248,7 +250,8 @@ type AzureVnetSiteAcceleratedNetworkingType struct {
 }
 
 type AzureVnetSiteAcceleratedNetworkingChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 type AzureVnetSiteAzureVnetTwoIfaceNodeType struct {
@@ -278,7 +281,6 @@ type AzureVnetSiteResGroupChoice struct {
 
 type AzureVnetSiteSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
 type AzureVnetSiteDcClusterGroupChoice struct {
@@ -404,7 +406,6 @@ type AzureVnetSiteAzureSpecialSubnetTypeResGroupChoice struct {
 
 type AzureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
 type AzureVnetSiteSkuChoice struct {
@@ -468,7 +469,6 @@ type AzureVnetSiteIpAddrType struct {
 type AzureVnetSiteVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
-	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
 type AzureVnetSiteDualStack struct {
@@ -488,25 +488,15 @@ type AzureVnetSiteIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AzureVnetSiteIpv6 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
 type AzureVnetSiteIpSubnetType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
 type AzureVnetSiteIpSubnetTypeVerChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
-	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
 type AzureVnetSiteIpSubnetTypeIpv4 struct {
-	Plen   types.Int64  `tfsdk:"plen"`
-	Prefix types.String `tfsdk:"prefix"`
-}
-
-type AzureVnetSiteIpSubnetTypeIpv6 struct {
 	Plen   types.Int64  `tfsdk:"plen"`
 	Prefix types.String `tfsdk:"prefix"`
 }
@@ -539,26 +529,8 @@ type AzureVnetSitePerformanceEnhancementModeType struct {
 }
 
 type AzureVnetSitePerfModeChoice struct {
-	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
-}
-
-type AzureVnetSitePerfModeL3Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice struct {
-	Jumbo   types.Bool `tfsdk:"jumbo"`
-	NoJumbo types.Bool `tfsdk:"no_jumbo"`
-}
-
-type AzureVnetSitePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
+	PerfModeL3Enhanced types.Bool `tfsdk:"perf_mode_l3_enhanced"`
+	PerfModeL7Enhanced types.Bool `tfsdk:"perf_mode_l7_enhanced"`
 }
 
 type AzureVnetSiteSiteMeshGroupChoice struct {
@@ -965,6 +937,7 @@ var AzureVnetSiteAdminPasswordSecretInfoOneofModelAttributeMap = map[string]attr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1024,9 +997,8 @@ var AzureVnetSiteBlockedServicesChoiceBlockedServicesBlockedSeviceModelAttribute
 // Attribute map for OneOfField --> BlockedServicesValueTypeChoice
 var AzureVnetSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServicesValueTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns":                types.BoolType,
-	"ssh":                types.BoolType,
-	"web_user_interface": types.BoolType,
+	"dns": types.BoolType,
+	"ssh": types.BoolType,
 }
 
 // Attribute map for PointerField --> CloudSiteInfo
@@ -1357,7 +1329,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingModelAttributeMap =
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -1415,7 +1388,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> OutsideSubnet
@@ -1457,7 +1429,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetResource
 var AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -1752,6 +1723,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1823,7 +1795,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> RouteServerSubnet
@@ -1865,7 +1836,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for OneOfField --> SkuChoice
@@ -2056,9 +2026,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2090,12 +2057,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2110,20 +2071,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2309,9 +2260,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2343,12 +2291,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2363,20 +2305,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2393,42 +2325,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttribute
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
@@ -2504,7 +2402,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingModelAttributeMap
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -2791,6 +2690,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2862,7 +2762,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> RouteServerSubnet
@@ -2904,7 +2803,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for OneOfField --> SkuChoice
@@ -3087,9 +2985,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -3121,12 +3016,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -3141,20 +3030,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -3259,7 +3138,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetResourceGr
 var AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> OutsideSubnet
@@ -3301,7 +3179,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
@@ -3426,9 +3303,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -3460,12 +3334,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -3480,20 +3348,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -3510,42 +3368,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttribu
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
@@ -3595,7 +3419,8 @@ var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingModelAttributeMap = map[s
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -3648,7 +3473,6 @@ var AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetResourceGroupCho
 var AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> PerformanceEnhancementMode
@@ -3662,42 +3486,8 @@ var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap = 
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> IngressGwAr
@@ -3737,7 +3527,8 @@ var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingModelAttributeMap = map
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for PointerField --> Node
@@ -3792,7 +3583,6 @@ var AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetResourceGroupChoi
 var AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> PerformanceEnhancementMode
@@ -3806,42 +3596,8 @@ var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModeModelAttributeMap 
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> VoltstackCluster
@@ -3903,7 +3659,8 @@ var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingModelAttributeMap 
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -3956,7 +3713,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -4261,9 +4017,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -4295,12 +4048,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -4315,20 +4062,10 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -4427,7 +4164,8 @@ var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingModelAttributeMa
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -4662,7 +4400,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetResourceGr
 var AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
@@ -4787,9 +4524,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -4821,12 +4555,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -4841,20 +4569,10 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -4972,7 +4690,7 @@ var AzureVnetSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -4998,8 +4716,8 @@ func (r *ResourceF5XCAzureVnetSite) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
+		MarkdownDescription: "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet.<br>It can be used to automatically site creation in the Azure VNet.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet. It can be used to automatically site creation in the Azure VNet. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -5055,7 +4773,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -5070,10 +4788,11 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"address": schema.StringAttribute{
 				Description:         "address Site's geographical address that can be used to determine its latitude and longitude.",
-				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -5095,6 +4814,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"blindfold_secret_info",
 								"clear_secret_info",
+								"none",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
@@ -5118,6 +4838,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
+										WriteOnly:           true,
 										Validators: []validator.String{
 											stringvalidator.RegexMatches(
 												regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5170,6 +4891,16 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											),
 										},
 									},
+								},
+							},
+							"none": schema.BoolAttribute{
+								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
 						},
@@ -5228,7 +4959,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												exactlyoneofvalidator.ExactlyOneOf(
 													"dns",
 													"ssh",
-													"web_user_interface",
 												),
 											},
 											Attributes: map[string]schema.Attribute{
@@ -5245,16 +4975,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												"ssh": schema.BoolAttribute{
 													Description:         "SSH",
 													MarkdownDescription: "SSH",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.Bool{
-														boolvalidator.Equals(true),
-													},
-												},
-												"web_user_interface": schema.BoolAttribute{
-													Description:         "Web UI",
-													MarkdownDescription: "Web UI",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5302,7 +5022,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"express_route_info": schema.SingleNestedAttribute{
@@ -5495,10 +5215,11 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"resource_id": schema.StringAttribute{
 								Description:         "VNET Resource ID VNET Resource ID",
-								MarkdownDescription: "VNET Resource ID VNET Resource ID",
+								MarkdownDescription: "VNET Resource ID VNET Resource ID<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 							},
 							"vnet_name": schema.StringAttribute{
 								Description:         "VNET Name VNET Name",
@@ -5518,7 +5239,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"latitude": schema.Float32Attribute{
@@ -5638,7 +5359,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -5661,12 +5382,15 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				MarkdownDescription: "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				Validators: []validator.Object{
 					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_encryption",
 						"enable_encryption",
 					),
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"disable_encryption": schema.BoolAttribute{
@@ -5709,10 +5433,11 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"error_description": schema.StringAttribute{
 				Description:         "error_description Description of error on site",
-				MarkdownDescription: "error_description Description of error on site",
+				MarkdownDescription: "error_description Description of error on site<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"kubernetes_upgrade_drain": schema.SingleNestedAttribute{
 				Description:         "Enable Drain Enable Kubernetes Drain during OS or SW upgrade",
@@ -5836,7 +5561,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -5912,7 +5637,10 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				MarkdownDescription: "Operating System Operating System Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
@@ -6035,10 +5763,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -6066,7 +5805,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									Attributes: map[string]schema.Attribute{
 										"azure_az": schema.StringAttribute{
 											Description:         "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
-											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
+											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input<br>**Allowed Values (choose one):** `['1', '2', '3']`",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -6169,19 +5908,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		stringvalidator.RegexMatches(
 																			regexp.MustCompile(`^.+/([0-9]|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28)$`),
 																			"IP prefix length must be at most 28",
-																		),
-																	},
-																},
-																"ipv6": schema.StringAttribute{
-																	Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.String{
-																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																			"must be a valid IPv6 prefix (CIDR notation)",
 																		),
 																	},
 																},
@@ -6289,19 +6015,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		),
 																	},
 																},
-																"ipv6": schema.StringAttribute{
-																	Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.String{
-																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																			"must be a valid IPv6 prefix (CIDR notation)",
-																		),
-																	},
-																},
 															},
 														},
 													},
@@ -6313,7 +6026,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-multi-nic-voltmesh']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -6365,7 +6078,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -6398,7 +6111,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -6468,7 +6181,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -6577,7 +6290,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -6619,7 +6332,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -6831,6 +6544,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -6854,6 +6568,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6906,6 +6621,16 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -7080,19 +6805,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							),
 																						},
 																					},
-																					"ipv6": schema.StringAttribute{
-																						Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Validators: []validator.String{
-																							stringvalidator.RegexMatches(
-																								regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																								"must be a valid IPv6 prefix (CIDR notation)",
-																							),
-																						},
-																					},
 																				},
 																			},
 																		},
@@ -7195,19 +6907,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^.+/([0-9]|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28)$`),
 																								"IP prefix length must be at most 28",
-																							),
-																						},
-																					},
-																					"ipv6": schema.StringAttribute{
-																						Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Validators: []validator.String{
-																							stringvalidator.RegexMatches(
-																								regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																								"must be a valid IPv6 prefix (CIDR notation)",
 																							),
 																						},
 																					},
@@ -7502,14 +7201,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -7559,7 +7258,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -7582,7 +7281,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -7661,28 +7359,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -7722,7 +7398,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -7753,38 +7428,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -7882,7 +7525,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -7929,7 +7572,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -8012,14 +7655,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -8069,7 +7712,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -8092,7 +7735,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -8171,28 +7813,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -8232,7 +7852,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -8263,38 +7882,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -8349,92 +7936,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											),
 										},
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo",
-																"no_jumbo",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
 												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo_disabled",
-																"jumbo_enabled",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -8500,10 +8019,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -8520,7 +8050,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-multi-nic-voltmesh']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -8572,7 +8102,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -8605,7 +8135,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -8675,7 +8205,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -8784,7 +8314,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -8826,7 +8356,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -9038,6 +8568,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -9061,6 +8592,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9113,6 +8645,16 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -9287,19 +8829,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							),
 																						},
 																					},
-																					"ipv6": schema.StringAttribute{
-																						Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Validators: []validator.String{
-																							stringvalidator.RegexMatches(
-																								regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																								"must be a valid IPv6 prefix (CIDR notation)",
-																							),
-																						},
-																					},
 																				},
 																			},
 																		},
@@ -9402,19 +8931,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^.+/([0-9]|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28)$`),
 																								"IP prefix length must be at most 28",
-																							),
-																						},
-																					},
-																					"ipv6": schema.StringAttribute{
-																						Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Validators: []validator.String{
-																							stringvalidator.RegexMatches(
-																								regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																								"must be a valid IPv6 prefix (CIDR notation)",
 																							),
 																						},
 																					},
@@ -9709,14 +9225,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -9766,7 +9282,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -9789,7 +9305,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -9868,28 +9383,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -9929,7 +9422,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -9960,38 +9452,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -10089,7 +9549,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -10136,7 +9596,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -10272,19 +9732,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	),
 																},
 															},
-															"ipv6": schema.StringAttribute{
-																Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.String{
-																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																		"must be a valid IPv6 prefix (CIDR notation)",
-																	),
-																},
-															},
 														},
 													},
 												},
@@ -10396,19 +9843,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	),
 																},
 															},
-															"ipv6": schema.StringAttribute{
-																Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.String{
-																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																		"must be a valid IPv6 prefix (CIDR notation)",
-																	),
-																},
-															},
 														},
 													},
 												},
@@ -10491,14 +9925,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -10548,7 +9982,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -10571,7 +10005,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -10650,28 +10083,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -10711,7 +10122,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -10742,38 +10152,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -10828,92 +10206,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											),
 										},
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo",
-																"no_jumbo",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
 												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo_disabled",
-																"jumbo_enabled",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -10979,10 +10289,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -11010,7 +10331,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									Attributes: map[string]schema.Attribute{
 										"azure_az": schema.StringAttribute{
 											Description:         "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
-											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
+											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input<br>**Allowed Values (choose one):** `['1', '2', '3']`",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -11116,19 +10437,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		),
 																	},
 																},
-																"ipv6": schema.StringAttribute{
-																	Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.String{
-																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																			"must be a valid IPv6 prefix (CIDR notation)",
-																		),
-																	},
-																},
 															},
 														},
 													},
@@ -11140,7 +10448,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltmesh']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -11170,92 +10478,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											),
 										},
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo",
-																"no_jumbo",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
 												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo_disabled",
-																"jumbo_enabled",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -11286,10 +10526,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -11306,7 +10557,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltmesh']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -11432,19 +10683,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	),
 																},
 															},
-															"ipv6": schema.StringAttribute{
-																Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.String{
-																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																		"must be a valid IPv6 prefix (CIDR notation)",
-																	),
-																},
-															},
 														},
 													},
 												},
@@ -11491,92 +10729,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											),
 										},
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo",
-																"no_jumbo",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
 												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
-																"jumbo_disabled",
-																"jumbo_enabled",
-															),
-														},
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.Bool{
-																	boolvalidator.Equals(true),
-																},
-															},
-														},
-													},
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -11607,10 +10777,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -11638,7 +10819,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									Attributes: map[string]schema.Attribute{
 										"azure_az": schema.StringAttribute{
 											Description:         "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
-											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input",
+											MarkdownDescription: "Azure AZ A zone depicting a grouping of datacenters within an Azure region. Expecting numeric input<br>**Allowed Values (choose one):** `['1', '2', '3']`",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -11744,19 +10925,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		),
 																	},
 																},
-																"ipv6": schema.StringAttribute{
-																	Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.String{
-																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																			"must be a valid IPv6 prefix (CIDR notation)",
-																		),
-																	},
-																},
 															},
 														},
 													},
@@ -11768,7 +10936,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltstack-combo']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -11819,7 +10987,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -11889,7 +11057,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -11998,7 +11166,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -12040,7 +11208,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -12107,7 +11275,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -12177,7 +11345,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -12224,7 +11392,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -12307,14 +11475,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -12364,7 +11532,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -12387,7 +11555,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -12466,28 +11633,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -12527,7 +11672,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -12558,38 +11702,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -12753,10 +11865,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
@@ -12773,7 +11896,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"azure_certified_hw": schema.StringAttribute{
 								Description:         "Azure Certified Hardware Name for Azure certified hardware.",
-								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`",
+								MarkdownDescription: "Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltstack-combo']`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -12824,7 +11947,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -12894,7 +12017,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -13003,7 +12126,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -13045,7 +12168,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -13112,7 +12235,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -13182,7 +12305,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -13229,7 +12352,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -13365,19 +12488,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	),
 																},
 															},
-															"ipv6": schema.StringAttribute{
-																Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-																Validators: []validator.String{
-																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																		"must be a valid IPv6 prefix (CIDR notation)",
-																	),
-																},
-															},
 														},
 													},
 												},
@@ -13467,14 +12577,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of route attributes associated with the static route",
-																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
 																			},
 																		},
 																		"labels": schema.MapAttribute{
@@ -13524,7 +12634,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								Optional:            false,
 																								Computed:            true,
 																								PlanModifiers: []planmodifier.String{
-																									stringplanmodifier.UseStateForUnknown(),
+																									stringplanmodifier.UseNonNullStateForUnknown(),
 																								},
 																							},
 																						},
@@ -13547,7 +12657,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								exactlyoneofvalidator.ExactlyOneOf(
 																									"dual_stack",
 																									"ipv4",
-																									"ipv6",
 																								),
 																							},
 																							Attributes: map[string]schema.Attribute{
@@ -13626,28 +12735,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description:         "IPv6 ADDRESS IPv6 Address",
-																									MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.String{
-																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																													"must be a valid IPv6 address",
-																												),
-																											},
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -13687,7 +12774,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Validators: []validator.Object{
 																							exactlyoneofvalidator.RequiredExactlyOneOf(
 																								"ipv4",
-																								"ipv6",
 																							),
 																						},
 																						Attributes: map[string]schema.Attribute{
@@ -13718,38 +12804,6 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																											stringvalidator.RegexMatches(
 																												regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																												"must be a valid IPv4 address",
-																											),
-																										},
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description:         "IPv6 Subnet IPv6 Subnet Address",
-																								MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.Int64{
-																											int64validator.AtMost(128),
-																										},
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:            false,
-																										Optional:            true,
-																										Computed:            false,
-																										Validators: []validator.String{
-																											stringvalidator.RegexMatches(
-																												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																												"must be a valid IPv6 address",
 																											),
 																										},
 																									},
@@ -13905,17 +12959,21 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"suggested_action": schema.StringAttribute{
 				Description:         "suggested_action Suggested action for customer on error",
-				MarkdownDescription: "suggested_action Suggested action for customer on error",
+				MarkdownDescription: "suggested_action Suggested action for customer on error<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"sw": schema.SingleNestedAttribute{
 				Description:         "F5XC Software F5XC Software Details",
 				MarkdownDescription: "F5XC Software F5XC Software Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
@@ -14146,11 +13204,11 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
 						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						Required:            false,
-						Optional:            true,
+						Required:            true,
+						Optional:            false,
 						Computed:            false,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.ExactlyOneOf(
+							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"automatic",
 								"manual",
 							),
@@ -14288,9 +13346,17 @@ func (r *ResourceF5XCAzureVnetSite) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAzureVnetSiteModel
 
 	// Read Terraform plan data into the model
@@ -14298,6 +13364,20 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCAzureVnetSiteModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.AdminPassword.IsNull() && !configData.AdminPassword.IsUnknown() {
+		data.AdminPassword = configData.AdminPassword
+	}
+	if !configData.SiteTypeChoice.IsNull() && !configData.SiteTypeChoice.IsUnknown() {
+		data.SiteTypeChoice = configData.SiteTypeChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -14449,6 +13529,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> None
+				if !adminPasswordSecretInfoChoiceModel.None.IsNull() && !adminPasswordSecretInfoChoiceModel.None.IsUnknown() {
+					noneSpecBool := &ves_io_schema.SecretType_None{}
+					noneSpecBool.None = &ves_io_schema.Empty{}
+					adminPasswordSpec.SecretInfoOneof = noneSpecBool
+				}
+
 			}
 
 		}
@@ -14520,13 +13607,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 							sshSpecBool := &ves_io_schema_fleet.BlockedServices_Ssh{}
 							sshSpecBool.Ssh = &ves_io_schema.Empty{}
 							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = sshSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> WebUserInterface
-						if !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsNull() && !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsUnknown() {
-							webUserInterfaceSpecBool := &ves_io_schema_fleet.BlockedServices_WebUserInterface{}
-							webUserInterfaceSpecBool.WebUserInterface = &ves_io_schema.Empty{}
-							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = webUserInterfaceSpecBool
 						}
 
 					}
@@ -14749,6 +13829,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -14968,6 +14051,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						return
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
+					}
+
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Enable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Enable.IsUnknown() {
 						enableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Enable{}
@@ -15081,11 +14171,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 						}
 
@@ -15166,11 +14251,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -15355,6 +14435,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -15662,6 +14745,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !authorizedKeySecretInfoChoiceModel.None.IsNull() && !authorizedKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														authorizedKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -15799,11 +14889,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
 										}
 
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
-										}
-
 									}
 
 								}
@@ -15887,11 +14972,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										// resource modelToSpecNested RequiredStringField --> Ipv4
 										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsUnknown() {
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
 										}
 
 									}
@@ -15993,6 +15073,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								spokeVnetsSpec[i].Labels = mapOfString
@@ -16176,6 +15263,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -16312,24 +15406,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -16407,29 +15483,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -16671,6 +15724,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -16807,24 +15867,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -16906,29 +15948,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -16971,78 +15990,24 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -17103,6 +16068,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -17290,6 +16262,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -17597,6 +16572,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !authorizedKeySecretInfoChoiceModel.None.IsNull() && !authorizedKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														authorizedKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -17734,11 +16716,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
 										}
 
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
-										}
-
 									}
 
 								}
@@ -17822,11 +16799,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										// resource modelToSpecNested RequiredStringField --> Ipv4
 										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsUnknown() {
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
 										}
 
 									}
@@ -17928,6 +16900,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								spokeVnetsSpec[i].Labels = mapOfString
@@ -18111,6 +17090,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -18247,24 +17233,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -18342,29 +17310,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -18603,11 +17548,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 							}
 
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-							}
-
 						}
 					}
 
@@ -18691,11 +17631,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 							// resource modelToSpecNested RequiredStringField --> Ipv4
 							if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 							}
 
 						}
@@ -18809,6 +17744,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
+										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
 										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
@@ -18946,24 +17888,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -19045,29 +17969,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -19110,78 +18011,24 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -19242,6 +18089,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -19357,11 +18211,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 						}
 
@@ -19394,78 +18243,24 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -19502,6 +18297,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -19615,11 +18417,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 							}
 
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-							}
-
 						}
 					}
 
@@ -19656,78 +18453,24 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -19764,6 +18507,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -19877,11 +18627,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -20043,6 +18788,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -20389,6 +19137,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -20525,24 +19280,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -20620,29 +19357,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -20789,6 +19503,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsNull() && !acceleratedNetworkingAcceleratedNetworkingChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_views.AcceleratedNetworkingType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						acceleratedNetworkingSpec.AcceleratedNetworking = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -20953,6 +19674,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -21296,11 +20020,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 							}
 
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-							}
-
 						}
 					}
 
@@ -21415,6 +20134,13 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
+										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
 										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
@@ -21552,24 +20278,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -21647,29 +20355,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -21979,7 +20664,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AzureVnetSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22039,7 +20724,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -22062,7 +20747,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "azure_vnet_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "azure_vnet_site", err),
 		)
 		return
 	}
@@ -22181,12 +20866,8 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot PointerField --> AdminPassword
 	if specData.GetAdminPassword() != nil {
@@ -22284,6 +20965,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				} else {
 					adminPasswordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -22385,15 +21075,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -22748,12 +21429,8 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			// Recursively populate the nested struct
 
 			// resource specToModelNested StringField --> ResourceId
-			if vnetElement.GetResourceId() != "" {
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
-			} else {
-				// Empty string, set to null
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringNull()
-			}
+			// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+			azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
 
 			// resource specToModelNested StringField --> VnetName
 			if vnetElement.GetVnetName() != "" {
@@ -22969,7 +21646,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	diskSizeValue := specData.GetDiskSize()
 	if diskSizeValue > 0 {
 		data.DiskSize = types.Int64Value(int64(diskSizeValue))
-	} else {
+	} else if data.DiskSize.IsNull() || data.DiskSize.IsUnknown() {
 		data.DiskSize = types.Int64Null()
 	}
 
@@ -23053,12 +21730,8 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -23519,6 +22192,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -23693,14 +22375,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -23859,14 +22533,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -24731,6 +23397,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -25010,14 +23685,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -25179,14 +23846,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 														} else {
 															// Empty string, set to null
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
 														}
 
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -25389,15 +24048,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
 										for k, v := range spokeVnetsElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -25681,15 +24341,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -25900,35 +24561,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -26048,38 +24680,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -26479,15 +25079,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -26698,35 +25299,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -26846,38 +25418,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -27025,142 +25565,22 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -27287,6 +25707,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -28130,6 +26559,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -28409,14 +26847,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -28578,14 +27008,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 														} else {
 															// Empty string, set to null
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
 														}
 
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -28788,15 +27210,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
 										for k, v := range spokeVnetsElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -29080,15 +27503,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -29299,35 +27723,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -29447,38 +27842,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -29920,14 +28283,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -30091,14 +28446,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -30249,15 +28596,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -30468,35 +28816,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -30616,38 +28935,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -30795,142 +29082,22 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -31057,6 +29224,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -31232,14 +29408,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -31333,142 +29501,22 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -31547,6 +29595,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -31725,14 +29782,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -31824,142 +29873,22 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -32038,6 +29967,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -32211,14 +30149,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -33102,15 +31032,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -33321,35 +31252,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -33469,38 +31371,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -33813,6 +31683,15 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -34717,14 +32596,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -34878,15 +32749,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -35097,35 +32969,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -35245,38 +33088,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -35592,12 +33403,8 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -35679,8 +33486,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -35922,7 +33728,8 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36099,7 +33906,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "azure_vnet_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "azure_vnet_site", err),
 		)
 		return
 	}
@@ -36218,12 +34025,8 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot PointerField --> AdminPassword
 	if specData.GetAdminPassword() != nil {
@@ -36321,6 +34124,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 				} else {
 					adminPasswordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -36448,15 +34260,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
 							}
 
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -36549,7 +34352,14 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BlockedServicesChoice = types.ObjectNull(AzureVnetSiteBlockedServicesChoiceModelAttributeMap)
+
+		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["block_all_services"].IsNull() || data.BlockedServicesChoice.Attributes()["block_all_services"].IsUnknown()) && (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
+			data.BlockedServicesChoice = types.ObjectValueMust(AzureVnetSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
+				"block_all_services":       types.BoolValue(true),
+				"blocked_services":         types.ObjectNull(AzureVnetSiteBlockedServicesChoiceBlockedServicesModelAttributeMap),
+				"default_blocked_services": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> CloudSiteInfo
@@ -36753,7 +34563,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetRoutingTypeModelAttributeMap)
+						azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectValueMust(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetRoutingTypeModelAttributeMap, map[string]attr.Value{
+							"f5_orchestrated_routing": types.BoolValue(true),
+							"manual_routing":          types.BoolNull(),
+						})
 					}
 
 					// resource specToModelNested RequiredStringField --> VnetName
@@ -36809,12 +34622,8 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 			// Recursively populate the nested struct
 
 			// resource specToModelNested StringField --> ResourceId
-			if vnetElement.GetResourceId() != "" {
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
-			} else {
-				// Empty string, set to null
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringNull()
-			}
+			// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+			azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
 
 			// resource specToModelNested StringField --> VnetName
 			if vnetElement.GetVnetName() != "" {
@@ -37064,7 +34873,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	diskSizeValue := specData.GetDiskSize()
 	if diskSizeValue > 0 {
 		data.DiskSize = types.Int64Value(int64(diskSizeValue))
-	} else {
+	} else if data.DiskSize.IsNull() || data.DiskSize.IsUnknown() {
 		data.DiskSize = types.Int64Null()
 	}
 
@@ -37148,12 +34957,8 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -37227,7 +35032,9 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap)
+						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectValueMust(AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap, map[string]attr.Value{
+							"drain_max_unavailable_node_count": types.Int64Value(1),
+						})
 					}
 
 					// resource specToModelNested RequiredUintField --> DrainNodeTimeout
@@ -37363,7 +35170,13 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogsReceiverChoice = types.ObjectNull(AzureVnetSiteLogsReceiverChoiceModelAttributeMap)
+
+		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown())) {
+			data.LogsReceiverChoice = types.ObjectValueMust(AzureVnetSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
+				"log_receiver":            types.ObjectNull(AzureVnetSiteLogsReceiverChoiceLogReceiverModelAttributeMap),
+				"logs_streaming_disabled": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredStringField --> MachineType
@@ -37424,7 +35237,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 			azureVnetSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AzureVnetSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			azureVnetSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectValueMust(AzureVnetSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap, map[string]attr.Value{
+				"enable_offline_survivability_mode": types.BoolNull(),
+				"no_offline_survivability_mode":     types.BoolValue(true),
+			})
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
@@ -37492,7 +35308,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 			azureVnetSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AzureVnetSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			azureVnetSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectValueMust(AzureVnetSiteOsOperatingSystemVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_os_version":       types.BoolValue(true),
+				"operating_system_version": types.StringNull(),
+			})
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
@@ -37614,6 +35433,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -37639,7 +35467,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -37786,14 +35617,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -37954,14 +35777,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -38164,7 +35979,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"dc_cluster_group_inside_vn":  types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceDcClusterGroupInsideVnModelAttributeMap),
+						"dc_cluster_group_outside_vn": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceDcClusterGroupOutsideVnModelAttributeMap),
+						"no_dc_cluster_group":         types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -38283,7 +36102,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -38541,7 +36364,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["global_network_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> HubChoice
@@ -38641,7 +36467,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											expressRouteEnabledAttributeMap["asn_choice"] = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											expressRouteEnabledAttributeMap["asn_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap)
+											expressRouteEnabledAttributeMap["asn_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap, map[string]attr.Value{
+												"auto_asn":   types.BoolValue(true),
+												"custom_asn": types.Int64Null(),
+											})
 										}
 
 										// resource specToModelNested RequiredArrayOfPointerField --> Connections
@@ -38824,6 +36653,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																		} else {
 																			authorizedKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 																		}
+																	}
+
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																	}
 
 																	// --- End of Choices ---
@@ -39117,14 +36955,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -39152,7 +36982,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap, map[string]attr.Value{
+													"auto":         types.BoolValue(true),
+													"subnet":       types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetModelAttributeMap),
+													"subnet_param": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap),
+												})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
@@ -39288,14 +37122,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -39323,7 +37149,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap, map[string]attr.Value{
+													"auto":         types.BoolValue(true),
+													"subnet":       types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetModelAttributeMap),
+													"subnet_param": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap),
+												})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
@@ -39483,7 +37313,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 								hubAttributeMap["express_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								hubAttributeMap["express_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceModelAttributeMap)
+								hubAttributeMap["express_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceModelAttributeMap, map[string]attr.Value{
+									"express_route_disabled": types.BoolValue(true),
+									"express_route_enabled":  types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested ArrayOfPointerField --> SpokeVnets
@@ -39496,13 +37329,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(spokeVnetsElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
+										for k, v := range spokeVnetsElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										} else {
+											azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39554,7 +37400,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap, map[string]attr.Value{
+											"auto":   types.BoolValue(true),
+											"manual": types.BoolNull(),
+										})
 									}
 
 									// resource specToModelNested PointerField --> Vnet
@@ -39618,7 +37467,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap, map[string]attr.Value{
+												"f5_orchestrated_routing": types.BoolValue(true),
+												"manual_routing":          types.BoolNull(),
+											})
 										}
 
 										// resource specToModelNested RequiredStringField --> VnetName
@@ -39701,7 +37553,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["hub_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["hub_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceModelAttributeMap, map[string]attr.Value{
+						"hub":     types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubModelAttributeMap),
+						"not_hub": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
@@ -39776,13 +37631,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39983,35 +37851,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -40131,38 +37970,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -40297,7 +38104,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["inside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["inside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"inside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesModelAttributeMap),
+						"no_inside_static_routes": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -40478,7 +38288,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["network_policy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
@@ -40562,13 +38376,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -40769,35 +38596,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -40917,38 +38715,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -41074,7 +38840,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["outside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["outside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_outside_static_routes": types.BoolValue(true),
+						"outside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> PerformanceEnhancementMode
@@ -41096,142 +38865,22 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -41250,7 +38899,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap, map[string]attr.Value{
+							"perf_mode_l3_enhanced": types.BoolNull(),
+							"perf_mode_l7_enhanced": types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41316,7 +38968,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwSiteMeshGroupChoiceModelAttributeMap)
+					ingressEgressGwAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"sm_connection_public_ip": types.BoolValue(true),
+						"sm_connection_pvt_ip":    types.BoolNull(),
+					})
 				}
 
 				ingressEgressGwObj, ingressEgressGwObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwModelAttributeMap, ingressEgressGwAttributeMap)
@@ -41359,6 +39014,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -41384,7 +39048,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41539,7 +39206,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["dc_cluster_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"dc_cluster_group_inside_vn":  types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceDcClusterGroupInsideVnModelAttributeMap),
+						"dc_cluster_group_outside_vn": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceDcClusterGroupOutsideVnModelAttributeMap),
+						"no_dc_cluster_group":         types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -41658,7 +39329,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -41916,7 +39591,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["global_network_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> HubChoice
@@ -42016,7 +39694,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											expressRouteEnabledAttributeMap["asn_choice"] = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											expressRouteEnabledAttributeMap["asn_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap)
+											expressRouteEnabledAttributeMap["asn_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap, map[string]attr.Value{
+												"auto_asn":   types.BoolValue(true),
+												"custom_asn": types.Int64Null(),
+											})
 										}
 
 										// resource specToModelNested RequiredArrayOfPointerField --> Connections
@@ -42199,6 +39880,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																		} else {
 																			authorizedKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 																		}
+																	}
+
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																	}
 
 																	// --- End of Choices ---
@@ -42492,14 +40182,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -42527,7 +40209,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap, map[string]attr.Value{
+													"auto":         types.BoolValue(true),
+													"subnet":       types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetModelAttributeMap),
+													"subnet_param": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap),
+												})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
@@ -42663,14 +40349,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -42698,7 +40376,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap, map[string]attr.Value{
+													"auto":         types.BoolValue(true),
+													"subnet":       types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetModelAttributeMap),
+													"subnet_param": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap),
+												})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
@@ -42858,7 +40540,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 								hubAttributeMap["express_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								hubAttributeMap["express_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceModelAttributeMap)
+								hubAttributeMap["express_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceModelAttributeMap, map[string]attr.Value{
+									"express_route_disabled": types.BoolValue(true),
+									"express_route_enabled":  types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested ArrayOfPointerField --> SpokeVnets
@@ -42871,13 +40556,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(spokeVnetsElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
+										for k, v := range spokeVnetsElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										} else {
+											azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -42929,7 +40627,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap, map[string]attr.Value{
+											"auto":   types.BoolValue(true),
+											"manual": types.BoolNull(),
+										})
 									}
 
 									// resource specToModelNested PointerField --> Vnet
@@ -42993,7 +40694,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap, map[string]attr.Value{
+												"f5_orchestrated_routing": types.BoolValue(true),
+												"manual_routing":          types.BoolNull(),
+											})
 										}
 
 										// resource specToModelNested RequiredStringField --> VnetName
@@ -43076,7 +40780,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["hub_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["hub_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceModelAttributeMap, map[string]attr.Value{
+						"hub":     types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubModelAttributeMap),
+						"not_hub": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
@@ -43151,13 +40858,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -43358,35 +41078,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -43506,38 +41197,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -43672,7 +41331,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["inside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["inside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"inside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesModelAttributeMap),
+						"no_inside_static_routes": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -43853,7 +41515,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNetworkPolicyChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["network_policy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested PointerField --> Node
@@ -43977,14 +41643,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 									} else {
 										// Empty string, set to null
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
 									}
 
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -44150,14 +41808,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -44308,13 +41958,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -44515,35 +42178,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -44663,38 +42297,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -44820,7 +42422,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["outside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["outside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_outside_static_routes": types.BoolValue(true),
+						"outside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> PerformanceEnhancementMode
@@ -44842,142 +42447,22 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -44996,7 +42481,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap, map[string]attr.Value{
+							"perf_mode_l3_enhanced": types.BoolNull(),
+							"perf_mode_l7_enhanced": types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -45062,7 +42550,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					ingressEgressGwArAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArSiteMeshGroupChoiceModelAttributeMap)
+					ingressEgressGwArAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressEgressGwArSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"sm_connection_public_ip": types.BoolValue(true),
+						"sm_connection_pvt_ip":    types.BoolNull(),
+					})
 				}
 
 				ingressEgressGwArObj, ingressEgressGwArObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArModelAttributeMap, ingressEgressGwArAttributeMap)
@@ -45105,6 +42596,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -45130,7 +42630,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -45279,14 +42782,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -45380,142 +42875,22 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -45534,7 +42909,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap, map[string]attr.Value{
+							"perf_mode_l3_enhanced": types.BoolNull(),
+							"perf_mode_l7_enhanced": types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -45595,6 +42973,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -45620,7 +43007,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -45772,14 +43162,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -45871,142 +43253,22 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -46025,7 +43287,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap, map[string]attr.Value{
+							"perf_mode_l3_enhanced": types.BoolNull(),
+							"perf_mode_l7_enhanced": types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -46086,6 +43351,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -46111,7 +43385,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -46258,14 +43535,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -46423,7 +43692,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["dc_cluster_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"dc_cluster_group":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceDcClusterGroupModelAttributeMap),
+						"no_dc_cluster_group": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -46542,7 +43814,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -46800,7 +44076,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
@@ -46884,7 +44163,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["k8s_cluster_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap, map[string]attr.Value{
+						"k8s_cluster":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceK8SClusterModelAttributeMap),
+						"no_k8s_cluster": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -47065,7 +44347,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["network_policy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
@@ -47149,13 +44435,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -47356,35 +44655,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -47504,38 +44774,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -47661,7 +44899,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["outside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["outside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_outside_static_routes": types.BoolValue(true),
+						"outside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
@@ -47709,7 +44950,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"sm_connection_public_ip": types.BoolValue(true),
+						"sm_connection_pvt_ip":    types.BoolNull(),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
@@ -47806,7 +45050,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["storage_class_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterAttributeMap["storage_class_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterStorageClassChoiceModelAttributeMap)
+					voltstackClusterAttributeMap["storage_class_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterStorageClassChoiceModelAttributeMap, map[string]attr.Value{
+						"default_storage":    types.BoolValue(true),
+						"storage_class_list": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterStorageClassChoiceStorageClassListModelAttributeMap),
+					})
 				}
 
 				voltstackClusterObj, voltstackClusterObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterModelAttributeMap, voltstackClusterAttributeMap)
@@ -47849,6 +45096,15 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -47874,7 +45130,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolNull(),
+							"enable":  types.BoolValue(true),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -47984,7 +45243,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["dc_cluster_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"dc_cluster_group":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceDcClusterGroupModelAttributeMap),
+						"no_dc_cluster_group": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -48103,7 +45365,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -48361,7 +45627,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["global_network_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
@@ -48445,7 +45714,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["k8s_cluster_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["k8s_cluster_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceModelAttributeMap, map[string]attr.Value{
+						"k8s_cluster":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceK8SClusterModelAttributeMap),
+						"no_k8s_cluster": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -48626,7 +45898,11 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNetworkPolicyChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["network_policy_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested PointerField --> Node
@@ -48750,14 +46026,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 									} else {
 										// Empty string, set to null
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
 									}
 
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -48913,13 +46181,26 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// READ operation: keep backend-injected keys so they enter the state.
-													labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-													response.Diagnostics.Append(labelsDiags...)
-													if response.Diagnostics.HasError() {
-														return
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+													for k, v := range customStaticRouteElement.GetLabels() {
+														filteredMap[k] = v
 													}
-													customStaticRouteAttributeMap["labels"] = labelsMap
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
+													if len(filteredMap) > 0 {
+														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+														response.Diagnostics.Append(labelsDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														customStaticRouteAttributeMap["labels"] = labelsMap
+													} else {
+														customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+													}
 												} else {
 													// API returned nil (Protobuf omits empty maps). Set to null.
 													// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -49120,35 +46401,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -49268,38 +46520,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -49425,7 +46645,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["outside_static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["outside_static_route_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_outside_static_routes": types.BoolValue(true),
+						"outside_static_routes":    types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
@@ -49473,7 +46696,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArSiteMeshGroupChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"sm_connection_public_ip": types.BoolValue(true),
+						"sm_connection_pvt_ip":    types.BoolNull(),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
@@ -49570,7 +46796,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["storage_class_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					voltstackClusterArAttributeMap["storage_class_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArStorageClassChoiceModelAttributeMap)
+					voltstackClusterArAttributeMap["storage_class_choice"] = types.ObjectValueMust(AzureVnetSiteSiteTypeVoltstackClusterArStorageClassChoiceModelAttributeMap, map[string]attr.Value{
+						"default_storage":    types.BoolValue(true),
+						"storage_class_list": types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArStorageClassChoiceStorageClassListModelAttributeMap),
+					})
 				}
 
 				voltstackClusterArObj, voltstackClusterArObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArModelAttributeMap, voltstackClusterArAttributeMap)
@@ -49615,12 +46844,8 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -49673,7 +46898,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 			azureVnetSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AzureVnetSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			azureVnetSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectValueMust(AzureVnetSiteSwVolterraSwVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sw_version":        types.BoolValue(true),
+				"volterra_software_version": types.StringNull(),
+			})
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
@@ -49702,8 +46930,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -49807,7 +47034,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						existingVnetAttributeMap["routing_type_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						existingVnetAttributeMap["routing_type_choice"] = types.ObjectNull(AzureVnetSiteVnetChoiceExistingVnetRoutingTypeModelAttributeMap)
+						existingVnetAttributeMap["routing_type_choice"] = types.ObjectValueMust(AzureVnetSiteVnetChoiceExistingVnetRoutingTypeModelAttributeMap, map[string]attr.Value{
+							"f5_orchestrated_routing": types.BoolValue(true),
+							"manual_routing":          types.BoolNull(),
+						})
 					}
 
 					// resource specToModelNested RequiredStringField --> VnetName
@@ -49885,7 +47115,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						newVnetAttributeMap["name_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						newVnetAttributeMap["name_choice"] = types.ObjectNull(AzureVnetSiteVnetChoiceNewVnetNameChoiceModelAttributeMap)
+						newVnetAttributeMap["name_choice"] = types.ObjectValueMust(AzureVnetSiteVnetChoiceNewVnetNameChoiceModelAttributeMap, map[string]attr.Value{
+							"autogenerate": types.BoolValue(true),
+							"name":         types.StringNull(),
+						})
 					}
 
 					// resource specToModelNested RequiredStringField --> PrimaryIpv4
@@ -49945,7 +47178,8 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -49989,7 +47223,10 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 			azureVnetSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			azureVnetSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectValueMust(AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic": types.BoolNull(),
+				"manual":    types.BoolValue(true),
+			})
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
@@ -50067,7 +47304,14 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.WorkerNodesChoice = types.ObjectNull(AzureVnetSiteWorkerNodesModelAttributeMap)
+
+		if data.WorkerNodesChoice.IsNull() || data.WorkerNodesChoice.IsUnknown() || ((data.WorkerNodesChoice.Attributes()["no_worker_nodes"].IsNull() || data.WorkerNodesChoice.Attributes()["no_worker_nodes"].IsUnknown()) && (data.WorkerNodesChoice.Attributes()["nodes_per_az"].IsNull() || data.WorkerNodesChoice.Attributes()["nodes_per_az"].IsUnknown()) && (data.WorkerNodesChoice.Attributes()["total_nodes"].IsNull() || data.WorkerNodesChoice.Attributes()["total_nodes"].IsUnknown())) {
+			data.WorkerNodesChoice = types.ObjectValueMust(AzureVnetSiteWorkerNodesModelAttributeMap, map[string]attr.Value{
+				"no_worker_nodes": types.BoolValue(true),
+				"nodes_per_az":    types.Int64Null(),
+				"total_nodes":     types.Int64Null(),
+			})
+		}
 	}
 
 	// Restore prior state for AdminPassword. The API redacts sensitive fields
@@ -50090,6 +47334,12 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAzureVnetSiteModel
@@ -50099,6 +47349,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planAdminPassword := data.AdminPassword
+	planSiteTypeChoice := data.SiteTypeChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -50118,8 +47370,14 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planAdminPassword := data.AdminPassword
-	planSiteTypeChoice := data.SiteTypeChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.AdminPassword.IsNull() && !configData.AdminPassword.IsUnknown() {
+		data.AdminPassword = configData.AdminPassword
+	}
+	if !configData.SiteTypeChoice.IsNull() && !configData.SiteTypeChoice.IsUnknown() {
+		data.SiteTypeChoice = configData.SiteTypeChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -50263,13 +47521,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 							sshSpecBool := &ves_io_schema_fleet.BlockedServices_Ssh{}
 							sshSpecBool.Ssh = &ves_io_schema.Empty{}
 							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = sshSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> WebUserInterface
-						if !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsNull() && !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsUnknown() {
-							webUserInterfaceSpecBool := &ves_io_schema_fleet.BlockedServices_WebUserInterface{}
-							webUserInterfaceSpecBool.WebUserInterface = &ves_io_schema.Empty{}
-							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = webUserInterfaceSpecBool
 						}
 
 					}
@@ -50452,6 +47703,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -50713,11 +47967,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 						}
 
@@ -50798,11 +48047,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -50982,6 +48226,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -51289,6 +48536,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !authorizedKeySecretInfoChoiceModel.None.IsNull() && !authorizedKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														authorizedKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -51426,11 +48680,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
 										}
 
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
-										}
-
 									}
 
 								}
@@ -51514,11 +48763,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										// resource modelToSpecNested RequiredStringField --> Ipv4
 										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsUnknown() {
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
 										}
 
 									}
@@ -51620,6 +48864,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								spokeVnetsSpec[i].Labels = mapOfString
@@ -51803,6 +49054,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -51939,24 +49197,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -52034,29 +49274,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -52298,6 +49515,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -52434,24 +49658,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -52533,29 +49739,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -52598,78 +49781,24 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -52882,6 +50011,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -53189,6 +50321,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !authorizedKeySecretInfoChoiceModel.None.IsNull() && !authorizedKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														authorizedKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -53326,11 +50465,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
 										}
 
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
-										}
-
 									}
 
 								}
@@ -53414,11 +50548,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										// resource modelToSpecNested RequiredStringField --> Ipv4
 										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.IsUnknown() {
 											subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv4.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> Ipv6
-										if !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.IsUnknown() {
-											subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParamModel.Ipv6.ValueString())
 										}
 
 									}
@@ -53520,6 +50649,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								spokeVnetsSpec[i].Labels = mapOfString
@@ -53703,6 +50839,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -53839,24 +50982,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -53934,29 +51059,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -54195,11 +51297,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 							}
 
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-							}
-
 						}
 					}
 
@@ -54283,11 +51380,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 							// resource modelToSpecNested RequiredStringField --> Ipv4
 							if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 							}
 
 						}
@@ -54401,6 +51493,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
+										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
 										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
@@ -54538,24 +51637,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -54637,29 +51718,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -54702,78 +51760,24 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						return
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL3EnhancedModel AzureVnetSitePerfModeL3Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &azureVnetSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
 						}
-						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL3EnhancedPerfModeChoiceModel := AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-								jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-								jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-							if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-								noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-								noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-								perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+					// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 					if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-						var azureVnetSitePerfModeL7EnhancedModel AzureVnetSitePerfModeL7Enhanced
-						response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &azureVnetSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
+						perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+						perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
 						}
-						perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-						perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-						if !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-							perfModeL7EnhancedPerfModeChoiceModel := AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice{}
-							response.Diagnostics.Append(azureVnetSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-								jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-								jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-							if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-								jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-								jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-								perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-							}
-
-						}
-
+						performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 					}
 
 				}
@@ -54919,11 +51923,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 						}
 
@@ -55038,11 +52037,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 							// resource modelToSpecNested RequiredStringField --> Ipv4
 							if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-							}
-
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 							}
 
 						}
@@ -55175,11 +52169,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !azureVnetSiteSubnetParamModel.Ipv4.IsNull() && !azureVnetSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -55336,6 +52325,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -55682,6 +52674,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -55818,24 +52817,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -55913,29 +52894,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -56146,6 +53104,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -56489,11 +53450,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								subnetParamOneOfSpec.SubnetParam.Ipv4 = string(azureVnetSiteSubnetParamModel.Ipv4.ValueString())
 							}
 
-							// resource modelToSpecNested StringField --> Ipv6
-							if !azureVnetSiteSubnetParamModel.Ipv6.IsNull() && !azureVnetSiteSubnetParamModel.Ipv6.IsUnknown() {
-								subnetParamOneOfSpec.SubnetParam.Ipv6 = string(azureVnetSiteSubnetParamModel.Ipv6.ValueString())
-							}
-
 						}
 					}
 
@@ -56608,6 +53564,13 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
+										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
 										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
@@ -56745,24 +53708,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpv6Model AzureVnetSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !azureVnetSiteIpv6Model.Addr.IsNull() && !azureVnetSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(azureVnetSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -56840,29 +53785,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 													// resource modelToSpecNested StringField --> Prefix
 													if !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(azureVnetSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var azureVnetSiteIpSubnetTypeIpv6Model AzureVnetSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &azureVnetSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(azureVnetSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !azureVnetSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(azureVnetSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -57051,7 +53973,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AzureVnetSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -57111,7 +54033,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -57127,7 +54049,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "azure_vnet_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "azure_vnet_site", err),
 		)
 		return
 	}
@@ -57136,7 +54058,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "azure_vnet_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "azure_vnet_site", err),
 		)
 		return
 	}
@@ -57254,12 +54176,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot PointerField --> AdminPassword
 	if specData.GetAdminPassword() != nil {
@@ -57357,6 +54275,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				} else {
 					adminPasswordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -57458,15 +54385,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -57821,12 +54739,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			// Recursively populate the nested struct
 
 			// resource specToModelNested StringField --> ResourceId
-			if vnetElement.GetResourceId() != "" {
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
-			} else {
-				// Empty string, set to null
-				azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringNull()
-			}
+			// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+			azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
 
 			// resource specToModelNested StringField --> VnetName
 			if vnetElement.GetVnetName() != "" {
@@ -58042,7 +54956,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	diskSizeValue := specData.GetDiskSize()
 	if diskSizeValue > 0 {
 		data.DiskSize = types.Int64Value(int64(diskSizeValue))
-	} else {
+	} else if data.DiskSize.IsNull() || data.DiskSize.IsUnknown() {
 		data.DiskSize = types.Int64Null()
 	}
 
@@ -58126,12 +55040,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -58592,6 +55502,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
 
@@ -58766,14 +55685,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -58932,14 +55843,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -59804,6 +56707,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -60083,14 +56995,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -60252,14 +57156,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 														} else {
 															// Empty string, set to null
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
 														}
 
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -60462,15 +57358,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
 										for k, v := range spokeVnetsElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -60754,15 +57651,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -60973,35 +57871,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -61121,38 +57990,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -61552,15 +58389,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -61771,35 +58609,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -61919,38 +58728,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -62098,142 +58875,22 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -62360,6 +59017,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -63203,6 +59869,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -63482,14 +60157,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -63651,14 +60318,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 														} else {
 															// Empty string, set to null
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
 														}
 
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -63861,15 +60520,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(spokeVnetsElement.GetLabels()))
 										for k, v := range spokeVnetsElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -64153,15 +60813,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -64372,35 +61033,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -64520,38 +61152,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -64993,14 +61593,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -65164,14 +61756,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -65322,15 +61906,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -65541,35 +62126,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -65689,38 +62245,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -65868,142 +62392,22 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -66130,6 +62534,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -66305,14 +62718,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -66406,142 +62811,22 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -66620,6 +62905,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -66798,14 +63092,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -66897,142 +63183,22 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// GlobalSpecType
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -67111,6 +63277,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -67284,14 +63459,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -68175,15 +64342,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -68394,35 +64562,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -68542,38 +64681,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -68886,6 +64993,15 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -69790,14 +65906,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -69951,15 +66059,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 												// resource specToModelNested MapOfStringField --> Labels
 												if customStaticRouteElement.GetLabels() != nil {
-													// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-													// They will be picked up during the next Read.
-													filteredMap := make(map[string]string)
+													// Filter out configured omitted map keys across all operations so backend-injected
+													// forbidden keys never enter or vanish from Terraform state.
+													filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 													for k, v := range customStaticRouteElement.GetLabels() {
-														if !strings.HasPrefix(k, "ves.io/") {
-															filteredMap[k] = v
-														}
+														filteredMap[k] = v
 													}
-
+													delete(filteredMap, "ves.io/config-propagation-destination")
+													delete(filteredMap, "ves.io/app_type")
+													delete(filteredMap, "ves.io/api-scope")
+													delete(filteredMap, "ves.io/provider")
 													if len(filteredMap) > 0 {
 														labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 														response.Diagnostics.Append(labelsDiags...)
@@ -70170,35 +66279,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																}
 															}
 
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -70318,38 +66398,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 																} else {
 																	subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-																}
-															}
-
-															// resource specToModelNested PointerOfOneOfField --> Ipv6
-															// GlobalSpecType
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// resource specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// resource specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 																}
 															}
 
@@ -70665,12 +66713,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -70752,8 +66796,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -70995,7 +67038,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -71147,10 +67191,10 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	}
 	// Restore plan value for AdminPassword. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.AdminPassword = planAdminPassword
+	data.AdminPassword = utils.ResolveUnknowns(planAdminPassword, data.AdminPassword)
 	// Restore plan value for SiteTypeChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.SiteTypeChoice = planSiteTypeChoice
+	data.SiteTypeChoice = utils.ResolveUnknowns(planSiteTypeChoice, data.SiteTypeChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -71198,7 +67242,7 @@ func (r *ResourceF5XCAzureVnetSite) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "azure_vnet_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "azure_vnet_site", err),
 		)
 		return
 	}

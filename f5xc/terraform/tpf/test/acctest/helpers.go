@@ -20,6 +20,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -363,4 +364,48 @@ func DefaultNamespace() string {
 // CI runs with a custom namespace do not break these tests.
 func SystemNamespace() string {
 	return "system"
+}
+
+// DefaultTenant returns the tenant name for acceptance tests.
+//
+// Why: Cross-namespace references and tenant-scoped test fixtures require the
+// active tenant name, which varies across CI and developer environments.
+//
+// How: Checks F5XCProvider_TENANT and F5XC_TEST_TENANT first. When neither is
+// set and the test is not replaying VCR cassettes, it resolves the tenant ID
+// from F5XCProvider_URL (mapping the short vanity prefix "terraforminfraex"
+// from https://terraforminfraex.console.ves.volterra.io/api to the internal
+// tenant identifier "terraforminfraex-bqyukwxm", or returning the subdomain
+// such as "customer1" for CRT environments). Otherwise it falls back to
+// "terraforminfraex-bqyukwxm".
+//
+// Parameters:
+//   - None.
+//
+// Returns:
+//   - string: the resolved tenant identifier.
+func DefaultTenant() string {
+	if tenant := strings.TrimSpace(os.Getenv("F5XCProvider_TENANT")); tenant != "" {
+		return tenant
+	}
+	if tenant := strings.TrimSpace(os.Getenv("F5XC_TEST_TENANT")); tenant != "" {
+		return tenant
+	}
+	vcrMode := strings.ToUpper(strings.TrimSpace(os.Getenv("VCR_MODE")))
+	if vcrMode != "REPLAYING" {
+		if rawURL := strings.TrimSpace(os.Getenv("F5XCProvider_URL")); rawURL != "" {
+			if parsed, err := url.Parse(rawURL); err == nil && parsed.Host != "" {
+				parts := strings.Split(strings.ToLower(parsed.Host), ".")
+				if len(parts) > 0 && parts[0] != "" {
+					switch parts[0] {
+					case "terraforminfraex":
+						return "terraforminfraex-bqyukwxm"
+					default:
+						return parts[0]
+					}
+				}
+			}
+		}
+	}
+	return "terraforminfraex-bqyukwxm"
 }

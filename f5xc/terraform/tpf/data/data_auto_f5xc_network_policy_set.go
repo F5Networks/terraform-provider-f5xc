@@ -64,8 +64,8 @@ func (d *DataSourceF5XCNetworkPolicySet) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCNetworkPolicySet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_set) etc. can be fetched",
+		MarkdownDescription: "Network policy set implements L3/L4 stateful firewall.<br>It is a list of one or more Network policy references and are applied sequentially in order specified in the list.<br><br>Network policy set can be configured via network firewall object or vK8s<br>* Network Firewall is a fleet object which can take a reference to network policy set.<br>Firewall is applied to VIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE in corresponding fleet<br>* vK8s will inherit network policy set configured in its own namespace and tenant<br><br>Network policy references to be attached to network policy set can be picked from<br>* Same namespace and tenant as of network policy set<br>* Shared namespace of the Tenant<br>* Shared namespace of 'ves.io' tenant",
+		Description:         "Network policy set implements L3/L4 stateful firewall. It is a list of one or more Network policy references and are applied sequentially in order specified in the list. Network policy set can be configured via network firewall object or vK8s Network Firewall is a fleet object which can take a reference to network policy set. Firewall is applied to VIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE in corresponding fleet vK8s will inherit network policy set configured in its own namespace and tenant Network policy references to be attached to network policy set can be picked from Same namespace and tenant as of network policy set Shared namespace of the Tenant Shared namespace of 'ves.io' tenant",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -191,7 +191,7 @@ func (d *DataSourceF5XCNetworkPolicySet) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_policy_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy_set", err))
 		return
 	}
 

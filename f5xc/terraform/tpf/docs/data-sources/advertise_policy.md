@@ -14,14 +14,23 @@
 page_title: "f5xc_advertise_policy Data Source - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  advertise policy object advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers. Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE). A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port. So the problem of configuring VIP and Service port is made possible by advertise policy. There three things to be decided * Network * VIP * Protocol and Port Network is decided by a concrete network reference Network can be inferred automatically based on site and network type Network can be inferred automatically based on all site selected by virtual site and network type VIP can be automatically allocated by the system  or configured. Most of the time VIP is the interface IP of the Application gateway in the given network. Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system. A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
+  advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.<br>Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE).<br><br>A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.<br>So the problem of configuring VIP and Service port is made possible by advertise policy.<br>There three things to be decided<br><br>* Network<br>* VIP<br>* Protocol and Port<br><br>Network is decided by a concrete network reference<br>Network can be inferred automatically based on site and network type<br>Network can be inferred automatically based on all site selected by virtual site and network type<br><br>VIP can be automatically allocated by the system  or configured.<br>Most of the time VIP is the interface IP of the Application gateway in the given network.<br><br>Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.<br>A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
 ---
 
 # f5xc_advertise_policy (Data Source)
 
-advertise policy object advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers. Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE). A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port. So the problem of configuring VIP and Service port is made possible by advertise policy. There three things to be decided * Network * VIP * Protocol and Port Network is decided by a concrete network reference Network can be inferred automatically based on site and network type Network can be inferred automatically based on all site selected by virtual site and network type VIP can be automatically allocated by the system  or configured. Most of the time VIP is the interface IP of the Application gateway in the given network. Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system. A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
+advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.<br>Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE).<br><br>A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.<br>So the problem of configuring VIP and Service port is made possible by advertise policy.<br>There three things to be decided<br><br>* Network<br>* VIP<br>* Protocol and Port<br><br>Network is decided by a concrete network reference<br>Network can be inferred automatically based on site and network type<br>Network can be inferred automatically based on all site selected by virtual site and network type<br><br>VIP can be automatically allocated by the system  or configured.<br>Most of the time VIP is the interface IP of the Application gateway in the given network.<br><br>Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.<br>A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
 
+## Example Usage
 
+```terraform
+# Example: Advertise Policy - Full
+
+data "f5xc_advertise_policy" "example" {
+  name      = f5xc_advertise_policy.example.name
+  namespace = f5xc_advertise_policy.example.namespace
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -87,7 +96,6 @@ Read-Only:
 
 - `client_certificate_verify_choice` (Attributes) Client certificate verification Configuration to indicate whether client certificate verification is required (see [below for nested schema](#nestedatt--tls_parameters--client_certificate_verify_choice))
 - `common_params` (Attributes) common_params Common TLS parameters used in both upstream and downstream connections (see [below for nested schema](#nestedatt--tls_parameters--common_params))
-- `xfcc_header_elements` (List of String) XFCC Header X-Forwarded-Client-Cert header elements to be set in an mTLS enabled connections. If none are defined, the header will not be added.
 
 <a id="nestedatt--tls_parameters--client_certificate_verify_choice"></a>
 ### Nested Schema for `tls_parameters.client_certificate_verify_choice`
@@ -152,6 +160,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_parameters.common_params.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
@@ -169,7 +178,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 

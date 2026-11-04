@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -76,8 +77,8 @@ func (r *ResourceF5XCFastAclsForInternetVips) Metadata(ctx context.Context, requ
 func (r *ResourceF5XCFastAclsForInternetVips) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
 			"namespace": schema.StringAttribute{
@@ -181,9 +182,17 @@ func (r *ResourceF5XCFastAclsForInternetVips) ModifyPlan(ctx context.Context, re
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCFastAclsForInternetVips) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCFastAclsForInternetVipsModel
 
 	// Read Terraform plan data into the model
@@ -270,7 +279,7 @@ func (r *ResourceF5XCFastAclsForInternetVips) Create(ctx context.Context, reques
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "fast_acls_for_internet_vips", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "fast_acls_for_internet_vips", err),
 		)
 		return
 	}
@@ -333,7 +342,7 @@ func (r *ResourceF5XCFastAclsForInternetVips) Read(ctx context.Context, request 
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "fast_acls_for_internet_vips", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acls_for_internet_vips", err),
 		)
 		return
 	}
@@ -398,14 +407,12 @@ func (r *ResourceF5XCFastAclsForInternetVips) Read(ctx context.Context, request 
 			AttrTypes: FastAclsForInternetVipsFastAclsObjectRefModelAttributeMap,
 		}
 		nullFastAclsList := basetypes.NewListNull(fastAclsObjectType)
-		var priorValFastAcls types.List
-		_ = request.State.GetAttribute(ctx, path.Root("fast_acls"), &priorValFastAcls)
-		if !priorValFastAcls.IsNull() && !priorValFastAcls.IsUnknown() {
-			data.FastAcls = priorValFastAcls
+		if !data.FastAcls.IsNull() && !data.FastAcls.IsUnknown() && len(data.FastAcls.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.FastAcls = basetypes.NewListValueMust(fastAclsObjectType, nil)
 		} else {
 			data.FastAcls = nullFastAclsList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -417,6 +424,12 @@ func (r *ResourceF5XCFastAclsForInternetVips) Read(ctx context.Context, request 
 }
 
 func (r *ResourceF5XCFastAclsForInternetVips) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCFastAclsForInternetVipsModel
@@ -505,7 +518,7 @@ func (r *ResourceF5XCFastAclsForInternetVips) Update(ctx context.Context, reques
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "fast_acls_for_internet_vips", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "fast_acls_for_internet_vips", err),
 		)
 		return
 	}
@@ -576,7 +589,7 @@ func (r *ResourceF5XCFastAclsForInternetVips) Delete(ctx context.Context, reques
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "fast_acls_for_internet_vips", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "fast_acls_for_internet_vips", err),
 			)
 			return
 		}
@@ -592,7 +605,7 @@ func (r *ResourceF5XCFastAclsForInternetVips) Delete(ctx context.Context, reques
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "fast_acls_for_internet_vips", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "fast_acls_for_internet_vips", err),
 		)
 		return
 	}

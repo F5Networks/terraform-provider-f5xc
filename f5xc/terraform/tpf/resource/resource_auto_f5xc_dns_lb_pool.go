@@ -28,7 +28,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -39,6 +38,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -50,6 +50,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_dns_lb_pool "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_lb_pool"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -389,8 +390,8 @@ func (r *ResourceF5XCDnsLbPool) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Pool  object is used for configuring DNS Load Balancer Pool",
+		Description:         "DNS Load Balancer Pool  object is used for configuring DNS Load Balancer Pool",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -446,7 +447,7 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -463,26 +464,23 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 				Description:         "backref_objs a list of Load balancers associated with this load balancer pool",
 				MarkdownDescription: "backref_objs a list of Load balancers associated with this load balancer pool",
 				Required:            false,
-				Optional:            true,
+				Optional:            false,
 				Computed:            true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -490,9 +488,6 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -583,7 +578,7 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -801,7 +796,7 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -1090,7 +1085,7 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 						Optional:            true,
 						Computed:            false,
 						Validators: []validator.Int64{
-							int64validator.Between(0, 2147483647),
+							int64validator.Between(0, 86400),
 						},
 						PlanModifiers: []planmodifier.Int64{
 							defaultvaluemodifier.NewDefaultValueModifierInt64("use_rrset_ttl"),
@@ -1170,9 +1165,17 @@ func (r *ResourceF5XCDnsLbPool) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsLbPoolModel
 
 	// Read Terraform plan data into the model
@@ -1722,7 +1725,7 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1745,7 +1748,7 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_lb_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_lb_pool", err),
 		)
 		return
 	}
@@ -1915,14 +1918,12 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
@@ -2618,7 +2619,7 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_lb_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_lb_pool", err),
 		)
 		return
 	}
@@ -2788,14 +2789,12 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
@@ -2919,7 +2918,10 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					aPoolAttributeMap["health_check_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					aPoolAttributeMap["health_check_choice"] = types.ObjectNull(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceModelAttributeMap)
+					aPoolAttributeMap["health_check_choice"] = types.ObjectValueMust(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_health_check": types.BoolValue(true),
+						"health_check":         types.ObjectNull(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredUintField --> MaxAnswers
@@ -3147,7 +3149,10 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					cnamePoolAttributeMap["health_check_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					cnamePoolAttributeMap["health_check_choice"] = types.ObjectNull(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap)
+					cnamePoolAttributeMap["health_check_choice"] = types.ObjectValueMust(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_health_check": types.BoolValue(true),
+						"health_check":         types.ObjectNull(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
@@ -3438,7 +3443,13 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.TtlChoice = types.ObjectNull(DnsLbPoolTtlChoiceModelAttributeMap)
+
+		if data.TtlChoice.IsNull() || data.TtlChoice.IsUnknown() || ((data.TtlChoice.Attributes()["ttl"].IsNull() || data.TtlChoice.Attributes()["ttl"].IsUnknown()) && (data.TtlChoice.Attributes()["use_rrset_ttl"].IsNull() || data.TtlChoice.Attributes()["use_rrset_ttl"].IsUnknown())) {
+			data.TtlChoice = types.ObjectValueMust(DnsLbPoolTtlChoiceModelAttributeMap, map[string]attr.Value{
+				"ttl":           types.Int64Value(30),
+				"use_rrset_ttl": types.BoolNull(),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3450,6 +3461,12 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsLbPoolModel
@@ -4019,7 +4036,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4035,7 +4052,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "dns_lb_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_lb_pool", err),
 		)
 		return
 	}
@@ -4044,7 +4061,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "dns_lb_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_lb_pool", err),
 		)
 		return
 	}
@@ -4213,14 +4230,12 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
@@ -4938,7 +4953,7 @@ func (r *ResourceF5XCDnsLbPool) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_lb_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_lb_pool", err),
 		)
 		return
 	}

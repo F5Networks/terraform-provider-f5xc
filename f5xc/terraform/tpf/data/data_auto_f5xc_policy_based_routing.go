@@ -31,51 +31,51 @@ type DataSourceF5XCPolicyBasedRouting struct {
 	client *client.APIClient
 }
 
-type PolicyBasedRoutingGlobalSpecTypePolicyChoice struct {
+type PolicyBasedRoutingPolicyChoice struct {
 	ForwardProxyPbr types.Object `tfsdk:"forward_proxy_pbr"`
 	NetworkPbr      types.Object `tfsdk:"network_pbr"`
 }
 
-type PolicyBasedRoutingGlobalSpecTypeForwardProxyPbr struct {
+type PolicyBasedRoutingForwardProxyPbr struct {
 	ForwardProxyPbrRules types.List `tfsdk:"forward_proxy_pbr_rules"`
 }
 
-type PolicyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleType struct {
+type PolicyBasedRoutingForwardProxyPBRRuleType struct {
 	DestinationChoice   types.Object `tfsdk:"destination_choice"`
 	ForwardingClassList types.List   `tfsdk:"forwarding_class_list"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	SourceChoice        types.Object `tfsdk:"source_choice"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypeDestinationChoice struct {
+type PolicyBasedRoutingDestChoice struct {
 	AllDestinations types.Bool   `tfsdk:"all_destinations"`
 	HttpList        types.Object `tfsdk:"http_list"`
 	TlsList         types.Object `tfsdk:"tls_list"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypeHttpList struct {
+type PolicyBasedRoutingHttpList struct {
 	HttpList types.List `tfsdk:"http_list"`
 }
 
-type PolicyBasedRoutingForwardProxyPolicyURLType struct {
+type PolicyBasedRoutingURLType struct {
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 	PathChoice   types.Object `tfsdk:"path_choice"`
 }
 
-type PolicyBasedRoutingURLTypeDomainChoice struct {
+type PolicyBasedRoutingDomainChoice struct {
 	ExactValue  types.String `tfsdk:"exact_value"`
 	RegexValue  types.String `tfsdk:"regex_value"`
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type PolicyBasedRoutingURLTypePathChoice struct {
+type PolicyBasedRoutingPathChoice struct {
 	AnyPath         types.Bool   `tfsdk:"any_path"`
 	PathExactValue  types.String `tfsdk:"path_exact_value"`
 	PathPrefixValue types.String `tfsdk:"path_prefix_value"`
 	PathRegexValue  types.String `tfsdk:"path_regex_value"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypeTlsList struct {
+type PolicyBasedRoutingTlsList struct {
 	TlsList types.List `tfsdk:"tls_list"`
 }
 
@@ -94,51 +94,51 @@ type PolicyBasedRoutingMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypeSourceChoice struct {
+type PolicyBasedRoutingSrcChoice struct {
 	AllSources    types.Bool   `tfsdk:"all_sources"`
 	IpPrefixSet   types.Object `tfsdk:"ip_prefix_set"`
 	LabelSelector types.Object `tfsdk:"label_selector"`
 	PrefixList    types.Object `tfsdk:"prefix_list"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypeLabelSelector struct {
+type PolicyBasedRoutingLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type PolicyBasedRoutingForwardProxyPBRRuleTypePrefixList struct {
+type PolicyBasedRoutingPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type PolicyBasedRoutingGlobalSpecTypeNetworkPbr struct {
+type PolicyBasedRoutingNetPbr struct {
 	NetworkPbrRules types.List   `tfsdk:"network_pbr_rules"`
 	SourceChoice    types.Object `tfsdk:"source_choice"`
 }
 
-type PolicyBasedRoutingPolicyBasedRoutingNetworkPBRRuleType struct {
+type PolicyBasedRoutingNetPBRRuleType struct {
 	DestinationChoice   types.Object `tfsdk:"destination_choice"`
 	ForwardingClassList types.List   `tfsdk:"forwarding_class_list"`
 	Metadata            types.Object `tfsdk:"metadata"`
 	TrafficChoice       types.Object `tfsdk:"traffic_choice"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypeDestinationChoice struct {
+type PolicyBasedRoutingNetPBRRuleTypeDestChoice struct {
 	Any         types.Bool   `tfsdk:"any"`
 	DnsName     types.String `tfsdk:"dns_name"`
 	IpPrefixSet types.Object `tfsdk:"ip_prefix_set"`
 	PrefixList  types.Object `tfsdk:"prefix_list"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypeIpPrefixSet struct {
+type PolicyBasedRoutingIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypePrefixList struct {
+type PolicyBasedRoutingNetPBRRuleTypePrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypeTrafficChoice struct {
+type PolicyBasedRoutingTrafficChoice struct {
 	AllTcpTraffic     types.Bool   `tfsdk:"all_tcp_traffic"`
 	AllTraffic        types.Bool   `tfsdk:"all_traffic"`
 	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
@@ -146,26 +146,26 @@ type PolicyBasedRoutingNetworkPBRRuleTypeTrafficChoice struct {
 	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypeApplications struct {
+type PolicyBasedRoutingApplications struct {
 	Applications types.List `tfsdk:"applications"`
 }
 
-type PolicyBasedRoutingNetworkPBRRuleTypeProtocolPortRange struct {
+type PolicyBasedRoutingProtoPortRange struct {
 	PortRanges types.List   `tfsdk:"port_ranges"`
 	Protocol   types.String `tfsdk:"protocol"`
 }
 
-type PolicyBasedRoutingNetworkPBRTypeSourceChoice struct {
+type PolicyBasedRoutingNetPBRTypeSrcChoice struct {
 	Any           types.Bool   `tfsdk:"any"`
 	LabelSelector types.Object `tfsdk:"label_selector"`
 	PrefixList    types.Object `tfsdk:"prefix_list"`
 }
 
-type PolicyBasedRoutingNetworkPBRTypeLabelSelector struct {
+type PolicyBasedRoutingNetPBRTypeLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type PolicyBasedRoutingNetworkPBRTypePrefixList struct {
+type PolicyBasedRoutingNetPBRTypePrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
@@ -588,8 +588,8 @@ func (d *DataSourceF5XCPolicyBasedRouting) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
+		MarkdownDescription: "Policy based routing is used to control how different classes of traffic is forwarded and QOS is<br>applied over WAN interfaces in SDWAN scenarios.",
+		Description:         "Policy based routing is used to control how different classes of traffic is forwarded and QOS is applied over WAN interfaces in SDWAN scenarios.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1257,7 +1257,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "policy_based_routing", err))
 		return
 	}
 
@@ -1376,7 +1376,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 		policyChoiceChoices := specData.GetPolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var policyChoiceChoicesModel = &PolicyBasedRoutingGlobalSpecTypePolicyChoice{}
+		var policyChoiceChoicesModel = &PolicyBasedRoutingPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1394,9 +1394,9 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 				if len(forwardProxyPbrElement.GetForwardProxyPbrRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					forwardProxyPbrRulesElements := make([]PolicyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleType, 0, len(forwardProxyPbrElement.GetForwardProxyPbrRules()))
+					forwardProxyPbrRulesElements := make([]PolicyBasedRoutingForwardProxyPBRRuleType, 0, len(forwardProxyPbrElement.GetForwardProxyPbrRules()))
 					for _, forwardProxyPbrRulesElement := range forwardProxyPbrElement.GetForwardProxyPbrRules() {
-						policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel := PolicyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleType{}
+						policyBasedRoutingForwardProxyPBRRuleTypeModel := PolicyBasedRoutingForwardProxyPBRRuleType{}
 
 						// data specToModelNested RequiredOneOfField --> DestinationChoice
 						// <no value>
@@ -1433,9 +1433,9 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 									if len(httpListElement.GetHttpList()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										httpListElements := make([]PolicyBasedRoutingForwardProxyPolicyURLType, 0, len(httpListElement.GetHttpList()))
+										httpListElements := make([]PolicyBasedRoutingURLType, 0, len(httpListElement.GetHttpList()))
 										for _, httpListElement := range httpListElement.GetHttpList() {
-											policyBasedRoutingForwardProxyPolicyURLTypeModel := PolicyBasedRoutingForwardProxyPolicyURLType{}
+											policyBasedRoutingURLTypeModel := PolicyBasedRoutingURLType{}
 
 											// data specToModelNested RequiredOneOfField --> DomainChoice
 											// <no value>
@@ -1492,10 +1492,10 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												policyBasedRoutingForwardProxyPolicyURLTypeModel.DomainChoice = finalObj
+												policyBasedRoutingURLTypeModel.DomainChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												policyBasedRoutingForwardProxyPolicyURLTypeModel.DomainChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
+												policyBasedRoutingURLTypeModel.DomainChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
 											}
 
 											// data specToModelNested RequiredOneOfField --> PathChoice
@@ -1562,13 +1562,13 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												policyBasedRoutingForwardProxyPolicyURLTypeModel.PathChoice = finalObj
+												policyBasedRoutingURLTypeModel.PathChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												policyBasedRoutingForwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
+												policyBasedRoutingURLTypeModel.PathChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
 											}
 
-											httpListElements = append(httpListElements, policyBasedRoutingForwardProxyPolicyURLTypeModel)
+											httpListElements = append(httpListElements, policyBasedRoutingURLTypeModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1718,10 +1718,10 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = finalObj
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap)
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredArrayOfPointerField --> ForwardingClassList
@@ -1765,13 +1765,13 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.ForwardingClassList = forwardingClassListListValue
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.ForwardingClassList = forwardingClassListListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.ForwardingClassList = types.ListNull(types.ObjectType{AttrTypes: PolicyBasedRoutingForwardingClassListObjectRefModelAttributeMap})
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.ForwardingClassList = types.ListNull(types.ObjectType{AttrTypes: PolicyBasedRoutingForwardingClassListObjectRefModelAttributeMap})
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -1804,7 +1804,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.Metadata = policyBasedRoutingMessageMetaTypeModelObj
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.Metadata = policyBasedRoutingMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1813,7 +1813,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.Metadata = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesMetadataModelAttributeMap)
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.Metadata = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> SourceChoice
@@ -1972,13 +1972,13 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.SourceChoice = finalObj
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel.SourceChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesSourceChoiceModelAttributeMap)
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.SourceChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesSourceChoiceModelAttributeMap)
 						}
 
-						forwardProxyPbrRulesElements = append(forwardProxyPbrRulesElements, policyBasedRoutingPolicyBasedRoutingForwardProxyPBRRuleTypeModel)
+						forwardProxyPbrRulesElements = append(forwardProxyPbrRulesElements, policyBasedRoutingForwardProxyPBRRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2021,9 +2021,9 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 				if len(networkPbrElement.GetNetworkPbrRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					networkPbrRulesElements := make([]PolicyBasedRoutingPolicyBasedRoutingNetworkPBRRuleType, 0, len(networkPbrElement.GetNetworkPbrRules()))
+					networkPbrRulesElements := make([]PolicyBasedRoutingNetPBRRuleType, 0, len(networkPbrElement.GetNetworkPbrRules()))
 					for _, networkPbrRulesElement := range networkPbrElement.GetNetworkPbrRules() {
-						policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel := PolicyBasedRoutingPolicyBasedRoutingNetworkPBRRuleType{}
+						policyBasedRoutingNetPBRRuleTypeModel := PolicyBasedRoutingNetPBRRuleType{}
 
 						// data specToModelNested OneOfField --> Destination
 						if networkPbrRulesElement.GetDestination() != nil {
@@ -2184,10 +2184,10 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.DestinationChoice = finalObj
+							policyBasedRoutingNetPBRRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesDestinationModelAttributeMap)
+							policyBasedRoutingNetPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesDestinationModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredArrayOfPointerField --> ForwardingClassList
@@ -2231,13 +2231,13 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.ForwardingClassList = forwardingClassListListValue
+							policyBasedRoutingNetPBRRuleTypeModel.ForwardingClassList = forwardingClassListListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.ForwardingClassList = types.ListNull(types.ObjectType{AttrTypes: PolicyBasedRoutingForwardingClassListObjectRefModelAttributeMap})
+							policyBasedRoutingNetPBRRuleTypeModel.ForwardingClassList = types.ListNull(types.ObjectType{AttrTypes: PolicyBasedRoutingForwardingClassListObjectRefModelAttributeMap})
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -2270,7 +2270,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							if response.Diagnostics.HasError() {
 								return
 							}
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.Metadata = policyBasedRoutingMessageMetaTypeModelObj
+							policyBasedRoutingNetPBRRuleTypeModel.Metadata = policyBasedRoutingMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2279,7 +2279,7 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.Metadata = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesMetadataModelAttributeMap)
+							policyBasedRoutingNetPBRRuleTypeModel.Metadata = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> TrafficChoice
@@ -2413,13 +2413,13 @@ func (d *DataSourceF5XCPolicyBasedRouting) Read(ctx context.Context, request dat
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.TrafficChoice = finalObj
+							policyBasedRoutingNetPBRRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel.TrafficChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesTrafficChoiceModelAttributeMap)
+							policyBasedRoutingNetPBRRuleTypeModel.TrafficChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceNetworkPbrNetworkPbrRulesTrafficChoiceModelAttributeMap)
 						}
 
-						networkPbrRulesElements = append(networkPbrRulesElements, policyBasedRoutingPolicyBasedRoutingNetworkPBRRuleTypeModel)
+						networkPbrRulesElements = append(networkPbrRulesElements, policyBasedRoutingNetPBRRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

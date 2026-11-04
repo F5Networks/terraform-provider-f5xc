@@ -35,8 +35,8 @@ func testAccSkipKnownInfraprotectFirewallRuleGroupCreateError(t *testing.T) reso
 
 		msg := err.Error()
 		if strings.Contains(msg, "Unable to create infraprotect_firewall_rule_group") &&
-			strings.Contains(msg, "status code 500") &&
-			strings.Contains(msg, "PreDBAddEntry") {
+			(strings.Contains(msg, "internal server error (HTTP 500)") ||
+				(strings.Contains(msg, "status code 500") && strings.Contains(msg, "PreDBAddEntry"))) {
 			t.Skipf("Skipping known infraprotect_firewall_rule_group create failure in this environment: %v", err)
 		}
 
@@ -48,7 +48,7 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-ip-fwrg-" + acctest.RandString(t, 8)
+	name := "example-ip-fwrg-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -58,10 +58,10 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
@@ -69,10 +69,10 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_basic(t *testing.T) {
 			},
 			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
@@ -86,7 +86,7 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_withFirewallRuleGroupN
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-ip-fwrg-" + acctest.RandString(t, 8)
+	name := "example-ip-fwrg-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -96,10 +96,10 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_withFirewallRuleGroupN
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_withGroupName(name, namespace, "group-initial")},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
@@ -107,10 +107,10 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_withFirewallRuleGroupN
 			},
 			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_withGroupName(name, namespace, "group-updated")},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
@@ -124,38 +124,42 @@ func TestAccResourceAutoF5XCInfraprotectFirewallRuleGroup_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-ip-fwrg-" + acctest.RandString(t, 8)
+	name := "example-ip-fwrg-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckInfraprotectFirewallRuleGroupDestroyProducer(t),
 		ErrorCheck:               testAccSkipKnownInfraprotectFirewallRuleGroupCreateError(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_full(name, namespace, "team-a")},
+			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_full(name, namespace, "example-team")},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
 				},
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_fullUpdated(name, namespace, "team-b")},
+			{Config: testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_fullUpdated(name, namespace, "example-team-alt")},
 			{
-				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.test",
+				ResourceName:                         "f5xc_infraprotect_firewall_rule_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_firewall_rule_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"firewall_ruleset",
 				},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_full("example-ip-fwrg", namespace, "example-team"),
+		})
 }
 
 func testAccCheckInfraprotectFirewallRuleGroupDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -164,7 +168,7 @@ func testAccCheckInfraprotectFirewallRuleGroupDestroyProducer(t *testing.T) func
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
   firewall_rule_group_name = "group-basic"
@@ -174,10 +178,10 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
-  description              = "updated basic firewall rule group"
+  description              = "Updated infraprotect firewall rule group example"
   firewall_rule_group_name = "group-basic-updated"
 }
 `, name, namespace)
@@ -185,7 +189,7 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_withLabels(name, namespace, env string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
   firewall_rule_group_name = "group-with-labels"
@@ -199,7 +203,7 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_withAnnotations(name, namespace, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
   firewall_rule_group_name = "group-with-annotations"
@@ -213,7 +217,7 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_withGroupName(name, namespace, groupName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
   firewall_rule_group_name = %q
@@ -223,19 +227,19 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_full(name, namespace, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
-  description              = "full firewall rule group"
+  description              = "Full infraprotect firewall rule group example"
   firewall_rule_group_name = "group-full"
 
   labels = {
-    env  = "acceptance"
+    env  = "example"
     team = %q
   }
 
   annotations = {
-    owner = "network"
+    owner = "platform-team"
   }
 }
 `, name, namespace, team)
@@ -243,19 +247,19 @@ resource "f5xc_infraprotect_firewall_rule_group" "test" {
 
 func testAccResourceAutoF5XCInfraprotectFirewallRuleGroupConfig_fullUpdated(name, namespace, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_firewall_rule_group" "test" {
+resource "f5xc_infraprotect_firewall_rule_group" "example" {
   name                     = %q
   namespace                = %q
-  description              = "full firewall rule group updated"
+  description              = "Updated full infraprotect firewall rule group example"
   firewall_rule_group_name = "group-full-updated"
 
   labels = {
-    env  = "acceptance-updated"
+    env  = "example-updated"
     team = %q
   }
 
   annotations = {
-    owner = "security"
+    owner = "netsec-team"
   }
 }
 `, name, namespace, team)

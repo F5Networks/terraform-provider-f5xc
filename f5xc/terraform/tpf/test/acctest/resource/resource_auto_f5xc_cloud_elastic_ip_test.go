@@ -30,10 +30,10 @@ func TestAccResourceAutoF5XCCloudElasticIp_full(t *testing.T) {
 	acctest.AccTestPreCheck(t)
 
 	namespace := "system"
-	name := "tf-acc-cloud-elastic-ip-" + testAccRunSuffix(t)
-	siteName := "tf-acc-azure-vnet-site-" + testAccRunSuffix(t)
+	name := "example-cloud-elastic-ip-" + testAccRunSuffix(t)
+	siteName := "example-azure-vnet-site-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck: func() {
 			acctest.AccTestPreCheck(t)
 		},
@@ -44,14 +44,18 @@ func TestAccResourceAutoF5XCCloudElasticIp_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCCloudElasticIpConfig_existingSite(name, siteName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_cloud_elastic_ip.test",
+				ResourceName:                         "f5xc_cloud_elastic_ip.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_elastic_ip.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_elastic_ip.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCloudElasticIpConfig_existingSite("example-cloud-elastic-ip", "example-azure-vnet-site", "system"),
+		})
 }
 
 func testAccCheckCloudElasticIpDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -62,14 +66,14 @@ func testAccResourceAutoF5XCCloudElasticIpConfig_existingSite(name, siteName, na
 	siteConfig := testAccResourceAutoF5XCAzureVnetSiteSetCloudSiteInfoConfig_site(siteName, namespace)
 
 	return siteConfig + fmt.Sprintf(`
-resource "f5xc_cloud_elastic_ip" "test" {
+resource "f5xc_cloud_elastic_ip" "example" {
   name      = %q
   namespace = %q
 
   site_ref = [
     {
-			name      = f5xc_azure_vnet_site.site.name
-			namespace = f5xc_azure_vnet_site.site.namespace
+		name      = f5xc_azure_vnet_site.site.name
+		namespace = f5xc_azure_vnet_site.site.namespace
     }
   ]
 

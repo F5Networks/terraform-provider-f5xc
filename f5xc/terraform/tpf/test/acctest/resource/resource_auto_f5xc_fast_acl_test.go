@@ -28,38 +28,42 @@ func TestAccResourceAutoF5XCFastAcl_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFastAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFastAclConfig_basic("example-fast-acl", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCFastAcl_withDestinationChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,26 +72,26 @@ func TestAccResourceAutoF5XCFastAcl_withDestinationChoiceTransition(t *testing.T
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_withDestinationBoolChoice(name, namespace, "interface_services")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withDestinationBoolChoice(name, namespace, "vip_services")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withDestinationBoolChoice(name, namespace, "all_services")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +102,7 @@ func TestAccResourceAutoF5XCFastAcl_withReAclVipChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,26 +111,26 @@ func TestAccResourceAutoF5XCFastAcl_withReAclVipChoiceTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_withNetworkChoice(name, namespace, "outside_network")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withNetworkChoice(name, namespace, "inside_network")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withNetworkChoice(name, namespace, "outside_network")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -137,7 +141,7 @@ func TestAccResourceAutoF5XCFastAcl_withSiteChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -146,26 +150,26 @@ func TestAccResourceAutoF5XCFastAcl_withSiteChoiceTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_withReAclVipChoice(name, namespace, "all_public_vips")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withReAclVipChoice(name, namespace, "default_tenant_vip")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withReAclVipChoice(name, namespace, "all_public_vips")},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -176,7 +180,7 @@ func TestAccResourceAutoF5XCFastAcl_withRulePortChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -185,26 +189,26 @@ func TestAccResourceAutoF5XCFastAcl_withRulePortChoiceTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_withRulePortChoice(name, namespace, "all", 0)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withRulePortChoice(name, namespace, "dns", 0)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_withRulePortChoice(name, namespace, "user_defined", 8443)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -215,31 +219,35 @@ func TestAccResourceAutoF5XCFastAcl_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-fast-acl-" + acctest.RandString(t, 8)
+	name := "example-fast-acl-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFastAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCFastAclConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl.test",
+				ResourceName:                         "f5xc_fast_acl.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFastAclConfig_full("example-fast-acl", namespace),
+		})
 }
 
 func testAccCheckFastAclDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -248,7 +256,7 @@ func testAccCheckFastAclDestroyProducer(t *testing.T) func(*terraform.State) err
 
 func testAccResourceAutoF5XCFastAclConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -268,10 +276,10 @@ resource "f5xc_fast_acl" "test" {
 
 func testAccResourceAutoF5XCFastAclConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name        = %q
   namespace   = %q
-  description = "fast acl updated"
+  description = "Updated fast ACL example"
 
   site_choice = {
     site_acl = {
@@ -289,7 +297,7 @@ resource "f5xc_fast_acl" "test" {
 
 func testAccResourceAutoF5XCFastAclConfig_withDestinationBoolChoice(name, namespace, choice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -310,7 +318,7 @@ resource "f5xc_fast_acl" "test" {
 func testAccResourceAutoF5XCFastAclConfig_withNetworkChoice(name, namespace, networkChoice string) string {
 	if networkChoice == "re_acl" {
 		return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -325,7 +333,7 @@ resource "f5xc_fast_acl" "test" {
 `, name, namespace)
 	}
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -345,7 +353,7 @@ resource "f5xc_fast_acl" "test" {
 
 func testAccResourceAutoF5XCFastAclConfig_withReAclVipChoice(name, namespace, vipChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -370,7 +378,7 @@ func testAccResourceAutoF5XCFastAclConfig_withRulePortChoice(name, namespace, po
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name      = %q
   namespace = %q
 
@@ -414,13 +422,13 @@ resource "f5xc_fast_acl" "test" {
 
 func testAccResourceAutoF5XCFastAclConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name        = %q
   namespace   = %q
-  description = "fast acl full"
+  description = "Full fast ACL example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -490,13 +498,13 @@ resource "f5xc_fast_acl" "test" {
 
 func testAccResourceAutoF5XCFastAclConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl" "test" {
+resource "f5xc_fast_acl" "example" {
   name        = %q
   namespace   = %q
-  description = "fast acl full updated"
+  description = "Updated full fast ACL example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

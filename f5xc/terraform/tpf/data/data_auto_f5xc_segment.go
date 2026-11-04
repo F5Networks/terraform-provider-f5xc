@@ -29,7 +29,7 @@ type DataSourceF5XCSegment struct {
 	client *client.APIClient
 }
 
-type SegmentSegmentAttachmentType struct {
+type SegmentAttachmentType struct {
 	CloudConnectName types.String `tfsdk:"cloud_connect_name"`
 	CloudConnectType types.String `tfsdk:"cloud_connect_type"`
 	Name             types.String `tfsdk:"name"`
@@ -37,8 +37,9 @@ type SegmentSegmentAttachmentType struct {
 	Type             types.String `tfsdk:"type"`
 }
 
-type SegmentGlobalSpecTypeInternetConnectionChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+type SegmentInternetConnChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 // DataSourceF5XCSegmentModel describes the resource data model.
@@ -68,7 +69,8 @@ var SegmentAttachmentsModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> InternetConnectionChoice
 var SegmentInternetConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -85,8 +87,8 @@ func (d *DataSourceF5XCSegment) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCSegment) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a segment This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a segment This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment) etc. can be fetched",
+		MarkdownDescription: "Network Segment.",
+		Description:         "Network Segment.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -173,6 +175,12 @@ func (r *DataSourceF5XCSegment) Schema(ctx context.Context, request datasource.S
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"disable": schema.BoolAttribute{
+						Description: "Disable connections to internet",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"enable": schema.BoolAttribute{
 						Description: "Enable connections to internet",
 						Required:    false,
@@ -238,7 +246,7 @@ func (d *DataSourceF5XCSegment) Read(ctx context.Context, request datasource.Rea
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "segment", err))
 		return
 	}
 
@@ -301,52 +309,52 @@ func (d *DataSourceF5XCSegment) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot ArrayOfPointerField --> Attachments
 	if len(specData.GetAttachments()) > 0 {
-		attachmentsElements := make([]SegmentSegmentAttachmentType, 0, len(specData.GetAttachments()))
+		attachmentsElements := make([]SegmentAttachmentType, 0, len(specData.GetAttachments()))
 
 		for _, attachmentsElement := range specData.GetAttachments() {
-			segmentSegmentAttachmentTypeModel := SegmentSegmentAttachmentType{}
+			segmentAttachmentTypeModel := SegmentAttachmentType{}
 
 			// data specToModelNested StringField --> CloudConnectName
 			if attachmentsElement.GetCloudConnectName() != "" {
-				segmentSegmentAttachmentTypeModel.CloudConnectName = types.StringValue(attachmentsElement.GetCloudConnectName())
+				segmentAttachmentTypeModel.CloudConnectName = types.StringValue(attachmentsElement.GetCloudConnectName())
 			} else {
 				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.CloudConnectName = types.StringNull()
+				segmentAttachmentTypeModel.CloudConnectName = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> CloudConnectType
 			if attachmentsElement.GetCloudConnectType() != "" {
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
+				segmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
 			} else {
 				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
+				segmentAttachmentTypeModel.CloudConnectType = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Name
 			if attachmentsElement.GetName() != "" {
-				segmentSegmentAttachmentTypeModel.Name = types.StringValue(attachmentsElement.GetName())
+				segmentAttachmentTypeModel.Name = types.StringValue(attachmentsElement.GetName())
 			} else {
 				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.Name = types.StringNull()
+				segmentAttachmentTypeModel.Name = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Site
 			if attachmentsElement.GetSite() != "" {
-				segmentSegmentAttachmentTypeModel.Site = types.StringValue(attachmentsElement.GetSite())
+				segmentAttachmentTypeModel.Site = types.StringValue(attachmentsElement.GetSite())
 			} else {
 				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.Site = types.StringNull()
+				segmentAttachmentTypeModel.Site = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Type
 			if attachmentsElement.GetType() != "" {
-				segmentSegmentAttachmentTypeModel.Type = types.StringValue(attachmentsElement.GetType())
+				segmentAttachmentTypeModel.Type = types.StringValue(attachmentsElement.GetType())
 			} else {
 				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.Type = types.StringNull()
+				segmentAttachmentTypeModel.Type = types.StringNull()
 			}
 
-			attachmentsElements = append(attachmentsElements, segmentSegmentAttachmentTypeModel)
+			attachmentsElements = append(attachmentsElements, segmentAttachmentTypeModel)
 		}
 
 		{
@@ -381,9 +389,18 @@ func (d *DataSourceF5XCSegment) Read(ctx context.Context, request datasource.Rea
 		internetConnectionChoiceChoices := specData.GetInternetConnectionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var internetConnectionChoiceChoicesModel = &SegmentGlobalSpecTypeInternetConnectionChoice{}
+		var internetConnectionChoiceChoicesModel = &SegmentInternetConnChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> Disable
+		_, isDisable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Disable)
+
+		if isDisable {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolValue(true)
+		} else {
+			internetConnectionChoiceChoicesModel.Disable = types.BoolNull()
+		}
 
 		// data specToModelNested BoolOfOneOfPointerField --> Enable
 		_, isEnable := internetConnectionChoiceChoices.(*ves_io_schema_segment.GlobalSpecType_Enable)

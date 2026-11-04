@@ -29,11 +29,11 @@ type DataSourceF5XCNetworkPolicy struct {
 	client *client.APIClient
 }
 
-type NetworkPolicyNetworkPolicyEndpointChoiceType struct {
+type NetPolicyEndpointChoiceType struct {
 	EndpointChoice types.Object `tfsdk:"endpoint_choice"`
 }
 
-type NetworkPolicyEndpointChoiceTypeEndpointChoice struct {
+type NetPolicyEndpointChoice struct {
 	Any              types.Bool   `tfsdk:"any"`
 	InsideEndpoints  types.Bool   `tfsdk:"inside_endpoints"`
 	LabelSelector    types.Object `tfsdk:"label_selector"`
@@ -41,39 +41,39 @@ type NetworkPolicyEndpointChoiceTypeEndpointChoice struct {
 	PrefixList       types.Object `tfsdk:"prefix_list"`
 }
 
-type NetworkPolicyEndpointChoiceTypeLabelSelector struct {
+type NetPolicyLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type NetworkPolicyEndpointChoiceTypePrefixList struct {
+type NetPolicyPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type NetworkPolicyGlobalSpecTypeLocalEndpointChoice struct {
+type NetPolicyLocalEndpointChoice struct {
 	Prefix         types.Object `tfsdk:"prefix"`
 	PrefixSelector types.Object `tfsdk:"prefix_selector"`
 }
 
-type NetworkPolicyGlobalSpecTypePrefix struct {
+type NetPolicyPrefix struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type NetworkPolicyGlobalSpecTypePrefixSelector struct {
+type NetPolicyPrefixSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type NetworkPolicyGlobalSpecTypeRuleChoice struct {
+type NetPolicyRuleChoice struct {
 	Rules types.Object `tfsdk:"rules"`
 }
 
-type NetworkPolicyGlobalSpecTypeRules struct {
+type NetPolicyRules struct {
 	EgressRules  types.List `tfsdk:"egress_rules"`
 	IngressRules types.List `tfsdk:"ingress_rules"`
 }
 
-type NetworkPolicyNetworkPolicyNetworkPolicyRuleType struct {
+type NetPolicyNetPolicyRuleType struct {
 	Action              types.List   `tfsdk:"action"`
 	AdvAction           types.Object `tfsdk:"adv_action"`
 	LabelMatcher        types.Object `tfsdk:"label_matcher"`
@@ -82,20 +82,20 @@ type NetworkPolicyNetworkPolicyNetworkPolicyRuleType struct {
 	TrafficChoice       types.Object `tfsdk:"traffic_choice"`
 }
 
-type NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+type NetPolicyNetPolicyRuleAdvancedAction struct {
 	Action types.List `tfsdk:"action"`
 }
 
-type NetworkPolicyLabelMatcherType struct {
+type NetPolicyLabelMatcherType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type NetworkPolicyMessageMetaType struct {
+type NetPolicyMessageMetaType struct {
 	Description types.String `tfsdk:"description"`
 	Name        types.String `tfsdk:"name"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeOtherEndpointChoice struct {
+type NetPolicyOtherEndpointChoice struct {
 	Any              types.Bool   `tfsdk:"any"`
 	InsideEndpoints  types.Bool   `tfsdk:"inside_endpoints"`
 	IpPrefixSet      types.Object `tfsdk:"ip_prefix_set"`
@@ -104,20 +104,20 @@ type NetworkPolicyNetworkPolicyRuleTypeOtherEndpointChoice struct {
 	PrefixList       types.Object `tfsdk:"prefix_list"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeIpPrefixSet struct {
+type NetPolicyIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeLabelSelector struct {
+type NetPolicyNetPolicyRuleTypeLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypePrefixList struct {
+type NetPolicyNetPolicyRuleTypePrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeTrafficChoice struct {
+type NetPolicyTrafficChoice struct {
 	AllTcpTraffic     types.Bool   `tfsdk:"all_tcp_traffic"`
 	AllTraffic        types.Bool   `tfsdk:"all_traffic"`
 	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
@@ -125,11 +125,11 @@ type NetworkPolicyNetworkPolicyRuleTypeTrafficChoice struct {
 	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeApplications struct {
+type NetPolicyApplications struct {
 	Applications types.List `tfsdk:"applications"`
 }
 
-type NetworkPolicyNetworkPolicyRuleTypeProtocolPortRange struct {
+type NetPolicyProtoPortRange struct {
 	PortRanges types.List   `tfsdk:"port_ranges"`
 	Protocol   types.String `tfsdk:"protocol"`
 }
@@ -599,8 +599,8 @@ func (d *DataSourceF5XCNetworkPolicy) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Network Policy Hits ID NetworkPolicyHitsId uniquely identifies an entry in the response to network policy hits request. Network policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Network Policy Hits ID NetworkPolicyHitsId uniquely identifies an entry in the response to network policy hits request. Network policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint').<br><br>Local endpoint can be,<br><br>prefix : list of ip prefixes representing local endpoint<br><br>prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br><br>Label preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br><br>Labels from the interface for the address<br>Labels from POD or Service for the address<br>Labels from Virtual Network for the address<br>Labels from Namespace for the address<br><br>Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule<br><br>Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network<br><br>Prefix selector labels (BNF grammar):<br><br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><br><exclusion>               ::= 'notin'<br><br><inclusion>               ::= 'in'<br><br><value-set>               ::= '(' <values> ')'<br><br><values>                  ::= VALUE | VALUE ',' <values><br><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\\t')<br><br>Note:<br><br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement<br><br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist<br><br>(3) The empty string is a valid VALUE<br><br>(4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE.<br><br>(5) A requirement with just !KEY requires that the KEY not exist.",
+		Description:         "Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint'). Local endpoint can be, prefix : list of ip prefixes representing local endpoint prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. Label preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, Labels from the interface for the address Labels from POD or Service for the address Labels from Virtual Network for the address Labels from Namespace for the address Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1342,7 +1342,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy", err))
 		return
 	}
 
@@ -1461,7 +1461,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> Endpoint
 	if specData.GetEndpoint() != nil {
-		var networkPolicyNetworkPolicyEndpointChoiceTypeModel = &NetworkPolicyNetworkPolicyEndpointChoiceType{}
+		var netPolicyEndpointChoiceTypeModel = &NetPolicyEndpointChoiceType{}
 		endpointElement := specData.GetEndpoint()
 
 		// data specToModelNested RequiredOneOfField --> EndpointChoice
@@ -1594,16 +1594,16 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			networkPolicyNetworkPolicyEndpointChoiceTypeModel.EndpointChoice = finalObj
+			netPolicyEndpointChoiceTypeModel.EndpointChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			networkPolicyNetworkPolicyEndpointChoiceTypeModel.EndpointChoice = types.ObjectNull(NetworkPolicyEndpointEndpointChoiceModelAttributeMap)
+			netPolicyEndpointChoiceTypeModel.EndpointChoice = types.ObjectNull(NetworkPolicyEndpointEndpointChoiceModelAttributeMap)
 		}
 
 		endpointObj, endpointDiags := utils.GoStructToObjectValue(
 			ctx,
 			NetworkPolicyEndpointModelAttributeMap,
-			networkPolicyNetworkPolicyEndpointChoiceTypeModel,
+			netPolicyEndpointChoiceTypeModel,
 		)
 		response.Diagnostics.Append(endpointDiags...)
 		data.Endpoint = endpointObj
@@ -1677,7 +1677,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 		localEndpointChoiceChoices := specData.GetLocalEndpoint()
 
 		// The model struct that will be populated by the nested template.
-		var localEndpointChoiceChoicesModel = &NetworkPolicyGlobalSpecTypeLocalEndpointChoice{}
+		var localEndpointChoiceChoicesModel = &NetPolicyLocalEndpointChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1789,7 +1789,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &NetworkPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &NetPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1807,9 +1807,9 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 				if len(rulesElement.GetEgressRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					egressRulesElements := make([]NetworkPolicyNetworkPolicyNetworkPolicyRuleType, 0, len(rulesElement.GetEgressRules()))
+					egressRulesElements := make([]NetPolicyNetPolicyRuleType, 0, len(rulesElement.GetEgressRules()))
 					for _, egressRulesElement := range rulesElement.GetEgressRules() {
-						networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel := NetworkPolicyNetworkPolicyNetworkPolicyRuleType{}
+						netPolicyNetPolicyRuleTypeModel := NetPolicyNetPolicyRuleType{}
 
 						// data specToModelNested EnumField --> Action
 						if egressRulesElement.GetAction().String() != "" {
@@ -1820,15 +1820,15 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
+							netPolicyNetPolicyRuleTypeModel.Action = listValue
 						} else {
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
+							netPolicyNetPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested PointerField --> AdvAction
 						if egressRulesElement.GetAdvAction() != nil {
 							// Create the nested Go struct
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+							netPolicyNetPolicyRuleAdvancedActionModel := &NetPolicyNetPolicyRuleAdvancedAction{}
 							advActionElement := egressRulesElement.GetAdvAction()
 
 							// Recursively populate the nested struct
@@ -1842,18 +1842,18 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+								netPolicyNetPolicyRuleAdvancedActionModel.Action = listValue
 							} else {
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+								netPolicyNetPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
+							netPolicyNetPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap, netPolicyNetPolicyRuleAdvancedActionModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
+							netPolicyNetPolicyRuleTypeModel.AdvAction = netPolicyNetPolicyRuleAdvancedActionModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1862,13 +1862,13 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> LabelMatcher
 						if egressRulesElement.GetLabelMatcher() != nil {
 							// Create the nested Go struct
-							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
+							netPolicyLabelMatcherTypeModel := &NetPolicyLabelMatcherType{}
 							labelMatcherElement := egressRulesElement.GetLabelMatcher()
 
 							// Recursively populate the nested struct
@@ -1880,18 +1880,18 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								networkPolicyLabelMatcherTypeModel.Keys = listValue
+								netPolicyLabelMatcherTypeModel.Keys = listValue
 							} else {
-								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+								netPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
+							netPolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap, netPolicyLabelMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
+							netPolicyNetPolicyRuleTypeModel.LabelMatcher = netPolicyLabelMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1900,40 +1900,40 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if egressRulesElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							networkPolicyMessageMetaTypeModel := &NetworkPolicyMessageMetaType{}
+							netPolicyMessageMetaTypeModel := &NetPolicyMessageMetaType{}
 							metadataElement := egressRulesElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								networkPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								netPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								networkPolicyMessageMetaTypeModel.Description = types.StringNull()
+								netPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								networkPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								netPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								networkPolicyMessageMetaTypeModel.Name = types.StringNull()
+								netPolicyMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap, networkPolicyMessageMetaTypeModel)
+							netPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap, netPolicyMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = networkPolicyMessageMetaTypeModelObj
+							netPolicyNetPolicyRuleTypeModel.Metadata = netPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1942,7 +1942,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> OtherEndpoint
@@ -2145,10 +2145,10 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.OtherEndpointChoice = finalObj
+							netPolicyNetPolicyRuleTypeModel.OtherEndpointChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.OtherEndpointChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.OtherEndpointChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> TrafficChoice
@@ -2282,13 +2282,13 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = finalObj
+							netPolicyNetPolicyRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap)
 						}
 
-						egressRulesElements = append(egressRulesElements, networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel)
+						egressRulesElements = append(egressRulesElements, netPolicyNetPolicyRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2310,9 +2310,9 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 				if len(rulesElement.GetIngressRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					ingressRulesElements := make([]NetworkPolicyNetworkPolicyNetworkPolicyRuleType, 0, len(rulesElement.GetIngressRules()))
+					ingressRulesElements := make([]NetPolicyNetPolicyRuleType, 0, len(rulesElement.GetIngressRules()))
 					for _, ingressRulesElement := range rulesElement.GetIngressRules() {
-						networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel := NetworkPolicyNetworkPolicyNetworkPolicyRuleType{}
+						netPolicyNetPolicyRuleTypeModel := NetPolicyNetPolicyRuleType{}
 
 						// data specToModelNested EnumField --> Action
 						if ingressRulesElement.GetAction().String() != "" {
@@ -2323,15 +2323,15 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
+							netPolicyNetPolicyRuleTypeModel.Action = listValue
 						} else {
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
+							netPolicyNetPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested PointerField --> AdvAction
 						if ingressRulesElement.GetAdvAction() != nil {
 							// Create the nested Go struct
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+							netPolicyNetPolicyRuleAdvancedActionModel := &NetPolicyNetPolicyRuleAdvancedAction{}
 							advActionElement := ingressRulesElement.GetAdvAction()
 
 							// Recursively populate the nested struct
@@ -2345,18 +2345,18 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+								netPolicyNetPolicyRuleAdvancedActionModel.Action = listValue
 							} else {
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+								netPolicyNetPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
+							netPolicyNetPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap, netPolicyNetPolicyRuleAdvancedActionModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
+							netPolicyNetPolicyRuleTypeModel.AdvAction = netPolicyNetPolicyRuleAdvancedActionModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2365,13 +2365,13 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> LabelMatcher
 						if ingressRulesElement.GetLabelMatcher() != nil {
 							// Create the nested Go struct
-							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
+							netPolicyLabelMatcherTypeModel := &NetPolicyLabelMatcherType{}
 							labelMatcherElement := ingressRulesElement.GetLabelMatcher()
 
 							// Recursively populate the nested struct
@@ -2383,18 +2383,18 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								networkPolicyLabelMatcherTypeModel.Keys = listValue
+								netPolicyLabelMatcherTypeModel.Keys = listValue
 							} else {
-								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+								netPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
+							netPolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap, netPolicyLabelMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
+							netPolicyNetPolicyRuleTypeModel.LabelMatcher = netPolicyLabelMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2403,40 +2403,40 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if ingressRulesElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							networkPolicyMessageMetaTypeModel := &NetworkPolicyMessageMetaType{}
+							netPolicyMessageMetaTypeModel := &NetPolicyMessageMetaType{}
 							metadataElement := ingressRulesElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								networkPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								netPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								networkPolicyMessageMetaTypeModel.Description = types.StringNull()
+								netPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								networkPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								netPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								networkPolicyMessageMetaTypeModel.Name = types.StringNull()
+								netPolicyMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap, networkPolicyMessageMetaTypeModel)
+							netPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap, netPolicyMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = networkPolicyMessageMetaTypeModelObj
+							netPolicyNetPolicyRuleTypeModel.Metadata = netPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2445,7 +2445,7 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> OtherEndpoint
@@ -2648,10 +2648,10 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.OtherEndpointChoice = finalObj
+							netPolicyNetPolicyRuleTypeModel.OtherEndpointChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.OtherEndpointChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.OtherEndpointChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> TrafficChoice
@@ -2785,13 +2785,13 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = finalObj
+							netPolicyNetPolicyRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap)
+							netPolicyNetPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap)
 						}
 
-						ingressRulesElements = append(ingressRulesElements, networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel)
+						ingressRulesElements = append(ingressRulesElements, netPolicyNetPolicyRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

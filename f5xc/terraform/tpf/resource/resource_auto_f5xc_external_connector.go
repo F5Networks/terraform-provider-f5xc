@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -576,8 +577,8 @@ func (r *ResourceF5XCExternalConnector) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
+		MarkdownDescription: "External Connector configuration mainly includes the following:<br>1. Tunnel connfiguration between F5 CE and external (3rd party) device<br>2. Tunnel specific parameters (IPSec, GRE)",
+		Description:         "External Connector configuration mainly includes the following: 1. Tunnel connfiguration between F5 CE and external (3rd party) device 2. Tunnel specific parameters (IPSec, GRE)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -668,10 +669,10 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 						Description:         "",
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            false,
+						Optional:            true,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
 						},
 					},
 				},
@@ -842,7 +843,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -959,10 +960,10 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 												Description:         "",
 												MarkdownDescription: "",
 												Required:            false,
-												Optional:            false,
+												Optional:            true,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -992,10 +993,10 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 												Description:         "",
 												MarkdownDescription: "",
 												Required:            false,
-												Optional:            false,
+												Optional:            true,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -1370,7 +1371,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1468,9 +1469,17 @@ func (r *ResourceF5XCExternalConnector) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCExternalConnectorModel
 
 	// Read Terraform plan data into the model
@@ -1573,6 +1582,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !ceSiteReferenceModel.Namespace.IsNull() && !ceSiteReferenceModel.Namespace.IsUnknown() {
 				ceSiteReferenceSpec.Namespace = string(ceSiteReferenceModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !ceSiteReferenceModel.Tenant.IsNull() && !ceSiteReferenceModel.Tenant.IsUnknown() {
+				ceSiteReferenceSpec.Tenant = string(ceSiteReferenceModel.Tenant.ValueString())
 			}
 
 		}
@@ -1826,6 +1840,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 						ikePhase1ProfileSpec.Namespace = string(ikePhase1ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase1ProfileModel.Tenant.IsNull() && !ikePhase1ProfileModel.Tenant.IsUnknown() {
+						ikePhase1ProfileSpec.Tenant = string(ikePhase1ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredPointerField --> IkePhase2Profile
@@ -1847,6 +1866,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 					// resource modelToSpecNested RequiredStringField --> Namespace
 					if !ikePhase2ProfileModel.Namespace.IsNull() && !ikePhase2ProfileModel.Namespace.IsUnknown() {
 						ikePhase2ProfileSpec.Namespace = string(ikePhase2ProfileModel.Namespace.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase2ProfileModel.Tenant.IsNull() && !ikePhase2ProfileModel.Tenant.IsUnknown() {
+						ikePhase2ProfileSpec.Tenant = string(ikePhase2ProfileModel.Tenant.ValueString())
 					}
 
 				}
@@ -2184,7 +2208,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2207,7 +2231,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_external_connector.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "external_connector", err),
 		)
 		return
 	}
@@ -3516,7 +3540,7 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "external_connector", err),
 		)
 		return
 	}
@@ -4213,7 +4237,10 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 						externalConnectorIkeParametersModel.ModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorIkeParametersModel.ModeChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap)
+						externalConnectorIkeParametersModel.ModeChoice = types.ObjectValueMust(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap, map[string]attr.Value{
+							"initiator": types.BoolValue(true),
+							"responder": types.BoolNull(),
+						})
 					}
 
 					// resource specToModelNested OneOfField --> RemoteIkeId
@@ -4720,7 +4747,11 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap)
+						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectValueMust(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap, map[string]attr.Value{
+							"segment":                   types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnSegmentModelAttributeMap),
+							"site_local_inside_network": types.BoolValue(true),
+							"site_local_network":        types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -4789,6 +4820,12 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCExternalConnectorModel
@@ -4798,6 +4835,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planConnectionTypeChoice := data.ConnectionTypeChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -4817,7 +4855,6 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planConnectionTypeChoice := data.ConnectionTypeChoice
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -4912,6 +4949,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !ceSiteReferenceModel.Namespace.IsNull() && !ceSiteReferenceModel.Namespace.IsUnknown() {
 				ceSiteReferenceSpec.Namespace = string(ceSiteReferenceModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !ceSiteReferenceModel.Tenant.IsNull() && !ceSiteReferenceModel.Tenant.IsUnknown() {
+				ceSiteReferenceSpec.Tenant = string(ceSiteReferenceModel.Tenant.ValueString())
 			}
 
 		}
@@ -5165,6 +5207,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 						ikePhase1ProfileSpec.Namespace = string(ikePhase1ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase1ProfileModel.Tenant.IsNull() && !ikePhase1ProfileModel.Tenant.IsUnknown() {
+						ikePhase1ProfileSpec.Tenant = string(ikePhase1ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredPointerField --> IkePhase2Profile
@@ -5186,6 +5233,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 					// resource modelToSpecNested RequiredStringField --> Namespace
 					if !ikePhase2ProfileModel.Namespace.IsNull() && !ikePhase2ProfileModel.Namespace.IsUnknown() {
 						ikePhase2ProfileSpec.Namespace = string(ikePhase2ProfileModel.Namespace.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase2ProfileModel.Tenant.IsNull() && !ikePhase2ProfileModel.Tenant.IsUnknown() {
+						ikePhase2ProfileSpec.Tenant = string(ikePhase2ProfileModel.Tenant.ValueString())
 					}
 
 				}
@@ -5523,7 +5575,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -5539,7 +5591,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_external_connector.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "external_connector", err),
 		)
 		return
 	}
@@ -5548,7 +5600,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "external_connector", err),
 		)
 		return
 	}
@@ -6832,7 +6884,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	}
 	// Restore plan value for ConnectionTypeChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.ConnectionTypeChoice = planConnectionTypeChoice
+	data.ConnectionTypeChoice = utils.ResolveUnknowns(planConnectionTypeChoice, data.ConnectionTypeChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -6880,7 +6932,7 @@ func (r *ResourceF5XCExternalConnector) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "external_connector", err),
 		)
 		return
 	}

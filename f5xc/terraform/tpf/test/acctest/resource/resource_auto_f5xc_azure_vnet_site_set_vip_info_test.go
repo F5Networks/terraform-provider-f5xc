@@ -31,7 +31,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-vip-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-vip-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -52,7 +52,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_withAzTransition(t *testing.
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-vip-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-vip-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -73,7 +73,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_withIPv6AndCname(t *testing.
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-vip-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-vip-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -94,7 +94,7 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_withMultipleAzEntries(t *tes
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-vip-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-vip-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,9 +115,9 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-azure-vnet-vip-info-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-vip-info-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAzureVnetSiteSetVipInfoDestroyProducer(t),
@@ -129,7 +129,11 @@ func TestAccResourceAutoF5XCAzureVnetSiteSetVipInfo_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withIPv6AndCname(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_full(name, namespace),
+		})
 }
 
 func testAccCheckAzureVnetSiteSetVipInfoDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -145,7 +149,7 @@ func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoAzureCredName() string {
 		return name
 	}
 
-	return "tf-acc-azure-cred"
+	return "example-azure-cred"
 }
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace string) string {
@@ -154,7 +158,7 @@ resource "f5xc_azure_vnet_site" "site" {
 	name      = %q
 	namespace = %q
 
-	resource_group = "tf-acc-azure-rg"
+	resource_group = "example-azure-rg"
 
 	region_choice = {
 		azure_region = "eastus2"
@@ -218,7 +222,7 @@ resource "f5xc_azure_vnet_site" "site" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_basic(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
   name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -233,7 +237,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withVipTransition(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -248,7 +252,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withAzA(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -263,7 +267,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withAzB(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -278,7 +282,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withIPv6AndCname(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -297,7 +301,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_withMultipleAz(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 
@@ -319,7 +323,7 @@ resource "f5xc_azure_vnet_site_set_vip_info" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_full(name, namespace string) string {
 	return testAccResourceAutoF5XCAzureVnetSiteSetVipInfoConfig_site(name, namespace) + acctest.Nprintf(`
-resource "f5xc_azure_vnet_site_set_vip_info" "test" {
+resource "f5xc_azure_vnet_site_set_vip_info" "example" {
 	name      = f5xc_azure_vnet_site.site.name
   namespace = "%{namespace}"
 

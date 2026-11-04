@@ -29,12 +29,12 @@ type DataSourceF5XCApiDefinition struct {
 	client *client.APIClient
 }
 
-type ApiDefinitionViewsApiOperation struct {
+type ApiDefApiOperation struct {
 	Method types.List   `tfsdk:"method"`
 	Path   types.String `tfsdk:"path"`
 }
 
-type ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice struct {
+type ApiDefSchemaUpdatesStrategyChoice struct {
 	MixedSchemaOrigin  types.Bool `tfsdk:"mixed_schema_origin"`
 	StrictSchemaOrigin types.Bool `tfsdk:"strict_schema_origin"`
 }
@@ -104,8 +104,8 @@ func (d *DataSourceF5XCApiDefinition) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCApiDefinition) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
+		MarkdownDescription: "The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.",
+		Description:         "The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls. In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -299,7 +299,7 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "api_definition", err))
 		return
 	}
 
@@ -362,10 +362,10 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
 	if len(specData.GetApiInventoryExclusionList()) > 0 {
-		apiInventoryExclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.GetApiInventoryExclusionList()))
+		apiInventoryExclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryExclusionList()))
 
 		for _, apiInventoryExclusionListElement := range specData.GetApiInventoryExclusionList() {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// data specToModelNested RequiredEnumField --> Method
 			if apiInventoryExclusionListElement.GetMethod().String() != "" {
@@ -376,20 +376,20 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 				if response.Diagnostics.HasError() {
 					return
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+				apiDefApiOperationModel.Method = listValue
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredStringField --> Path
 			if apiInventoryExclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefinitionViewsApiOperationModel)
+			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefApiOperationModel)
 		}
 
 		{
@@ -416,10 +416,10 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
 	if len(specData.GetApiInventoryInclusionList()) > 0 {
-		apiInventoryInclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.GetApiInventoryInclusionList()))
+		apiInventoryInclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryInclusionList()))
 
 		for _, apiInventoryInclusionListElement := range specData.GetApiInventoryInclusionList() {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// data specToModelNested RequiredEnumField --> Method
 			if apiInventoryInclusionListElement.GetMethod().String() != "" {
@@ -430,20 +430,20 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 				if response.Diagnostics.HasError() {
 					return
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+				apiDefApiOperationModel.Method = listValue
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredStringField --> Path
 			if apiInventoryInclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefinitionViewsApiOperationModel)
+			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefApiOperationModel)
 		}
 
 		{
@@ -470,10 +470,10 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
 	if len(specData.GetNonApiEndpoints()) > 0 {
-		nonApiEndpointsElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.GetNonApiEndpoints()))
+		nonApiEndpointsElements := make([]ApiDefApiOperation, 0, len(specData.GetNonApiEndpoints()))
 
 		for _, nonApiEndpointsElement := range specData.GetNonApiEndpoints() {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// data specToModelNested RequiredEnumField --> Method
 			if nonApiEndpointsElement.GetMethod().String() != "" {
@@ -484,20 +484,20 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 				if response.Diagnostics.HasError() {
 					return
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+				apiDefApiOperationModel.Method = listValue
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredStringField --> Path
 			if nonApiEndpointsElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefinitionViewsApiOperationModel)
+			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefApiOperationModel)
 		}
 
 		{
@@ -532,7 +532,7 @@ func (d *DataSourceF5XCApiDefinition) Read(ctx context.Context, request datasour
 		schemaUpdatesStrategyChoiceChoices := specData.GetSchemaUpdatesStrategy()
 
 		// The model struct that will be populated by the nested template.
-		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefSchemaUpdatesStrategyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

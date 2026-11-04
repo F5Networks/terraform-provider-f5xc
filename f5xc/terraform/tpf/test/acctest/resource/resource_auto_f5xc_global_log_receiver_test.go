@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCGlobalLogReceiver_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-glr-" + acctest.RandString(t, 8)
+	name := "example-glr-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,20 +38,20 @@ func TestAccResourceAutoF5XCGlobalLogReceiver_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCGlobalLogReceiverConfig_basic(name),
 			},
 			{
-				ResourceName:                         "f5xc_global_log_receiver.test",
+				ResourceName:                         "f5xc_global_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCGlobalLogReceiverConfig_basicUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_global_log_receiver.test",
+				ResourceName:                         "f5xc_global_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -61,9 +61,9 @@ func TestAccResourceAutoF5XCGlobalLogReceiver_basic(t *testing.T) {
 func TestAccResourceAutoF5XCGlobalLogReceiver_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-glr-" + acctest.RandString(t, 8)
+	name := "example-glr-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckGlobalLogReceiverDestroyProducer(t),
@@ -72,24 +72,28 @@ func TestAccResourceAutoF5XCGlobalLogReceiver_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCGlobalLogReceiverConfig_full(name),
 			},
 			{
-				ResourceName:                         "f5xc_global_log_receiver.test",
+				ResourceName:                         "f5xc_global_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCGlobalLogReceiverConfig_fullUpdated(name),
 			},
 			{
-				ResourceName:                         "f5xc_global_log_receiver.test",
+				ResourceName:                         "f5xc_global_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_global_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCGlobalLogReceiverConfig_full("example-global-log-receiver"),
+		})
 }
 
 func testAccCheckGlobalLogReceiverDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -98,10 +102,10 @@ func testAccCheckGlobalLogReceiverDestroyProducer(t *testing.T) func(*terraform.
 
 func testAccResourceAutoF5XCGlobalLogReceiverConfig_basic(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_global_log_receiver" "test" {
+resource "f5xc_global_log_receiver" "example" {
   name        = "%s"
   namespace   = "system"
-  description = "Acceptance test global log receiver"
+  description = "Global log receiver example"
 
 	filter_choice = {
 		ns_all = true
@@ -132,10 +136,10 @@ resource "f5xc_global_log_receiver" "test" {
 
 func testAccResourceAutoF5XCGlobalLogReceiverConfig_basicUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_global_log_receiver" "test" {
+resource "f5xc_global_log_receiver" "example" {
   name        = "%s"
   namespace   = "system"
-  description = "Acceptance test global log receiver updated"
+  description = "Updated global log receiver example"
 
 	filter_choice = {
 		ns_all = true
@@ -166,10 +170,10 @@ resource "f5xc_global_log_receiver" "test" {
 
 func testAccResourceAutoF5XCGlobalLogReceiverConfig_full(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_global_log_receiver" "test" {
+resource "f5xc_global_log_receiver" "example" {
   name        = "%s"
   namespace   = "system"
-  description = "Full global log receiver"
+  description = "Full global log receiver example"
 
 	filter_choice = {
 		ns_list = {
@@ -198,7 +202,7 @@ resource "f5xc_global_log_receiver" "test" {
   }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -210,10 +214,10 @@ resource "f5xc_global_log_receiver" "test" {
 
 func testAccResourceAutoF5XCGlobalLogReceiverConfig_fullUpdated(name string) string {
 	return fmt.Sprintf(`
-resource "f5xc_global_log_receiver" "test" {
+resource "f5xc_global_log_receiver" "example" {
   name        = "%s"
   namespace   = "system"
-  description = "Full global log receiver updated"
+  description = "Updated full global log receiver example"
 
 	filter_choice = {
 		ns_list = {
@@ -242,7 +246,7 @@ resource "f5xc_global_log_receiver" "test" {
   }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "logging"
   }
 

@@ -33,6 +33,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/immutableplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -99,8 +100,8 @@ func (r *ResourceF5XCVirtualSite) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCVirtualSite) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a virtual_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a virtual_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_site) etc. can be fetched",
+		MarkdownDescription: "Virtual site object is mechanism to create arbitrary set of sites<br>It selects all the sites for which label selector expression return true.<br>Selector is goes thru all customer edge sites for a given tenant and all regional sites from volterra",
+		Description:         "Virtual site object is mechanism to create arbitrary set of sites It selects all the sites for which label selector expression return true. Selector is goes thru all customer edge sites for a given tenant and all regional sites from volterra",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -267,9 +268,17 @@ func (r *ResourceF5XCVirtualSite) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCVirtualSite) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCVirtualSiteModel
 
 	// Read Terraform plan data into the model
@@ -406,7 +415,7 @@ func (r *ResourceF5XCVirtualSite) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -429,7 +438,7 @@ func (r *ResourceF5XCVirtualSite) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_virtual_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "virtual_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "virtual_site", err),
 		)
 		return
 	}
@@ -647,7 +656,7 @@ func (r *ResourceF5XCVirtualSite) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "virtual_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_site", err),
 		)
 		return
 	}
@@ -824,6 +833,12 @@ func (r *ResourceF5XCVirtualSite) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCVirtualSiteModel
@@ -927,7 +942,7 @@ func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -943,7 +958,7 @@ func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "virtual_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_site", err),
 		)
 		return
 	}
@@ -952,7 +967,7 @@ func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "virtual_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "virtual_site", err),
 		)
 		return
 	}

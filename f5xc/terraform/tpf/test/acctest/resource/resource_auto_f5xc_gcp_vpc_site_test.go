@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCGcpVpcSite_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-gcp-vpc-site-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,10 +39,10 @@ func TestAccResourceAutoF5XCGcpVpcSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -50,10 +50,10 @@ func TestAccResourceAutoF5XCGcpVpcSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_withDescription(name, namespace, "gcp vpc site basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCGcpVpcSite_basic(t *testing.T) {
 func TestAccResourceAutoF5XCGcpVpcSite_withBlockedServicesChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-gcp-vpc-site-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,10 +76,10 @@ func TestAccResourceAutoF5XCGcpVpcSite_withBlockedServicesChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_withBlockedServicesChoice(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -87,10 +87,10 @@ func TestAccResourceAutoF5XCGcpVpcSite_withBlockedServicesChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_withBlockedServicesChoice(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -101,10 +101,10 @@ func TestAccResourceAutoF5XCGcpVpcSite_withBlockedServicesChoiceTransition(t *te
 func TestAccResourceAutoF5XCGcpVpcSite_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-gcp-vpc-site-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckGcpVpcSiteDestroyProducer(t),
@@ -113,26 +113,30 @@ func TestAccResourceAutoF5XCGcpVpcSite_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_full(name, namespace, "dev", "platform"),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
 			{
-				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_full(name, namespace, "prod", "security"),
+				Config: testAccResourceAutoF5XCGcpVpcSiteConfig_full(name, namespace, "example", "security"),
 			},
 			{
-				ResourceName:                         "f5xc_gcp_vpc_site.test",
+				ResourceName:                         "f5xc_gcp_vpc_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_gcp_vpc_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCGcpVpcSiteConfig_full(name, namespace, "dev", "platform"),
+		})
 }
 
 func testAccCheckGcpVpcSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -141,7 +145,7 @@ func testAccCheckGcpVpcSiteDestroyProducer(t *testing.T) func(*terraform.State) 
 
 func testAccResourceAutoF5XCGcpVpcSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_gcp_vpc_site" "test" {
+resource "f5xc_gcp_vpc_site" "example" {
   name      = %q
   namespace = %q
 
@@ -172,7 +176,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 
   deployment_choice = {
     cloud_credentials = {
-      name      = "tf-acc-gcp-cred"
+      name      = "example-gcp-cred"
       namespace = %q
     }
   }
@@ -197,7 +201,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 
 func testAccResourceAutoF5XCGcpVpcSiteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_gcp_vpc_site" "test" {
+resource "f5xc_gcp_vpc_site" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -229,7 +233,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 
   deployment_choice = {
     cloud_credentials = {
-      name      = "tf-acc-gcp-cred"
+      name      = "example-gcp-cred"
       namespace = %q
     }
   }
@@ -257,7 +261,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 // Uses multiple zones (3 zones) for multi-zone deployment testing.
 func testAccResourceAutoF5XCGcpVpcSiteConfig_full(name, namespace, envLabel, ownerLabel string) string {
 	return fmt.Sprintf(`
-resource "f5xc_gcp_vpc_site" "test" {
+resource "f5xc_gcp_vpc_site" "example" {
   name      = %q
   namespace = %q
 
@@ -295,7 +299,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 
   deployment_choice = {
     cloud_credentials = {
-      name      = "tf-acc-gcp-cred"
+      name      = "example-gcp-cred"
       namespace = %q
     }
   }
@@ -326,7 +330,7 @@ func testAccResourceAutoF5XCGcpVpcSiteConfig_withBlockedServicesChoice(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_gcp_vpc_site" "test" {
+resource "f5xc_gcp_vpc_site" "example" {
   name      = %q
   namespace = %q
 
@@ -357,7 +361,7 @@ resource "f5xc_gcp_vpc_site" "test" {
 
   deployment_choice = {
     cloud_credentials = {
-      name      = "tf-acc-gcp-cred"
+      name      = "example-gcp-cred"
       namespace = %q
     }
   }

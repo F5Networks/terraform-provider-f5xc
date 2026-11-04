@@ -25,11 +25,10 @@ import (
 )
 
 func TestAccResourceAutoF5XCNatPolicy_basic(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -40,20 +39,20 @@ func TestAccResourceAutoF5XCNatPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_basic(name, namespace, siteName),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNatPolicyConfig_basicUpdated(name, namespace, siteName),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -61,11 +60,10 @@ func TestAccResourceAutoF5XCNatPolicy_basic(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCNatPolicy_withProtocolTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,10 +74,10 @@ func TestAccResourceAutoF5XCNatPolicy_withProtocolTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withProtocol(name, namespace, siteName, "any"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"rules.0.criteria.protocol_choice.any",
@@ -92,10 +90,10 @@ func TestAccResourceAutoF5XCNatPolicy_withProtocolTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withProtocol(name, namespace, siteName, "icmp"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"rules.0.criteria.protocol_choice.any",
@@ -108,10 +106,10 @@ func TestAccResourceAutoF5XCNatPolicy_withProtocolTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withProtocol(name, namespace, siteName, "tcp"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"rules.0.criteria.protocol_choice.any",
@@ -125,11 +123,10 @@ func TestAccResourceAutoF5XCNatPolicy_withProtocolTransition(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCNatPolicy_withNetworkChoiceTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -140,20 +137,20 @@ func TestAccResourceAutoF5XCNatPolicy_withNetworkChoiceTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withNetworkChoice(name, namespace, siteName, "site_local_network"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withNetworkChoice(name, namespace, siteName, "site_local_inside_network"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -161,11 +158,10 @@ func TestAccResourceAutoF5XCNatPolicy_withNetworkChoiceTransition(t *testing.T) 
 }
 
 func TestAccResourceAutoF5XCNatPolicy_withSourceNatChoiceTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -176,20 +172,20 @@ func TestAccResourceAutoF5XCNatPolicy_withSourceNatChoiceTransition(t *testing.T
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withSourceNatChoice(name, namespace, siteName, "virtual_cidr"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNatPolicyConfig_withSourceNatChoice(name, namespace, siteName, "dynamic_pools"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -197,11 +193,10 @@ func TestAccResourceAutoF5XCNatPolicy_withSourceNatChoiceTransition(t *testing.T
 }
 
 func TestAccResourceAutoF5XCNatPolicy_withMetadataTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -209,23 +204,23 @@ func TestAccResourceAutoF5XCNatPolicy_withMetadataTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckNatPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCNatPolicyConfig_withMetadata(name, namespace, siteName, "test", "platform", "platform-team"),
+				Config: testAccResourceAutoF5XCNatPolicyConfig_withMetadata(name, namespace, siteName, "example", "platform", "platform-team"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNatPolicyConfig_withMetadata(name, namespace, siteName, "prod", "security", "security-team"),
+				Config: testAccResourceAutoF5XCNatPolicyConfig_withMetadata(name, namespace, siteName, "example", "security", "netsec-team"),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -233,13 +228,12 @@ func TestAccResourceAutoF5XCNatPolicy_withMetadataTransition(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCNatPolicy_full(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-nat-policy-" + testAccRunSuffix(t)
-	siteName := "tf-acc-nat-site-" + testAccRunSuffix(t)
+	name := "example-nat-policy-" + testAccRunSuffix(t)
+	siteName := "example-nat-site-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNatPolicyDestroyProducer(t),
@@ -248,10 +242,10 @@ func TestAccResourceAutoF5XCNatPolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_full(name, namespace, siteName),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"rules.0.criteria.protocol_choice.any",
@@ -264,10 +258,10 @@ func TestAccResourceAutoF5XCNatPolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNatPolicyConfig_fullUpdated(name, namespace, siteName),
 			},
 			{
-				ResourceName:                         "f5xc_nat_policy.test",
+				ResourceName:                         "f5xc_nat_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nat_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"rules.0.criteria.protocol_choice.any",
@@ -277,7 +271,11 @@ func TestAccResourceAutoF5XCNatPolicy_full(t *testing.T) {
 				},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNatPolicyConfig_full("example-nat-policy", "default", siteName),
+		})
 }
 
 func testAccCheckNatPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -311,7 +309,7 @@ resource "f5xc_securemesh_site_v2" "site" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_basic(name, namespace, siteName string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -342,10 +340,10 @@ resource "f5xc_nat_policy" "test" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_basicUpdated(name, namespace, siteName string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "nat policy basic updated"
+  description = "Updated basic NAT policy example"
 
   applies_to_choice = {
     site = {
@@ -401,7 +399,7 @@ func testAccResourceAutoF5XCNatPolicyConfig_withProtocol(name, namespace, siteNa
 	}
 
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -428,7 +426,7 @@ resource "f5xc_nat_policy" "test" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_withNetworkChoice(name, namespace, siteName, networkChoice string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -480,7 +478,7 @@ func testAccResourceAutoF5XCNatPolicyConfig_withSourceNatChoice(name, namespace,
 	}
 
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -508,10 +506,10 @@ resource "f5xc_nat_policy" "test" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_withMetadata(name, namespace, siteName, env, team, owner string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "nat policy metadata"
+  description = "NAT policy example with metadata"
 
   labels      = { env = %q, team = %q }
   annotations = { owner = %q }
@@ -543,12 +541,12 @@ resource "f5xc_nat_policy" "test" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_full(name, namespace, siteName string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "nat policy full"
+  description = "Full NAT policy example"
 
-  labels      = { env = "test", owner = "network" }
+  labels      = { env = "example", owner = "network" }
   annotations = { owner = "platform-team" }
 
   applies_to_choice = {
@@ -559,7 +557,7 @@ resource "f5xc_nat_policy" "test" {
 
   rules = [
     {
-      name          = "rule-full"
+      name          = "example-rule-full"
       enable_choice = { enable = true }
       scope_choice  = { node_interface = {} }
 
@@ -581,7 +579,7 @@ resource "f5xc_nat_policy" "test" {
             pool_choice = {
               pools = {
                 prefixes      = ["192.168.20.0/24"]
-								ipv6_prefixes = ["fd48:fa09:d9d4:0000:0000:0000:0000:0000/48"]
+                ipv6_prefixes = ["fd48:fa09:d9d4:0000:0000:0000:0000:0000/48"]
               }
             }
           }
@@ -595,13 +593,13 @@ resource "f5xc_nat_policy" "test" {
 
 func testAccResourceAutoF5XCNatPolicyConfig_fullUpdated(name, namespace, siteName string) string {
 	return testAccNatPolicySiteConfig(siteName, namespace) + fmt.Sprintf(`
-resource "f5xc_nat_policy" "test" {
+resource "f5xc_nat_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "nat policy full updated"
+  description = "Updated full NAT policy example"
 
-  labels      = { env = "prod", owner = "security" }
-  annotations = { owner = "security-team" }
+  labels      = { env = "example", owner = "security" }
+  annotations = { owner = "netsec-team" }
 
   applies_to_choice = {
     site = {
@@ -611,7 +609,7 @@ resource "f5xc_nat_policy" "test" {
 
   rules = [
     {
-      name          = "rule-full-updated"
+      name          = "example-rule-full-updated"
       enable_choice = { enable = true }
       scope_choice  = { node_interface = {} }
 
@@ -633,7 +631,7 @@ resource "f5xc_nat_policy" "test" {
             pool_choice = {
               pools = {
                 prefixes      = ["192.168.30.0/24"]
-								ipv6_prefixes = ["2606:4700:0020:0000:0000:0000:0000:0000/64"]
+                ipv6_prefixes = ["2606:4700:0020:0000:0000:0000:0000:0000/64"]
               }
             }
           }

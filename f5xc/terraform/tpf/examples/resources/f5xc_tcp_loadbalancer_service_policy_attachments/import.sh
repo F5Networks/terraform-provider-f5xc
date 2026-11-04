@@ -1,0 +1,1 @@
+terraform import f5xc_tcp_loadbalancer_service_policy_attachments.example <namespace>/<tcp_loadbalancer_name>

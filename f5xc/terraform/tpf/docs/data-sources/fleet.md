@@ -14,14 +14,23 @@
 page_title: "f5xc_fleet Data Source - F5 XC Distributed Cloud"
 subcategory: "Cloud & Infrastructure Sites"
 description: |-
-  Fleet Fleet is used to configure infrastructure components (like nodes) in one or more F5XC customer edge sites homogeneously. Fleet configuration has following information, * Software image release to be deployed on the fleet * List of devices to be configured on every node * Connections between the virtual networks in the site * Security policies applied in the site Fleet object must be created in the 'system' namespace for the tenant Associating Fleet with Site Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label 'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant. A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time. When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration is applied on all nodes that are member of the fleet. Fleet and Virtual Site Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site. However to enable other features like monitoring, deploying application or jobs on sites represented by fleet, system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
+  Fleet is used to configure infrastructure components (like nodes) in one or<br>more F5XC customer edge sites homogeneously. Fleet configuration has<br>following information,<br>* Software image release to be deployed on the fleet<br>* List of devices to be configured on every node<br>* Connections between the virtual networks in the site<br>* Security policies applied in the site<br><br>Fleet object must be created in the 'system' namespace for the tenant<br><br>Associating Fleet with Site<br><br>Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label<br>'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant.<br>A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label<br>of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time.<br><br>When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration<br>is applied on all nodes that are member of the fleet.<br><br>Fleet and Virtual Site<br><br>Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between<br>virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset<br>of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site.<br><br>However to enable other features like monitoring, deploying application or jobs on sites represented by fleet,<br>system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
 ---
 
 # f5xc_fleet (Data Source)
 
-Fleet Fleet is used to configure infrastructure components (like nodes) in one or more F5XC customer edge sites homogeneously. Fleet configuration has following information, * Software image release to be deployed on the fleet * List of devices to be configured on every node * Connections between the virtual networks in the site * Security policies applied in the site Fleet object must be created in the 'system' namespace for the tenant Associating Fleet with Site Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label 'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant. A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time. When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration is applied on all nodes that are member of the fleet. Fleet and Virtual Site Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site. However to enable other features like monitoring, deploying application or jobs on sites represented by fleet, system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
+Fleet is used to configure infrastructure components (like nodes) in one or<br>more F5XC customer edge sites homogeneously. Fleet configuration has<br>following information,<br>* Software image release to be deployed on the fleet<br>* List of devices to be configured on every node<br>* Connections between the virtual networks in the site<br>* Security policies applied in the site<br><br>Fleet object must be created in the 'system' namespace for the tenant<br><br>Associating Fleet with Site<br><br>Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label<br>'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant.<br>A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label<br>of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time.<br><br>When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration<br>is applied on all nodes that are member of the fleet.<br><br>Fleet and Virtual Site<br><br>Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between<br>virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset<br>of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site.<br><br>However to enable other features like monitoring, deploying application or jobs on sites represented by fleet,<br>system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
 
+## Example Usage
 
+```terraform
+# Example: Fleet - Full
+
+data "f5xc_fleet" "example" {
+  name      = f5xc_fleet.example.name
+  namespace = f5xc_fleet.example.namespace
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -579,6 +588,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.blindfold_secret_info`
@@ -596,7 +606,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -615,6 +625,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.blindfold_secret_info`
@@ -632,7 +643,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -702,6 +713,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.blindfold_secret_info`
@@ -719,7 +731,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -756,6 +768,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.blindfold_secret_info`
@@ -773,7 +786,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -901,6 +914,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.blindfold_secret_info`
@@ -918,7 +932,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -937,6 +951,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.blindfold_secret_info`
@@ -954,7 +969,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -975,6 +990,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.blindfold_secret_info`
@@ -992,7 +1008,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -1029,6 +1045,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.blindfold_secret_info`
@@ -1046,7 +1063,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -1174,6 +1191,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.blindfold_secret_info`
@@ -1191,7 +1209,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 
@@ -1240,6 +1258,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.blindfold_secret_info`
@@ -1257,7 +1276,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 

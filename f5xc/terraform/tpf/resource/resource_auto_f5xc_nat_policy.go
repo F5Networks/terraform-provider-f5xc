@@ -36,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -140,7 +141,8 @@ type NatPolicyUdp struct {
 }
 
 type NatPolicyEnableChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 type NatPolicyScopeChoice struct {
@@ -452,7 +454,8 @@ var NatPolicyRulesCriteriaProtocolChoiceUdpSourcePortPortMatchModelAttributeMap 
 // Attribute map for RequiredOneOfField --> EnableChoice
 var NatPolicyRulesEnableChoiceModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ScopeChoice
@@ -575,8 +578,8 @@ func (r *ResourceF5XCNatPolicy) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a nat_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nat_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a nat_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nat_policy) etc. can be fetched",
+		MarkdownDescription: "NAT Policy object represents the configuration of Network Address Translation parameters on<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br>Site where the NAT objects are applicable<br>Ingress points where the NAT policies need to be applied<br>Match criteria of the packet to apply NAT Policy<br>Action to take if the Match criteria passes",
+		Description:         "NAT Policy object represents the configuration of Network Address Translation parameters on F5XC Customer Edge sites. The following properties can be configured in this object: Site where the NAT objects are applicable Ingress points where the NAT policies need to be applied Match criteria of the packet to apply NAT Policy Action to take if the Match criteria passes",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -815,7 +818,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -851,7 +854,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 											Computed:            false,
 											Validators: []validator.String{
 												stringvalidator.RegexMatches(
-													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 													"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 												),
 											},
@@ -876,7 +879,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 									Computed:            false,
 									Validators: []validator.List{
 										listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 										)),
 									},
@@ -1220,7 +1223,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 									Computed:            false,
 									Validators: []validator.List{
 										listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 										)),
 									},
@@ -1235,10 +1238,21 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 							Computed:            false,
 							Validators: []validator.Object{
 								exactlyoneofvalidator.RequiredExactlyOneOf(
+									"disable",
 									"enable",
 								),
 							},
 							Attributes: map[string]schema.Attribute{
+								"disable": schema.BoolAttribute{
+									Description:         "disable Disables the rule",
+									MarkdownDescription: "disable Disables the rule",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.Bool{
+										boolvalidator.Equals(true),
+									},
+								},
 								"enable": schema.BoolAttribute{
 									Description:         "enable Enables the rule",
 									MarkdownDescription: "enable Enables the rule",
@@ -1549,9 +1563,17 @@ func (r *ResourceF5XCNatPolicy) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNatPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1920,6 +1942,13 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 					return
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !rulesEnableChoiceModel.Disable.IsNull() && !rulesEnableChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_nat_policy.RuleType_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					rulesSpec[i].EnableChoice = disableSpecBool
+				}
+
 				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 				if !rulesEnableChoiceModel.Enable.IsNull() && !rulesEnableChoiceModel.Enable.IsUnknown() {
 					enableSpecBool := &ves_io_schema_nat_policy.RuleType_Enable{}
@@ -2184,7 +2213,7 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2207,7 +2236,7 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_nat_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "nat_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "nat_policy", err),
 		)
 		return
 	}
@@ -3250,6 +3279,15 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 
 				// Process nested choices, populating the temporary attribute map
 
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Disable)
+
+				if isDisable {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
+
 				// resource specToModelNested BoolOfOneOfPointerField --> Enable
 				_, isEnable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Enable)
 
@@ -3702,7 +3740,7 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "nat_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "nat_policy", err),
 		)
 		return
 	}
@@ -4745,6 +4783,15 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 
 				// Process nested choices, populating the temporary attribute map
 
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Disable)
+
+				if isDisable {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
+
 				// resource specToModelNested BoolOfOneOfPointerField --> Enable
 				_, isEnable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Enable)
 
@@ -4770,7 +4817,10 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 				natPolicyRuleTypeModel.EnableChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				natPolicyRuleTypeModel.EnableChoice = types.ObjectNull(NatPolicyRulesEnableChoiceModelAttributeMap)
+				natPolicyRuleTypeModel.EnableChoice = types.ObjectValueMust(NatPolicyRulesEnableChoiceModelAttributeMap, map[string]attr.Value{
+					"disable": types.BoolNull(),
+					"enable":  types.BoolValue(true),
+				})
 			}
 
 			// resource specToModelNested RequiredStringField --> Name
@@ -5156,6 +5206,12 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNatPolicyModel
@@ -5544,6 +5600,13 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 					return
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !rulesEnableChoiceModel.Disable.IsNull() && !rulesEnableChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_nat_policy.RuleType_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					rulesSpec[i].EnableChoice = disableSpecBool
+				}
+
 				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 				if !rulesEnableChoiceModel.Enable.IsNull() && !rulesEnableChoiceModel.Enable.IsUnknown() {
 					enableSpecBool := &ves_io_schema_nat_policy.RuleType_Enable{}
@@ -5808,7 +5871,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -5824,7 +5887,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 	err = r.client.ReplaceObject(ctx, ves_io_schema_nat_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "nat_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "nat_policy", err),
 		)
 		return
 	}
@@ -5833,7 +5896,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "nat_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "nat_policy", err),
 		)
 		return
 	}
@@ -6875,6 +6938,15 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 
 				// Process nested choices, populating the temporary attribute map
 
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Disable)
+
+				if isDisable {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					rulesenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
+
 				// resource specToModelNested BoolOfOneOfPointerField --> Enable
 				_, isEnable := rulesenableChoiceChoices.(*ves_io_schema_nat_policy.RuleType_Enable)
 
@@ -7349,7 +7421,7 @@ func (r *ResourceF5XCNatPolicy) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "nat_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "nat_policy", err),
 		)
 		return
 	}

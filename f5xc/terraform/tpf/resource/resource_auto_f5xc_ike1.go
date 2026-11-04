@@ -29,6 +29,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -80,8 +81,8 @@ func (r *ResourceF5XCIke1) Metadata(ctx context.Context, request resource.Metada
 func (r *ResourceF5XCIke1) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ike1 This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike1) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ike1 This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike1) etc. can be fetched",
+		MarkdownDescription: "IKE Phase1 profile mainly includes the following<br>1. Encryption protocols to be used for IKE SA<br>2. Authentication Protocols to be used for IKE SA<br>3. DH group<br>4. PRF<br>5. Key lifetime etc",
+		Description:         "IKE Phase1 profile mainly includes the following 1. Encryption protocols to be used for IKE SA 2. Authentication Protocols to be used for IKE SA 3. DH group 4. PRF 5. Key lifetime etc",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -209,9 +210,17 @@ func (r *ResourceF5XCIke1) ModifyPlan(ctx context.Context, req resource.ModifyPl
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCIke1) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCIke1Model
 
 	// Read Terraform plan data into the model
@@ -295,7 +304,7 @@ func (r *ResourceF5XCIke1) Create(ctx context.Context, request resource.CreateRe
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -318,7 +327,7 @@ func (r *ResourceF5XCIke1) Create(ctx context.Context, request resource.CreateRe
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_ike1.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "ike1", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "ike1", err),
 		)
 		return
 	}
@@ -486,7 +495,7 @@ func (r *ResourceF5XCIke1) Read(ctx context.Context, request resource.ReadReques
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_ike1.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "ike1", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "ike1", err),
 		)
 		return
 	}
@@ -613,6 +622,12 @@ func (r *ResourceF5XCIke1) Read(ctx context.Context, request resource.ReadReques
 }
 
 func (r *ResourceF5XCIke1) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCIke1Model
@@ -716,7 +731,7 @@ func (r *ResourceF5XCIke1) Update(ctx context.Context, request resource.UpdateRe
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -732,7 +747,7 @@ func (r *ResourceF5XCIke1) Update(ctx context.Context, request resource.UpdateRe
 	err = r.client.ReplaceObject(ctx, ves_io_schema_ike1.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "ike1", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "ike1", err),
 		)
 		return
 	}
@@ -741,7 +756,7 @@ func (r *ResourceF5XCIke1) Update(ctx context.Context, request resource.UpdateRe
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_ike1.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "ike1", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "ike1", err),
 		)
 		return
 	}
@@ -930,7 +945,7 @@ func (r *ResourceF5XCIke1) Delete(ctx context.Context, request resource.DeleteRe
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "ike1", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "ike1", err),
 		)
 		return
 	}

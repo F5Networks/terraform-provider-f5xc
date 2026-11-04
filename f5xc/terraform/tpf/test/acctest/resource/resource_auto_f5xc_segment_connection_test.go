@@ -42,20 +42,20 @@ func TestAccResourceAutoF5XCSegmentConnection_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSegmentConnectionConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withDescription(name, namespace, "segment connection basic updated"),
+				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withDescription(name, namespace, "segment connection updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -66,8 +66,8 @@ func TestAccResourceAutoF5XCSegmentConnection_withConnectionChoiceDirectTransiti
 
 	namespace := "system"
 	name := "default-segment-connection"
-	sourceSegmentName := "tf-acc-segment-src-" + acctest.RandString(t, 8)
-	destinationSegmentName := "tf-acc-segment-dst-" + acctest.RandString(t, 8)
+	sourceSegmentName := "example-segment-src-" + acctest.RandString(t, 8)
+	destinationSegmentName := "example-segment-dst-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -78,23 +78,23 @@ func TestAccResourceAutoF5XCSegmentConnection_withConnectionChoiceDirectTransiti
 				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withConnection(name, namespace, sourceSegmentName, destinationSegmentName, false),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withConnection(name, namespace, sourceSegmentName, destinationSegmentName, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_segment_connection.test", "connections.0.connection_choice.direct", "true"),
+					resource.TestCheckResourceAttr("f5xc_segment_connection.example", "connections.0.connection_choice.direct", "true"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -105,8 +105,8 @@ func TestAccResourceAutoF5XCSegmentConnection_withConnectionListTransition(t *te
 
 	namespace := "system"
 	name := "default-segment-connection"
-	sourceSegmentName := "tf-acc-segment-src-" + acctest.RandString(t, 8)
-	destinationSegmentName := "tf-acc-segment-dst-" + acctest.RandString(t, 8)
+	sourceSegmentName := "example-segment-src-" + acctest.RandString(t, 8)
+	destinationSegmentName := "example-segment-dst-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -117,23 +117,23 @@ func TestAccResourceAutoF5XCSegmentConnection_withConnectionListTransition(t *te
 				Config: testAccResourceAutoF5XCSegmentConnectionConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withConnection(name, namespace, sourceSegmentName, destinationSegmentName, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_segment_connection.test", "connections.#", "1"),
+					resource.TestCheckResourceAttr("f5xc_segment_connection.example", "connections.#", "1"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -151,26 +151,26 @@ func TestAccResourceAutoF5XCSegmentConnection_withLabelsAndAnnotationsTransition
 		CheckDestroy:             testAccCheckSegmentConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withMetadata(name, namespace, "test", "team-a", "owner-a"),
+				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withMetadata(name, namespace, "example", "example-team", "example-owner"),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withMetadata(name, namespace, "prod", "team-b", "owner-b"),
+				Config: testAccResourceAutoF5XCSegmentConnectionConfig_withMetadata(name, namespace, "example", "example-team-alt", "example-owner-alt"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_segment_connection.test", "labels.env", "prod"),
+					resource.TestCheckResourceAttr("f5xc_segment_connection.example", "labels.env", "example"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -181,39 +181,43 @@ func TestAccResourceAutoF5XCSegmentConnection_full(t *testing.T) {
 
 	namespace := "system"
 	name := "default-segment-connection"
-	sourceSegmentName := "tf-acc-segment-src-" + acctest.RandString(t, 8)
-	destinationSegmentName := "tf-acc-segment-dst-" + acctest.RandString(t, 8)
+	sourceSegmentName := "example-segment-src-" + acctest.RandString(t, 8)
+	destinationSegmentName := "example-segment-dst-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSegmentConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSegmentConnectionConfig_full(name, namespace, sourceSegmentName, destinationSegmentName, "test", "platform", "owner-a", false),
+				Config: testAccResourceAutoF5XCSegmentConnectionConfig_full(name, namespace, sourceSegmentName, destinationSegmentName, "example", "platform", "example-owner", false),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSegmentConnectionConfig_full(name, namespace, sourceSegmentName, destinationSegmentName, "prod", "security", "owner-b", true),
+				Config: testAccResourceAutoF5XCSegmentConnectionConfig_full(name, namespace, sourceSegmentName, destinationSegmentName, "example", "security", "example-owner-alt", true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_segment_connection.test", "connections.0.connection_choice.direct", "true"),
+					resource.TestCheckResourceAttr("f5xc_segment_connection.example", "connections.0.connection_choice.direct", "true"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_segment_connection.test",
+				ResourceName:                         "f5xc_segment_connection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_segment_connection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSegmentConnectionConfig_full("default-segment-connection", "system", "example-source-segment", "example-destination-segment", "example", "platform", "example-owner", true),
+		})
 }
 
 func testAccCheckSegmentConnectionDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -226,7 +230,7 @@ func testAccResourceImportStateID(resourceAddr string) func(*terraform.State) (s
 
 func testAccResourceAutoF5XCSegmentConnectionConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment_connection" "test" {
+resource "f5xc_segment_connection" "example" {
   name      = %q
   namespace = %q
 }
@@ -235,7 +239,7 @@ resource "f5xc_segment_connection" "test" {
 
 func testAccResourceAutoF5XCSegmentConnectionConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment_connection" "test" {
+resource "f5xc_segment_connection" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -246,21 +250,21 @@ resource "f5xc_segment_connection" "test" {
 func testAccResourceAutoF5XCSegmentConnectionConfig_withConnection(name, namespace, sourceSegmentName, destinationSegmentName string, direct bool) string {
 	connectionChoice := ""
 	if direct {
-		connectionChoice = "    connection_choice = {\n      direct = true\n    }\n"
+		connectionChoice = "      connection_choice = {\n        direct = true\n      }\n"
 	}
 
 	return fmt.Sprintf(`
 resource "f5xc_segment" "source" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 }
 
 resource "f5xc_segment" "destination" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 }
 
-resource "f5xc_segment_connection" "test" {
+resource "f5xc_segment_connection" "example" {
   name      = %q
   namespace = %q
 
@@ -268,14 +272,14 @@ resource "f5xc_segment_connection" "test" {
     {
 %s      source_segments = [
         {
-					name      = f5xc_segment.source.name
-					namespace = f5xc_segment.source.namespace
+          name      = f5xc_segment.source.name
+          namespace = f5xc_segment.source.namespace
         }
       ]
       destination_segments = [
         {
-					name      = f5xc_segment.destination.name
-					namespace = f5xc_segment.destination.namespace
+          name      = f5xc_segment.destination.name
+          namespace = f5xc_segment.destination.namespace
         }
       ]
     }
@@ -286,7 +290,7 @@ resource "f5xc_segment_connection" "test" {
 
 func testAccResourceAutoF5XCSegmentConnectionConfig_withMetadata(name, namespace, env, team, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_segment_connection" "test" {
+resource "f5xc_segment_connection" "example" {
   name      = %q
   namespace = %q
 
@@ -305,21 +309,21 @@ resource "f5xc_segment_connection" "test" {
 func testAccResourceAutoF5XCSegmentConnectionConfig_full(name, namespace, sourceSegmentName, destinationSegmentName, env, team, owner string, direct bool) string {
 	connectionChoice := ""
 	if direct {
-		connectionChoice = "    connection_choice = {\n      direct = true\n    }\n"
+		connectionChoice = "      connection_choice = {\n        direct = true\n      }\n"
 	}
 
 	return fmt.Sprintf(`
 resource "f5xc_segment" "source" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 }
 
 resource "f5xc_segment" "destination" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 }
 
-resource "f5xc_segment_connection" "test" {
+resource "f5xc_segment_connection" "example" {
   name        = %q
   namespace   = %q
   description = "segment connection full"
@@ -337,14 +341,14 @@ resource "f5xc_segment_connection" "test" {
     {
 %s      source_segments = [
         {
-					name      = f5xc_segment.source.name
-					namespace = f5xc_segment.source.namespace
+          name      = f5xc_segment.source.name
+          namespace = f5xc_segment.source.namespace
         }
       ]
       destination_segments = [
         {
-					name      = f5xc_segment.destination.name
-					namespace = f5xc_segment.destination.namespace
+          name      = f5xc_segment.destination.name
+          namespace = f5xc_segment.destination.namespace
         }
       ]
     }

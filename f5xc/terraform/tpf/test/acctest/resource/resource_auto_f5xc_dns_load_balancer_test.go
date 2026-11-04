@@ -16,7 +16,6 @@ package resource
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -28,23 +27,18 @@ import (
 )
 
 // getTestDnsLbTenant returns the tenant value for acceptance tests.
-// It reads from F5XC_TEST_TENANT environment variable, falling back to "customer1".
+// It delegates to acctest.DefaultTenant() (F5XCProvider_TENANT / F5XC_TEST_TENANT / URL host / fallback).
 // Cross-namespace pool references require a non-empty tenant value.
 func getTestDnsLbTenant(t *testing.T) string {
-	if tenant := os.Getenv("F5XC_TEST_TENANT"); tenant != "" {
-		t.Logf("Using tenant from F5XC_TEST_TENANT env variable: %s", tenant)
-		return tenant
-	}
-	defaultTenant := "customer1"
-	t.Logf("As F5XC_TEST_TENANT env variable is not configured, using default tenant: %s", defaultTenant)
-	return defaultTenant
+	tenant := acctest.DefaultTenant()
+	t.Logf("Using resolved tenant for dns_load_balancer test: %s", tenant)
+	return tenant
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_basic(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-" + acctest.RandString(t, 8)
+	name := "example-dnslb-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -56,10 +50,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_basic(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -67,10 +61,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_basicUpdated(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -79,10 +73,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_basic(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeA(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-a-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-a-" + acctest.RandString(t, 8)
+	name := "example-dnslb-a-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-a-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -93,14 +86,14 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeA(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + testAccResourceAutoF5XCDnsLoadBalancerConfig_withRecordType(name, namespace, "A", getTestDnsLbTenant(t)),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.test", "record_type.0", "A"),
+					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.example", "record_type.0", "A"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -109,10 +102,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeA(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeCNAME(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-cname-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-cname-" + acctest.RandString(t, 8)
+	name := "example-dnslb-cname-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-cname-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -123,14 +115,14 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeCNAME(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCDnsLbPoolCNAMEConfig(poolName, namespace) + testAccResourceAutoF5XCDnsLoadBalancerConfig_withRecordType(name, namespace, "CNAME", getTestDnsLbTenant(t)),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.test", "record_type.0", "CNAME"),
+					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.example", "record_type.0", "CNAME"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -139,10 +131,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeCNAME(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeAAAA(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-aaaa-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-aaaa-" + acctest.RandString(t, 8)
+	name := "example-dnslb-aaaa-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-aaaa-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -153,14 +144,14 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeAAAA(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCDnsLbPoolAAAAConfig(poolName, namespace) + testAccResourceAutoF5XCDnsLoadBalancerConfig_withRecordType(name, namespace, "AAAA", getTestDnsLbTenant(t)),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.test", "record_type.0", "AAAA"),
+					resource.TestCheckResourceAttr("f5xc_dns_load_balancer.example", "record_type.0", "AAAA"),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -169,10 +160,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withRecordTypeAAAA(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withGeoLocation(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-geo-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-geo-" + acctest.RandString(t, 8)
+	name := "example-dnslb-geo-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-geo-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -184,10 +174,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withGeoLocation(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_withGeoLocation(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -195,10 +185,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withGeoLocation(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_withAsnList(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -207,10 +197,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withGeoLocation(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withIpPrefixList(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-ip-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-ip-" + acctest.RandString(t, 8)
+	name := "example-dnslb-ip-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-ip-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -222,10 +211,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withIpPrefixList(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_withIpPrefixList(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -234,10 +223,9 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withIpPrefixList(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_withResponseCache(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-rc-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-rc-" + acctest.RandString(t, 8)
+	name := "example-dnslb-rc-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-rc-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -249,10 +237,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withResponseCache(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_withDefaultResponseCache(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -260,10 +248,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withResponseCache(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_withCustomResponseCache(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -272,13 +260,12 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_withResponseCache(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCDnsLoadBalancer_full(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-dnslb-full-" + acctest.RandString(t, 8)
-	poolName := "tf-acc-dnslbpool-full-" + acctest.RandString(t, 8)
+	name := "example-dnslb-full-" + testAccRunSuffix(t)
+	poolName := "example-dnslbpool-full-" + testAccRunSuffix(t)
 	namespace := acctest.SystemNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsLoadBalancerDestroyProducer(t),
@@ -287,10 +274,10 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_full(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -298,19 +285,35 @@ func TestAccResourceAutoF5XCDnsLoadBalancer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLoadBalancerConfig_fullUpdated(name, namespace, poolName, getTestDnsLbTenant(t)),
 			},
 			{
-				ResourceName:                         "f5xc_dns_load_balancer.test",
+				ResourceName:                         "f5xc_dns_load_balancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCDnsLoadBalancerConfig_full(name, "system", poolName, getTestDnsLbTenant(t)),
+		},
+	)
 }
 
 func testAccCheckDnsLoadBalancerDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_dns_load_balancer", dnsLbSchema.ObjectType, "dns load balancer")
+}
+
+func testAccResourceAutoF5XCDnsLoadBalancerImportStep() resource.TestStep {
+	return resource.TestStep{
+		ResourceName:                         "f5xc_dns_load_balancer.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_load_balancer.example"),
+		ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
+		ImportStateVerifyIdentifierAttribute: "uid",
+	}
 }
 
 // --- Pool Helpers ---
@@ -414,7 +417,7 @@ resource "f5xc_dns_lb_pool" "test_pool" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_basic(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name = %q
   namespace = %q
 
@@ -445,7 +448,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_basicUpdated(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name = %q
   namespace = %q
   description = "Acceptance test DNS load balancer updated"
@@ -477,7 +480,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withRecordType(name, namespace, recordType, tenant string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name      = %q
   namespace = %q
 
@@ -508,7 +511,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withGeoLocation(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name = %q
   namespace = %q
 
@@ -539,7 +542,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withAsnList(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name      = %q
   namespace = %q
 
@@ -570,7 +573,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withIpPrefixList(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name      = %q
   namespace = %q
 
@@ -601,7 +604,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withDefaultResponseCache(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name      = %q
   namespace = %q
 
@@ -638,7 +641,7 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_withCustomResponseCache(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name      = %q
   namespace = %q
 
@@ -679,13 +682,13 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_full(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name        = %q
   namespace   = %q
   description = "Full acceptance test DNS load balancer"
 
   labels = {
-    "env"  = "acceptance-test"
+    "env"  = "example"
     "tier" = "dns"
   }
 
@@ -747,13 +750,13 @@ resource "f5xc_dns_load_balancer" "test" {
 
 func testAccResourceAutoF5XCDnsLoadBalancerConfig_fullUpdated(name, namespace, poolName, tenant string) string {
 	return testAccResourceAutoF5XCDnsLbPoolAConfig(poolName, namespace) + fmt.Sprintf(`
-resource "f5xc_dns_load_balancer" "test" {
+resource "f5xc_dns_load_balancer" "example" {
   name        = %q
   namespace   = %q
   description = "Full acceptance test DNS load balancer updated"
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "tier"    = "dns"
     "version" = "v2"
   }

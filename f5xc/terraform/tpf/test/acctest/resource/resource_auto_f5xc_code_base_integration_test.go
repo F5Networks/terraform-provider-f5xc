@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCCodeBaseIntegration_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cbi-" + acctest.RandString(t, 8)
+	name := "example-code-base-integration-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCodeBaseIntegrationDestroyProducer(t),
@@ -39,10 +39,10 @@ func TestAccResourceAutoF5XCCodeBaseIntegration_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCodeBaseIntegrationConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_code_base_integration.test",
+				ResourceName:                         "f5xc_code_base_integration.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"code_base_integration.type_choice.gitlab.access_token.secret_info_choice",
@@ -53,10 +53,10 @@ func TestAccResourceAutoF5XCCodeBaseIntegration_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCodeBaseIntegrationConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_code_base_integration.test",
+				ResourceName:                         "f5xc_code_base_integration.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"code_base_integration.type_choice.gitlab.access_token.secret_info_choice",
@@ -64,13 +64,17 @@ func TestAccResourceAutoF5XCCodeBaseIntegration_basic(t *testing.T) {
 				},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCodeBaseIntegrationConfig_basic("example-code-base-integration", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCCodeBaseIntegration_github(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cbi-" + acctest.RandString(t, 8)
+	name := "example-code-base-integration-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -82,10 +86,10 @@ func TestAccResourceAutoF5XCCodeBaseIntegration_github(t *testing.T) {
 				Config: testAccResourceAutoF5XCCodeBaseIntegrationConfig_github(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_code_base_integration.test",
+				ResourceName:                         "f5xc_code_base_integration.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_code_base_integration.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"code_base_integration.type_choice.github.access_token.secret_info_choice",
@@ -102,10 +106,10 @@ func testAccCheckCodeBaseIntegrationDestroyProducer(t *testing.T) func(*terrafor
 
 func testAccResourceAutoF5XCCodeBaseIntegrationConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_code_base_integration" "test" {
+resource "f5xc_code_base_integration" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test code base integration"
+  description = "Code base integration example"
 
   code_base_integration = {
     type_choice = {
@@ -129,10 +133,10 @@ resource "f5xc_code_base_integration" "test" {
 
 func testAccResourceAutoF5XCCodeBaseIntegrationConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_code_base_integration" "test" {
+resource "f5xc_code_base_integration" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test code base integration updated"
+  description = "Code base integration example updated"
 
   code_base_integration = {
     type_choice = {
@@ -156,10 +160,10 @@ resource "f5xc_code_base_integration" "test" {
 
 func testAccResourceAutoF5XCCodeBaseIntegrationConfig_github(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_code_base_integration" "test" {
+resource "f5xc_code_base_integration" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test code base integration with GitHub"
+  description = "Code base integration example with GitHub"
 
   code_base_integration = {
     type_choice = {

@@ -28,38 +28,44 @@ func TestAccResourceAutoF5XCCluster_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCClusterConfig_basic("example-cluster", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCCluster_withLoadBalancerAlgorithmTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,26 +74,29 @@ func TestAccResourceAutoF5XCCluster_withLoadBalancerAlgorithmTransition(t *testi
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_withLoadBalancerAlgorithm(name, namespace, "ROUND_ROBIN")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withLoadBalancerAlgorithm(name, namespace, "LEAST_REQUEST")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withLoadBalancerAlgorithm(name, namespace, "RANDOM")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +107,7 @@ func TestAccResourceAutoF5XCCluster_withEndpointSelectionTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,26 +116,29 @@ func TestAccResourceAutoF5XCCluster_withEndpointSelectionTransition(t *testing.T
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_withEndpointSelection(name, namespace, "DISTRIBUTED")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withEndpointSelection(name, namespace, "LOCAL_ONLY")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withEndpointSelection(name, namespace, "LOCAL_PREFERRED")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -137,7 +149,7 @@ func TestAccResourceAutoF5XCCluster_withMaxRequestsPerConnectionChoiceTransition
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -146,18 +158,20 @@ func TestAccResourceAutoF5XCCluster_withMaxRequestsPerConnectionChoiceTransition
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_withNoRequestLimit(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withMaxRequestsPerConnection(name, namespace, 100)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +182,7 @@ func TestAccResourceAutoF5XCCluster_withConnPoolReuseTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -177,18 +191,20 @@ func TestAccResourceAutoF5XCCluster_withConnPoolReuseTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_withConnPoolReuse(name, namespace, "enable_conn_pool_reuse")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_withConnPoolReuse(name, namespace, "disable_conn_pool_reuse")},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"connection_timeout", "http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -199,31 +215,37 @@ func TestAccResourceAutoF5XCCluster_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cluster-" + testAccRunSuffix(t)
+	name := "example-cluster-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCClusterConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCClusterConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cluster.test",
+				ResourceName:                         "f5xc_cluster.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.test"),
+				ImportStateVerifyIgnore:              []string{"http_idle_timeout"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cluster.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCClusterConfig_full("example-cluster", "default"),
+		})
 }
 
 func testAccCheckClusterDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -232,7 +254,7 @@ func testAccCheckClusterDestroyProducer(t *testing.T) func(*terraform.State) err
 
 func testAccResourceAutoF5XCClusterConfig_base(name, namespace, body string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cluster" "test" {
+resource "f5xc_cluster" "example" {
   name      = %q
   namespace = %q
 %s
@@ -245,7 +267,7 @@ func testAccResourceAutoF5XCClusterConfig_basic(name, namespace string) string {
 }
 
 func testAccResourceAutoF5XCClusterConfig_basicUpdated(name, namespace string) string {
-	body := `  description = "cluster updated"
+	body := `  description = "Cluster example updated"
 `
 	return testAccResourceAutoF5XCClusterConfig_base(name, namespace, body)
 }
@@ -289,10 +311,10 @@ func testAccResourceAutoF5XCClusterConfig_withConnPoolReuse(name, namespace, cho
 }
 
 func testAccResourceAutoF5XCClusterConfig_full(name, namespace string) string {
-	body := `  description = "cluster full"
+	body := `  description = "Cluster example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -323,10 +345,10 @@ func testAccResourceAutoF5XCClusterConfig_full(name, namespace string) string {
 }
 
 func testAccResourceAutoF5XCClusterConfig_fullUpdated(name, namespace string) string {
-	body := `  description = "cluster full updated"
+	body := `  description = "Cluster example updated"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

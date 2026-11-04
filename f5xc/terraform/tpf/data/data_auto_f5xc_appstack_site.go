@@ -35,12 +35,12 @@ type DataSourceF5XCAppstackSite struct {
 	client *client.APIClient
 }
 
-type AppstackSiteGlobalSpecTypeBlockedServicesChoice struct {
+type AppstackSiteBlockedServicesChoice struct {
 	BlockedServices        types.Object `tfsdk:"blocked_services"`
 	DefaultBlockedServices types.Bool   `tfsdk:"default_blocked_services"`
 }
 
-type AppstackSiteGlobalSpecTypeBlockedServices struct {
+type AppstackSiteBlockedServices struct {
 	BlockedSevice types.List `tfsdk:"blocked_sevice"`
 }
 
@@ -49,22 +49,22 @@ type AppstackSiteFleetBlockedServices struct {
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type AppstackSiteBlockedServicesBlockedServicesValueTypeChoice struct {
+type AppstackSiteBlockedServicesValueTypeChoice struct {
 	Dns              types.Bool `tfsdk:"dns"`
 	Ssh              types.Bool `tfsdk:"ssh"`
 	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
 }
 
-type AppstackSiteGlobalSpecTypeBondChoice struct {
+type AppstackSiteBondChoice struct {
 	BondDeviceList types.Object `tfsdk:"bond_device_list"`
 	NoBondDevices  types.Bool   `tfsdk:"no_bond_devices"`
 }
 
-type AppstackSiteGlobalSpecTypeBondDeviceList struct {
+type AppstackSiteBondDeviceList struct {
 	BondDevices types.List `tfsdk:"bond_devices"`
 }
 
-type AppstackSiteFleetFleetBondDeviceType struct {
+type AppstackSiteFleetBondDeviceType struct {
 	Devices             types.List   `tfsdk:"devices"`
 	LacpChoice          types.Object `tfsdk:"lacp_choice"`
 	LinkPollingInterval types.Int64  `tfsdk:"link_polling_interval"`
@@ -72,78 +72,78 @@ type AppstackSiteFleetFleetBondDeviceType struct {
 	Name                types.String `tfsdk:"name"`
 }
 
-type AppstackSiteFleetBondDeviceTypeLacpChoice struct {
+type AppstackSiteLacpChoice struct {
 	ActiveBackup types.Bool   `tfsdk:"active_backup"`
 	Lacp         types.Object `tfsdk:"lacp"`
 }
 
-type AppstackSiteFleetBondDeviceTypeLacp struct {
+type AppstackSiteLacp struct {
 	Rate types.Int64 `tfsdk:"rate"`
 }
 
-type AppstackSiteSiteCoordinates struct {
+type AppstackSiteCoordinates struct {
 	Latitude  types.Float32 `tfsdk:"latitude"`
 	Longitude types.Float32 `tfsdk:"longitude"`
 }
 
-type AppstackSiteViewsCustomDNS struct {
+type AppstackSiteCustomDNS struct {
 	InsideNameserver    types.String `tfsdk:"inside_nameserver"`
 	InsideNameserverV6  types.String `tfsdk:"inside_nameserver_v6"`
 	OutsideNameserver   types.String `tfsdk:"outside_nameserver"`
 	OutsideNameserverV6 types.String `tfsdk:"outside_nameserver_v6"`
 }
 
-type AppstackSiteGlobalSpecTypeGpuChoice struct {
+type AppstackSiteGpuChoice struct {
 	DisableGpu types.Bool   `tfsdk:"disable_gpu"`
 	EnableGpu  types.Bool   `tfsdk:"enable_gpu"`
 	EnableVgpu types.Object `tfsdk:"enable_vgpu"`
 }
 
-type AppstackSiteGlobalSpecTypeEnableVgpu struct {
+type AppstackSiteEnableVgpu struct {
 	FeatureType   types.List   `tfsdk:"feature_type"`
 	ServerAddress types.String `tfsdk:"server_address"`
 	ServerPort    types.Int64  `tfsdk:"server_port"`
 }
 
-type AppstackSiteGlobalSpecTypeK8SClusterChoice struct {
+type AppstackSiteK8SClusterChoice struct {
 	K8SCluster   types.Object `tfsdk:"k8s_cluster"`
 	NoK8SCluster types.Bool   `tfsdk:"no_k8s_cluster"`
 }
 
-type AppstackSiteViewsKubernetesUpgradeDrain struct {
+type AppstackSiteK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type AppstackSiteK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type AppstackSiteKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type AppstackSiteEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type AppstackSiteKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type AppstackSiteDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type AppstackSiteGlobalSpecTypeLogsReceiverChoice struct {
+type AppstackSiteLogsReceiverChoice struct {
 	LogReceiver           types.Object `tfsdk:"log_receiver"`
 	LogsStreamingDisabled types.Bool   `tfsdk:"logs_streaming_disabled"`
 }
 
-type AppstackSiteViewsMasterNode struct {
+type AppstackSiteMasterNode struct {
 	Name     types.String `tfsdk:"name"`
 	PublicIp types.String `tfsdk:"public_ip"`
 }
 
-type AppstackSiteGlobalSpecTypeNetworkCfgChoice struct {
+type AppstackSiteNetCfgChoice struct {
 	CustomNetworkConfig  types.Object `tfsdk:"custom_network_config"`
 	DefaultNetworkConfig types.Bool   `tfsdk:"default_network_config"`
 }
 
-type AppstackSiteGlobalSpecTypeCustomNetworkConfig struct {
+type AppstackSiteCustomNetConfig struct {
 	BgpPeerAddress      types.String `tfsdk:"bgp_peer_address"`
 	BgpPeerAddressV6    types.String `tfsdk:"bgp_peer_address_v6"`
 	BgpRouterId         types.String `tfsdk:"bgp_router_id"`
@@ -161,71 +161,71 @@ type AppstackSiteGlobalSpecTypeCustomNetworkConfig struct {
 	VipVrrpMode         types.List   `tfsdk:"vip_vrrp_mode"`
 }
 
-type AppstackSiteVssNetworkConfigurationForwardProxyChoice struct {
+type AppstackSiteForwardProxyChoice struct {
 	ActiveForwardProxyPolicies types.Object `tfsdk:"active_forward_proxy_policies"`
 	ForwardProxyAllowAll       types.Bool   `tfsdk:"forward_proxy_allow_all"`
 	NoForwardProxy             types.Bool   `tfsdk:"no_forward_proxy"`
 }
 
-type AppstackSiteVssNetworkConfigurationActiveForwardProxyPolicies struct {
+type AppstackSiteActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AppstackSiteVssNetworkConfigurationGlobalNetworkChoice struct {
+type AppstackSiteGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AppstackSiteVssNetworkConfigurationGlobalNetworkList struct {
+type AppstackSiteGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type AppstackSiteViewsGlobalNetworkConnectionType struct {
+type AppstackSiteGlobalNetConnType struct {
 	ConnectionChoice types.Object `tfsdk:"connection_choice"`
 }
 
-type AppstackSiteGlobalNetworkConnectionTypeConnectionChoice struct {
+type AppstackSiteConnChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type AppstackSiteGlobalNetworkConnectionTypeSliToGlobalDr struct {
+type AppstackSiteSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AppstackSiteGlobalNetworkConnectionTypeSloToGlobalDr struct {
+type AppstackSiteSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AppstackSiteVssNetworkConfigurationInterfaceChoice struct {
+type AppstackSiteIfaceChoice struct {
 	DefaultInterfaceConfig types.Bool   `tfsdk:"default_interface_config"`
 	InterfaceList          types.Object `tfsdk:"interface_list"`
 }
 
-type AppstackSiteVssNetworkConfigurationInterfaceList struct {
+type AppstackSiteIfaceList struct {
 	Interfaces types.List `tfsdk:"interfaces"`
 }
 
-type AppstackSiteVoltstackSiteInterface struct {
+type AppstackSiteIface struct {
 	DcClusterGroupConnectivityInterfaceChoice types.Object `tfsdk:"dc_cluster_group_connectivity_interface_choice"`
 	Description                               types.String `tfsdk:"description"`
 	InterfaceChoice                           types.Object `tfsdk:"interface_choice"`
 	Labels                                    types.Map    `tfsdk:"labels"`
 }
 
-type AppstackSiteInterfaceDcClusterGroupConnectivityInterfaceChoice struct {
+type AppstackSiteDcClusterGroupConnectivityIfaceChoice struct {
 	DcClusterGroupConnectivityInterfaceDisabled types.Bool `tfsdk:"dc_cluster_group_connectivity_interface_disabled"`
 	DcClusterGroupConnectivityInterfaceEnabled  types.Bool `tfsdk:"dc_cluster_group_connectivity_interface_enabled"`
 }
 
-type AppstackSiteInterfaceInterfaceChoice struct {
+type AppstackSiteIfaceIfaceChoice struct {
 	DedicatedInterface           types.Object `tfsdk:"dedicated_interface"`
 	DedicatedManagementInterface types.Object `tfsdk:"dedicated_management_interface"`
 	EthernetInterface            types.Object `tfsdk:"ethernet_interface"`
 	TunnelInterface              types.Object `tfsdk:"tunnel_interface"`
 }
 
-type AppstackSiteInterfaceDedicatedInterface struct {
+type AppstackSiteDedicatedIface struct {
 	Device           types.String `tfsdk:"device"`
 	MonitoringChoice types.Object `tfsdk:"monitoring_choice"`
 	Mtu              types.Int64  `tfsdk:"mtu"`
@@ -234,33 +234,33 @@ type AppstackSiteInterfaceDedicatedInterface struct {
 	Priority         types.Int64  `tfsdk:"priority"`
 }
 
-type AppstackSiteDedicatedInterfaceTypeMonitoringChoice struct {
+type AppstackSiteMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type AppstackSiteDedicatedInterfaceTypeNodeChoice struct {
+type AppstackSiteNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type AppstackSiteDedicatedInterfaceTypePrimaryChoice struct {
+type AppstackSitePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type AppstackSiteInterfaceDedicatedManagementInterface struct {
+type AppstackSiteDedicatedMgmtIface struct {
 	Device     types.String `tfsdk:"device"`
 	Mtu        types.Int64  `tfsdk:"mtu"`
 	NodeChoice types.Object `tfsdk:"node_choice"`
 }
 
-type AppstackSiteDedicatedManagementInterfaceTypeNodeChoice struct {
+type AppstackSiteDedicatedMgmtIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type AppstackSiteInterfaceEthernetInterface struct {
+type AppstackSiteEthernetIface struct {
 	AddressChoice     types.Object `tfsdk:"address_choice"`
 	Device            types.String `tfsdk:"device"`
 	Ipv6AddressChoice types.Object `tfsdk:"ipv6_address_choice"`
@@ -273,19 +273,19 @@ type AppstackSiteInterfaceEthernetInterface struct {
 	VlanChoice        types.Object `tfsdk:"vlan_choice"`
 }
 
-type AppstackSiteEthernetInterfaceTypeAddressChoice struct {
+type AppstackSiteAddrChoice struct {
 	DhcpClient types.Bool   `tfsdk:"dhcp_client"`
 	DhcpServer types.Object `tfsdk:"dhcp_server"`
 	StaticIp   types.Object `tfsdk:"static_ip"`
 }
 
-type AppstackSiteEthernetInterfaceTypeDhcpServer struct {
+type AppstackSiteDhcpServer struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type AppstackSiteNetworkInterfaceDHCPNetworkType struct {
+type AppstackSiteDHCPNetType struct {
 	DnsChoice           types.Object `tfsdk:"dns_choice"`
 	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
@@ -293,101 +293,101 @@ type AppstackSiteNetworkInterfaceDHCPNetworkType struct {
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type AppstackSiteDHCPNetworkTypeDnsChoice struct {
+type AppstackSiteDnsChoice struct {
 	DnsAddress types.String `tfsdk:"dns_address"`
 	SameAsDgw  types.Bool   `tfsdk:"same_as_dgw"`
 }
 
-type AppstackSiteDHCPNetworkTypeGatewayChoice struct {
+type AppstackSiteGatewayChoice struct {
 	DgwAddress   types.String `tfsdk:"dgw_address"`
 	FirstAddress types.Bool   `tfsdk:"first_address"`
 	LastAddress  types.Bool   `tfsdk:"last_address"`
 }
 
-type AppstackSiteDHCPNetworkTypeNetworkPrefixChoice struct {
+type AppstackSiteNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type AppstackSiteNetworkInterfaceDHCPPoolType struct {
+type AppstackSiteDHCPPoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
 
-type AppstackSiteDHCPServerParametersTypeInterfacesAddressingChoice struct {
+type AppstackSiteInterfacesAddressingChoice struct {
 	AutomaticFromEnd   types.Bool   `tfsdk:"automatic_from_end"`
 	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type AppstackSiteDHCPServerParametersTypeInterfaceIpMap struct {
+type AppstackSiteIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type AppstackSiteEthernetInterfaceTypeStaticIp struct {
+type AppstackSiteStaticIp struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type AppstackSiteStaticIPParametersTypeNetworkPrefixChoice struct {
+type AppstackSiteStaticIPParametersTypeNetPrefixChoice struct {
 	ClusterStaticIp types.Object `tfsdk:"cluster_static_ip"`
 	NodeStaticIp    types.Object `tfsdk:"node_static_ip"`
 }
 
-type AppstackSiteStaticIPParametersTypeClusterStaticIp struct {
+type AppstackSiteClusterStaticIp struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type AppstackSiteNetworkInterfaceStaticIpParametersNodeType struct {
+type AppstackSiteStaticIpParametersNodeType struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type AppstackSiteStaticIPParametersTypeNodeStaticIp struct {
+type AppstackSiteNodeStaticIp struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type AppstackSiteEthernetInterfaceTypeIpv6AddressChoice struct {
+type AppstackSiteIpv6AddrChoice struct {
 	Ipv6AutoConfig    types.Object `tfsdk:"ipv6_auto_config"`
 	NoIpv6Address     types.Bool   `tfsdk:"no_ipv6_address"`
 	StaticIpv6Address types.Object `tfsdk:"static_ipv6_address"`
 }
 
-type AppstackSiteEthernetInterfaceTypeIpv6AutoConfig struct {
+type AppstackSiteIpv6AutoConfig struct {
 	AutoconfigChoice types.Object `tfsdk:"autoconfig_choice"`
 }
 
-type AppstackSiteIPV6AutoConfigTypeAutoconfigChoice struct {
+type AppstackSiteAutoconfigChoice struct {
 	Host   types.Bool   `tfsdk:"host"`
 	Router types.Object `tfsdk:"router"`
 }
 
-type AppstackSiteIPV6AutoConfigTypeRouter struct {
+type AppstackSiteRouter struct {
 	AddressChoice types.Object `tfsdk:"address_choice"`
 	DnsConfig     types.Object `tfsdk:"dns_config"`
 }
 
-type AppstackSiteIPV6AutoConfigRouterTypeAddressChoice struct {
+type AppstackSiteIPV6AutoConfigRouterTypeAddrChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 	Stateful      types.Object `tfsdk:"stateful"`
 }
 
-type AppstackSiteIPV6AutoConfigRouterTypeStateful struct {
+type AppstackSiteStateful struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type AppstackSiteNetworkInterfaceDHCPIPV6NetworkType struct {
+type AppstackSiteDHCPIPV6NetType struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 	PoolSettings        types.List   `tfsdk:"pool_settings"`
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type AppstackSiteDHCPIPV6NetworkTypeNetworkPrefixChoice struct {
+type AppstackSiteDHCPIPV6NetTypeNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type AppstackSiteNetworkInterfaceDHCPIPV6PoolType struct {
+type AppstackSiteDHCPIPV6PoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
@@ -398,11 +398,11 @@ type AppstackSiteDHCPIPV6StatefulServerInterfacesAddressingChoice struct {
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type AppstackSiteDHCPIPV6StatefulServerInterfaceIpMap struct {
+type AppstackSiteDHCPIPV6StatefulServerIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type AppstackSiteNetworkInterfaceIPV6DnsConfig struct {
+type AppstackSiteIPV6DnsConfig struct {
 	DnsChoice types.Object `tfsdk:"dns_choice"`
 }
 
@@ -411,52 +411,52 @@ type AppstackSiteIPV6DnsConfigDnsChoice struct {
 	LocalDns       types.Object `tfsdk:"local_dns"`
 }
 
-type AppstackSiteIPV6DnsConfigConfiguredList struct {
+type AppstackSiteConfiguredList struct {
 	DnsList types.List `tfsdk:"dns_list"`
 }
 
-type AppstackSiteIPV6DnsConfigLocalDns struct {
+type AppstackSiteLocalDns struct {
 	LocalDnsChoice types.Object `tfsdk:"local_dns_choice"`
 }
 
-type AppstackSiteIPV6LocalDnsAddressLocalDnsChoice struct {
+type AppstackSiteLocalDnsChoice struct {
 	ConfiguredAddress types.String `tfsdk:"configured_address"`
 	FirstAddress      types.Bool   `tfsdk:"first_address"`
 	LastAddress       types.Bool   `tfsdk:"last_address"`
 }
 
-type AppstackSiteEthernetInterfaceTypeStaticIpv6Address struct {
+type AppstackSiteStaticIpv6Addr struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type AppstackSiteEthernetInterfaceTypeMonitoringChoice struct {
+type AppstackSiteEthernetIfaceTypeMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type AppstackSiteEthernetInterfaceTypeNetworkChoice struct {
+type AppstackSiteNetChoice struct {
 	SegmentNetwork         types.Object `tfsdk:"segment_network"`
 	SiteLocalInsideNetwork types.Bool   `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool   `tfsdk:"site_local_network"`
 	StorageNetwork         types.Bool   `tfsdk:"storage_network"`
 }
 
-type AppstackSiteEthernetInterfaceTypeNodeChoice struct {
+type AppstackSiteEthernetIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type AppstackSiteEthernetInterfaceTypePrimaryChoice struct {
+type AppstackSiteEthernetIfaceTypePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type AppstackSiteEthernetInterfaceTypeVlanChoice struct {
+type AppstackSiteVlanChoice struct {
 	Untagged types.Bool  `tfsdk:"untagged"`
 	VlanId   types.Int64 `tfsdk:"vlan_id"`
 }
 
-type AppstackSiteInterfaceTunnelInterface struct {
+type AppstackSiteTunnelIface struct {
 	Mtu           types.Int64  `tfsdk:"mtu"`
 	NetworkChoice types.Object `tfsdk:"network_choice"`
 	NodeChoice    types.Object `tfsdk:"node_choice"`
@@ -465,96 +465,96 @@ type AppstackSiteInterfaceTunnelInterface struct {
 	Tunnel        types.Object `tfsdk:"tunnel"`
 }
 
-type AppstackSiteTunnelInterfaceTypeNetworkChoice struct {
+type AppstackSiteTunnelIfaceTypeNetChoice struct {
 	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
 }
 
-type AppstackSiteTunnelInterfaceTypeNodeChoice struct {
+type AppstackSiteTunnelIfaceTypeNodeChoice struct {
 	Node types.String `tfsdk:"node"`
 }
 
-type AppstackSiteNetworkInterfaceStaticIPParametersType struct {
+type AppstackSiteStaticIPParametersType struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type AppstackSiteVssNetworkConfigurationNetworkPolicyChoice struct {
+type AppstackSiteNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
 }
 
-type AppstackSiteVssNetworkConfigurationActiveEnhancedFirewallPolicies struct {
+type AppstackSiteActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AppstackSiteVssNetworkConfigurationActiveNetworkPolicies struct {
+type AppstackSiteActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type AppstackSiteVssNetworkConfigurationSiteMeshGroupChoice struct {
+type AppstackSiteSiteMeshGroupChoice struct {
 	SiteToSiteTunnelIp   types.String `tfsdk:"site_to_site_tunnel_ip"`
 	SmConnectionPublicIp types.Bool   `tfsdk:"sm_connection_public_ip"`
 	SmConnectionPvtIp    types.Bool   `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type AppstackSiteVssNetworkConfigurationSloChoice struct {
+type AppstackSiteSloChoice struct {
 	DefaultConfig types.Bool   `tfsdk:"default_config"`
 	SloConfig     types.Object `tfsdk:"slo_config"`
 }
 
-type AppstackSiteVssNetworkConfigurationSloConfig struct {
+type AppstackSiteSloConfig struct {
 	DcClusterGroupChoice types.Object `tfsdk:"dc_cluster_group_choice"`
 	Labels               types.Map    `tfsdk:"labels"`
 	StaticRouteChoice    types.Object `tfsdk:"static_route_choice"`
 	StaticV6RouteChoice  types.Object `tfsdk:"static_v6_route_choice"`
 }
 
-type AppstackSiteVnConfigurationDcClusterGroupChoice struct {
+type AppstackSiteDcClusterGroupChoice struct {
 	DcClusterGroup   types.Object `tfsdk:"dc_cluster_group"`
 	NoDcClusterGroup types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type AppstackSiteVnConfigurationStaticRouteChoice struct {
+type AppstackSiteStaticRouteChoice struct {
 	NoStaticRoutes types.Bool   `tfsdk:"no_static_routes"`
 	StaticRoutes   types.Object `tfsdk:"static_routes"`
 }
 
-type AppstackSiteVnConfigurationStaticRoutes struct {
+type AppstackSiteStaticRoutes struct {
 	StaticRoutes types.List `tfsdk:"static_routes"`
 }
 
-type AppstackSiteVirtualNetworkStaticRouteViewType struct {
+type AppstackSiteStaticRouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
 }
 
-type AppstackSiteStaticRouteViewTypeNextHopChoice struct {
+type AppstackSiteNextHopChoice struct {
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type AppstackSiteStaticRouteViewTypeNodeInterface struct {
+type AppstackSiteNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type AppstackSiteNodeInterfaceInfo struct {
+type AppstackSiteNodeIfaceInfo struct {
 	Interface types.List   `tfsdk:"interface"`
 	Node      types.String `tfsdk:"node"`
 }
 
-type AppstackSiteVnConfigurationStaticV6RouteChoice struct {
+type AppstackSiteStaticV6RouteChoice struct {
 	NoStaticV6Routes types.Bool   `tfsdk:"no_static_v6_routes"`
 	StaticV6Routes   types.Object `tfsdk:"static_v6_routes"`
 }
 
-type AppstackSiteVnConfigurationStaticV6Routes struct {
+type AppstackSiteStaticV6Routes struct {
 	StaticRoutes types.List `tfsdk:"static_routes"`
 }
 
-type AppstackSiteVirtualNetworkStaticV6RouteViewType struct {
+type AppstackSiteStaticV6RouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
@@ -566,74 +566,74 @@ type AppstackSiteStaticV6RouteViewTypeNextHopChoice struct {
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type AppstackSiteStaticV6RouteViewTypeNodeInterface struct {
+type AppstackSiteStaticV6RouteViewTypeNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type AppstackSiteViewsOfflineSurvivabilityModeType struct {
+type AppstackSiteOfflineSurvivabilityModeType struct {
 	OfflineSurvivabilityModeChoice types.Object `tfsdk:"offline_survivability_mode_choice"`
 }
 
-type AppstackSiteOfflineSurvivabilityModeTypeOfflineSurvivabilityModeChoice struct {
+type AppstackSiteOfflineSurvivabilityModeChoice struct {
 	EnableOfflineSurvivabilityMode types.Bool `tfsdk:"enable_offline_survivability_mode"`
 	NoOfflineSurvivabilityMode     types.Bool `tfsdk:"no_offline_survivability_mode"`
 }
 
-type AppstackSiteViewsOperatingSystemType struct {
+type AppstackSiteOperatingSystemType struct {
 	OperatingSystemVersionChoice types.Object `tfsdk:"operating_system_version_choice"`
 }
 
-type AppstackSiteOperatingSystemTypeOperatingSystemVersionChoice struct {
+type AppstackSiteOperatingSystemVersionChoice struct {
 	DefaultOsVersion       types.Bool   `tfsdk:"default_os_version"`
 	OperatingSystemVersion types.String `tfsdk:"operating_system_version"`
 }
 
-type AppstackSiteGlobalSpecTypeSriovInterfaceChoice struct {
+type AppstackSiteSriovIfaceChoice struct {
 	DefaultSriovInterface types.Bool   `tfsdk:"default_sriov_interface"`
 	SriovInterfaces       types.Object `tfsdk:"sriov_interfaces"`
 }
 
-type AppstackSiteGlobalSpecTypeSriovInterfaces struct {
+type AppstackSiteSriovInterfaces struct {
 	SriovInterface types.List `tfsdk:"sriov_interface"`
 }
 
-type AppstackSiteFleetSriovInterface struct {
+type AppstackSiteSriovIface struct {
 	InterfaceName   types.String `tfsdk:"interface_name"`
 	NumberOfVfioVfs types.Int64  `tfsdk:"number_of_vfio_vfs"`
 	NumberOfVfs     types.Int64  `tfsdk:"number_of_vfs"`
 }
 
-type AppstackSiteGlobalSpecTypeStorageCfgChoice struct {
+type AppstackSiteStorageCfgChoice struct {
 	CustomStorageConfig  types.Object `tfsdk:"custom_storage_config"`
 	DefaultStorageConfig types.Bool   `tfsdk:"default_storage_config"`
 }
 
-type AppstackSiteGlobalSpecTypeCustomStorageConfig struct {
+type AppstackSiteCustomStorageConfig struct {
 	StaticRouteChoice      types.Object `tfsdk:"static_route_choice"`
 	StorageClassChoice     types.Object `tfsdk:"storage_class_choice"`
 	StorageDeviceChoice    types.Object `tfsdk:"storage_device_choice"`
 	StorageInterfaceChoice types.Object `tfsdk:"storage_interface_choice"`
 }
 
-type AppstackSiteVssStorageConfigurationStaticRouteChoice struct {
+type AppstackSiteVssStorageCfgStaticRouteChoice struct {
 	NoStaticRoutes types.Bool   `tfsdk:"no_static_routes"`
 	StaticRoutes   types.Object `tfsdk:"static_routes"`
 }
 
-type AppstackSiteVssStorageConfigurationStaticRoutes struct {
+type AppstackSiteVssStorageCfgStaticRoutes struct {
 	StaticRoutes types.List `tfsdk:"static_routes"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageClassChoice struct {
+type AppstackSiteStorageClassChoice struct {
 	DefaultStorageClass types.Bool   `tfsdk:"default_storage_class"`
 	StorageClassList    types.Object `tfsdk:"storage_class_list"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageClassList struct {
+type AppstackSiteStorageClassList struct {
 	StorageClasses types.List `tfsdk:"storage_classes"`
 }
 
-type AppstackSiteFleetFleetStorageClassType struct {
+type AppstackSiteFleetStorageClassType struct {
 	AdvancedStorageParameters types.Map    `tfsdk:"advanced_storage_parameters"`
 	AllowVolumeExpansion      types.Bool   `tfsdk:"allow_volume_expansion"`
 	DefaultStorageClass       types.Bool   `tfsdk:"default_storage_class"`
@@ -644,18 +644,18 @@ type AppstackSiteFleetFleetStorageClassType struct {
 	StorageDevice             types.String `tfsdk:"storage_device"`
 }
 
-type AppstackSiteFleetStorageClassTypeDeviceChoice struct {
+type AppstackSiteDeviceChoice struct {
 	CustomStorage           types.Object `tfsdk:"custom_storage"`
 	HpeStorage              types.Object `tfsdk:"hpe_storage"`
 	NetappTrident           types.Object `tfsdk:"netapp_trident"`
 	PureServiceOrchestrator types.Object `tfsdk:"pure_service_orchestrator"`
 }
 
-type AppstackSiteFleetStorageClassTypeCustomStorage struct {
+type AppstackSiteCustomStorage struct {
 	Yaml types.String `tfsdk:"yaml"`
 }
 
-type AppstackSiteFleetStorageClassTypeHpeStorage struct {
+type AppstackSiteHpeStorage struct {
 	AllowMutations     types.String `tfsdk:"allow_mutations"`
 	AllowOverrides     types.String `tfsdk:"allow_overrides"`
 	DedupeEnabled      types.Bool   `tfsdk:"dedupe_enabled"`
@@ -674,27 +674,27 @@ type AppstackSiteFleetStorageClassTypeHpeStorage struct {
 	Thick              types.Bool   `tfsdk:"thick"`
 }
 
-type AppstackSiteFleetStorageClassTypeNetappTrident struct {
+type AppstackSiteNetappTrident struct {
 	Selector     types.Map    `tfsdk:"selector"`
 	StoragePools types.String `tfsdk:"storage_pools"`
 }
 
-type AppstackSiteFleetStorageClassTypePureServiceOrchestrator struct {
+type AppstackSitePureSvcOrchestrator struct {
 	Backend        types.String `tfsdk:"backend"`
 	BandwidthLimit types.String `tfsdk:"bandwidth_limit"`
 	IopsLimit      types.Int64  `tfsdk:"iops_limit"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageDeviceChoice struct {
+type AppstackSiteStorageDeviceChoice struct {
 	NoStorageDevice   types.Bool   `tfsdk:"no_storage_device"`
 	StorageDeviceList types.Object `tfsdk:"storage_device_list"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageDeviceList struct {
+type AppstackSiteStorageDeviceList struct {
 	StorageDevices types.List `tfsdk:"storage_devices"`
 }
 
-type AppstackSiteFleetFleetStorageDeviceType struct {
+type AppstackSiteFleetStorageDeviceType struct {
 	AdvancedAdvancedParameters types.Map    `tfsdk:"advanced_advanced_parameters"`
 	DeviceChoice               types.Object `tfsdk:"device_choice"`
 	StorageDevice              types.String `tfsdk:"storage_device"`
@@ -721,18 +721,19 @@ type AppstackSiteSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type AppstackSiteSecretTypeSecretInfoChoice struct {
+type AppstackSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type AppstackSiteSecretTypeBlindfoldSecretInfo struct {
+type AppstackSiteBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type AppstackSiteSecretTypeClearSecretInfo struct {
+type AppstackSiteClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -741,12 +742,12 @@ type AppstackSiteFleetStorageDeviceTypeNetappTrident struct {
 	BackendChoice types.Object `tfsdk:"backend_choice"`
 }
 
-type AppstackSiteStorageDeviceNetappTridentTypeBackendChoice struct {
+type AppstackSiteBackendChoice struct {
 	NetappBackendOntapNas types.Object `tfsdk:"netapp_backend_ontap_nas"`
 	NetappBackendOntapSan types.Object `tfsdk:"netapp_backend_ontap_san"`
 }
 
-type AppstackSiteStorageDeviceNetappTridentTypeNetappBackendOntapNas struct {
+type AppstackSiteNetappBackendOntapNas struct {
 	AutoExportCidrs      types.Object `tfsdk:"auto_export_cidrs"`
 	AutoExportPolicy     types.Bool   `tfsdk:"auto_export_policy"`
 	BackendName          types.String `tfsdk:"backend_name"`
@@ -769,28 +770,28 @@ type AppstackSiteStorageDeviceNetappTridentTypeNetappBackendOntapNas struct {
 	VolumeDefaults       types.Object `tfsdk:"volume_defaults"`
 }
 
-type AppstackSiteViewsPrefixStringListType struct {
+type AppstackSitePrefixStringListType struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type AppstackSiteStorageDeviceNetappBackendOntapNasTypeDataLifChoice struct {
+type AppstackSiteDataLifChoice struct {
 	DataLifDnsName types.String `tfsdk:"data_lif_dns_name"`
 	DataLifIp      types.String `tfsdk:"data_lif_ip"`
 }
 
-type AppstackSiteStorageDeviceNetappBackendOntapNasTypeManagementLifChoice struct {
+type AppstackSiteMgmtLifChoice struct {
 	ManagementLifDnsName types.String `tfsdk:"management_lif_dns_name"`
 	ManagementLifIp      types.String `tfsdk:"management_lif_ip"`
 }
 
-type AppstackSiteFleetOntapVirtualStoragePoolType struct {
+type AppstackSiteOntapVirtualStoragePoolType struct {
 	Labels         types.Map    `tfsdk:"labels"`
 	VolumeDefaults types.Object `tfsdk:"volume_defaults"`
 	Zone           types.String `tfsdk:"zone"`
 }
 
-type AppstackSiteFleetOntapVolumeDefaults struct {
+type AppstackSiteOntapVolumeDefaults struct {
 	Encryption      types.Bool   `tfsdk:"encryption"`
 	ExportPolicy    types.String `tfsdk:"export_policy"`
 	QosPolicyChoice types.Object `tfsdk:"qos_policy_choice"`
@@ -804,13 +805,13 @@ type AppstackSiteFleetOntapVolumeDefaults struct {
 	UnixPermissions types.Int32  `tfsdk:"unix_permissions"`
 }
 
-type AppstackSiteOntapVolumeDefaultsQosPolicyChoice struct {
+type AppstackSiteQosPolicyChoice struct {
 	AdaptiveQosPolicy types.String `tfsdk:"adaptive_qos_policy"`
 	NoQos             types.Bool   `tfsdk:"no_qos"`
 	QosPolicy         types.String `tfsdk:"qos_policy"`
 }
 
-type AppstackSiteStorageDeviceNetappTridentTypeNetappBackendOntapSan struct {
+type AppstackSiteNetappBackendOntapSan struct {
 	ChapChoice           types.Object `tfsdk:"chap_choice"`
 	ClientCertificate    types.String `tfsdk:"client_certificate"`
 	ClientPrivateKey     types.Object `tfsdk:"client_private_key"`
@@ -831,12 +832,12 @@ type AppstackSiteStorageDeviceNetappTridentTypeNetappBackendOntapSan struct {
 	VolumeDefaults       types.Object `tfsdk:"volume_defaults"`
 }
 
-type AppstackSiteStorageDeviceNetappBackendOntapSanTypeChapChoice struct {
+type AppstackSiteChapChoice struct {
 	NoChap  types.Bool   `tfsdk:"no_chap"`
 	UseChap types.Object `tfsdk:"use_chap"`
 }
 
-type AppstackSiteStorageDeviceNetappBackendOntapSanTypeUseChap struct {
+type AppstackSiteUseChap struct {
 	ChapInitiatorSecret       types.Object `tfsdk:"chap_initiator_secret"`
 	ChapTargetInitiatorSecret types.Object `tfsdk:"chap_target_initiator_secret"`
 	ChapTargetUsername        types.String `tfsdk:"chap_target_username"`
@@ -848,24 +849,24 @@ type AppstackSiteStorageDeviceNetappBackendOntapSanTypeDataLifChoice struct {
 	DataLifIp      types.String `tfsdk:"data_lif_ip"`
 }
 
-type AppstackSiteStorageDeviceNetappBackendOntapSanTypeManagementLifChoice struct {
+type AppstackSiteStorageDeviceNetappBackendOntapSanTypeMgmtLifChoice struct {
 	ManagementLifDnsName types.String `tfsdk:"management_lif_dns_name"`
 	ManagementLifIp      types.String `tfsdk:"management_lif_ip"`
 }
 
-type AppstackSiteFleetStorageDeviceTypePureServiceOrchestrator struct {
+type AppstackSiteFleetStorageDeviceTypePureSvcOrchestrator struct {
 	Arrays                types.Object `tfsdk:"arrays"`
 	ClusterId             types.String `tfsdk:"cluster_id"`
 	EnableStorageTopology types.Bool   `tfsdk:"enable_storage_topology"`
 	EnableStrictTopology  types.Bool   `tfsdk:"enable_strict_topology"`
 }
 
-type AppstackSiteFleetPsoArrayConfiguration struct {
+type AppstackSitePsoArrayCfg struct {
 	FlashArray types.Object `tfsdk:"flash_array"`
 	FlashBlade types.Object `tfsdk:"flash_blade"`
 }
 
-type AppstackSiteFleetFlashArrayType struct {
+type AppstackSiteFlashArrayType struct {
 	DefaultFsOpt              types.String `tfsdk:"default_fs_opt"`
 	DefaultFsType             types.String `tfsdk:"default_fs_type"`
 	DefaultMountOpts          types.List   `tfsdk:"default_mount_opts"`
@@ -875,24 +876,24 @@ type AppstackSiteFleetFlashArrayType struct {
 	SanType                   types.String `tfsdk:"san_type"`
 }
 
-type AppstackSiteFleetFlashArrayEndpoint struct {
+type AppstackSiteFlashArrayEndpoint struct {
 	ApiToken           types.Object `tfsdk:"api_token"`
 	Labels             types.Map    `tfsdk:"labels"`
 	MgmtEndpointChoice types.Object `tfsdk:"mgmt_endpoint_choice"`
 }
 
-type AppstackSiteFlashArrayEndpointMgmtEndpointChoice struct {
+type AppstackSiteMgmtEndpointChoice struct {
 	MgmtDnsName types.String `tfsdk:"mgmt_dns_name"`
 	MgmtIp      types.String `tfsdk:"mgmt_ip"`
 }
 
-type AppstackSiteFleetFlashBladeType struct {
+type AppstackSiteFlashBladeType struct {
 	EnableSnapshotDirectory types.Bool   `tfsdk:"enable_snapshot_directory"`
 	ExportRules             types.String `tfsdk:"export_rules"`
 	FlashBlades             types.List   `tfsdk:"flash_blades"`
 }
 
-type AppstackSiteFleetFlashBladeEndpoint struct {
+type AppstackSiteFlashBladeEndpoint struct {
 	ApiToken           types.Object `tfsdk:"api_token"`
 	Lables             types.Map    `tfsdk:"lables"`
 	MgmtEndpointChoice types.Object `tfsdk:"mgmt_endpoint_choice"`
@@ -904,27 +905,27 @@ type AppstackSiteFlashBladeEndpointMgmtEndpointChoice struct {
 	MgmtIp      types.String `tfsdk:"mgmt_ip"`
 }
 
-type AppstackSiteFlashBladeEndpointNfsEndpointChoice struct {
+type AppstackSiteNfsEndpointChoice struct {
 	NfsEndpointDnsName types.String `tfsdk:"nfs_endpoint_dns_name"`
 	NfsEndpointIp      types.String `tfsdk:"nfs_endpoint_ip"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageInterfaceChoice struct {
+type AppstackSiteStorageIfaceChoice struct {
 	NoStorageInterfaces  types.Bool   `tfsdk:"no_storage_interfaces"`
 	StorageInterfaceList types.Object `tfsdk:"storage_interface_list"`
 }
 
-type AppstackSiteVssStorageConfigurationStorageInterfaceList struct {
+type AppstackSiteStorageIfaceList struct {
 	StorageInterfaces types.List `tfsdk:"storage_interfaces"`
 }
 
-type AppstackSiteVoltstackSiteStorageInterfaceType struct {
+type AppstackSiteStorageIfaceType struct {
 	Description      types.String `tfsdk:"description"`
 	Labels           types.Map    `tfsdk:"labels"`
 	StorageInterface types.Object `tfsdk:"storage_interface"`
 }
 
-type AppstackSiteNetworkInterfaceEthernetInterfaceType struct {
+type AppstackSiteEthernetIfaceType struct {
 	AddressChoice     types.Object `tfsdk:"address_choice"`
 	Device            types.String `tfsdk:"device"`
 	Ipv6AddressChoice types.Object `tfsdk:"ipv6_address_choice"`
@@ -937,31 +938,31 @@ type AppstackSiteNetworkInterfaceEthernetInterfaceType struct {
 	VlanChoice        types.Object `tfsdk:"vlan_choice"`
 }
 
-type AppstackSiteViewsVolterraSoftwareType struct {
+type AppstackSiteVolterraSoftwareType struct {
 	VolterraSwVersionChoice types.Object `tfsdk:"volterra_sw_version_choice"`
 }
 
-type AppstackSiteVolterraSoftwareTypeVolterraSwVersionChoice struct {
+type AppstackSiteVolterraSwVersionChoice struct {
 	DefaultSwVersion        types.Bool   `tfsdk:"default_sw_version"`
 	VolterraSoftwareVersion types.String `tfsdk:"volterra_software_version"`
 }
 
-type AppstackSiteGlobalSpecTypeUsbPolicyChoice struct {
+type AppstackSiteUsbPolicyChoice struct {
 	AllowAllUsb types.Bool   `tfsdk:"allow_all_usb"`
 	DenyAllUsb  types.Bool   `tfsdk:"deny_all_usb"`
 	UsbPolicy   types.Object `tfsdk:"usb_policy"`
 }
 
-type AppstackSiteGlobalSpecTypeVmChoice struct {
+type AppstackSiteVmChoice struct {
 	DisableVm types.Bool `tfsdk:"disable_vm"`
 	EnableVm  types.Bool `tfsdk:"enable_vm"`
 }
 
-type AppstackSiteCommonWafLiveSignaturesUpdate struct {
+type AppstackSiteLiveSignaturesUpdate struct {
 	SignaturesUpdateModeChoice types.Object `tfsdk:"signatures_update_mode_choice"`
 }
 
-type AppstackSiteLiveSignaturesUpdateSignaturesUpdateModeChoice struct {
+type AppstackSiteSignaturesUpdateModeChoice struct {
 	Automatic types.Bool `tfsdk:"automatic"`
 	Manual    types.Bool `tfsdk:"manual"`
 }
@@ -2733,6 +2734,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorageIscsiChapPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2767,6 +2769,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2916,6 +2919,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2964,6 +2968,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3178,6 +3183,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3212,6 +3218,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3246,6 +3253,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3294,6 +3302,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3572,6 +3581,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3660,6 +3670,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -4288,7 +4299,7 @@ var AppstackSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -4309,8 +4320,8 @@ func (d *DataSourceF5XCAppstackSite) Metadata(ctx context.Context, request datas
 func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
+		MarkdownDescription: "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
+		Description:         "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -5048,7 +5059,7 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -5114,7 +5125,7 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																			Computed:    true,
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -5695,7 +5706,7 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -5827,7 +5838,7 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -7047,8 +7058,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -7115,8 +7133,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -7255,8 +7280,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -7382,8 +7414,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -7717,8 +7756,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																																	Required:    false,
 																																	Optional:    false,
 																																	Computed:    true,
+																																	Sensitive:   true,
 																																},
 																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															Required:    false,
+																															Optional:    false,
+																															Computed:    true,
 																														},
 																													},
 																												},
@@ -7779,8 +7825,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																																	Required:    false,
 																																	Optional:    false,
 																																	Computed:    true,
+																																	Sensitive:   true,
 																																},
 																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															Required:    false,
+																															Optional:    false,
+																															Computed:    true,
 																														},
 																													},
 																												},
@@ -7863,8 +7916,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -7990,8 +8050,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -8355,8 +8422,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																																Required:    false,
 																																Optional:    false,
 																																Computed:    true,
+																																Sensitive:   true,
 																															},
 																														},
+																													},
+																													"none": schema.BoolAttribute{
+																														Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														Required:    false,
+																														Optional:    false,
+																														Computed:    true,
 																													},
 																												},
 																											},
@@ -8486,8 +8560,15 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																																Required:    false,
 																																Optional:    false,
 																																Computed:    true,
+																																Sensitive:   true,
 																															},
 																														},
+																													},
+																													"none": schema.BoolAttribute{
+																														Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														Required:    false,
+																														Optional:    false,
+																														Computed:    true,
 																													},
 																												},
 																											},
@@ -9174,7 +9255,7 @@ func (r *DataSourceF5XCAppstackSite) Schema(ctx context.Context, request datasou
 																	},
 																},
 																"mtu": schema.Int64Attribute{
-																	Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																	Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -9514,7 +9595,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "appstack_site", err))
 		return
 	}
 
@@ -9576,12 +9657,8 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// data SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
 	// false
@@ -9593,7 +9670,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		blockedServicesChoiceChoices := specData.GetBlockedServicesChoice()
 
 		// The model struct that will be populated by the nested template.
-		var blockedServicesChoiceChoicesModel = &AppstackSiteGlobalSpecTypeBlockedServicesChoice{}
+		var blockedServicesChoiceChoicesModel = &AppstackSiteBlockedServicesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -9754,7 +9831,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		bondChoiceChoices := specData.GetBondChoice()
 
 		// The model struct that will be populated by the nested template.
-		var bondChoiceChoicesModel = &AppstackSiteGlobalSpecTypeBondChoice{}
+		var bondChoiceChoicesModel = &AppstackSiteBondChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -9772,9 +9849,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 				if len(bondDeviceListElement.GetBondDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					bondDevicesElements := make([]AppstackSiteFleetFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
+					bondDevicesElements := make([]AppstackSiteFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
 					for _, bondDevicesElement := range bondDeviceListElement.GetBondDevices() {
-						appstackSiteFleetFleetBondDeviceTypeModel := AppstackSiteFleetFleetBondDeviceType{}
+						appstackSiteFleetBondDeviceTypeModel := AppstackSiteFleetBondDeviceType{}
 
 						// data specToModelNested RequiredArrayOfStringField --> Devices
 						if len(bondDevicesElement.GetDevices()) > 0 {
@@ -9783,9 +9860,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if response.Diagnostics.HasError() {
 								return
 							}
-							appstackSiteFleetFleetBondDeviceTypeModel.Devices = listValue
+							appstackSiteFleetBondDeviceTypeModel.Devices = listValue
 						} else {
-							appstackSiteFleetFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
+							appstackSiteFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> LacpChoice
@@ -9846,27 +9923,27 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							appstackSiteFleetFleetBondDeviceTypeModel.LacpChoice = finalObj
+							appstackSiteFleetBondDeviceTypeModel.LacpChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							appstackSiteFleetFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
+							appstackSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredUintField --> LinkPollingInterval
-						appstackSiteFleetFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
+						appstackSiteFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
 
 						// data specToModelNested RequiredUintField --> LinkUpDelay
-						appstackSiteFleetFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
+						appstackSiteFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
 
 						// data specToModelNested RequiredStringField --> Name
 						if bondDevicesElement.GetName() != "" {
-							appstackSiteFleetFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
+							appstackSiteFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
 						} else {
 							// Empty string, set to null
-							appstackSiteFleetFleetBondDeviceTypeModel.Name = types.StringNull()
+							appstackSiteFleetBondDeviceTypeModel.Name = types.StringNull()
 						}
 
-						bondDevicesElements = append(bondDevicesElements, appstackSiteFleetFleetBondDeviceTypeModel)
+						bondDevicesElements = append(bondDevicesElements, appstackSiteFleetBondDeviceTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9926,19 +10003,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> Coordinates
 	if specData.GetCoordinates() != nil {
-		var appstackSiteSiteCoordinatesModel = &AppstackSiteSiteCoordinates{}
+		var appstackSiteCoordinatesModel = &AppstackSiteCoordinates{}
 		coordinatesElement := specData.GetCoordinates()
 
 		// data specToModelNested FloatField --> Latitude
-		appstackSiteSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
+		appstackSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
 
 		// data specToModelNested FloatField --> Longitude
-		appstackSiteSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
+		appstackSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
 
 		coordinatesObj, coordinatesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteCoordinatesModelAttributeMap,
-			appstackSiteSiteCoordinatesModel,
+			appstackSiteCoordinatesModel,
 		)
 		response.Diagnostics.Append(coordinatesDiags...)
 		data.Coordinates = coordinatesObj
@@ -9948,45 +10025,45 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> CustomDns
 	if specData.GetCustomDns() != nil {
-		var appstackSiteViewsCustomDNSModel = &AppstackSiteViewsCustomDNS{}
+		var appstackSiteCustomDNSModel = &AppstackSiteCustomDNS{}
 		customDnsElement := specData.GetCustomDns()
 
 		// data specToModelNested StringField --> InsideNameserver
 		if customDnsElement.GetInsideNameserver() != "" {
-			appstackSiteViewsCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
+			appstackSiteCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsCustomDNSModel.InsideNameserver = types.StringNull()
+			appstackSiteCustomDNSModel.InsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> InsideNameserverV6
 		if customDnsElement.GetInsideNameserverV6() != "" {
-			appstackSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
+			appstackSiteCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringNull()
+			appstackSiteCustomDNSModel.InsideNameserverV6 = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserver
 		if customDnsElement.GetOutsideNameserver() != "" {
-			appstackSiteViewsCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
+			appstackSiteCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsCustomDNSModel.OutsideNameserver = types.StringNull()
+			appstackSiteCustomDNSModel.OutsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserverV6
 		if customDnsElement.GetOutsideNameserverV6() != "" {
-			appstackSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
+			appstackSiteCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringNull()
+			appstackSiteCustomDNSModel.OutsideNameserverV6 = types.StringNull()
 		}
 
 		customDnsObj, customDnsDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteCustomDnsModelAttributeMap,
-			appstackSiteViewsCustomDNSModel,
+			appstackSiteCustomDNSModel,
 		)
 		response.Diagnostics.Append(customDnsDiags...)
 		data.CustomDns = customDnsObj
@@ -10004,7 +10081,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		gpuChoiceChoices := specData.GetGpuChoice()
 
 		// The model struct that will be populated by the nested template.
-		var gpuChoiceChoicesModel = &AppstackSiteGlobalSpecTypeGpuChoice{}
+		var gpuChoiceChoicesModel = &AppstackSiteGpuChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -10102,7 +10179,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		k8sClusterChoiceChoices := specData.GetK8SClusterChoice()
 
 		// The model struct that will be populated by the nested template.
-		var k8sClusterChoiceChoicesModel = &AppstackSiteGlobalSpecTypeK8SClusterChoice{}
+		var k8sClusterChoiceChoicesModel = &AppstackSiteK8SClusterChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -10182,7 +10259,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var appstackSiteViewsKubernetesUpgradeDrainModel = &AppstackSiteViewsKubernetesUpgradeDrain{}
+		var appstackSiteK8sUpgradeDrainModel = &AppstackSiteK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -10284,16 +10361,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appstackSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			appstackSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			appstackSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteKubernetesUpgradeDrainModelAttributeMap,
-			appstackSiteViewsKubernetesUpgradeDrainModel,
+			appstackSiteK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -10314,7 +10391,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		logsReceiverChoiceChoices := specData.GetLogsReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &AppstackSiteGlobalSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &AppstackSiteLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -10393,28 +10470,28 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> MasterNodeConfiguration
-	masterNodeConfigurationElementsSpectToModel := make([]AppstackSiteViewsMasterNode, 0, len(specData.GetMasterNodeConfiguration()))
+	masterNodeConfigurationElementsSpectToModel := make([]AppstackSiteMasterNode, 0, len(specData.GetMasterNodeConfiguration()))
 
 	for _, masterNodeConfigurationElement := range specData.GetMasterNodeConfiguration() {
-		appstackSiteViewsMasterNodeModel := AppstackSiteViewsMasterNode{}
+		appstackSiteMasterNodeModel := AppstackSiteMasterNode{}
 
 		// data specToModelNested RequiredStringField --> Name
 		if masterNodeConfigurationElement.GetName() != "" {
-			appstackSiteViewsMasterNodeModel.Name = types.StringValue(masterNodeConfigurationElement.GetName())
+			appstackSiteMasterNodeModel.Name = types.StringValue(masterNodeConfigurationElement.GetName())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsMasterNodeModel.Name = types.StringNull()
+			appstackSiteMasterNodeModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> PublicIp
 		if masterNodeConfigurationElement.GetPublicIp() != "" {
-			appstackSiteViewsMasterNodeModel.PublicIp = types.StringValue(masterNodeConfigurationElement.GetPublicIp())
+			appstackSiteMasterNodeModel.PublicIp = types.StringValue(masterNodeConfigurationElement.GetPublicIp())
 		} else {
 			// Empty string, set to null
-			appstackSiteViewsMasterNodeModel.PublicIp = types.StringNull()
+			appstackSiteMasterNodeModel.PublicIp = types.StringNull()
 		}
 
-		masterNodeConfigurationElementsSpectToModel = append(masterNodeConfigurationElementsSpectToModel, appstackSiteViewsMasterNodeModel)
+		masterNodeConfigurationElementsSpectToModel = append(masterNodeConfigurationElementsSpectToModel, appstackSiteMasterNodeModel)
 	}
 
 	{
@@ -10442,7 +10519,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		networkCfgChoiceChoices := specData.GetNetworkCfgChoice()
 
 		// The model struct that will be populated by the nested template.
-		var networkCfgChoiceChoicesModel = &AppstackSiteGlobalSpecTypeNetworkCfgChoice{}
+		var networkCfgChoiceChoicesModel = &AppstackSiteNetCfgChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -10626,9 +10703,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]AppstackSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]AppstackSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									appstackSiteViewsGlobalNetworkConnectionTypeModel := AppstackSiteViewsGlobalNetworkConnectionType{}
+									appstackSiteGlobalNetConnTypeModel := AppstackSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -10797,13 +10874,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										appstackSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										appstackSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, appstackSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, appstackSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10895,9 +10972,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(interfaceListElement.GetInterfaces()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								interfacesElements := make([]AppstackSiteVoltstackSiteInterface, 0, len(interfaceListElement.GetInterfaces()))
+								interfacesElements := make([]AppstackSiteIface, 0, len(interfaceListElement.GetInterfaces()))
 								for _, interfacesElement := range interfaceListElement.GetInterfaces() {
-									appstackSiteVoltstackSiteInterfaceModel := AppstackSiteVoltstackSiteInterface{}
+									appstackSiteIfaceModel := AppstackSiteIface{}
 
 									// data specToModelNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
 									// <no value>
@@ -10942,18 +11019,18 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteVoltstackSiteInterfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
+										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteVoltstackSiteInterfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
+										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested StringField --> Description
 									if interfacesElement.GetDescription() != "" {
-										appstackSiteVoltstackSiteInterfaceModel.Description = types.StringValue(interfacesElement.GetDescription())
+										appstackSiteIfaceModel.Description = types.StringValue(interfacesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										appstackSiteVoltstackSiteInterfaceModel.Description = types.StringNull()
+										appstackSiteIfaceModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> InterfaceChoice
@@ -11277,9 +11354,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if len(dhcpServerElement.GetDhcpNetworks()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																dhcpNetworksElements := make([]AppstackSiteNetworkInterfaceDHCPNetworkType, 0, len(dhcpServerElement.GetDhcpNetworks()))
+																dhcpNetworksElements := make([]AppstackSiteDHCPNetType, 0, len(dhcpServerElement.GetDhcpNetworks()))
 																for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
-																	appstackSiteNetworkInterfaceDHCPNetworkTypeModel := AppstackSiteNetworkInterfaceDHCPNetworkType{}
+																	appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
 																	// data specToModelNested RequiredOneOfField --> DnsChoice
 																	// <no value>
@@ -11325,10 +11402,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = finalObj
+																		appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredOneOfField --> GatewayChoice
@@ -11384,10 +11461,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = finalObj
+																		appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -11425,10 +11502,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+																		appstackSiteDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredEnumField --> PoolSettings
@@ -11440,36 +11517,36 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = listValue
+																		appstackSiteDHCPNetTypeModel.PoolSettings = listValue
 																	} else {
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																		appstackSiteDHCPNetTypeModel.PoolSettings = types.ListNull(types.StringType)
 																	}
 
 																	// data specToModelNested ArrayOfPointerField --> Pools
 																	if len(dhcpNetworksElement.GetPools()) > 0 {
 																		// Step 1: Always create a slice of model structs from the spec data.
 																		// This slice serves as an intermediate representation.
-																		poolsElements := make([]AppstackSiteNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+																		poolsElements := make([]AppstackSiteDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
 																		for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																			appstackSiteNetworkInterfaceDHCPPoolTypeModel := AppstackSiteNetworkInterfaceDHCPPoolType{}
+																			appstackSiteDHCPPoolTypeModel := AppstackSiteDHCPPoolType{}
 
 																			// data specToModelNested StringField --> EndIp
 																			if poolsElement.GetEndIp() != "" {
-																				appstackSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																				appstackSiteDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																			} else {
 																				// Empty string, set to null
-																				appstackSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+																				appstackSiteDHCPPoolTypeModel.EndIp = types.StringNull()
 																			}
 
 																			// data specToModelNested StringField --> StartIp
 																			if poolsElement.GetStartIp() != "" {
-																				appstackSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																				appstackSiteDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																			} else {
 																				// Empty string, set to null
-																				appstackSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+																				appstackSiteDHCPPoolTypeModel.StartIp = types.StringNull()
 																			}
 
-																			poolsElements = append(poolsElements, appstackSiteNetworkInterfaceDHCPPoolTypeModel)
+																			poolsElements = append(poolsElements, appstackSiteDHCPPoolTypeModel)
 																		}
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11478,16 +11555,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+																		appstackSiteDHCPNetTypeModel.Pools = poolsListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		appstackSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
+																		appstackSiteDHCPNetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
 																	}
 
-																	dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteNetworkInterfaceDHCPNetworkTypeModel)
+																	dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteDHCPNetTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11656,10 +11733,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 																		// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																		if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																			interfaceIpMapGoMap := make(map[string]AppstackSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																			interfaceIpMapGoMap := make(map[string]AppstackSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																			for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																				interfaceIpMapItem := AppstackSiteNetworkInterfaceStaticIpParametersNodeType{}
+																				interfaceIpMapItem := AppstackSiteStaticIpParametersNodeType{}
 
 																				// data specToModelNested StringField --> DefaultGw
 																				if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -11889,9 +11966,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																					if len(statefulElement.GetDhcpNetworks()) > 0 {
 																						// Step 1: Always create a slice of model structs from the spec data.
 																						// This slice serves as an intermediate representation.
-																						dhcpNetworksElements := make([]AppstackSiteNetworkInterfaceDHCPIPV6NetworkType, 0, len(statefulElement.GetDhcpNetworks()))
+																						dhcpNetworksElements := make([]AppstackSiteDHCPIPV6NetType, 0, len(statefulElement.GetDhcpNetworks()))
 																						for _, dhcpNetworksElement := range statefulElement.GetDhcpNetworks() {
-																							appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel := AppstackSiteNetworkInterfaceDHCPIPV6NetworkType{}
+																							appstackSiteDHCPIPV6NetTypeModel := AppstackSiteDHCPIPV6NetType{}
 
 																							// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
 																							// <no value>
@@ -11928,10 +12005,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = finalObj
+																								appstackSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																								appstackSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 																							}
 
 																							// data specToModelNested RequiredEnumField --> PoolSettings
@@ -11943,36 +12020,36 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																								if response.Diagnostics.HasError() {
 																									return
 																								}
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = listValue
+																								appstackSiteDHCPIPV6NetTypeModel.PoolSettings = listValue
 																							} else {
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																								appstackSiteDHCPIPV6NetTypeModel.PoolSettings = types.ListNull(types.StringType)
 																							}
 
 																							// data specToModelNested ArrayOfPointerField --> Pools
 																							if len(dhcpNetworksElement.GetPools()) > 0 {
 																								// Step 1: Always create a slice of model structs from the spec data.
 																								// This slice serves as an intermediate representation.
-																								poolsElements := make([]AppstackSiteNetworkInterfaceDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
+																								poolsElements := make([]AppstackSiteDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
 																								for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																									appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel := AppstackSiteNetworkInterfaceDHCPIPV6PoolType{}
+																									appstackSiteDHCPIPV6PoolTypeModel := AppstackSiteDHCPIPV6PoolType{}
 
 																									// data specToModelNested StringField --> EndIp
 																									if poolsElement.GetEndIp() != "" {
-																										appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																										appstackSiteDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																									} else {
 																										// Empty string, set to null
-																										appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
+																										appstackSiteDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
 																									}
 
 																									// data specToModelNested StringField --> StartIp
 																									if poolsElement.GetStartIp() != "" {
-																										appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																										appstackSiteDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																									} else {
 																										// Empty string, set to null
-																										appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
+																										appstackSiteDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
 																									}
 
-																									poolsElements = append(poolsElements, appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel)
+																									poolsElements = append(poolsElements, appstackSiteDHCPIPV6PoolTypeModel)
 																								}
 																								// CASE 1: The target field is a `types.List` or an attribute map.
 																								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11981,16 +12058,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																								if response.Diagnostics.HasError() {
 																									return
 																								}
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = poolsListValue
+																								appstackSiteDHCPIPV6NetTypeModel.Pools = poolsListValue
 
 																							} else {
 																								// The source list is empty or nil.
 																								// CASE 1: The target field is a `types.List` or an attribute map.
 																								// Assign a null `types.ListValue`.
-																								appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
+																								appstackSiteDHCPIPV6NetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
 																							}
 
-																							dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel)
+																							dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteDHCPIPV6NetTypeModel)
 																						}
 																						// CASE 1: The target field is a `types.List` or an attribute map.
 																						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -12147,7 +12224,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		// data specToModelNested PointerField --> DnsConfig
 																		if routerElement.GetDnsConfig() != nil {
 																			// Create the nested Go struct
-																			appstackSiteNetworkInterfaceIPV6DnsConfigModel := &AppstackSiteNetworkInterfaceIPV6DnsConfig{}
+																			appstackSiteIPV6DnsConfigModel := &AppstackSiteIPV6DnsConfig{}
 																			dnsConfigElement := routerElement.GetDnsConfig()
 
 																			// Recursively populate the nested struct
@@ -12290,19 +12367,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																				}
 
 																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				appstackSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = finalObj
+																				appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				appstackSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																				appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 																			}
 
 																			// This field needs to be converted to a types.ObjectValue before assignment.
-																			appstackSiteNetworkInterfaceIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, appstackSiteNetworkInterfaceIPV6DnsConfigModel)
+																			appstackSiteIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, appstackSiteIPV6DnsConfigModel)
 																			response.Diagnostics.Append(objDiags...)
 																			if response.Diagnostics.HasError() {
 																				return
 																			}
-																			routerAttributeMap["dns_config"] = appstackSiteNetworkInterfaceIPV6DnsConfigModelObj
+																			routerAttributeMap["dns_config"] = appstackSiteIPV6DnsConfigModelObj
 
 																		} else {
 																			// The source field is nil (e.g. redacted by the API).
@@ -12398,10 +12475,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 																		// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																		if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																			interfaceIpMapGoMap := make(map[string]AppstackSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																			interfaceIpMapGoMap := make(map[string]AppstackSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																			for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																				interfaceIpMapItem := AppstackSiteNetworkInterfaceStaticIpParametersNodeType{}
+																				interfaceIpMapItem := AppstackSiteStaticIpParametersNodeType{}
 
 																				// data specToModelNested StringField --> DefaultGw
 																				if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -12961,7 +13038,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 												// data specToModelNested RequiredPointerField --> StaticIp
 												if tunnelInterfaceElement.GetStaticIp() != nil {
 													// Create the nested Go struct
-													appstackSiteNetworkInterfaceStaticIPParametersTypeModel := &AppstackSiteNetworkInterfaceStaticIPParametersType{}
+													appstackSiteStaticIPParametersTypeModel := &AppstackSiteStaticIPParametersType{}
 													staticIpElement := tunnelInterfaceElement.GetStaticIp()
 
 													// Recursively populate the nested struct
@@ -12990,10 +13067,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 																// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																	interfaceIpMapGoMap := make(map[string]AppstackSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																	interfaceIpMapGoMap := make(map[string]AppstackSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																	for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																		interfaceIpMapItem := AppstackSiteNetworkInterfaceStaticIpParametersNodeType{}
+																		interfaceIpMapItem := AppstackSiteStaticIpParametersNodeType{}
 
 																		// data specToModelNested StringField --> DefaultGw
 																		if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -13091,19 +13168,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														appstackSiteNetworkInterfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
+														appstackSiteStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														appstackSiteNetworkInterfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
+														appstackSiteStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
 													}
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													appstackSiteNetworkInterfaceStaticIPParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceStaticIpModelAttributeMap, appstackSiteNetworkInterfaceStaticIPParametersTypeModel)
+													appstackSiteStaticIPParametersTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceStaticIpModelAttributeMap, appstackSiteStaticIPParametersTypeModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													tunnelInterfaceAttributeMap["static_ip"] = appstackSiteNetworkInterfaceStaticIPParametersTypeModelObj
+													tunnelInterfaceAttributeMap["static_ip"] = appstackSiteStaticIPParametersTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -13189,10 +13266,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteVoltstackSiteInterfaceModel.InterfaceChoice = finalObj
+										appstackSiteIfaceModel.InterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteVoltstackSiteInterfaceModel.InterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceModelAttributeMap)
+										appstackSiteIfaceModel.InterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested MapOfStringField --> Labels
@@ -13204,16 +13281,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											return
 										}
 										// Assign the typed map to the model
-										appstackSiteVoltstackSiteInterfaceModel.Labels = labelsMap
+										appstackSiteIfaceModel.Labels = labelsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										appstackSiteVoltstackSiteInterfaceModel.Labels = types.MapNull(types.StringType)
+										appstackSiteIfaceModel.Labels = types.MapNull(types.StringType)
 									}
 
-									interfacesElements = append(interfacesElements, appstackSiteVoltstackSiteInterfaceModel)
+									interfacesElements = append(interfacesElements, appstackSiteIfaceModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13703,9 +13780,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										if len(staticRoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]AppstackSiteVirtualNetworkStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]AppstackSiteStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticRoutesElement.GetStaticRoutes() {
-												appstackSiteVirtualNetworkStaticRouteViewTypeModel := AppstackSiteVirtualNetworkStaticRouteViewType{}
+												appstackSiteStaticRouteViewTypeModel := AppstackSiteStaticRouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -13720,9 +13797,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													if response.Diagnostics.HasError() {
 														return
 													}
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+													appstackSiteStaticRouteViewTypeModel.Attrs = listValue
 												} else {
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													appstackSiteStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -13732,9 +13809,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													if response.Diagnostics.HasError() {
 														return
 													}
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+													appstackSiteStaticRouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													appstackSiteStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -13782,9 +13859,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]AppstackSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]AppstackSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	appstackSiteNodeInterfaceInfoModel := AppstackSiteNodeInterfaceInfo{}
+																	appstackSiteNodeIfaceInfoModel := AppstackSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -13827,24 +13904,24 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		appstackSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		appstackSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
+																		appstackSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		appstackSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		appstackSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		appstackSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, appstackSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, appstackSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13886,13 +13963,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+													appstackSiteStaticRouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													appstackSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													appstackSiteStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, appstackSiteVirtualNetworkStaticRouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, appstackSiteStaticRouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13975,9 +14052,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										if len(staticV6RoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]AppstackSiteVirtualNetworkStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]AppstackSiteStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticV6RoutesElement.GetStaticRoutes() {
-												appstackSiteVirtualNetworkStaticV6RouteViewTypeModel := AppstackSiteVirtualNetworkStaticV6RouteViewType{}
+												appstackSiteStaticV6RouteViewTypeModel := AppstackSiteStaticV6RouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -13992,9 +14069,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													if response.Diagnostics.HasError() {
 														return
 													}
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
+													appstackSiteStaticV6RouteViewTypeModel.Attrs = listValue
 												} else {
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													appstackSiteStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -14004,9 +14081,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													if response.Diagnostics.HasError() {
 														return
 													}
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
+													appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -14054,9 +14131,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]AppstackSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]AppstackSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	appstackSiteNodeInterfaceInfoModel := AppstackSiteNodeInterfaceInfo{}
+																	appstackSiteNodeIfaceInfoModel := AppstackSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -14099,24 +14176,24 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		appstackSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		appstackSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
+																		appstackSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		appstackSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		appstackSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		appstackSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, appstackSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, appstackSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14158,13 +14235,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
+													appstackSiteStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													appstackSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													appstackSiteStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, appstackSiteVirtualNetworkStaticV6RouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, appstackSiteStaticV6RouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14301,7 +14378,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> OfflineSurvivabilityMode
 	if specData.GetOfflineSurvivabilityMode() != nil {
-		var appstackSiteViewsOfflineSurvivabilityModeTypeModel = &AppstackSiteViewsOfflineSurvivabilityModeType{}
+		var appstackSiteOfflineSurvivabilityModeTypeModel = &AppstackSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
 		// data specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
@@ -14347,16 +14424,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appstackSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
+			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteOfflineSurvivabilityModeModelAttributeMap,
-			appstackSiteViewsOfflineSurvivabilityModeTypeModel,
+			appstackSiteOfflineSurvivabilityModeTypeModel,
 		)
 		response.Diagnostics.Append(offlineSurvivabilityModeDiags...)
 		data.OfflineSurvivabilityMode = offlineSurvivabilityModeObj
@@ -14365,16 +14442,12 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 	}
 
 	// data SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// data SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
-		var appstackSiteViewsOperatingSystemTypeModel = &AppstackSiteViewsOperatingSystemType{}
+		var appstackSiteOperatingSystemTypeModel = &AppstackSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
 		// data specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
@@ -14421,16 +14494,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appstackSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
+			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap)
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteOsModelAttributeMap,
-			appstackSiteViewsOperatingSystemTypeModel,
+			appstackSiteOperatingSystemTypeModel,
 		)
 		response.Diagnostics.Append(osDiags...)
 		data.Os = osObj
@@ -14448,7 +14521,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		sriovInterfaceChoiceChoices := specData.GetSriovInterfaceChoice()
 
 		// The model struct that will be populated by the nested template.
-		var sriovInterfaceChoiceChoicesModel = &AppstackSiteGlobalSpecTypeSriovInterfaceChoice{}
+		var sriovInterfaceChoiceChoicesModel = &AppstackSiteSriovIfaceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -14475,25 +14548,25 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 				if len(sriovInterfacesElement.GetSriovInterface()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					sriovInterfaceElements := make([]AppstackSiteFleetSriovInterface, 0, len(sriovInterfacesElement.GetSriovInterface()))
+					sriovInterfaceElements := make([]AppstackSiteSriovIface, 0, len(sriovInterfacesElement.GetSriovInterface()))
 					for _, sriovInterfaceElement := range sriovInterfacesElement.GetSriovInterface() {
-						appstackSiteFleetSriovInterfaceModel := AppstackSiteFleetSriovInterface{}
+						appstackSiteSriovIfaceModel := AppstackSiteSriovIface{}
 
 						// data specToModelNested RequiredStringField --> InterfaceName
 						if sriovInterfaceElement.GetInterfaceName() != "" {
-							appstackSiteFleetSriovInterfaceModel.InterfaceName = types.StringValue(sriovInterfaceElement.GetInterfaceName())
+							appstackSiteSriovIfaceModel.InterfaceName = types.StringValue(sriovInterfaceElement.GetInterfaceName())
 						} else {
 							// Empty string, set to null
-							appstackSiteFleetSriovInterfaceModel.InterfaceName = types.StringNull()
+							appstackSiteSriovIfaceModel.InterfaceName = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> NumberOfVfioVfs
-						appstackSiteFleetSriovInterfaceModel.NumberOfVfioVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfioVfs()))
+						appstackSiteSriovIfaceModel.NumberOfVfioVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfioVfs()))
 
 						// data specToModelNested RequiredUintField --> NumberOfVfs
-						appstackSiteFleetSriovInterfaceModel.NumberOfVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfs()))
+						appstackSiteSriovIfaceModel.NumberOfVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfs()))
 
-						sriovInterfaceElements = append(sriovInterfaceElements, appstackSiteFleetSriovInterfaceModel)
+						sriovInterfaceElements = append(sriovInterfaceElements, appstackSiteSriovIfaceModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14552,7 +14625,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		storageCfgChoiceChoices := specData.GetStorageCfgChoice()
 
 		// The model struct that will be populated by the nested template.
-		var storageCfgChoiceChoicesModel = &AppstackSiteGlobalSpecTypeStorageCfgChoice{}
+		var storageCfgChoiceChoicesModel = &AppstackSiteStorageCfgChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -14601,9 +14674,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(staticRoutesElement.GetStaticRoutes()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRoutesElements := make([]AppstackSiteVirtualNetworkStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
+								staticRoutesElements := make([]AppstackSiteStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
 								for _, staticRoutesElement := range staticRoutesElement.GetStaticRoutes() {
-									appstackSiteVirtualNetworkStaticRouteViewTypeModel := AppstackSiteVirtualNetworkStaticRouteViewType{}
+									appstackSiteStaticRouteViewTypeModel := AppstackSiteStaticRouteViewType{}
 
 									// data SpecToModelNested ArrayOfEnumField --> Attrs
 									if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -14618,9 +14691,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										if response.Diagnostics.HasError() {
 											return
 										}
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+										appstackSiteStaticRouteViewTypeModel.Attrs = listValue
 									} else {
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+										appstackSiteStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -14630,9 +14703,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										if response.Diagnostics.HasError() {
 											return
 										}
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+										appstackSiteStaticRouteViewTypeModel.IpPrefixes = listValue
 									} else {
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+										appstackSiteStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -14680,9 +14753,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 												if len(nodeInterfaceElement.GetList()) > 0 {
 													// Step 1: Always create a slice of model structs from the spec data.
 													// This slice serves as an intermediate representation.
-													listElements := make([]AppstackSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+													listElements := make([]AppstackSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 													for _, listElement := range nodeInterfaceElement.GetList() {
-														appstackSiteNodeInterfaceInfoModel := AppstackSiteNodeInterfaceInfo{}
+														appstackSiteNodeIfaceInfoModel := AppstackSiteNodeIfaceInfo{}
 
 														// data specToModelNested ArrayOfPointerField --> Interface
 														if len(listElement.GetInterface()) > 0 {
@@ -14725,24 +14798,24 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if response.Diagnostics.HasError() {
 																return
 															}
-															appstackSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+															appstackSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 														} else {
 															// The source list is empty or nil.
 															// CASE 1: The target field is a `types.List` or an attribute map.
 															// Assign a null `types.ListValue`.
-															appstackSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
+															appstackSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteInterfaceObjectRefModelAttributeMap})
 														}
 
 														// data specToModelNested StringField --> Node
 														if listElement.GetNode() != "" {
-															appstackSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+															appstackSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 														} else {
 															// Empty string, set to null
-															appstackSiteNodeInterfaceInfoModel.Node = types.StringNull()
+															appstackSiteNodeIfaceInfoModel.Node = types.StringNull()
 														}
 
-														listElements = append(listElements, appstackSiteNodeInterfaceInfoModel)
+														listElements = append(listElements, appstackSiteNodeIfaceInfoModel)
 													}
 													// CASE 1: The target field is a `types.List` or an attribute map.
 													// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14784,13 +14857,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+										appstackSiteStaticRouteViewTypeModel.NextHopChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
+										appstackSiteStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
 									}
 
-									staticRoutesElements = append(staticRoutesElements, appstackSiteVirtualNetworkStaticRouteViewTypeModel)
+									staticRoutesElements = append(staticRoutesElements, appstackSiteStaticRouteViewTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14873,9 +14946,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(storageClassListElement.GetStorageClasses()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageClassesElements := make([]AppstackSiteFleetFleetStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
+								storageClassesElements := make([]AppstackSiteFleetStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
 								for _, storageClassesElement := range storageClassListElement.GetStorageClasses() {
-									appstackSiteFleetFleetStorageClassTypeModel := AppstackSiteFleetFleetStorageClassType{}
+									appstackSiteFleetStorageClassTypeModel := AppstackSiteFleetStorageClassType{}
 
 									// data specToModelNested MapOfStringField --> AdvancedStorageParameters
 									if storageClassesElement.GetAdvancedStorageParameters() != nil {
@@ -14886,27 +14959,27 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											return
 										}
 										// Assign the typed map to the model
-										appstackSiteFleetFleetStorageClassTypeModel.AdvancedStorageParameters = advancedStorageParametersMap
+										appstackSiteFleetStorageClassTypeModel.AdvancedStorageParameters = advancedStorageParametersMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										appstackSiteFleetFleetStorageClassTypeModel.AdvancedStorageParameters = types.MapNull(types.StringType)
+										appstackSiteFleetStorageClassTypeModel.AdvancedStorageParameters = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested BoolField --> AllowVolumeExpansion
-									appstackSiteFleetFleetStorageClassTypeModel.AllowVolumeExpansion = types.BoolValue(bool(storageClassesElement.GetAllowVolumeExpansion()))
+									appstackSiteFleetStorageClassTypeModel.AllowVolumeExpansion = types.BoolValue(bool(storageClassesElement.GetAllowVolumeExpansion()))
 
 									// data specToModelNested BoolField --> DefaultStorageClass
-									appstackSiteFleetFleetStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
+									appstackSiteFleetStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
 
 									// data specToModelNested StringField --> Description
 									if storageClassesElement.GetDescription() != "" {
-										appstackSiteFleetFleetStorageClassTypeModel.Description = types.StringValue(storageClassesElement.GetDescription())
+										appstackSiteFleetStorageClassTypeModel.Description = types.StringValue(storageClassesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										appstackSiteFleetFleetStorageClassTypeModel.Description = types.StringNull()
+										appstackSiteFleetStorageClassTypeModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> DeviceChoice
@@ -15164,37 +15237,37 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteFleetFleetStorageClassTypeModel.DeviceChoice = finalObj
+										appstackSiteFleetStorageClassTypeModel.DeviceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteFleetFleetStorageClassTypeModel.DeviceChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceStorageClassListStorageClassesDeviceChoiceModelAttributeMap)
+										appstackSiteFleetStorageClassTypeModel.DeviceChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceStorageClassListStorageClassesDeviceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested StringField --> ReclaimPolicy
 									if storageClassesElement.GetReclaimPolicy() != "" {
-										appstackSiteFleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringValue(storageClassesElement.GetReclaimPolicy())
+										appstackSiteFleetStorageClassTypeModel.ReclaimPolicy = types.StringValue(storageClassesElement.GetReclaimPolicy())
 									} else {
 										// Empty string, set to null
-										appstackSiteFleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringNull()
+										appstackSiteFleetStorageClassTypeModel.ReclaimPolicy = types.StringNull()
 									}
 
 									// data specToModelNested RequiredStringField --> StorageClassName
 									if storageClassesElement.GetStorageClassName() != "" {
-										appstackSiteFleetFleetStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
+										appstackSiteFleetStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
 									} else {
 										// Empty string, set to null
-										appstackSiteFleetFleetStorageClassTypeModel.StorageClassName = types.StringNull()
+										appstackSiteFleetStorageClassTypeModel.StorageClassName = types.StringNull()
 									}
 
 									// data specToModelNested RequiredStringField --> StorageDevice
 									if storageClassesElement.GetStorageDevice() != "" {
-										appstackSiteFleetFleetStorageClassTypeModel.StorageDevice = types.StringValue(storageClassesElement.GetStorageDevice())
+										appstackSiteFleetStorageClassTypeModel.StorageDevice = types.StringValue(storageClassesElement.GetStorageDevice())
 									} else {
 										// Empty string, set to null
-										appstackSiteFleetFleetStorageClassTypeModel.StorageDevice = types.StringNull()
+										appstackSiteFleetStorageClassTypeModel.StorageDevice = types.StringNull()
 									}
 
-									storageClassesElements = append(storageClassesElements, appstackSiteFleetFleetStorageClassTypeModel)
+									storageClassesElements = append(storageClassesElements, appstackSiteFleetStorageClassTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -15277,9 +15350,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(storageDeviceListElement.GetStorageDevices()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageDevicesElements := make([]AppstackSiteFleetFleetStorageDeviceType, 0, len(storageDeviceListElement.GetStorageDevices()))
+								storageDevicesElements := make([]AppstackSiteFleetStorageDeviceType, 0, len(storageDeviceListElement.GetStorageDevices()))
 								for _, storageDevicesElement := range storageDeviceListElement.GetStorageDevices() {
-									appstackSiteFleetFleetStorageDeviceTypeModel := AppstackSiteFleetFleetStorageDeviceType{}
+									appstackSiteFleetStorageDeviceTypeModel := AppstackSiteFleetStorageDeviceType{}
 
 									// data specToModelNested MapOfStringField --> AdvancedAdvancedParameters
 									if storageDevicesElement.GetAdvancedAdvancedParameters() != nil {
@@ -15290,13 +15363,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											return
 										}
 										// Assign the typed map to the model
-										appstackSiteFleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = advancedAdvancedParametersMap
+										appstackSiteFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = advancedAdvancedParametersMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										appstackSiteFleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = types.MapNull(types.StringType)
+										appstackSiteFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredOneOfField --> DeviceChoice
@@ -15433,6 +15506,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															} else {
 																iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorageIscsiChapPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -15594,6 +15676,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															}
 														}
 
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -15713,7 +15804,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															// data specToModelNested PointerField --> AutoExportCidrs
 															if netappBackendOntapNasElement.GetAutoExportCidrs() != nil {
 																// Create the nested Go struct
-																appstackSiteViewsPrefixStringListTypeModel := &AppstackSiteViewsPrefixStringListType{}
+																appstackSitePrefixStringListTypeModel := &AppstackSitePrefixStringListType{}
 																autoExportCidrsElement := netappBackendOntapNasElement.GetAutoExportCidrs()
 
 																// Recursively populate the nested struct
@@ -15725,9 +15816,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	appstackSiteViewsPrefixStringListTypeModel.Ipv6Prefixes = listValue
+																	appstackSitePrefixStringListTypeModel.Ipv6Prefixes = listValue
 																} else {
-																	appstackSiteViewsPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+																	appstackSitePrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
 																}
 
 																// data specToModelNested ArrayOfStringField --> Prefixes
@@ -15737,18 +15828,18 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	appstackSiteViewsPrefixStringListTypeModel.Prefixes = listValue
+																	appstackSitePrefixStringListTypeModel.Prefixes = listValue
 																} else {
-																	appstackSiteViewsPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
+																	appstackSitePrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
 																}
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																appstackSiteViewsPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasAutoExportCidrsModelAttributeMap, appstackSiteViewsPrefixStringListTypeModel)
+																appstackSitePrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasAutoExportCidrsModelAttributeMap, appstackSitePrefixStringListTypeModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																netappBackendOntapNasAttributeMap["auto_export_cidrs"] = appstackSiteViewsPrefixStringListTypeModelObj
+																netappBackendOntapNasAttributeMap["auto_export_cidrs"] = appstackSitePrefixStringListTypeModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -15879,6 +15970,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		} else {
 																			clientPrivateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 																		}
+																	}
+
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																	}
 
 																	// --- End of Choices ---
@@ -16175,6 +16275,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 																	}
 
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -16236,9 +16345,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if len(netappBackendOntapNasElement.GetStorage()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																storageElements := make([]AppstackSiteFleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapNasElement.GetStorage()))
+																storageElements := make([]AppstackSiteOntapVirtualStoragePoolType, 0, len(netappBackendOntapNasElement.GetStorage()))
 																for _, storageElement := range netappBackendOntapNasElement.GetStorage() {
-																	appstackSiteFleetOntapVirtualStoragePoolTypeModel := AppstackSiteFleetOntapVirtualStoragePoolType{}
+																	appstackSiteOntapVirtualStoragePoolTypeModel := AppstackSiteOntapVirtualStoragePoolType{}
 
 																	// data specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
@@ -16249,32 +16358,32 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			return
 																		}
 																		// Assign the typed map to the model
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
 																	} else {
 																		// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 																		// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
 																	}
 
 																	// data specToModelNested PointerField --> VolumeDefaults
 																	if storageElement.GetVolumeDefaults() != nil {
 																		// Create the nested Go struct
-																		appstackSiteFleetOntapVolumeDefaultsModel := &AppstackSiteFleetOntapVolumeDefaults{}
+																		appstackSiteOntapVolumeDefaultsModel := &AppstackSiteOntapVolumeDefaults{}
 																		volumeDefaultsElement := storageElement.GetVolumeDefaults()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested BoolField --> Encryption
-																		appstackSiteFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+																		appstackSiteOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 																		// data specToModelNested StringField --> ExportPolicy
 																		if volumeDefaultsElement.GetExportPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -16331,68 +16440,68 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 																		}
 
 																		// data specToModelNested StringField --> SecurityStyle
 																		if volumeDefaultsElement.GetSecurityStyle() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																			appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 																		}
 
 																		// data specToModelNested BoolField --> SnapshotDir
-																		appstackSiteFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+																		appstackSiteOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 																		// data specToModelNested StringField --> SnapshotPolicy
 																		if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested StringField --> SnapshotReserve
 																		if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 																		}
 
 																		// data specToModelNested StringField --> SpaceReserve
 																		if volumeDefaultsElement.GetSpaceReserve() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																			appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 																		}
 
 																		// data specToModelNested BoolField --> SplitOnClone
-																		appstackSiteFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+																		appstackSiteOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 																		// data specToModelNested StringField --> TieringPolicy
 																		if volumeDefaultsElement.GetTieringPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested IntField --> UnixPermissions
-																		appstackSiteFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+																		appstackSiteOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		appstackSiteFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap, appstackSiteFleetOntapVolumeDefaultsModel)
+																		appstackSiteOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap, appstackSiteOntapVolumeDefaultsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = appstackSiteFleetOntapVolumeDefaultsModelObj
+																		appstackSiteOntapVirtualStoragePoolTypeModel.VolumeDefaults = appstackSiteOntapVolumeDefaultsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -16401,18 +16510,18 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		// because the API may always return a non-nil struct (with REDACTED values) for this field,
 																		// making this else-branch unreachable. The child OneOf handles the actual healing.
 																		// The target is a types.Object, so we use types.ObjectNull.
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap)
+																		appstackSiteOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap)
 																	}
 
 																	// data specToModelNested StringField --> Zone
 																	if storageElement.GetZone() != "" {
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
 																	}
 
-																	storageElements = append(storageElements, appstackSiteFleetOntapVirtualStoragePoolTypeModel)
+																	storageElements = append(storageElements, appstackSiteOntapVirtualStoragePoolTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -16473,20 +16582,20 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															// data specToModelNested PointerField --> VolumeDefaults
 															if netappBackendOntapNasElement.GetVolumeDefaults() != nil {
 																// Create the nested Go struct
-																appstackSiteFleetOntapVolumeDefaultsModel := &AppstackSiteFleetOntapVolumeDefaults{}
+																appstackSiteOntapVolumeDefaultsModel := &AppstackSiteOntapVolumeDefaults{}
 																volumeDefaultsElement := netappBackendOntapNasElement.GetVolumeDefaults()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested BoolField --> Encryption
-																appstackSiteFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+																appstackSiteOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 																// data specToModelNested StringField --> ExportPolicy
 																if volumeDefaultsElement.GetExportPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
 																// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -16543,68 +16652,68 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	}
 
 																	// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																	appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 																}
 
 																// data specToModelNested StringField --> SecurityStyle
 																if volumeDefaultsElement.GetSecurityStyle() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																	appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 																}
 
 																// data specToModelNested BoolField --> SnapshotDir
-																appstackSiteFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+																appstackSiteOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 																// data specToModelNested StringField --> SnapshotPolicy
 																if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 																}
 
 																// data specToModelNested StringField --> SnapshotReserve
 																if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 																}
 
 																// data specToModelNested StringField --> SpaceReserve
 																if volumeDefaultsElement.GetSpaceReserve() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																	appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 																}
 
 																// data specToModelNested BoolField --> SplitOnClone
-																appstackSiteFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+																appstackSiteOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 																// data specToModelNested StringField --> TieringPolicy
 																if volumeDefaultsElement.GetTieringPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 																}
 
 																// data specToModelNested IntField --> UnixPermissions
-																appstackSiteFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+																appstackSiteOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																appstackSiteFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsModelAttributeMap, appstackSiteFleetOntapVolumeDefaultsModel)
+																appstackSiteOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsModelAttributeMap, appstackSiteOntapVolumeDefaultsModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																netappBackendOntapNasAttributeMap["volume_defaults"] = appstackSiteFleetOntapVolumeDefaultsModelObj
+																netappBackendOntapNasAttributeMap["volume_defaults"] = appstackSiteOntapVolumeDefaultsModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -16769,6 +16878,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																					}
 																				}
 
+																				// data specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -16918,6 +17036,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// data specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -17123,6 +17250,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		} else {
 																			clientPrivateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 																		}
+																	}
+
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																	}
 
 																	// --- End of Choices ---
@@ -17409,6 +17545,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 																	}
 
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -17470,9 +17615,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if len(netappBackendOntapSanElement.GetStorage()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																storageElements := make([]AppstackSiteFleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapSanElement.GetStorage()))
+																storageElements := make([]AppstackSiteOntapVirtualStoragePoolType, 0, len(netappBackendOntapSanElement.GetStorage()))
 																for _, storageElement := range netappBackendOntapSanElement.GetStorage() {
-																	appstackSiteFleetOntapVirtualStoragePoolTypeModel := AppstackSiteFleetOntapVirtualStoragePoolType{}
+																	appstackSiteOntapVirtualStoragePoolTypeModel := AppstackSiteOntapVirtualStoragePoolType{}
 
 																	// data specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
@@ -17483,32 +17628,32 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			return
 																		}
 																		// Assign the typed map to the model
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
 																	} else {
 																		// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 																		// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
 																	}
 
 																	// data specToModelNested PointerField --> VolumeDefaults
 																	if storageElement.GetVolumeDefaults() != nil {
 																		// Create the nested Go struct
-																		appstackSiteFleetOntapVolumeDefaultsModel := &AppstackSiteFleetOntapVolumeDefaults{}
+																		appstackSiteOntapVolumeDefaultsModel := &AppstackSiteOntapVolumeDefaults{}
 																		volumeDefaultsElement := storageElement.GetVolumeDefaults()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested BoolField --> Encryption
-																		appstackSiteFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+																		appstackSiteOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 																		// data specToModelNested StringField --> ExportPolicy
 																		if volumeDefaultsElement.GetExportPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -17565,68 +17710,68 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			}
 
 																			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																			appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 																		}
 
 																		// data specToModelNested StringField --> SecurityStyle
 																		if volumeDefaultsElement.GetSecurityStyle() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																			appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 																		}
 
 																		// data specToModelNested BoolField --> SnapshotDir
-																		appstackSiteFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+																		appstackSiteOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 																		// data specToModelNested StringField --> SnapshotPolicy
 																		if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested StringField --> SnapshotReserve
 																		if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 																		}
 
 																		// data specToModelNested StringField --> SpaceReserve
 																		if volumeDefaultsElement.GetSpaceReserve() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																			appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 																		}
 
 																		// data specToModelNested BoolField --> SplitOnClone
-																		appstackSiteFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+																		appstackSiteOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 																		// data specToModelNested StringField --> TieringPolicy
 																		if volumeDefaultsElement.GetTieringPolicy() != "" {
-																			appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																			appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 																		} else {
 																			// Empty string, set to null
-																			appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																			appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 																		}
 
 																		// data specToModelNested IntField --> UnixPermissions
-																		appstackSiteFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+																		appstackSiteOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		appstackSiteFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap, appstackSiteFleetOntapVolumeDefaultsModel)
+																		appstackSiteOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap, appstackSiteOntapVolumeDefaultsModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = appstackSiteFleetOntapVolumeDefaultsModelObj
+																		appstackSiteOntapVirtualStoragePoolTypeModel.VolumeDefaults = appstackSiteOntapVolumeDefaultsModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -17635,18 +17780,18 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		// because the API may always return a non-nil struct (with REDACTED values) for this field,
 																		// making this else-branch unreachable. The child OneOf handles the actual healing.
 																		// The target is a types.Object, so we use types.ObjectNull.
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap)
+																		appstackSiteOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap)
 																	}
 
 																	// data specToModelNested StringField --> Zone
 																	if storageElement.GetZone() != "" {
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
+																		appstackSiteOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
 																	}
 
-																	storageElements = append(storageElements, appstackSiteFleetOntapVirtualStoragePoolTypeModel)
+																	storageElements = append(storageElements, appstackSiteOntapVirtualStoragePoolTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -17707,20 +17852,20 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															// data specToModelNested PointerField --> VolumeDefaults
 															if netappBackendOntapSanElement.GetVolumeDefaults() != nil {
 																// Create the nested Go struct
-																appstackSiteFleetOntapVolumeDefaultsModel := &AppstackSiteFleetOntapVolumeDefaults{}
+																appstackSiteOntapVolumeDefaultsModel := &AppstackSiteOntapVolumeDefaults{}
 																volumeDefaultsElement := netappBackendOntapSanElement.GetVolumeDefaults()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested BoolField --> Encryption
-																appstackSiteFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+																appstackSiteOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 																// data specToModelNested StringField --> ExportPolicy
 																if volumeDefaultsElement.GetExportPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
 																// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -17777,68 +17922,68 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	}
 
 																	// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																	appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 																}
 
 																// data specToModelNested StringField --> SecurityStyle
 																if volumeDefaultsElement.GetSecurityStyle() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																	appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 																}
 
 																// data specToModelNested BoolField --> SnapshotDir
-																appstackSiteFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+																appstackSiteOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 																// data specToModelNested StringField --> SnapshotPolicy
 																if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 																}
 
 																// data specToModelNested StringField --> SnapshotReserve
 																if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 																}
 
 																// data specToModelNested StringField --> SpaceReserve
 																if volumeDefaultsElement.GetSpaceReserve() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																	appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 																}
 
 																// data specToModelNested BoolField --> SplitOnClone
-																appstackSiteFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+																appstackSiteOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 																// data specToModelNested StringField --> TieringPolicy
 																if volumeDefaultsElement.GetTieringPolicy() != "" {
-																	appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																	appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 																} else {
 																	// Empty string, set to null
-																	appstackSiteFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																	appstackSiteOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 																}
 
 																// data specToModelNested IntField --> UnixPermissions
-																appstackSiteFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+																appstackSiteOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																appstackSiteFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsModelAttributeMap, appstackSiteFleetOntapVolumeDefaultsModel)
+																appstackSiteOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsModelAttributeMap, appstackSiteOntapVolumeDefaultsModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																netappBackendOntapSanAttributeMap["volume_defaults"] = appstackSiteFleetOntapVolumeDefaultsModelObj
+																netappBackendOntapSanAttributeMap["volume_defaults"] = appstackSiteOntapVolumeDefaultsModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -17904,7 +18049,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 												// data specToModelNested RequiredPointerField --> Arrays
 												if pureServiceOrchestratorElement.GetArrays() != nil {
 													// Create the nested Go struct
-													appstackSiteFleetPsoArrayConfigurationModel := &AppstackSiteFleetPsoArrayConfiguration{}
+													appstackSitePsoArrayCfgModel := &AppstackSitePsoArrayCfg{}
 													arraysElement := pureServiceOrchestratorElement.GetArrays()
 
 													// Recursively populate the nested struct
@@ -17912,25 +18057,25 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													// data specToModelNested PointerField --> FlashArray
 													if arraysElement.GetFlashArray() != nil {
 														// Create the nested Go struct
-														appstackSiteFleetFlashArrayTypeModel := &AppstackSiteFleetFlashArrayType{}
+														appstackSiteFlashArrayTypeModel := &AppstackSiteFlashArrayType{}
 														flashArrayElement := arraysElement.GetFlashArray()
 
 														// Recursively populate the nested struct
 
 														// data specToModelNested StringField --> DefaultFsOpt
 														if flashArrayElement.GetDefaultFsOpt() != "" {
-															appstackSiteFleetFlashArrayTypeModel.DefaultFsOpt = types.StringValue(flashArrayElement.GetDefaultFsOpt())
+															appstackSiteFlashArrayTypeModel.DefaultFsOpt = types.StringValue(flashArrayElement.GetDefaultFsOpt())
 														} else {
 															// Empty string, set to null
-															appstackSiteFleetFlashArrayTypeModel.DefaultFsOpt = types.StringNull()
+															appstackSiteFlashArrayTypeModel.DefaultFsOpt = types.StringNull()
 														}
 
 														// data specToModelNested RequiredStringField --> DefaultFsType
 														if flashArrayElement.GetDefaultFsType() != "" {
-															appstackSiteFleetFlashArrayTypeModel.DefaultFsType = types.StringValue(flashArrayElement.GetDefaultFsType())
+															appstackSiteFlashArrayTypeModel.DefaultFsType = types.StringValue(flashArrayElement.GetDefaultFsType())
 														} else {
 															// Empty string, set to null
-															appstackSiteFleetFlashArrayTypeModel.DefaultFsType = types.StringNull()
+															appstackSiteFlashArrayTypeModel.DefaultFsType = types.StringNull()
 														}
 
 														// data specToModelNested ArrayOfStringField --> DefaultMountOpts
@@ -17940,21 +18085,21 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if response.Diagnostics.HasError() {
 																return
 															}
-															appstackSiteFleetFlashArrayTypeModel.DefaultMountOpts = listValue
+															appstackSiteFlashArrayTypeModel.DefaultMountOpts = listValue
 														} else {
-															appstackSiteFleetFlashArrayTypeModel.DefaultMountOpts = types.ListNull(types.StringType)
+															appstackSiteFlashArrayTypeModel.DefaultMountOpts = types.ListNull(types.StringType)
 														}
 
 														// data specToModelNested BoolField --> DisablePreemptAttachments
-														appstackSiteFleetFlashArrayTypeModel.DisablePreemptAttachments = types.BoolValue(bool(flashArrayElement.GetDisablePreemptAttachments()))
+														appstackSiteFlashArrayTypeModel.DisablePreemptAttachments = types.BoolValue(bool(flashArrayElement.GetDisablePreemptAttachments()))
 
 														// data specToModelNested RequiredArrayOfPointerField --> FlashArrays
 														if len(flashArrayElement.GetFlashArrays()) > 0 {
 															// Step 1: Always create a slice of model structs from the spec data.
 															// This slice serves as an intermediate representation.
-															flashArraysElements := make([]AppstackSiteFleetFlashArrayEndpoint, 0, len(flashArrayElement.GetFlashArrays()))
+															flashArraysElements := make([]AppstackSiteFlashArrayEndpoint, 0, len(flashArrayElement.GetFlashArrays()))
 															for _, flashArraysElement := range flashArrayElement.GetFlashArrays() {
-																appstackSiteFleetFlashArrayEndpointModel := AppstackSiteFleetFlashArrayEndpoint{}
+																appstackSiteFlashArrayEndpointModel := AppstackSiteFlashArrayEndpoint{}
 
 																// data specToModelNested PointerField --> ApiToken
 																if flashArraysElement.GetApiToken() != nil {
@@ -18058,6 +18203,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			}
 																		}
 
+																		// data specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -18095,7 +18249,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	appstackSiteFleetFlashArrayEndpointModel.ApiToken = appstackSiteSecretTypeModelObj
+																	appstackSiteFlashArrayEndpointModel.ApiToken = appstackSiteSecretTypeModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -18104,7 +18258,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	// because the API may always return a non-nil struct (with REDACTED values) for this field,
 																	// making this else-branch unreachable. The child OneOf handles the actual healing.
 																	// The target is a types.Object, so we use types.ObjectNull.
-																	appstackSiteFleetFlashArrayEndpointModel.ApiToken = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenModelAttributeMap)
+																	appstackSiteFlashArrayEndpointModel.ApiToken = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenModelAttributeMap)
 																}
 
 																// data specToModelNested MapOfStringField --> Labels
@@ -18116,13 +18270,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		return
 																	}
 																	// Assign the typed map to the model
-																	appstackSiteFleetFlashArrayEndpointModel.Labels = labelsMap
+																	appstackSiteFlashArrayEndpointModel.Labels = labelsMap
 																} else {
 																	// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 																	// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 																	// API returned nil (Protobuf omits empty maps). Set to null.
 																	// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-																	appstackSiteFleetFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
+																	appstackSiteFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
 																}
 
 																// data specToModelNested RequiredOneOfField --> MgmtEndpoint
@@ -18170,13 +18324,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	}
 
 																	// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																	appstackSiteFleetFlashArrayEndpointModel.MgmtEndpointChoice = finalObj
+																	appstackSiteFlashArrayEndpointModel.MgmtEndpointChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteFleetFlashArrayEndpointModel.MgmtEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysMgmtEndpointModelAttributeMap)
+																	appstackSiteFlashArrayEndpointModel.MgmtEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysMgmtEndpointModelAttributeMap)
 																}
 
-																flashArraysElements = append(flashArraysElements, appstackSiteFleetFlashArrayEndpointModel)
+																flashArraysElements = append(flashArraysElements, appstackSiteFlashArrayEndpointModel)
 															}
 															// CASE 1: The target field is a `types.List` or an attribute map.
 															// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -18185,33 +18339,33 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if response.Diagnostics.HasError() {
 																return
 															}
-															appstackSiteFleetFlashArrayTypeModel.FlashArrays = flashArraysListValue
+															appstackSiteFlashArrayTypeModel.FlashArrays = flashArraysListValue
 
 														} else {
 															// The source list is empty or nil.
 															// CASE 1: The target field is a `types.List` or an attribute map.
 															// Assign a null `types.ListValue`.
-															appstackSiteFleetFlashArrayTypeModel.FlashArrays = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysModelAttributeMap})
+															appstackSiteFlashArrayTypeModel.FlashArrays = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysModelAttributeMap})
 														}
 
 														// data specToModelNested RequiredIntField --> IscsiLoginTimeout
-														appstackSiteFleetFlashArrayTypeModel.IscsiLoginTimeout = types.Int32Value(flashArrayElement.GetIscsiLoginTimeout())
+														appstackSiteFlashArrayTypeModel.IscsiLoginTimeout = types.Int32Value(flashArrayElement.GetIscsiLoginTimeout())
 
 														// data specToModelNested RequiredStringField --> SanType
 														if flashArrayElement.GetSanType() != "" {
-															appstackSiteFleetFlashArrayTypeModel.SanType = types.StringValue(flashArrayElement.GetSanType())
+															appstackSiteFlashArrayTypeModel.SanType = types.StringValue(flashArrayElement.GetSanType())
 														} else {
 															// Empty string, set to null
-															appstackSiteFleetFlashArrayTypeModel.SanType = types.StringNull()
+															appstackSiteFlashArrayTypeModel.SanType = types.StringNull()
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														appstackSiteFleetFlashArrayTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap, appstackSiteFleetFlashArrayTypeModel)
+														appstackSiteFlashArrayTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap, appstackSiteFlashArrayTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														appstackSiteFleetPsoArrayConfigurationModel.FlashArray = appstackSiteFleetFlashArrayTypeModelObj
+														appstackSitePsoArrayCfgModel.FlashArray = appstackSiteFlashArrayTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -18220,35 +18374,35 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 														// because the API may always return a non-nil struct (with REDACTED values) for this field,
 														// making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														appstackSiteFleetPsoArrayConfigurationModel.FlashArray = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap)
+														appstackSitePsoArrayCfgModel.FlashArray = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap)
 													}
 
 													// data specToModelNested PointerField --> FlashBlade
 													if arraysElement.GetFlashBlade() != nil {
 														// Create the nested Go struct
-														appstackSiteFleetFlashBladeTypeModel := &AppstackSiteFleetFlashBladeType{}
+														appstackSiteFlashBladeTypeModel := &AppstackSiteFlashBladeType{}
 														flashBladeElement := arraysElement.GetFlashBlade()
 
 														// Recursively populate the nested struct
 
 														// data specToModelNested BoolField --> EnableSnapshotDirectory
-														appstackSiteFleetFlashBladeTypeModel.EnableSnapshotDirectory = types.BoolValue(bool(flashBladeElement.GetEnableSnapshotDirectory()))
+														appstackSiteFlashBladeTypeModel.EnableSnapshotDirectory = types.BoolValue(bool(flashBladeElement.GetEnableSnapshotDirectory()))
 
 														// data specToModelNested StringField --> ExportRules
 														if flashBladeElement.GetExportRules() != "" {
-															appstackSiteFleetFlashBladeTypeModel.ExportRules = types.StringValue(flashBladeElement.GetExportRules())
+															appstackSiteFlashBladeTypeModel.ExportRules = types.StringValue(flashBladeElement.GetExportRules())
 														} else {
 															// Empty string, set to null
-															appstackSiteFleetFlashBladeTypeModel.ExportRules = types.StringNull()
+															appstackSiteFlashBladeTypeModel.ExportRules = types.StringNull()
 														}
 
 														// data specToModelNested RequiredArrayOfPointerField --> FlashBlades
 														if len(flashBladeElement.GetFlashBlades()) > 0 {
 															// Step 1: Always create a slice of model structs from the spec data.
 															// This slice serves as an intermediate representation.
-															flashBladesElements := make([]AppstackSiteFleetFlashBladeEndpoint, 0, len(flashBladeElement.GetFlashBlades()))
+															flashBladesElements := make([]AppstackSiteFlashBladeEndpoint, 0, len(flashBladeElement.GetFlashBlades()))
 															for _, flashBladesElement := range flashBladeElement.GetFlashBlades() {
-																appstackSiteFleetFlashBladeEndpointModel := AppstackSiteFleetFlashBladeEndpoint{}
+																appstackSiteFlashBladeEndpointModel := AppstackSiteFlashBladeEndpoint{}
 
 																// data specToModelNested PointerField --> ApiToken
 																if flashBladesElement.GetApiToken() != nil {
@@ -18352,6 +18506,15 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			}
 																		}
 
+																		// data specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -18389,7 +18552,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	appstackSiteFleetFlashBladeEndpointModel.ApiToken = appstackSiteSecretTypeModelObj
+																	appstackSiteFlashBladeEndpointModel.ApiToken = appstackSiteSecretTypeModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -18398,7 +18561,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	// because the API may always return a non-nil struct (with REDACTED values) for this field,
 																	// making this else-branch unreachable. The child OneOf handles the actual healing.
 																	// The target is a types.Object, so we use types.ObjectNull.
-																	appstackSiteFleetFlashBladeEndpointModel.ApiToken = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenModelAttributeMap)
+																	appstackSiteFlashBladeEndpointModel.ApiToken = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenModelAttributeMap)
 																}
 
 																// data specToModelNested MapOfStringField --> Lables
@@ -18410,13 +18573,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		return
 																	}
 																	// Assign the typed map to the model
-																	appstackSiteFleetFlashBladeEndpointModel.Lables = lablesMap
+																	appstackSiteFlashBladeEndpointModel.Lables = lablesMap
 																} else {
 																	// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 																	// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 																	// API returned nil (Protobuf omits empty maps). Set to null.
 																	// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-																	appstackSiteFleetFlashBladeEndpointModel.Lables = types.MapNull(types.StringType)
+																	appstackSiteFlashBladeEndpointModel.Lables = types.MapNull(types.StringType)
 																}
 
 																// data specToModelNested RequiredOneOfField --> MgmtEndpoint
@@ -18464,10 +18627,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	}
 
 																	// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																	appstackSiteFleetFlashBladeEndpointModel.MgmtEndpointChoice = finalObj
+																	appstackSiteFlashBladeEndpointModel.MgmtEndpointChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteFleetFlashBladeEndpointModel.MgmtEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesMgmtEndpointModelAttributeMap)
+																	appstackSiteFlashBladeEndpointModel.MgmtEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesMgmtEndpointModelAttributeMap)
 																}
 
 																// data specToModelNested RequiredOneOfField --> NfsEndpoint
@@ -18515,13 +18678,13 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																	}
 
 																	// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																	appstackSiteFleetFlashBladeEndpointModel.NfsEndpointChoice = finalObj
+																	appstackSiteFlashBladeEndpointModel.NfsEndpointChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteFleetFlashBladeEndpointModel.NfsEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesNfsEndpointModelAttributeMap)
+																	appstackSiteFlashBladeEndpointModel.NfsEndpointChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesNfsEndpointModelAttributeMap)
 																}
 
-																flashBladesElements = append(flashBladesElements, appstackSiteFleetFlashBladeEndpointModel)
+																flashBladesElements = append(flashBladesElements, appstackSiteFlashBladeEndpointModel)
 															}
 															// CASE 1: The target field is a `types.List` or an attribute map.
 															// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -18530,22 +18693,22 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 															if response.Diagnostics.HasError() {
 																return
 															}
-															appstackSiteFleetFlashBladeTypeModel.FlashBlades = flashBladesListValue
+															appstackSiteFlashBladeTypeModel.FlashBlades = flashBladesListValue
 
 														} else {
 															// The source list is empty or nil.
 															// CASE 1: The target field is a `types.List` or an attribute map.
 															// Assign a null `types.ListValue`.
-															appstackSiteFleetFlashBladeTypeModel.FlashBlades = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesModelAttributeMap})
+															appstackSiteFlashBladeTypeModel.FlashBlades = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesModelAttributeMap})
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														appstackSiteFleetFlashBladeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap, appstackSiteFleetFlashBladeTypeModel)
+														appstackSiteFlashBladeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap, appstackSiteFlashBladeTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														appstackSiteFleetPsoArrayConfigurationModel.FlashBlade = appstackSiteFleetFlashBladeTypeModelObj
+														appstackSitePsoArrayCfgModel.FlashBlade = appstackSiteFlashBladeTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -18554,16 +18717,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 														// because the API may always return a non-nil struct (with REDACTED values) for this field,
 														// making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														appstackSiteFleetPsoArrayConfigurationModel.FlashBlade = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap)
+														appstackSitePsoArrayCfgModel.FlashBlade = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap)
 													}
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													appstackSiteFleetPsoArrayConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysModelAttributeMap, appstackSiteFleetPsoArrayConfigurationModel)
+													appstackSitePsoArrayCfgModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysModelAttributeMap, appstackSitePsoArrayCfgModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													pureServiceOrchestratorAttributeMap["arrays"] = appstackSiteFleetPsoArrayConfigurationModelObj
+													pureServiceOrchestratorAttributeMap["arrays"] = appstackSitePsoArrayCfgModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -18613,21 +18776,21 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										appstackSiteFleetFleetStorageDeviceTypeModel.DeviceChoice = finalObj
+										appstackSiteFleetStorageDeviceTypeModel.DeviceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteFleetFleetStorageDeviceTypeModel.DeviceChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceModelAttributeMap)
+										appstackSiteFleetStorageDeviceTypeModel.DeviceChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> StorageDevice
 									if storageDevicesElement.GetStorageDevice() != "" {
-										appstackSiteFleetFleetStorageDeviceTypeModel.StorageDevice = types.StringValue(storageDevicesElement.GetStorageDevice())
+										appstackSiteFleetStorageDeviceTypeModel.StorageDevice = types.StringValue(storageDevicesElement.GetStorageDevice())
 									} else {
 										// Empty string, set to null
-										appstackSiteFleetFleetStorageDeviceTypeModel.StorageDevice = types.StringNull()
+										appstackSiteFleetStorageDeviceTypeModel.StorageDevice = types.StringNull()
 									}
 
-									storageDevicesElements = append(storageDevicesElements, appstackSiteFleetFleetStorageDeviceTypeModel)
+									storageDevicesElements = append(storageDevicesElements, appstackSiteFleetStorageDeviceTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -18710,16 +18873,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 							if len(storageInterfaceListElement.GetStorageInterfaces()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageInterfacesElements := make([]AppstackSiteVoltstackSiteStorageInterfaceType, 0, len(storageInterfaceListElement.GetStorageInterfaces()))
+								storageInterfacesElements := make([]AppstackSiteStorageIfaceType, 0, len(storageInterfaceListElement.GetStorageInterfaces()))
 								for _, storageInterfacesElement := range storageInterfaceListElement.GetStorageInterfaces() {
-									appstackSiteVoltstackSiteStorageInterfaceTypeModel := AppstackSiteVoltstackSiteStorageInterfaceType{}
+									appstackSiteStorageIfaceTypeModel := AppstackSiteStorageIfaceType{}
 
 									// data specToModelNested StringField --> Description
 									if storageInterfacesElement.GetDescription() != "" {
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.Description = types.StringValue(storageInterfacesElement.GetDescription())
+										appstackSiteStorageIfaceTypeModel.Description = types.StringValue(storageInterfacesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.Description = types.StringNull()
+										appstackSiteStorageIfaceTypeModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested MapOfStringField --> Labels
@@ -18731,19 +18894,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											return
 										}
 										// Assign the typed map to the model
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.Labels = labelsMap
+										appstackSiteStorageIfaceTypeModel.Labels = labelsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.Labels = types.MapNull(types.StringType)
+										appstackSiteStorageIfaceTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredPointerField --> StorageInterface
 									if storageInterfacesElement.GetStorageInterface() != nil {
 										// Create the nested Go struct
-										appstackSiteNetworkInterfaceEthernetInterfaceTypeModel := &AppstackSiteNetworkInterfaceEthernetInterfaceType{}
+										appstackSiteEthernetIfaceTypeModel := &AppstackSiteEthernetIfaceType{}
 										storageInterfaceElement := storageInterfacesElement.GetStorageInterface()
 
 										// Recursively populate the nested struct
@@ -18783,9 +18946,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 													if len(dhcpServerElement.GetDhcpNetworks()) > 0 {
 														// Step 1: Always create a slice of model structs from the spec data.
 														// This slice serves as an intermediate representation.
-														dhcpNetworksElements := make([]AppstackSiteNetworkInterfaceDHCPNetworkType, 0, len(dhcpServerElement.GetDhcpNetworks()))
+														dhcpNetworksElements := make([]AppstackSiteDHCPNetType, 0, len(dhcpServerElement.GetDhcpNetworks()))
 														for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
-															appstackSiteNetworkInterfaceDHCPNetworkTypeModel := AppstackSiteNetworkInterfaceDHCPNetworkType{}
+															appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
 															// data specToModelNested RequiredOneOfField --> DnsChoice
 															// <no value>
@@ -18831,10 +18994,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = finalObj
+																appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested RequiredOneOfField --> GatewayChoice
@@ -18890,10 +19053,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = finalObj
+																appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -18931,10 +19094,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+																appstackSiteDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested RequiredEnumField --> PoolSettings
@@ -18946,36 +19109,36 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = listValue
+																appstackSiteDHCPNetTypeModel.PoolSettings = listValue
 															} else {
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																appstackSiteDHCPNetTypeModel.PoolSettings = types.ListNull(types.StringType)
 															}
 
 															// data specToModelNested ArrayOfPointerField --> Pools
 															if len(dhcpNetworksElement.GetPools()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																poolsElements := make([]AppstackSiteNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+																poolsElements := make([]AppstackSiteDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
 																for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																	appstackSiteNetworkInterfaceDHCPPoolTypeModel := AppstackSiteNetworkInterfaceDHCPPoolType{}
+																	appstackSiteDHCPPoolTypeModel := AppstackSiteDHCPPoolType{}
 
 																	// data specToModelNested StringField --> EndIp
 																	if poolsElement.GetEndIp() != "" {
-																		appstackSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																		appstackSiteDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+																		appstackSiteDHCPPoolTypeModel.EndIp = types.StringNull()
 																	}
 
 																	// data specToModelNested StringField --> StartIp
 																	if poolsElement.GetStartIp() != "" {
-																		appstackSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																		appstackSiteDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																	} else {
 																		// Empty string, set to null
-																		appstackSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+																		appstackSiteDHCPPoolTypeModel.StartIp = types.StringNull()
 																	}
 
-																	poolsElements = append(poolsElements, appstackSiteNetworkInterfaceDHCPPoolTypeModel)
+																	poolsElements = append(poolsElements, appstackSiteDHCPPoolTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -18984,16 +19147,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+																appstackSiteDHCPNetTypeModel.Pools = poolsListValue
 
 															} else {
 																// The source list is empty or nil.
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// Assign a null `types.ListValue`.
-																appstackSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
+																appstackSiteDHCPNetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
 															}
 
-															dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteNetworkInterfaceDHCPNetworkTypeModel)
+															dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteDHCPNetTypeModel)
 														}
 														// CASE 1: The target field is a `types.List` or an attribute map.
 														// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19162,10 +19325,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 																// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																	interfaceIpMapGoMap := make(map[string]AppstackSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																	interfaceIpMapGoMap := make(map[string]AppstackSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																	for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																		interfaceIpMapItem := AppstackSiteNetworkInterfaceStaticIpParametersNodeType{}
+																		interfaceIpMapItem := AppstackSiteStaticIpParametersNodeType{}
 
 																		// data specToModelNested StringField --> DefaultGw
 																		if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -19293,18 +19456,18 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.AddressChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.AddressChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredStringField --> Device
 										if storageInterfaceElement.GetDevice() != "" {
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Device = types.StringValue(storageInterfaceElement.GetDevice())
+											appstackSiteEthernetIfaceTypeModel.Device = types.StringValue(storageInterfaceElement.GetDevice())
 										} else {
 											// Empty string, set to null
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Device = types.StringNull()
+											appstackSiteEthernetIfaceTypeModel.Device = types.StringNull()
 										}
 
 										// data specToModelNested OneOfField --> Ipv6AddressChoice
@@ -19395,9 +19558,9 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																			if len(statefulElement.GetDhcpNetworks()) > 0 {
 																				// Step 1: Always create a slice of model structs from the spec data.
 																				// This slice serves as an intermediate representation.
-																				dhcpNetworksElements := make([]AppstackSiteNetworkInterfaceDHCPIPV6NetworkType, 0, len(statefulElement.GetDhcpNetworks()))
+																				dhcpNetworksElements := make([]AppstackSiteDHCPIPV6NetType, 0, len(statefulElement.GetDhcpNetworks()))
 																				for _, dhcpNetworksElement := range statefulElement.GetDhcpNetworks() {
-																					appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel := AppstackSiteNetworkInterfaceDHCPIPV6NetworkType{}
+																					appstackSiteDHCPIPV6NetTypeModel := AppstackSiteDHCPIPV6NetType{}
 
 																					// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
 																					// <no value>
@@ -19434,10 +19597,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																						}
 
 																						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = finalObj
+																						appstackSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																						appstackSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 																					}
 
 																					// data specToModelNested RequiredEnumField --> PoolSettings
@@ -19449,36 +19612,36 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = listValue
+																						appstackSiteDHCPIPV6NetTypeModel.PoolSettings = listValue
 																					} else {
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																						appstackSiteDHCPIPV6NetTypeModel.PoolSettings = types.ListNull(types.StringType)
 																					}
 
 																					// data specToModelNested ArrayOfPointerField --> Pools
 																					if len(dhcpNetworksElement.GetPools()) > 0 {
 																						// Step 1: Always create a slice of model structs from the spec data.
 																						// This slice serves as an intermediate representation.
-																						poolsElements := make([]AppstackSiteNetworkInterfaceDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
+																						poolsElements := make([]AppstackSiteDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
 																						for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																							appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel := AppstackSiteNetworkInterfaceDHCPIPV6PoolType{}
+																							appstackSiteDHCPIPV6PoolTypeModel := AppstackSiteDHCPIPV6PoolType{}
 
 																							// data specToModelNested StringField --> EndIp
 																							if poolsElement.GetEndIp() != "" {
-																								appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																								appstackSiteDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																							} else {
 																								// Empty string, set to null
-																								appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
+																								appstackSiteDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
 																							}
 
 																							// data specToModelNested StringField --> StartIp
 																							if poolsElement.GetStartIp() != "" {
-																								appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																								appstackSiteDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																							} else {
 																								// Empty string, set to null
-																								appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
+																								appstackSiteDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
 																							}
 
-																							poolsElements = append(poolsElements, appstackSiteNetworkInterfaceDHCPIPV6PoolTypeModel)
+																							poolsElements = append(poolsElements, appstackSiteDHCPIPV6PoolTypeModel)
 																						}
 																						// CASE 1: The target field is a `types.List` or an attribute map.
 																						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19487,16 +19650,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																						if response.Diagnostics.HasError() {
 																							return
 																						}
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = poolsListValue
+																						appstackSiteDHCPIPV6NetTypeModel.Pools = poolsListValue
 
 																					} else {
 																						// The source list is empty or nil.
 																						// CASE 1: The target field is a `types.List` or an attribute map.
 																						// Assign a null `types.ListValue`.
-																						appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
+																						appstackSiteDHCPIPV6NetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
 																					}
 
-																					dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteNetworkInterfaceDHCPIPV6NetworkTypeModel)
+																					dhcpNetworksElements = append(dhcpNetworksElements, appstackSiteDHCPIPV6NetTypeModel)
 																				}
 																				// CASE 1: The target field is a `types.List` or an attribute map.
 																				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19653,7 +19816,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																// data specToModelNested PointerField --> DnsConfig
 																if routerElement.GetDnsConfig() != nil {
 																	// Create the nested Go struct
-																	appstackSiteNetworkInterfaceIPV6DnsConfigModel := &AppstackSiteNetworkInterfaceIPV6DnsConfig{}
+																	appstackSiteIPV6DnsConfigModel := &AppstackSiteIPV6DnsConfig{}
 																	dnsConfigElement := routerElement.GetDnsConfig()
 
 																	// Recursively populate the nested struct
@@ -19796,19 +19959,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		appstackSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = finalObj
+																		appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																		appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
-																	appstackSiteNetworkInterfaceIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, appstackSiteNetworkInterfaceIPV6DnsConfigModel)
+																	appstackSiteIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, appstackSiteIPV6DnsConfigModel)
 																	response.Diagnostics.Append(objDiags...)
 																	if response.Diagnostics.HasError() {
 																		return
 																	}
-																	routerAttributeMap["dns_config"] = appstackSiteNetworkInterfaceIPV6DnsConfigModelObj
+																	routerAttributeMap["dns_config"] = appstackSiteIPV6DnsConfigModelObj
 
 																} else {
 																	// The source field is nil (e.g. redacted by the API).
@@ -19904,10 +20067,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 																// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																	interfaceIpMapGoMap := make(map[string]AppstackSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																	interfaceIpMapGoMap := make(map[string]AppstackSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																	for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																		interfaceIpMapItem := AppstackSiteNetworkInterfaceStaticIpParametersNodeType{}
+																		interfaceIpMapItem := AppstackSiteStaticIpParametersNodeType{}
 
 																		// data specToModelNested StringField --> DefaultGw
 																		if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -20035,10 +20198,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Ipv6AddressChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.Ipv6AddressChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Ipv6AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.Ipv6AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested OneOfField --> MonitoringChoice
@@ -20083,14 +20246,14 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.MonitoringChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.MonitoringChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.MonitoringChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceMonitoringChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.MonitoringChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceMonitoringChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested UintField --> Mtu
-										appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Mtu = types.Int64Value(int64(storageInterfaceElement.GetMtu()))
+										appstackSiteEthernetIfaceTypeModel.Mtu = types.Int64Value(int64(storageInterfaceElement.GetMtu()))
 
 										// data specToModelNested RequiredOneOfField --> NetworkChoice
 										// <no value>
@@ -20189,10 +20352,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.NetworkChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.NetworkChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredOneOfField --> NodeChoice
@@ -20239,10 +20402,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.NodeChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.NodeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredOneOfField --> PrimaryChoice
@@ -20288,14 +20451,14 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.PrimaryChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.PrimaryChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested UintField --> Priority
-										appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.Priority = types.Int64Value(int64(storageInterfaceElement.GetPriority()))
+										appstackSiteEthernetIfaceTypeModel.Priority = types.Int64Value(int64(storageInterfaceElement.GetPriority()))
 
 										// data specToModelNested RequiredOneOfField --> VlanChoice
 										// <no value>
@@ -20341,19 +20504,19 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.VlanChoice = finalObj
+											appstackSiteEthernetIfaceTypeModel.VlanChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteNetworkInterfaceEthernetInterfaceTypeModel.VlanChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.VlanChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										appstackSiteNetworkInterfaceEthernetInterfaceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceModelAttributeMap, appstackSiteNetworkInterfaceEthernetInterfaceTypeModel)
+										appstackSiteEthernetIfaceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceModelAttributeMap, appstackSiteEthernetIfaceTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.StorageInterface = appstackSiteNetworkInterfaceEthernetInterfaceTypeModelObj
+										appstackSiteStorageIfaceTypeModel.StorageInterface = appstackSiteEthernetIfaceTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -20362,10 +20525,10 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										appstackSiteVoltstackSiteStorageInterfaceTypeModel.StorageInterface = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceModelAttributeMap)
+										appstackSiteStorageIfaceTypeModel.StorageInterface = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceModelAttributeMap)
 									}
 
-									storageInterfacesElements = append(storageInterfacesElements, appstackSiteVoltstackSiteStorageInterfaceTypeModel)
+									storageInterfacesElements = append(storageInterfacesElements, appstackSiteStorageIfaceTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -20455,7 +20618,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
-		var appstackSiteViewsVolterraSoftwareTypeModel = &AppstackSiteViewsVolterraSoftwareType{}
+		var appstackSiteVolterraSoftwareTypeModel = &AppstackSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
 		// data specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
@@ -20502,16 +20665,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appstackSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
+			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap)
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteSwModelAttributeMap,
-			appstackSiteViewsVolterraSoftwareTypeModel,
+			appstackSiteVolterraSoftwareTypeModel,
 		)
 		response.Diagnostics.Append(swDiags...)
 		data.Sw = swObj
@@ -20529,7 +20692,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		usbPolicyChoiceChoices := specData.GetUsbPolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var usbPolicyChoiceChoicesModel = &AppstackSiteGlobalSpecTypeUsbPolicyChoice{}
+		var usbPolicyChoiceChoicesModel = &AppstackSiteUsbPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -20626,7 +20789,7 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 		vmChoiceChoices := specData.GetVmChoice()
 
 		// The model struct that will be populated by the nested template.
-		var vmChoiceChoicesModel = &AppstackSiteGlobalSpecTypeVmChoice{}
+		var vmChoiceChoicesModel = &AppstackSiteVmChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -20677,19 +20840,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 	}
 
 	// data SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// data SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
-		var appstackSiteCommonWafLiveSignaturesUpdateModel = &AppstackSiteCommonWafLiveSignaturesUpdate{}
+		var appstackSiteLiveSignaturesUpdateModel = &AppstackSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// data specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// data specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20731,16 +20891,16 @@ func (d *DataSourceF5XCAppstackSite) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appstackSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
+			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppstackSiteWafSignaturesModelAttributeMap,
-			appstackSiteCommonWafLiveSignaturesUpdateModel,
+			appstackSiteLiveSignaturesUpdateModel,
 		)
 		response.Diagnostics.Append(wafSignaturesDiags...)
 		data.WafSignatures = wafSignaturesObj

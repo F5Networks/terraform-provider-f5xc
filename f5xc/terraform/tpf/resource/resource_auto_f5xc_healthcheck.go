@@ -29,7 +29,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -38,6 +37,8 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -179,8 +180,8 @@ func (r *ResourceF5XCHealthcheck) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
+		MarkdownDescription: "Health check configuration for a given cluster.",
+		Description:         "Health check configuration for a given cluster.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -463,7 +464,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 				MarkdownDescription: "jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
+				Computed:            false,
 				Validators: []validator.Object{
 					exactlyoneofvalidator.ExactlyOneOf(
 						"default_jitter",
@@ -471,7 +472,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					),
 				},
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					oneofbranchplanmodifier.PreserveSelectedBranch(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"default_jitter": schema.BoolAttribute{
@@ -583,9 +584,17 @@ func (r *ResourceF5XCHealthcheck) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCHealthcheckModel
 
 	// Read Terraform plan data into the model
@@ -839,7 +848,7 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -862,7 +871,7 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_healthcheck.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "healthcheck", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "healthcheck", err),
 		)
 		return
 	}
@@ -1256,6 +1265,45 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 				return
 			}
 
+			// OneOf branch preservation: if the API canonicalizes to a different branch than
+			// prior plan/state, keep the prior branch object to avoid false oneof drift.
+			{
+				var priorOneOfObj types.Object
+				priorOneOfDiags := request.Plan.GetAttribute(ctx, path.Root("jitter_choice"), &priorOneOfObj)
+				if !priorOneOfDiags.HasError() && !priorOneOfObj.IsNull() && !priorOneOfObj.IsUnknown() && !jitterChoiceObj.IsNull() && !jitterChoiceObj.IsUnknown() {
+					selectedBranchName := func(obj types.Object) string {
+						for branchName, branchValue := range obj.Attributes() {
+							if !branchValue.IsNull() && !branchValue.IsUnknown() {
+								return branchName
+							}
+						}
+						return ""
+					}
+
+					priorBranch := selectedBranchName(priorOneOfObj)
+					apiBranch := selectedBranchName(jitterChoiceObj)
+					if priorBranch != "" && apiBranch != "" && priorBranch != apiBranch {
+						priorAttrs := priorOneOfObj.Attributes()
+						priorBranchValue, ok := priorAttrs[priorBranch]
+						if ok && !priorBranchValue.IsNull() && !priorBranchValue.IsUnknown() {
+							attrTypes := jitterChoiceObj.AttributeTypes(ctx)
+							mergedAttrs := make(map[string]attr.Value, len(attrTypes))
+							for attrName, attrType := range attrTypes {
+								mergedAttrs[attrName] = attrType.ValueType(ctx)
+							}
+							mergedAttrs[priorBranch] = priorBranchValue
+
+							preservedObj, preservedObjDiags := types.ObjectValue(attrTypes, mergedAttrs)
+							response.Diagnostics.Append(preservedObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							jitterChoiceObj = preservedObj
+						}
+					}
+				}
+			}
+
 			// Assign the final object to the root data model.
 			data.JitterChoice = jitterChoiceObj
 		}
@@ -1326,7 +1374,7 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "healthcheck", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "healthcheck", err),
 		)
 		return
 	}
@@ -1557,7 +1605,10 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 					httpHealthCheckAttributeMap["host_header_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpHealthCheckAttributeMap["host_header_choice"] = types.ObjectNull(HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap)
+					httpHealthCheckAttributeMap["host_header_choice"] = types.ObjectValueMust(HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap, map[string]attr.Value{
+						"host_header":            types.StringNull(),
+						"use_origin_server_name": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Path
@@ -1720,6 +1771,45 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 				return
 			}
 
+			// OneOf branch preservation: if the API canonicalizes to a different branch than
+			// prior plan/state, keep the prior branch object to avoid false oneof drift.
+			{
+				var priorOneOfObj types.Object
+				priorOneOfDiags := request.State.GetAttribute(ctx, path.Root("jitter_choice"), &priorOneOfObj)
+				if !priorOneOfDiags.HasError() && !priorOneOfObj.IsNull() && !priorOneOfObj.IsUnknown() && !jitterChoiceObj.IsNull() && !jitterChoiceObj.IsUnknown() {
+					selectedBranchName := func(obj types.Object) string {
+						for branchName, branchValue := range obj.Attributes() {
+							if !branchValue.IsNull() && !branchValue.IsUnknown() {
+								return branchName
+							}
+						}
+						return ""
+					}
+
+					priorBranch := selectedBranchName(priorOneOfObj)
+					apiBranch := selectedBranchName(jitterChoiceObj)
+					if priorBranch != "" && apiBranch != "" && priorBranch != apiBranch {
+						priorAttrs := priorOneOfObj.Attributes()
+						priorBranchValue, ok := priorAttrs[priorBranch]
+						if ok && !priorBranchValue.IsNull() && !priorBranchValue.IsUnknown() {
+							attrTypes := jitterChoiceObj.AttributeTypes(ctx)
+							mergedAttrs := make(map[string]attr.Value, len(attrTypes))
+							for attrName, attrType := range attrTypes {
+								mergedAttrs[attrName] = attrType.ValueType(ctx)
+							}
+							mergedAttrs[priorBranch] = priorBranchValue
+
+							preservedObj, preservedObjDiags := types.ObjectValue(attrTypes, mergedAttrs)
+							response.Diagnostics.Append(preservedObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							jitterChoiceObj = preservedObj
+						}
+					}
+				}
+			}
+
 			// Assign the final object to the root data model.
 			data.JitterChoice = jitterChoiceObj
 		}
@@ -1749,6 +1839,12 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCHealthcheckModel
@@ -2022,7 +2118,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2038,7 +2134,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_healthcheck.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "healthcheck", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "healthcheck", err),
 		)
 		return
 	}
@@ -2047,7 +2143,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "healthcheck", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "healthcheck", err),
 		)
 		return
 	}
@@ -2440,6 +2536,45 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 				return
 			}
 
+			// OneOf branch preservation: if the API canonicalizes to a different branch than
+			// prior plan/state, keep the prior branch object to avoid false oneof drift.
+			{
+				var priorOneOfObj types.Object
+				priorOneOfDiags := request.Plan.GetAttribute(ctx, path.Root("jitter_choice"), &priorOneOfObj)
+				if !priorOneOfDiags.HasError() && !priorOneOfObj.IsNull() && !priorOneOfObj.IsUnknown() && !jitterChoiceObj.IsNull() && !jitterChoiceObj.IsUnknown() {
+					selectedBranchName := func(obj types.Object) string {
+						for branchName, branchValue := range obj.Attributes() {
+							if !branchValue.IsNull() && !branchValue.IsUnknown() {
+								return branchName
+							}
+						}
+						return ""
+					}
+
+					priorBranch := selectedBranchName(priorOneOfObj)
+					apiBranch := selectedBranchName(jitterChoiceObj)
+					if priorBranch != "" && apiBranch != "" && priorBranch != apiBranch {
+						priorAttrs := priorOneOfObj.Attributes()
+						priorBranchValue, ok := priorAttrs[priorBranch]
+						if ok && !priorBranchValue.IsNull() && !priorBranchValue.IsUnknown() {
+							attrTypes := jitterChoiceObj.AttributeTypes(ctx)
+							mergedAttrs := make(map[string]attr.Value, len(attrTypes))
+							for attrName, attrType := range attrTypes {
+								mergedAttrs[attrName] = attrType.ValueType(ctx)
+							}
+							mergedAttrs[priorBranch] = priorBranchValue
+
+							preservedObj, preservedObjDiags := types.ObjectValue(attrTypes, mergedAttrs)
+							response.Diagnostics.Append(preservedObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							jitterChoiceObj = preservedObj
+						}
+					}
+				}
+			}
+
 			// Assign the final object to the root data model.
 			data.JitterChoice = jitterChoiceObj
 		}
@@ -2532,7 +2667,7 @@ func (r *ResourceF5XCHealthcheck) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "healthcheck", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "healthcheck", err),
 		)
 		return
 	}

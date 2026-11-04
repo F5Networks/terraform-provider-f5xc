@@ -64,8 +64,8 @@ func (d *DataSourceF5XCInfraprotectFirewallRuleGroup) Metadata(ctx context.Conte
 func (r *DataSourceF5XCInfraprotectFirewallRuleGroup) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_firewall_rule_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_firewall_rule_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_firewall_rule_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_firewall_rule_group) etc. can be fetched",
+		MarkdownDescription: "DDoS transit Firewall Rule Group",
+		Description:         "DDoS transit Firewall Rule Group",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -197,7 +197,7 @@ func (d *DataSourceF5XCInfraprotectFirewallRuleGroup) Read(ctx context.Context, 
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_firewall_rule_group", err))
 		return
 	}
 

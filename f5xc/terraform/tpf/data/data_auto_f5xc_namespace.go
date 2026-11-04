@@ -31,29 +31,30 @@ type DataSourceF5XCNamespace struct {
 	client *client.APIClient
 }
 
-type NamespaceNamespaceSubCA struct {
+type NsSubCA struct {
 	Name       types.String `tfsdk:"name"`
 	Pem        types.String `tfsdk:"pem"`
 	PrivateKey types.Object `tfsdk:"private_key"`
 	Version    types.Int64  `tfsdk:"version"`
 }
 
-type NamespaceSecretType struct {
+type NsSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type NamespaceSecretTypeSecretInfoChoice struct {
+type NsSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type NamespaceSecretTypeBlindfoldSecretInfo struct {
+type NsBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type NamespaceSecretTypeClearSecretInfo struct {
+type NsClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -103,6 +104,7 @@ var NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap = map[string]
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -134,8 +136,8 @@ func (d *DataSourceF5XCNamespace) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCNamespace) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -263,8 +265,15 @@ func (r *DataSourceF5XCNamespace) Schema(ctx context.Context, request datasource
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
+													Sensitive:   true,
 												},
 											},
+										},
+										"none": schema.BoolAttribute{
+											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
 									},
 								},
@@ -336,7 +345,7 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_namespace.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "namespace", err))
 		return
 	}
 
@@ -424,31 +433,31 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 
 	// data SpecToModelRoot ArrayOfPointerField --> ProxySubCas
 	if len(specData.GetProxySubCas()) > 0 {
-		proxySubCasElements := make([]NamespaceNamespaceSubCA, 0, len(specData.GetProxySubCas()))
+		proxySubCasElements := make([]NsSubCA, 0, len(specData.GetProxySubCas()))
 
 		for _, proxySubCasElement := range specData.GetProxySubCas() {
-			namespaceNamespaceSubCAModel := NamespaceNamespaceSubCA{}
+			nsSubCAModel := NsSubCA{}
 
 			// data specToModelNested RequiredStringField --> Name
 			if proxySubCasElement.GetName() != "" {
-				namespaceNamespaceSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
+				nsSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
 			} else {
 				// Empty string, set to null
-				namespaceNamespaceSubCAModel.Name = types.StringNull()
+				nsSubCAModel.Name = types.StringNull()
 			}
 
 			// data specToModelNested RequiredStringField --> Pem
 			if proxySubCasElement.GetPem() != "" {
-				namespaceNamespaceSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
+				nsSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
 			} else {
 				// Empty string, set to null
-				namespaceNamespaceSubCAModel.Pem = types.StringNull()
+				nsSubCAModel.Pem = types.StringNull()
 			}
 
 			// data specToModelNested RequiredPointerField --> PrivateKey
 			if proxySubCasElement.GetPrivateKey() != nil {
 				// Create the nested Go struct
-				namespaceSecretTypeModel := &NamespaceSecretType{}
+				nsSecretTypeModel := &NsSecretType{}
 				privateKeyElement := proxySubCasElement.GetPrivateKey()
 
 				// Recursively populate the nested struct
@@ -547,6 +556,15 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 						}
 					}
 
+					// data specToModelNested BoolOfOneOfPointerField --> None
+					_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+					if isNone {
+						privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+					} else {
+						privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+					}
+
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
@@ -560,7 +578,7 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					namespaceSecretTypeModel.SecretInfoChoice = finalObj
+					nsSecretTypeModel.SecretInfoChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
@@ -571,20 +589,20 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 						var savedSecretInfoChoice types.Object
 						stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
 						if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-							namespaceSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							nsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
 						} else {
-							namespaceSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
+							nsSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
 						}
 					}
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				namespaceSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, namespaceSecretTypeModel)
+				nsSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, nsSecretTypeModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				namespaceNamespaceSubCAModel.PrivateKey = namespaceSecretTypeModelObj
+				nsSubCAModel.PrivateKey = nsSecretTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -593,13 +611,13 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				namespaceNamespaceSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
+				nsSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
 			}
 
 			// data specToModelNested UintField --> Version
-			namespaceNamespaceSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
+			nsSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
 
-			proxySubCasElements = append(proxySubCasElements, namespaceNamespaceSubCAModel)
+			proxySubCasElements = append(proxySubCasElements, nsSubCAModel)
 		}
 
 		{

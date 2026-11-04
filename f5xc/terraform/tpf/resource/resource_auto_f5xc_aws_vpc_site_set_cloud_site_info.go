@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listsizevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -32,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/stdlib/codec"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_views_aws_vpc_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/aws_vpc_site"
 )
@@ -195,8 +198,8 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Metadata(ctx context.Context, r
 func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a aws_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_vpc_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a aws_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_vpc_site) etc. can be fetched",
+		MarkdownDescription: "AWS VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC.<br>It can be used to automatically site creation in the AWS VPC.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "AWS VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC. It can be used to automatically site creation in the AWS VPC. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -213,7 +216,7 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Schema(ctx context.Context, req
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"aws_vpc_info": schema.SingleNestedAttribute{
@@ -595,9 +598,17 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) ModifyPlan(ctx context.Context,
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAwsVpcSiteSetCloudSiteInfoModel
 
 	// Read Terraform plan data into the model
@@ -856,7 +867,7 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Create(ctx context.Context, req
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "aws_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "aws_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -912,6 +923,12 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Read(ctx context.Context, reque
 }
 
 func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAwsVpcSiteSetCloudSiteInfoModel
@@ -1172,7 +1189,7 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Update(ctx context.Context, req
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "aws_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "aws_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -1246,7 +1263,7 @@ func (r *ResourceF5XCAwsVpcSiteSetCloudSiteInfo) Delete(ctx context.Context, req
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "aws_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "aws_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}

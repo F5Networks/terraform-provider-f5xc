@@ -28,30 +28,30 @@ type DataSourceF5XCNetworkPolicyRule struct {
 	client *client.APIClient
 }
 
-type NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+type NetPolicyRuleNetPolicyRuleAdvancedAction struct {
 	Action types.List `tfsdk:"action"`
 }
 
-type NetworkPolicyRuleLabelMatcherType struct {
+type NetPolicyRuleLabelMatcherType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type NetworkPolicyRuleGlobalSpecTypeRemoteEndpointChoice struct {
+type NetPolicyRuleRemoteEndpointChoice struct {
 	IpPrefixSet    types.Object `tfsdk:"ip_prefix_set"`
 	Prefix         types.Object `tfsdk:"prefix"`
 	PrefixSelector types.Object `tfsdk:"prefix_selector"`
 }
 
-type NetworkPolicyRuleGlobalSpecTypeIpPrefixSet struct {
+type NetPolicyRuleIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type NetworkPolicyRuleGlobalSpecTypePrefix struct {
+type NetPolicyRulePrefix struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type NetworkPolicyRuleGlobalSpecTypePrefixSelector struct {
+type NetPolicyRulePrefixSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
@@ -159,8 +159,8 @@ func (d *DataSourceF5XCNetworkPolicyRule) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
+		MarkdownDescription: "Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule.<br>Local Endpoint is picked from the network policy to which this rule has been attached<br><br>Action on a match can be<br>* Allow<br>* Deny<br><br>Match Criteria<br>* Ports specify the port range to be matched, if not set it matches to any<br>* Protocol specify the protocol to be matched<br>Supported values are<br>* tcp<br>* udp<br>* icmp<br>* Remote Endpoint<br>* prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint.<br>* prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br>* ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects<br>* Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector<br><br>Label Preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br>* Labels from the interface for the address<br>* Labels from POD or Service for the address<br>* Labels from Virtual Network for the address<br>* Labels from Namespace for the address<br><br>Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached<br><br>Prefix selector labels (BNF grammar):<br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><exclusion>               ::= 'notin'<br><inclusion>               ::= 'in'<br><value-set>               ::= '(' <values> ')'<br><values>                  ::= VALUE | VALUE ',' <values><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters.<br>VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters.<br>Delimiter is white space: (' ', '\\t')<br><br>Note:<br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the<br>VALUEs in its requirement<br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any<br>of the VALUEs in its requirement or does not exist<br>(3) The empty string is a valid VALUE<br>(4) A requirement with just a KEY - as in 'y' above - denotes that<br>the KEY exists and can be any VALUE.<br>(5) A requirement with just !KEY requires that the KEY not exist.",
+		Description:         "Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule. Local Endpoint is picked from the network policy to which this rule has been attached Action on a match can be Allow Deny Match Criteria Ports specify the port range to be matched, if not set it matches to any Protocol specify the protocol to be matched Supported values are tcp udp icmp Remote Endpoint prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint. prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector Label Preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, Labels from the interface for the address Labels from POD or Service for the address Labels from Virtual Network for the address Labels from Namespace for the address Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUEs in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUEs in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -389,7 +389,7 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy_rule", err))
 		return
 	}
 
@@ -469,7 +469,7 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> AdvancedAction
 	if specData.GetAdvancedAction() != nil {
-		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+		var netPolicyRuleNetPolicyRuleAdvancedActionModel = &NetPolicyRuleNetPolicyRuleAdvancedAction{}
 		advancedActionElement := specData.GetAdvancedAction()
 
 		// data specToModelNested EnumField --> Action
@@ -481,15 +481,15 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 			if response.Diagnostics.HasError() {
 				return
 			}
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+			netPolicyRuleNetPolicyRuleAdvancedActionModel.Action = listValue
 		} else {
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+			netPolicyRuleNetPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 		}
 
 		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
 			ctx,
 			NetworkPolicyRuleAdvancedActionModelAttributeMap,
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
+			netPolicyRuleNetPolicyRuleAdvancedActionModel,
 		)
 		response.Diagnostics.Append(advancedActionDiags...)
 		data.AdvancedAction = advancedActionObj
@@ -499,7 +499,7 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> LabelMatcher
 	if specData.GetLabelMatcher() != nil {
-		var networkPolicyRuleLabelMatcherTypeModel = &NetworkPolicyRuleLabelMatcherType{}
+		var netPolicyRuleLabelMatcherTypeModel = &NetPolicyRuleLabelMatcherType{}
 		labelMatcherElement := specData.GetLabelMatcher()
 
 		// data specToModelNested ArrayOfStringField --> Keys
@@ -509,15 +509,15 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 			if response.Diagnostics.HasError() {
 				return
 			}
-			networkPolicyRuleLabelMatcherTypeModel.Keys = listValue
+			netPolicyRuleLabelMatcherTypeModel.Keys = listValue
 		} else {
-			networkPolicyRuleLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+			netPolicyRuleLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
 		}
 
 		labelMatcherObj, labelMatcherDiags := utils.GoStructToObjectValue(
 			ctx,
 			NetworkPolicyRuleLabelMatcherModelAttributeMap,
-			networkPolicyRuleLabelMatcherTypeModel,
+			netPolicyRuleLabelMatcherTypeModel,
 		)
 		response.Diagnostics.Append(labelMatcherDiags...)
 		data.LabelMatcher = labelMatcherObj
@@ -557,7 +557,7 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 		remoteEndpointChoiceChoices := specData.GetRemoteEndpoint()
 
 		// The model struct that will be populated by the nested template.
-		var remoteEndpointChoiceChoicesModel = &NetworkPolicyRuleGlobalSpecTypeRemoteEndpointChoice{}
+		var remoteEndpointChoiceChoicesModel = &NetPolicyRuleRemoteEndpointChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

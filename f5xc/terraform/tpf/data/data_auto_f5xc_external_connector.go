@@ -29,49 +29,49 @@ type DataSourceF5XCExternalConnector struct {
 	client *client.APIClient
 }
 
-type ExternalConnectorGlobalSpecTypeConnectionTypeChoice struct {
+type ExternalConnectorConnTypeChoice struct {
 	Gre   types.Object `tfsdk:"gre"`
 	Ipsec types.Object `tfsdk:"ipsec"`
 }
 
-type ExternalConnectorGlobalSpecTypeGre struct {
+type ExternalConnectorGre struct {
 	GreParameters types.Object `tfsdk:"gre_parameters"`
 }
 
-type ExternalConnectorExternalConnectorGRETunnelParameters struct {
+type ExternalConnectorGRETunnelParameters struct {
 	PeerIpAddress        types.Object `tfsdk:"peer_ip_address"`
 	TunnelEps            types.List   `tfsdk:"tunnel_eps"`
 	TunnelMtu            types.Int64  `tfsdk:"tunnel_mtu"`
 	TunnelSourceVnChoice types.Object `tfsdk:"tunnel_source_vn_choice"`
 }
 
-type ExternalConnectorIpv4AddressType struct {
+type ExternalConnectorIpv4AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type ExternalConnectorExternalConnectorTunnelEndpoint struct {
+type ExternalConnectorTunnelEndpoint struct {
 	Interface      types.String `tfsdk:"interface"`
 	LocalTunnelIp  types.String `tfsdk:"local_tunnel_ip"`
 	Node           types.String `tfsdk:"node"`
 	RemoteTunnelIp types.String `tfsdk:"remote_tunnel_ip"`
 }
 
-type ExternalConnectorGRETunnelParametersTunnelSourceVnChoice struct {
+type ExternalConnectorTunnelSrcVnChoice struct {
 	Segment                types.Object `tfsdk:"segment"`
 	SiteLocalInsideNetwork types.Bool   `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool   `tfsdk:"site_local_network"`
 }
 
-type ExternalConnectorGRETunnelParametersSegment struct {
+type ExternalConnectorSegment struct {
 	Refs types.List `tfsdk:"refs"`
 }
 
-type ExternalConnectorGlobalSpecTypeIpsec struct {
+type ExternalConnectorIpsec struct {
 	IkeParameters         types.Object `tfsdk:"ike_parameters"`
 	IpsecTunnelParameters types.Object `tfsdk:"ipsec_tunnel_parameters"`
 }
 
-type ExternalConnectorExternalConnectorIkeParameters struct {
+type ExternalConnectorIkeParameters struct {
 	DpdChoice         types.Object `tfsdk:"dpd_choice"`
 	IkePhase1Profile  types.Object `tfsdk:"ike_phase1_profile"`
 	IkePhase2Profile  types.Object `tfsdk:"ike_phase2_profile"`
@@ -80,58 +80,58 @@ type ExternalConnectorExternalConnectorIkeParameters struct {
 	RemoteIkeIdChoice types.Object `tfsdk:"remote_ike_id_choice"`
 }
 
-type ExternalConnectorIkeParametersDpdChoice struct {
+type ExternalConnectorDpdChoice struct {
 	DpdDisabled       types.Bool   `tfsdk:"dpd_disabled"`
 	DpdKeepAliveTimer types.Object `tfsdk:"dpd_keep_alive_timer"`
 }
 
-type ExternalConnectorIkeParametersDpdKeepAliveTimer struct {
+type ExternalConnectorDpdKeepAliveTimer struct {
 	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
-type ExternalConnectorIkeParametersLocalIkeIdChoice struct {
+type ExternalConnectorLocalIkeIdChoice struct {
 	UseDefaultLocalIkeId types.Bool `tfsdk:"use_default_local_ike_id"`
 }
 
-type ExternalConnectorIkeParametersModeChoice struct {
+type ExternalConnectorModeChoice struct {
 	Initiator types.Bool `tfsdk:"initiator"`
 	Responder types.Bool `tfsdk:"responder"`
 }
 
-type ExternalConnectorIkeParametersRemoteIkeIdChoice struct {
+type ExternalConnectorRemoteIkeIdChoice struct {
 	RmHostname            types.String `tfsdk:"rm_hostname"`
 	RmIpAddress           types.Object `tfsdk:"rm_ip_address"`
 	UseDefaultRemoteIkeId types.Bool   `tfsdk:"use_default_remote_ike_id"`
 }
 
-type ExternalConnectorIkeParametersRmIpAddress struct {
+type ExternalConnectorRmIpAddr struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
-type ExternalConnectorIpAddressTypeVerChoice struct {
+type ExternalConnectorVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
 	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
-type ExternalConnectorIpAddressTypeDualStack struct {
+type ExternalConnectorDualStack struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
-type ExternalConnectorIpv6AddressType struct {
+type ExternalConnectorIpv6AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type ExternalConnectorIpAddressTypeIpv4 struct {
+type ExternalConnectorIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type ExternalConnectorIpAddressTypeIpv6 struct {
+type ExternalConnectorIpv6 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type ExternalConnectorExternalConnectorTunnelParameters struct {
+type ExternalConnectorTunnelParameters struct {
 	PeerIpAddress        types.Object `tfsdk:"peer_ip_address"`
 	Psk                  types.String `tfsdk:"psk"`
 	TunnelEps            types.List   `tfsdk:"tunnel_eps"`
@@ -139,7 +139,7 @@ type ExternalConnectorExternalConnectorTunnelParameters struct {
 	TunnelSourceVnChoice types.Object `tfsdk:"tunnel_source_vn_choice"`
 }
 
-type ExternalConnectorTunnelParametersTunnelSourceVnChoice struct {
+type ExternalConnectorTunnelParametersTunnelSrcVnChoice struct {
 	Segment                types.Object `tfsdk:"segment"`
 	SiteLocalInsideNetwork types.Bool   `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool   `tfsdk:"site_local_network"`
@@ -544,8 +544,8 @@ func (d *DataSourceF5XCExternalConnector) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCExternalConnector) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
+		MarkdownDescription: "External Connector configuration mainly includes the following:<br>1. Tunnel connfiguration between F5 CE and external (3rd party) device<br>2. Tunnel specific parameters (IPSec, GRE)",
+		Description:         "External Connector configuration mainly includes the following: 1. Tunnel connfiguration between F5 CE and external (3rd party) device 2. Tunnel specific parameters (IPSec, GRE)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -997,6 +997,7 @@ func (r *DataSourceF5XCExternalConnector) Schema(ctx context.Context, request da
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+										Sensitive:   true,
 									},
 									"tunnel_eps": schema.ListNestedAttribute{
 										Description: "Tunnel Endpoint Configure tunnel parameters, local and remote IP addresses",
@@ -1157,7 +1158,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "external_connector", err))
 		return
 	}
 
@@ -1271,7 +1272,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 		connectionTypeChoiceChoices := specData.GetConnectionType()
 
 		// The model struct that will be populated by the nested template.
-		var connectionTypeChoiceChoicesModel = &ExternalConnectorGlobalSpecTypeConnectionTypeChoice{}
+		var connectionTypeChoiceChoicesModel = &ExternalConnectorConnTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1288,7 +1289,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> GreParameters
 				if greElement.GetGreParameters() != nil {
 					// Create the nested Go struct
-					externalConnectorExternalConnectorGRETunnelParametersModel := &ExternalConnectorExternalConnectorGRETunnelParameters{}
+					externalConnectorGRETunnelParametersModel := &ExternalConnectorGRETunnelParameters{}
 					greParametersElement := greElement.GetGreParameters()
 
 					// Recursively populate the nested struct
@@ -1296,26 +1297,26 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 					// data specToModelNested PointerField --> PeerIpAddress
 					if greParametersElement.GetPeerIpAddress() != nil {
 						// Create the nested Go struct
-						externalConnectorIpv4AddressTypeModel := &ExternalConnectorIpv4AddressType{}
+						externalConnectorIpv4AddrTypeModel := &ExternalConnectorIpv4AddrType{}
 						peerIpAddressElement := greParametersElement.GetPeerIpAddress()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested StringField --> Addr
 						if peerIpAddressElement.GetAddr() != "" {
-							externalConnectorIpv4AddressTypeModel.Addr = types.StringValue(peerIpAddressElement.GetAddr())
+							externalConnectorIpv4AddrTypeModel.Addr = types.StringValue(peerIpAddressElement.GetAddr())
 						} else {
 							// Empty string, set to null
-							externalConnectorIpv4AddressTypeModel.Addr = types.StringNull()
+							externalConnectorIpv4AddrTypeModel.Addr = types.StringNull()
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						externalConnectorIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeGreGreParametersPeerIpAddressModelAttributeMap, externalConnectorIpv4AddressTypeModel)
+						externalConnectorIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeGreGreParametersPeerIpAddressModelAttributeMap, externalConnectorIpv4AddrTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorGRETunnelParametersModel.PeerIpAddress = externalConnectorIpv4AddressTypeModelObj
+						externalConnectorGRETunnelParametersModel.PeerIpAddress = externalConnectorIpv4AddrTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1324,50 +1325,50 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						externalConnectorExternalConnectorGRETunnelParametersModel.PeerIpAddress = types.ObjectNull(ExternalConnectorConnectionTypeGreGreParametersPeerIpAddressModelAttributeMap)
+						externalConnectorGRETunnelParametersModel.PeerIpAddress = types.ObjectNull(ExternalConnectorConnectionTypeGreGreParametersPeerIpAddressModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredArrayOfPointerField --> TunnelEps
 					if len(greParametersElement.GetTunnelEps()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						tunnelEpsElements := make([]ExternalConnectorExternalConnectorTunnelEndpoint, 0, len(greParametersElement.GetTunnelEps()))
+						tunnelEpsElements := make([]ExternalConnectorTunnelEndpoint, 0, len(greParametersElement.GetTunnelEps()))
 						for _, tunnelEpsElement := range greParametersElement.GetTunnelEps() {
-							externalConnectorExternalConnectorTunnelEndpointModel := ExternalConnectorExternalConnectorTunnelEndpoint{}
+							externalConnectorTunnelEndpointModel := ExternalConnectorTunnelEndpoint{}
 
 							// data specToModelNested RequiredStringField --> Interface
 							if tunnelEpsElement.GetInterface() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.Interface = types.StringValue(tunnelEpsElement.GetInterface())
+								externalConnectorTunnelEndpointModel.Interface = types.StringValue(tunnelEpsElement.GetInterface())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.Interface = types.StringNull()
+								externalConnectorTunnelEndpointModel.Interface = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> LocalTunnelIp
 							if tunnelEpsElement.GetLocalTunnelIp() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringValue(tunnelEpsElement.GetLocalTunnelIp())
+								externalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringValue(tunnelEpsElement.GetLocalTunnelIp())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringNull()
+								externalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Node
 							if tunnelEpsElement.GetNode() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.Node = types.StringValue(tunnelEpsElement.GetNode())
+								externalConnectorTunnelEndpointModel.Node = types.StringValue(tunnelEpsElement.GetNode())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.Node = types.StringNull()
+								externalConnectorTunnelEndpointModel.Node = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> RemoteTunnelIp
 							if tunnelEpsElement.GetRemoteTunnelIp() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringValue(tunnelEpsElement.GetRemoteTunnelIp())
+								externalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringValue(tunnelEpsElement.GetRemoteTunnelIp())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringNull()
+								externalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringNull()
 							}
 
-							tunnelEpsElements = append(tunnelEpsElements, externalConnectorExternalConnectorTunnelEndpointModel)
+							tunnelEpsElements = append(tunnelEpsElements, externalConnectorTunnelEndpointModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1376,17 +1377,17 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorGRETunnelParametersModel.TunnelEps = tunnelEpsListValue
+						externalConnectorGRETunnelParametersModel.TunnelEps = tunnelEpsListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						externalConnectorExternalConnectorGRETunnelParametersModel.TunnelEps = types.ListNull(types.ObjectType{AttrTypes: ExternalConnectorConnectionTypeGreGreParametersTunnelEpsModelAttributeMap})
+						externalConnectorGRETunnelParametersModel.TunnelEps = types.ListNull(types.ObjectType{AttrTypes: ExternalConnectorConnectionTypeGreGreParametersTunnelEpsModelAttributeMap})
 					}
 
 					// data specToModelNested UintField --> TunnelMtu
-					externalConnectorExternalConnectorGRETunnelParametersModel.TunnelMtu = types.Int64Value(int64(greParametersElement.GetTunnelMtu()))
+					externalConnectorGRETunnelParametersModel.TunnelMtu = types.Int64Value(int64(greParametersElement.GetTunnelMtu()))
 
 					// data specToModelNested OneOfField --> TunnelSourceVn
 					if greParametersElement.GetTunnelSourceVn() != nil {
@@ -1501,19 +1502,19 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorGRETunnelParametersModel.TunnelSourceVnChoice = finalObj
+						externalConnectorGRETunnelParametersModel.TunnelSourceVnChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorGRETunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeGreGreParametersTunnelSourceVnModelAttributeMap)
+						externalConnectorGRETunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeGreGreParametersTunnelSourceVnModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					externalConnectorExternalConnectorGRETunnelParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeGreGreParametersModelAttributeMap, externalConnectorExternalConnectorGRETunnelParametersModel)
+					externalConnectorGRETunnelParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeGreGreParametersModelAttributeMap, externalConnectorGRETunnelParametersModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					greAttributeMap["gre_parameters"] = externalConnectorExternalConnectorGRETunnelParametersModelObj
+					greAttributeMap["gre_parameters"] = externalConnectorGRETunnelParametersModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -1549,7 +1550,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 				// data specToModelNested RequiredPointerField --> IkeParameters
 				if ipsecElement.GetIkeParameters() != nil {
 					// Create the nested Go struct
-					externalConnectorExternalConnectorIkeParametersModel := &ExternalConnectorExternalConnectorIkeParameters{}
+					externalConnectorIkeParametersModel := &ExternalConnectorIkeParameters{}
 					ikeParametersElement := ipsecElement.GetIkeParameters()
 
 					// Recursively populate the nested struct
@@ -1611,10 +1612,10 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorIkeParametersModel.DpdChoice = finalObj
+						externalConnectorIkeParametersModel.DpdChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorIkeParametersModel.DpdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersDpdChoiceModelAttributeMap)
+						externalConnectorIkeParametersModel.DpdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersDpdChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredPointerField --> IkePhase1Profile
@@ -1655,7 +1656,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorIkeParametersModel.IkePhase1Profile = objectRefTypeModelModelObj
+						externalConnectorIkeParametersModel.IkePhase1Profile = objectRefTypeModelModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1664,7 +1665,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						// here because the API may always return a non-nil struct (with REDACTED values) for this
 						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						externalConnectorExternalConnectorIkeParametersModel.IkePhase1Profile = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersIkePhase1ProfileModelAttributeMap)
+						externalConnectorIkeParametersModel.IkePhase1Profile = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersIkePhase1ProfileModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredPointerField --> IkePhase2Profile
@@ -1705,7 +1706,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorIkeParametersModel.IkePhase2Profile = objectRefTypeModelModelObj
+						externalConnectorIkeParametersModel.IkePhase2Profile = objectRefTypeModelModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1714,7 +1715,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						// here because the API may always return a non-nil struct (with REDACTED values) for this
 						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						externalConnectorExternalConnectorIkeParametersModel.IkePhase2Profile = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersIkePhase2ProfileModelAttributeMap)
+						externalConnectorIkeParametersModel.IkePhase2Profile = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersIkePhase2ProfileModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> LocalIkeId
@@ -1750,10 +1751,10 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorIkeParametersModel.LocalIkeIdChoice = finalObj
+						externalConnectorIkeParametersModel.LocalIkeIdChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorIkeParametersModel.LocalIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap)
+						externalConnectorIkeParametersModel.LocalIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredOneOfField --> ModeChoice
@@ -1799,10 +1800,10 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorIkeParametersModel.ModeChoice = finalObj
+						externalConnectorIkeParametersModel.ModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorIkeParametersModel.ModeChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap)
+						externalConnectorIkeParametersModel.ModeChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> RemoteIkeId
@@ -1860,26 +1861,26 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 											// data specToModelNested PointerField --> Ipv4
 											if dualStackElement.GetIpv4() != nil {
 												// Create the nested Go struct
-												externalConnectorIpv4AddressTypeModel := &ExternalConnectorIpv4AddressType{}
+												externalConnectorIpv4AddrTypeModel := &ExternalConnectorIpv4AddrType{}
 												ipv4Element := dualStackElement.GetIpv4()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested StringField --> Addr
 												if ipv4Element.GetAddr() != "" {
-													externalConnectorIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+													externalConnectorIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 												} else {
 													// Empty string, set to null
-													externalConnectorIpv4AddressTypeModel.Addr = types.StringNull()
+													externalConnectorIpv4AddrTypeModel.Addr = types.StringNull()
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												externalConnectorIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdRmIpAddressVerDualStackIpv4ModelAttributeMap, externalConnectorIpv4AddressTypeModel)
+												externalConnectorIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdRmIpAddressVerDualStackIpv4ModelAttributeMap, externalConnectorIpv4AddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dualStackAttributeMap["ipv4"] = externalConnectorIpv4AddressTypeModelObj
+												dualStackAttributeMap["ipv4"] = externalConnectorIpv4AddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -1894,26 +1895,26 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 											// data specToModelNested PointerField --> Ipv6
 											if dualStackElement.GetIpv6() != nil {
 												// Create the nested Go struct
-												externalConnectorIpv6AddressTypeModel := &ExternalConnectorIpv6AddressType{}
+												externalConnectorIpv6AddrTypeModel := &ExternalConnectorIpv6AddrType{}
 												ipv6Element := dualStackElement.GetIpv6()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested StringField --> Addr
 												if ipv6Element.GetAddr() != "" {
-													externalConnectorIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+													externalConnectorIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 												} else {
 													// Empty string, set to null
-													externalConnectorIpv6AddressTypeModel.Addr = types.StringNull()
+													externalConnectorIpv6AddrTypeModel.Addr = types.StringNull()
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												externalConnectorIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdRmIpAddressVerDualStackIpv6ModelAttributeMap, externalConnectorIpv6AddressTypeModel)
+												externalConnectorIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdRmIpAddressVerDualStackIpv6ModelAttributeMap, externalConnectorIpv6AddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dualStackAttributeMap["ipv6"] = externalConnectorIpv6AddressTypeModelObj
+												dualStackAttributeMap["ipv6"] = externalConnectorIpv6AddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -2046,19 +2047,19 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorIkeParametersModel.RemoteIkeIdChoice = finalObj
+						externalConnectorIkeParametersModel.RemoteIkeIdChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorIkeParametersModel.RemoteIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdModelAttributeMap)
+						externalConnectorIkeParametersModel.RemoteIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersRemoteIkeIdModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					externalConnectorExternalConnectorIkeParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersModelAttributeMap, externalConnectorExternalConnectorIkeParametersModel)
+					externalConnectorIkeParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIkeParametersModelAttributeMap, externalConnectorIkeParametersModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ipsecAttributeMap["ike_parameters"] = externalConnectorExternalConnectorIkeParametersModelObj
+					ipsecAttributeMap["ike_parameters"] = externalConnectorIkeParametersModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -2073,7 +2074,7 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 				// data specToModelNested RequiredPointerField --> IpsecTunnelParameters
 				if ipsecElement.GetIpsecTunnelParameters() != nil {
 					// Create the nested Go struct
-					externalConnectorExternalConnectorTunnelParametersModel := &ExternalConnectorExternalConnectorTunnelParameters{}
+					externalConnectorTunnelParametersModel := &ExternalConnectorTunnelParameters{}
 					ipsecTunnelParametersElement := ipsecElement.GetIpsecTunnelParameters()
 
 					// Recursively populate the nested struct
@@ -2081,26 +2082,26 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 					// data specToModelNested RequiredPointerField --> PeerIpAddress
 					if ipsecTunnelParametersElement.GetPeerIpAddress() != nil {
 						// Create the nested Go struct
-						externalConnectorIpv4AddressTypeModel := &ExternalConnectorIpv4AddressType{}
+						externalConnectorIpv4AddrTypeModel := &ExternalConnectorIpv4AddrType{}
 						peerIpAddressElement := ipsecTunnelParametersElement.GetPeerIpAddress()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested StringField --> Addr
 						if peerIpAddressElement.GetAddr() != "" {
-							externalConnectorIpv4AddressTypeModel.Addr = types.StringValue(peerIpAddressElement.GetAddr())
+							externalConnectorIpv4AddrTypeModel.Addr = types.StringValue(peerIpAddressElement.GetAddr())
 						} else {
 							// Empty string, set to null
-							externalConnectorIpv4AddressTypeModel.Addr = types.StringNull()
+							externalConnectorIpv4AddrTypeModel.Addr = types.StringNull()
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						externalConnectorIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersPeerIpAddressModelAttributeMap, externalConnectorIpv4AddressTypeModel)
+						externalConnectorIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersPeerIpAddressModelAttributeMap, externalConnectorIpv4AddrTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorTunnelParametersModel.PeerIpAddress = externalConnectorIpv4AddressTypeModelObj
+						externalConnectorTunnelParametersModel.PeerIpAddress = externalConnectorIpv4AddrTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -2109,54 +2110,54 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						// here because the API may always return a non-nil struct (with REDACTED values) for this
 						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						externalConnectorExternalConnectorTunnelParametersModel.PeerIpAddress = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersPeerIpAddressModelAttributeMap)
+						externalConnectorTunnelParametersModel.PeerIpAddress = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersPeerIpAddressModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredStringField --> Psk
 					// State Healing: preserve empty string — do not convert "" to null for this field.
-					externalConnectorExternalConnectorTunnelParametersModel.Psk = types.StringValue(ipsecTunnelParametersElement.GetPsk())
+					externalConnectorTunnelParametersModel.Psk = types.StringValue(ipsecTunnelParametersElement.GetPsk())
 
 					// data specToModelNested RequiredArrayOfPointerField --> TunnelEps
 					if len(ipsecTunnelParametersElement.GetTunnelEps()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						tunnelEpsElements := make([]ExternalConnectorExternalConnectorTunnelEndpoint, 0, len(ipsecTunnelParametersElement.GetTunnelEps()))
+						tunnelEpsElements := make([]ExternalConnectorTunnelEndpoint, 0, len(ipsecTunnelParametersElement.GetTunnelEps()))
 						for _, tunnelEpsElement := range ipsecTunnelParametersElement.GetTunnelEps() {
-							externalConnectorExternalConnectorTunnelEndpointModel := ExternalConnectorExternalConnectorTunnelEndpoint{}
+							externalConnectorTunnelEndpointModel := ExternalConnectorTunnelEndpoint{}
 
 							// data specToModelNested RequiredStringField --> Interface
 							if tunnelEpsElement.GetInterface() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.Interface = types.StringValue(tunnelEpsElement.GetInterface())
+								externalConnectorTunnelEndpointModel.Interface = types.StringValue(tunnelEpsElement.GetInterface())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.Interface = types.StringNull()
+								externalConnectorTunnelEndpointModel.Interface = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> LocalTunnelIp
 							if tunnelEpsElement.GetLocalTunnelIp() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringValue(tunnelEpsElement.GetLocalTunnelIp())
+								externalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringValue(tunnelEpsElement.GetLocalTunnelIp())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringNull()
+								externalConnectorTunnelEndpointModel.LocalTunnelIp = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Node
 							if tunnelEpsElement.GetNode() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.Node = types.StringValue(tunnelEpsElement.GetNode())
+								externalConnectorTunnelEndpointModel.Node = types.StringValue(tunnelEpsElement.GetNode())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.Node = types.StringNull()
+								externalConnectorTunnelEndpointModel.Node = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> RemoteTunnelIp
 							if tunnelEpsElement.GetRemoteTunnelIp() != "" {
-								externalConnectorExternalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringValue(tunnelEpsElement.GetRemoteTunnelIp())
+								externalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringValue(tunnelEpsElement.GetRemoteTunnelIp())
 							} else {
 								// Empty string, set to null
-								externalConnectorExternalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringNull()
+								externalConnectorTunnelEndpointModel.RemoteTunnelIp = types.StringNull()
 							}
 
-							tunnelEpsElements = append(tunnelEpsElements, externalConnectorExternalConnectorTunnelEndpointModel)
+							tunnelEpsElements = append(tunnelEpsElements, externalConnectorTunnelEndpointModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2165,17 +2166,17 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						if response.Diagnostics.HasError() {
 							return
 						}
-						externalConnectorExternalConnectorTunnelParametersModel.TunnelEps = tunnelEpsListValue
+						externalConnectorTunnelParametersModel.TunnelEps = tunnelEpsListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						externalConnectorExternalConnectorTunnelParametersModel.TunnelEps = types.ListNull(types.ObjectType{AttrTypes: ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelEpsModelAttributeMap})
+						externalConnectorTunnelParametersModel.TunnelEps = types.ListNull(types.ObjectType{AttrTypes: ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelEpsModelAttributeMap})
 					}
 
 					// data specToModelNested RequiredUintField --> TunnelMtu
-					externalConnectorExternalConnectorTunnelParametersModel.TunnelMtu = types.Int64Value(int64(ipsecTunnelParametersElement.GetTunnelMtu()))
+					externalConnectorTunnelParametersModel.TunnelMtu = types.Int64Value(int64(ipsecTunnelParametersElement.GetTunnelMtu()))
 
 					// data specToModelNested RequiredOneOfField --> TunnelSourceVn
 					// <no value>
@@ -2291,19 +2292,19 @@ func (d *DataSourceF5XCExternalConnector) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						externalConnectorExternalConnectorTunnelParametersModel.TunnelSourceVnChoice = finalObj
+						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorExternalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap)
+						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					externalConnectorExternalConnectorTunnelParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersModelAttributeMap, externalConnectorExternalConnectorTunnelParametersModel)
+					externalConnectorTunnelParametersModelObj, objDiags := types.ObjectValueFrom(ctx, ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersModelAttributeMap, externalConnectorTunnelParametersModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ipsecAttributeMap["ipsec_tunnel_parameters"] = externalConnectorExternalConnectorTunnelParametersModelObj
+					ipsecAttributeMap["ipsec_tunnel_parameters"] = externalConnectorTunnelParametersModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).

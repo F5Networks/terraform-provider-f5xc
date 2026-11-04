@@ -30,7 +30,7 @@ type DataSourceF5XCAlertReceiver struct {
 	client *client.APIClient
 }
 
-type AlertReceiverGlobalSpecTypeReceiverChoice struct {
+type AlertReceiverReceiverChoice struct {
 	Email     types.Object `tfsdk:"email"`
 	Opsgenie  types.Object `tfsdk:"opsgenie"`
 	Pagerduty types.Object `tfsdk:"pagerduty"`
@@ -39,11 +39,11 @@ type AlertReceiverGlobalSpecTypeReceiverChoice struct {
 	Webhook   types.Object `tfsdk:"webhook"`
 }
 
-type AlertReceiverGlobalSpecTypeEmail struct {
+type AlertReceiverEmail struct {
 	Email types.String `tfsdk:"email"`
 }
 
-type AlertReceiverGlobalSpecTypeOpsgenie struct {
+type AlertReceiverOpsgenie struct {
 	ApiKey types.Object `tfsdk:"api_key"`
 	Url    types.String `tfsdk:"url"`
 }
@@ -52,94 +52,95 @@ type AlertReceiverSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type AlertReceiverSecretTypeSecretInfoChoice struct {
+type AlertReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type AlertReceiverSecretTypeBlindfoldSecretInfo struct {
+type AlertReceiverBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type AlertReceiverSecretTypeClearSecretInfo struct {
+type AlertReceiverClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type AlertReceiverGlobalSpecTypePagerduty struct {
+type AlertReceiverPagerduty struct {
 	RoutingKey types.Object `tfsdk:"routing_key"`
 	Url        types.String `tfsdk:"url"`
 }
 
-type AlertReceiverGlobalSpecTypeSlack struct {
+type AlertReceiverSlack struct {
 	Channel types.String `tfsdk:"channel"`
 	Url     types.Object `tfsdk:"url"`
 }
 
-type AlertReceiverGlobalSpecTypeSms struct {
+type AlertReceiverSms struct {
 	ContactNumber types.String `tfsdk:"contact_number"`
 }
 
-type AlertReceiverGlobalSpecTypeWebhook struct {
+type AlertReceiverWebhook struct {
 	HttpConfig types.Object `tfsdk:"http_config"`
 	Url        types.Object `tfsdk:"url"`
 }
 
-type AlertReceiverAlertReceiverHTTPConfig struct {
+type AlertReceiverHTTPConfig struct {
 	AuthChoice      types.Object `tfsdk:"auth_choice"`
 	EnableHttp2     types.Bool   `tfsdk:"enable_http2"`
 	FollowRedirects types.Bool   `tfsdk:"follow_redirects"`
 	TlsChoice       types.Object `tfsdk:"tls_choice"`
 }
 
-type AlertReceiverHTTPConfigAuthChoice struct {
+type AlertReceiverAuthChoice struct {
 	AuthToken       types.Object `tfsdk:"auth_token"`
 	BasicAuth       types.Object `tfsdk:"basic_auth"`
 	ClientCertObj   types.Object `tfsdk:"client_cert_obj"`
 	NoAuthorization types.Bool   `tfsdk:"no_authorization"`
 }
 
-type AlertReceiverHTTPConfigAuthToken struct {
+type AlertReceiverAuthToken struct {
 	Token types.Object `tfsdk:"token"`
 }
 
-type AlertReceiverHTTPConfigBasicAuth struct {
+type AlertReceiverBasicAuth struct {
 	Password types.Object `tfsdk:"password"`
 	UserName types.String `tfsdk:"user_name"`
 }
 
-type AlertReceiverHTTPConfigClientCertObj struct {
+type AlertReceiverClientCertObj struct {
 	UseTlsObj types.List `tfsdk:"use_tls_obj"`
 }
 
-type AlertReceiverHTTPConfigTlsChoice struct {
+type AlertReceiverTlsChoice struct {
 	NoTls  types.Bool   `tfsdk:"no_tls"`
 	UseTls types.Object `tfsdk:"use_tls"`
 }
 
-type AlertReceiverHTTPConfigUseTls struct {
+type AlertReceiverUseTls struct {
 	MaxVersion             types.List   `tfsdk:"max_version"`
 	MinVersion             types.List   `tfsdk:"min_version"`
 	ServerValidationChoice types.Object `tfsdk:"server_validation_choice"`
 	SniChoice              types.Object `tfsdk:"sni_choice"`
 }
 
-type AlertReceiverTLSConfigServerValidationChoice struct {
+type AlertReceiverServerValChoice struct {
 	UseServerVerification types.Object `tfsdk:"use_server_verification"`
 	VolterraTrustedCa     types.Bool   `tfsdk:"volterra_trusted_ca"`
 }
 
-type AlertReceiverTLSConfigUseServerVerification struct {
+type AlertReceiverUseServerVerification struct {
 	CaCertObj types.Object `tfsdk:"ca_cert_obj"`
 }
 
-type AlertReceiverAlertReceiverCACertificateObj struct {
+type AlertReceiverCACertObj struct {
 	TrustedCa types.List `tfsdk:"trusted_ca"`
 }
 
-type AlertReceiverTLSConfigSniChoice struct {
+type AlertReceiverSniChoice struct {
 	DisableSni types.Bool   `tfsdk:"disable_sni"`
 	Sni        types.String `tfsdk:"sni"`
 }
@@ -214,6 +215,7 @@ var AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofModelAttributeMap = map[st
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -259,6 +261,7 @@ var AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap = m
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -304,6 +307,7 @@ var AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap = map[string]a
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -402,6 +406,7 @@ var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -447,6 +452,7 @@ var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoO
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -586,6 +592,7 @@ var AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap = map[string
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -617,8 +624,8 @@ func (d *DataSourceF5XCAlertReceiver) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
+		MarkdownDescription: "Alert Receiver is used to specify a receiver (slack, pagerDuty, etc.,) to send the alert notifications.<br>An Alert Receiver may be associated with one or more Alert Policy objects, which defines one or more routes to match<br>the incoming alert.",
+		Description:         "Alert Receiver is used to specify a receiver (slack, pagerDuty, etc.,) to send the alert notifications. An Alert Receiver may be associated with one or more Alert Policy objects, which defines one or more routes to match the incoming alert.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -740,8 +747,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -816,8 +830,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -898,8 +919,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -1000,8 +1028,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -1070,8 +1105,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -1312,8 +1354,15 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -1380,7 +1429,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "alert_receiver", err))
 		return
 	}
 
@@ -1451,7 +1500,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 		receiverChoiceChoices := specData.GetReceiver()
 
 		// The model struct that will be populated by the nested template.
-		var receiverChoiceChoicesModel = &AlertReceiverGlobalSpecTypeReceiverChoice{}
+		var receiverChoiceChoicesModel = &AlertReceiverReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1594,6 +1643,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							} else {
 								apiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -1774,6 +1832,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							} else {
 								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -1964,6 +2031,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -2035,12 +2111,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 				smsElement := smsOptionsWrapper.Sms
 
 				// data specToModelNested StringField --> ContactNumber
-				if smsElement.GetContactNumber() != "" {
-					smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
-				} else {
-					// Empty string, set to null
-					smsAttributeMap["contact_number"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
 
 				smsObj, smsObjDiags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
 				response.Diagnostics.Append(smsObjDiags...)
@@ -2066,7 +2138,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 				// data specToModelNested RequiredPointerField --> HttpConfig
 				if webhookElement.GetHttpConfig() != nil {
 					// Create the nested Go struct
-					alertReceiverAlertReceiverHTTPConfigModel := &AlertReceiverAlertReceiverHTTPConfig{}
+					alertReceiverHTTPConfigModel := &AlertReceiverHTTPConfig{}
 					httpConfigElement := webhookElement.GetHttpConfig()
 
 					// Recursively populate the nested struct
@@ -2193,6 +2265,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 											} else {
 												tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// data specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -2367,6 +2448,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 											}
 										}
 
+										// data specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -2528,17 +2618,17 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						alertReceiverAlertReceiverHTTPConfigModel.AuthChoice = finalObj
+						alertReceiverHTTPConfigModel.AuthChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						alertReceiverAlertReceiverHTTPConfigModel.AuthChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap)
+						alertReceiverHTTPConfigModel.AuthChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested BoolField --> EnableHttp2
-					alertReceiverAlertReceiverHTTPConfigModel.EnableHttp2 = types.BoolValue(bool(httpConfigElement.GetEnableHttp2()))
+					alertReceiverHTTPConfigModel.EnableHttp2 = types.BoolValue(bool(httpConfigElement.GetEnableHttp2()))
 
 					// data specToModelNested BoolField --> FollowRedirects
-					alertReceiverAlertReceiverHTTPConfigModel.FollowRedirects = types.BoolValue(bool(httpConfigElement.GetFollowRedirects()))
+					alertReceiverHTTPConfigModel.FollowRedirects = types.BoolValue(bool(httpConfigElement.GetFollowRedirects()))
 
 					// data specToModelNested RequiredOneOfField --> TlsChoice
 					// <no value>
@@ -2624,7 +2714,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 											// data specToModelNested PointerField --> CaCertObj
 											if useServerVerificationElement.GetCaCertObj() != nil {
 												// Create the nested Go struct
-												alertReceiverAlertReceiverCACertificateObjModel := &AlertReceiverAlertReceiverCACertificateObj{}
+												alertReceiverCACertObjModel := &AlertReceiverCACertObj{}
 												caCertObjElement := useServerVerificationElement.GetCaCertObj()
 
 												// Recursively populate the nested struct
@@ -2670,22 +2760,22 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 													if response.Diagnostics.HasError() {
 														return
 													}
-													alertReceiverAlertReceiverCACertificateObjModel.TrustedCa = trustedCaListValue
+													alertReceiverCACertObjModel.TrustedCa = trustedCaListValue
 
 												} else {
 													// The source list is empty or nil.
 													// CASE 1: The target field is a `types.List` or an attribute map.
 													// Assign a null `types.ListValue`.
-													alertReceiverAlertReceiverCACertificateObjModel.TrustedCa = types.ListNull(types.ObjectType{AttrTypes: AlertReceiverTrustedCaObjectRefModelAttributeMap})
+													alertReceiverCACertObjModel.TrustedCa = types.ListNull(types.ObjectType{AttrTypes: AlertReceiverTrustedCaObjectRefModelAttributeMap})
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												alertReceiverAlertReceiverCACertificateObjModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap, alertReceiverAlertReceiverCACertificateObjModel)
+												alertReceiverCACertObjModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap, alertReceiverCACertObjModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												useServerVerificationAttributeMap["ca_cert_obj"] = alertReceiverAlertReceiverCACertificateObjModelObj
+												useServerVerificationAttributeMap["ca_cert_obj"] = alertReceiverCACertObjModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -2810,19 +2900,19 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						alertReceiverAlertReceiverHTTPConfigModel.TlsChoice = finalObj
+						alertReceiverHTTPConfigModel.TlsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						alertReceiverAlertReceiverHTTPConfigModel.TlsChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap)
+						alertReceiverHTTPConfigModel.TlsChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverAlertReceiverHTTPConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigModelAttributeMap, alertReceiverAlertReceiverHTTPConfigModel)
+					alertReceiverHTTPConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigModelAttributeMap, alertReceiverHTTPConfigModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					webhookAttributeMap["http_config"] = alertReceiverAlertReceiverHTTPConfigModelObj
+					webhookAttributeMap["http_config"] = alertReceiverHTTPConfigModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -2934,6 +3024,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							} else {
 								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---

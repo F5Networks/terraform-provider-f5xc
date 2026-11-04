@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCDnsDomain_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := testAccResourceAutoF5XCDnsDomainName(t)
+	name := fmt.Sprintf("example-dns-domain-%s.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDnsDomain_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsDomainConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsDomainConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCDnsDomain_withDnssecModeTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := testAccResourceAutoF5XCDnsDomainName(t)
+	name := fmt.Sprintf("example-dns-domain-%s.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCDnsDomain_withDnssecModeTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsDomainConfig_withDnssecMode(name, namespace, "DNSSEC_DISABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsDomainConfig_withDnssecMode(name, namespace, "DNSSEC_ENABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCDnsDomain_withDomainChoiceVolterraManaged(t *testing
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := testAccResourceAutoF5XCDnsDomainName(t)
+	name := fmt.Sprintf("example-dns-domain-%s.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCDnsDomain_withDomainChoiceVolterraManaged(t *testing
 				Config: testAccResourceAutoF5XCDnsDomainConfig_domainChoiceVolterraManaged(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsDomainConfig_withDnssecMode(name, namespace, "DNSSEC_ENABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCDnsDomain_withMetadataUpdate(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := testAccResourceAutoF5XCDnsDomainName(t)
+	name := fmt.Sprintf("example-dns-domain-%s.example.com", acctest.RandString(t, 8))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -141,23 +141,23 @@ func TestAccResourceAutoF5XCDnsDomain_withMetadataUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDnsDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCDnsDomainConfig_withMetadata(name, namespace, "test", "platform"),
+				Config: testAccResourceAutoF5XCDnsDomainConfig_withMetadata(name, namespace, "example", "platform"),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCDnsDomainConfig_withMetadata(name, namespace, "prod", "network"),
+				Config: testAccResourceAutoF5XCDnsDomainConfig_withMetadata(name, namespace, "example", "network"),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,9 +168,9 @@ func TestAccResourceAutoF5XCDnsDomain_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := testAccResourceAutoF5XCDnsDomainName(t)
+	name := fmt.Sprintf("example-dns-domain-%s.example.com", acctest.RandString(t, 8))
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsDomainDestroyProducer(t),
@@ -179,23 +179,26 @@ func TestAccResourceAutoF5XCDnsDomain_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsDomainConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsDomainConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_domain.test",
+				ResourceName:                         "f5xc_dns_domain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_domain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsDomainConfig_full(name, "system"),
 	})
 }
 
@@ -203,13 +206,9 @@ func testAccCheckDnsDomainDestroyProducer(t *testing.T) func(*terraform.State) e
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_dns_domain", dnsDomainSchema.ObjectType, "dns domain")
 }
 
-func testAccResourceAutoF5XCDnsDomainName(t *testing.T) string {
-	return fmt.Sprintf("tf-acc-dns-domain-%s.example.com", acctest.RandString(t, 8))
-}
-
 func testAccResourceAutoF5XCDnsDomainConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name      = %q
   namespace = %q
 
@@ -222,10 +221,10 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name        = %q
   namespace   = %q
-  description = "dns domain updated"
+  description = "DNS domain basic example updated"
 
   domain_choice = {
     volterra_managed = true
@@ -236,7 +235,7 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_withDnssecMode(name, namespace, dnssecMode string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name      = %q
   namespace = %q
 
@@ -251,10 +250,10 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_domainChoiceVolterraManaged(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name        = %q
   namespace   = %q
-  description = "volterra managed domain"
+  description = "DNS domain with Volterra managed"
 
   domain_choice = {
     volterra_managed = true
@@ -267,7 +266,7 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_withMetadata(name, namespace, env, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name      = %q
   namespace = %q
 
@@ -288,13 +287,13 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name        = %q
   namespace   = %q
-  description = "dns domain full"
+  description = "DNS domain example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "platform"
   }
 
@@ -313,13 +312,13 @@ resource "f5xc_dns_domain" "test" {
 
 func testAccResourceAutoF5XCDnsDomainConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_domain" "test" {
+resource "f5xc_dns_domain" "example" {
   name        = %q
   namespace   = %q
-  description = "dns domain full updated"
+  description = "DNS domain example updated"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     team = "network"
   }
 

@@ -14,14 +14,23 @@
 page_title: "f5xc_service_policy Data Source - F5 XC Distributed Cloud"
 subcategory: "Network Security & Firewalls"
 description: |-
-  service policy object A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the policy. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action. A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.
+  A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input<br>fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The<br>rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining<br>algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the<br>policy.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule<br>combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with<br>a DENY action are evaluated prior to rules with a ALLOW action.<br><br>A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the<br>policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.
 ---
 
 # f5xc_service_policy (Data Source)
 
-service policy object A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the policy. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action. A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.
+A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input<br>fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The<br>rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining<br>algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the<br>policy.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule<br>combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with<br>a DENY action are evaluated prior to rules with a ALLOW action.<br><br>A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the<br>policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.
 
+## Example Usage
 
+```terraform
+# Example: Service Policy - Basic
+
+data "f5xc_service_policy" "example" {
+  name      = f5xc_service_policy.example.name
+  namespace = f5xc_service_policy.example.namespace
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -762,36 +771,7 @@ Read-Only:
 
 Read-Only:
 
-- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice))
 - `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--segment_policy--src_segment_choice))
-
-<a id="nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice"></a>
-### Nested Schema for `rule_choice.rule_list.rules.spec.segment_policy.dst_segment_choice`
-
-Read-Only:
-
-- `dst_any` (Boolean) Any segment Traffic is not matched against any segment
-- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice--dst_segments))
-- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment
-
-<a id="nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice--dst_segments"></a>
-### Nested Schema for `rule_choice.rule_list.rules.spec.segment_policy.dst_segment_choice.dst_segments`
-
-Read-Only:
-
-- `segments` (Attributes List) Segments Select list of segments (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments))
-
-<a id="nestedatt--rule_choice--rule_list--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments"></a>
-### Nested Schema for `rule_choice.rule_list.rules.spec.segment_policy.dst_segment_choice.dst_segments.segments`
-
-Read-Only:
-
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
-
-
-
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--segment_policy--src_segment_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.spec.segment_policy.src_segment_choice`

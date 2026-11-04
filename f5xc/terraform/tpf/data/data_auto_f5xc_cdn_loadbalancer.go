@@ -33,7 +33,6 @@ import (
 	ves_io_schema_views_common_cache_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_cache_rule"
 	ves_io_schema_views_common_security "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_security"
 	ves_io_schema_views_common_waf "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_waf"
-	ves_io_schema_views_http_loadbalancer "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/http_loadbalancer"
 	ves_io_schema_views_origin_pool "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/origin_pool"
 	ves_io_schema_virtual_host "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
 )
@@ -43,28 +42,29 @@ type DataSourceF5XCCdnLoadbalancer struct {
 	client *client.APIClient
 }
 
-type CdnLoadbalancerVirtualHostAutoCertInfoType struct {
+type CdnLoadbalancerAutoCertInfoType struct {
 	AutoCertExpiry  timetypes.RFC3339 `tfsdk:"auto_cert_expiry"`
 	AutoCertIssuer  types.String      `tfsdk:"auto_cert_issuer"`
 	AutoCertState   types.List        `tfsdk:"auto_cert_state"`
 	AutoCertSubject types.String      `tfsdk:"auto_cert_subject"`
 	DnsRecords      types.List        `tfsdk:"dns_records"`
+	DnsZones        types.List        `tfsdk:"dns_zones"`
 }
 
-type CdnLoadbalancerVirtualHostDNSRecord struct {
+type CdnLoadbalancerDNSRecord struct {
 	Name  types.String `tfsdk:"name"`
 	Type  types.String `tfsdk:"type"`
 	Value types.String `tfsdk:"value"`
 }
 
-type CdnLoadbalancerCommonWafSimpleClientSrcRule struct {
+type CdnLoadbalancerSimpleClientSrcRule struct {
 	Actions             types.List        `tfsdk:"actions"`
 	ClientSourceChoice  types.Object      `tfsdk:"client_source_choice"`
 	ExpirationTimestamp timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
 	Metadata            types.Object      `tfsdk:"metadata"`
 }
 
-type CdnLoadbalancerSimpleClientSrcRuleClientSourceChoice struct {
+type CdnLoadbalancerClientSrcChoice struct {
 	AsNumber       types.Int64  `tfsdk:"as_number"`
 	HttpHeader     types.Object `tfsdk:"http_header"`
 	IpPrefix       types.String `tfsdk:"ip_prefix"`
@@ -72,7 +72,7 @@ type CdnLoadbalancerSimpleClientSrcRuleClientSourceChoice struct {
 	UserIdentifier types.String `tfsdk:"user_identifier"`
 }
 
-type CdnLoadbalancerSimpleClientSrcRuleHttpHeader struct {
+type CdnLoadbalancerHttpHeader struct {
 	Headers types.List `tfsdk:"headers"`
 }
 
@@ -82,7 +82,7 @@ type CdnLoadbalancerHeaderMatcherType struct {
 	ValueMatchChoice types.Object `tfsdk:"value_match_choice"`
 }
 
-type CdnLoadbalancerHeaderMatcherTypeValueMatchChoice struct {
+type CdnLoadbalancerValueMatchChoice struct {
 	Exact    types.String `tfsdk:"exact"`
 	Presence types.Bool   `tfsdk:"presence"`
 	Regex    types.String `tfsdk:"regex"`
@@ -93,7 +93,7 @@ type CdnLoadbalancerMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeChallengeTypeChoice struct {
+type CdnLoadbalancerChallengeTypeChoice struct {
 	CaptchaChallenge     types.Object `tfsdk:"captcha_challenge"`
 	EnableChallenge      types.Object `tfsdk:"enable_challenge"`
 	JsChallenge          types.Object `tfsdk:"js_challenge"`
@@ -101,50 +101,50 @@ type CdnLoadbalancerGlobalSpecTypeChallengeTypeChoice struct {
 	PolicyBasedChallenge types.Object `tfsdk:"policy_based_challenge"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeCaptchaChallenge struct {
+type CdnLoadbalancerCaptchaChallenge struct {
 	CookieExpiry types.Int64  `tfsdk:"cookie_expiry"`
 	CustomPage   types.String `tfsdk:"custom_page"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeEnableChallenge struct {
+type CdnLoadbalancerEnableChallenge struct {
 	CaptchaChallengeParametersChoice types.Object `tfsdk:"captcha_challenge_parameters_choice"`
 	JsChallengeParametersChoice      types.Object `tfsdk:"js_challenge_parameters_choice"`
 	MaliciousUserMitigationChoice    types.Object `tfsdk:"malicious_user_mitigation_choice"`
 }
 
-type CdnLoadbalancerEnableChallengeCaptchaChallengeParametersChoice struct {
+type CdnLoadbalancerCaptchaChallengeParametersChoice struct {
 	CaptchaChallengeParameters        types.Object `tfsdk:"captcha_challenge_parameters"`
 	DefaultCaptchaChallengeParameters types.Bool   `tfsdk:"default_captcha_challenge_parameters"`
 }
 
-type CdnLoadbalancerEnableChallengeCaptchaChallengeParameters struct {
+type CdnLoadbalancerCaptchaChallengeParameters struct {
 	CookieExpiry types.Int64  `tfsdk:"cookie_expiry"`
 	CustomPage   types.String `tfsdk:"custom_page"`
 }
 
-type CdnLoadbalancerEnableChallengeJsChallengeParametersChoice struct {
+type CdnLoadbalancerJsChallengeParametersChoice struct {
 	DefaultJsChallengeParameters types.Bool   `tfsdk:"default_js_challenge_parameters"`
 	JsChallengeParameters        types.Object `tfsdk:"js_challenge_parameters"`
 }
 
-type CdnLoadbalancerEnableChallengeJsChallengeParameters struct {
+type CdnLoadbalancerJsChallengeParameters struct {
 	CookieExpiry  types.Int64  `tfsdk:"cookie_expiry"`
 	CustomPage    types.String `tfsdk:"custom_page"`
 	JsScriptDelay types.Int64  `tfsdk:"js_script_delay"`
 }
 
-type CdnLoadbalancerEnableChallengeMaliciousUserMitigationChoice struct {
+type CdnLoadbalancerMaliciousUserMitigationChoice struct {
 	DefaultMitigationSettings types.Bool   `tfsdk:"default_mitigation_settings"`
 	MaliciousUserMitigation   types.Object `tfsdk:"malicious_user_mitigation"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeJsChallenge struct {
+type CdnLoadbalancerJsChallenge struct {
 	CookieExpiry  types.Int64  `tfsdk:"cookie_expiry"`
 	CustomPage    types.String `tfsdk:"custom_page"`
 	JsScriptDelay types.Int64  `tfsdk:"js_script_delay"`
 }
 
-type CdnLoadbalancerGlobalSpecTypePolicyBasedChallenge struct {
+type CdnLoadbalancerPolicyBasedChallenge struct {
 	CaptchaChallengeParametersChoice types.Object `tfsdk:"captcha_challenge_parameters_choice"`
 	ChallengeChoice                  types.Object `tfsdk:"challenge_choice"`
 	JsChallengeParametersChoice      types.Object `tfsdk:"js_challenge_parameters_choice"`
@@ -162,7 +162,7 @@ type CdnLoadbalancerPolicyBasedChallengeCaptchaChallengeParameters struct {
 	CustomPage   types.String `tfsdk:"custom_page"`
 }
 
-type CdnLoadbalancerPolicyBasedChallengeChallengeChoice struct {
+type CdnLoadbalancerChallengeChoice struct {
 	AlwaysEnableCaptchaChallenge types.Bool `tfsdk:"always_enable_captcha_challenge"`
 	AlwaysEnableJsChallenge      types.Bool `tfsdk:"always_enable_js_challenge"`
 	NoChallenge                  types.Bool `tfsdk:"no_challenge"`
@@ -184,16 +184,16 @@ type CdnLoadbalancerPolicyBasedChallengeMaliciousUserMitigationChoice struct {
 	MaliciousUserMitigation   types.Object `tfsdk:"malicious_user_mitigation"`
 }
 
-type CdnLoadbalancerCommonWafChallengeRuleList struct {
+type CdnLoadbalancerChallengeRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type CdnLoadbalancerCommonWafChallengeRule struct {
+type CdnLoadbalancerChallengeRule struct {
 	Metadata types.Object `tfsdk:"metadata"`
 	Spec     types.Object `tfsdk:"spec"`
 }
 
-type CdnLoadbalancerServicePolicyRuleChallengeRuleSpec struct {
+type CdnLoadbalancerChallengeRuleSpec struct {
 	ArgMatchers           types.List        `tfsdk:"arg_matchers"`
 	AsnChoice             types.Object      `tfsdk:"asn_choice"`
 	BodyMatcher           types.Object      `tfsdk:"body_matcher"`
@@ -210,78 +210,72 @@ type CdnLoadbalancerServicePolicyRuleChallengeRuleSpec struct {
 	TlsFingerprintChoice  types.Object      `tfsdk:"tls_fingerprint_choice"`
 }
 
-type CdnLoadbalancerPolicyArgMatcherType struct {
+type CdnLoadbalancerArgMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
 }
 
-type CdnLoadbalancerArgMatcherTypeMatchChoice struct {
+type CdnLoadbalancerMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type CdnLoadbalancerArgMatcherTypeItem struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+type CdnLoadbalancerItem struct {
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecAsnChoice struct {
+type CdnLoadbalancerAsnChoice struct {
 	AnyAsn     types.Bool   `tfsdk:"any_asn"`
 	AsnList    types.Object `tfsdk:"asn_list"`
 	AsnMatcher types.Object `tfsdk:"asn_matcher"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecAsnList struct {
+type CdnLoadbalancerAsnList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecAsnMatcher struct {
+type CdnLoadbalancerAsnMatcher struct {
 	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
-type CdnLoadbalancerPolicyMatcherType struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+type CdnLoadbalancerMatcherType struct {
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecChallengeActionChoice struct {
+type CdnLoadbalancerChallengeActionChoice struct {
 	DisableChallenge          types.Bool `tfsdk:"disable_challenge"`
 	EnableCaptchaChallenge    types.Bool `tfsdk:"enable_captcha_challenge"`
 	EnableJavascriptChallenge types.Bool `tfsdk:"enable_javascript_challenge"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecClientChoice struct {
+type CdnLoadbalancerClientChoice struct {
 	AnyClient      types.Bool   `tfsdk:"any_client"`
 	ClientSelector types.Object `tfsdk:"client_selector"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecClientSelector struct {
+type CdnLoadbalancerClientSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type CdnLoadbalancerPolicyCookieMatcherType struct {
-	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
-	MatchChoice   types.Object `tfsdk:"match_choice"`
-	Name          types.String `tfsdk:"name"`
+type CdnLoadbalancerCookieMatcherType struct {
+	MatchChoice types.Object `tfsdk:"match_choice"`
+	Name        types.String `tfsdk:"name"`
 }
 
 type CdnLoadbalancerCookieMatcherTypeMatchChoice struct {
-	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
-	CheckPresent    types.Bool   `tfsdk:"check_present"`
-	Item            types.Object `tfsdk:"item"`
+	Item types.Object `tfsdk:"item"`
 }
 
 type CdnLoadbalancerCookieMatcherTypeItem struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerPolicyMatcherTypeBasic struct {
+type CdnLoadbalancerMatcherTypeBasic struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 	RegexValues types.List `tfsdk:"regex_values"`
 }
@@ -299,34 +293,33 @@ type CdnLoadbalancerHeaderMatcherTypeMatchChoice struct {
 }
 
 type CdnLoadbalancerHeaderMatcherTypeItem struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerPolicyHttpMethodMatcherType struct {
+type CdnLoadbalancerHttpMethodMatcherType struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	Methods       types.List `tfsdk:"methods"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecIpChoice struct {
+type CdnLoadbalancerIpChoice struct {
 	AnyIp        types.Bool   `tfsdk:"any_ip"`
 	IpMatcher    types.Object `tfsdk:"ip_matcher"`
 	IpPrefixList types.Object `tfsdk:"ip_prefix_list"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecIpMatcher struct {
+type CdnLoadbalancerIpMatcher struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	PrefixSets    types.List `tfsdk:"prefix_sets"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecIpPrefixList struct {
+type CdnLoadbalancerIpPrefixList struct {
 	InvertMatch  types.Bool `tfsdk:"invert_match"`
 	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
-type CdnLoadbalancerPolicyPathMatcherType struct {
+type CdnLoadbalancerPathMatcherType struct {
 	EncodedPathMatcher types.Bool `tfsdk:"encoded_path_matcher"`
 	ExactValues        types.List `tfsdk:"exact_values"`
 	InvertMatcher      types.Bool `tfsdk:"invert_matcher"`
@@ -336,29 +329,28 @@ type CdnLoadbalancerPolicyPathMatcherType struct {
 	Transformers       types.List `tfsdk:"transformers"`
 }
 
-type CdnLoadbalancerPolicyQueryParameterMatcherType struct {
+type CdnLoadbalancerQueryParamMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	Key           types.String `tfsdk:"key"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 }
 
-type CdnLoadbalancerQueryParameterMatcherTypeMatchChoice struct {
+type CdnLoadbalancerQueryParamMatcherTypeMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type CdnLoadbalancerQueryParameterMatcherTypeItem struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+type CdnLoadbalancerQueryParamMatcherTypeItem struct {
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecTlsFingerprintChoice struct {
+type CdnLoadbalancerTlsFingerprintChoice struct {
 	TlsFingerprintMatcher types.Object `tfsdk:"tls_fingerprint_matcher"`
 }
 
-type CdnLoadbalancerChallengeRuleSpecTlsFingerprintMatcher struct {
+type CdnLoadbalancerTlsFingerprintMatcher struct {
 	Classes        types.List `tfsdk:"classes"`
 	ExactValues    types.List `tfsdk:"exact_values"`
 	ExcludedValues types.List `tfsdk:"excluded_values"`
@@ -379,80 +371,80 @@ type CdnLoadbalancerCsrfPolicy struct {
 	AllowedDomainsChoice types.Object `tfsdk:"allowed_domains_choice"`
 }
 
-type CdnLoadbalancerCsrfPolicyAllowedDomainsChoice struct {
+type CdnLoadbalancerAllowedDomainsChoice struct {
 	AllLoadBalancerDomains types.Bool   `tfsdk:"all_load_balancer_domains"`
 	CustomDomainList       types.Object `tfsdk:"custom_domain_list"`
 	Disabled               types.Bool   `tfsdk:"disabled"`
 }
 
-type CdnLoadbalancerCsrfPolicyCustomDomainList struct {
+type CdnLoadbalancerCustomDomainList struct {
 	Domains types.List `tfsdk:"domains"`
 }
 
-type CdnLoadbalancerCommonCacheRuleCustomCacheRule struct {
+type CdnLoadbalancerCustomCacheRule struct {
 	CdnCacheRules types.List `tfsdk:"cdn_cache_rules"`
 }
 
-type CdnLoadbalancerPolicySimpleDataGuardRule struct {
+type CdnLoadbalancerSimpleDataGuardRule struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 	DomainChoice types.Object `tfsdk:"domain_choice"`
 	Metadata     types.Object `tfsdk:"metadata"`
 	Path         types.Object `tfsdk:"path"`
 }
 
-type CdnLoadbalancerSimpleDataGuardRuleActionChoice struct {
+type CdnLoadbalancerActionChoice struct {
 	ApplyDataGuard types.Bool `tfsdk:"apply_data_guard"`
 	SkipDataGuard  types.Bool `tfsdk:"skip_data_guard"`
 }
 
-type CdnLoadbalancerSimpleDataGuardRuleDomainChoice struct {
+type CdnLoadbalancerDomainChoice struct {
 	AnyDomain   types.Bool   `tfsdk:"any_domain"`
 	ExactValue  types.String `tfsdk:"exact_value"`
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type CdnLoadbalancerPathMatcherType struct {
+type CdnLoadbalancerSchemaPathMatcherType struct {
 	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
 }
 
-type CdnLoadbalancerPathMatcherTypePathMatchChoice struct {
+type CdnLoadbalancerPathMatchChoice struct {
 	Path   types.String `tfsdk:"path"`
 	Prefix types.String `tfsdk:"prefix"`
 	Regex  types.String `tfsdk:"regex"`
 }
 
-type CdnLoadbalancerCommonSecurityDDoSMitigationRule struct {
+type CdnLoadbalancerDDoSMitigationRule struct {
 	ExpirationTimestamp    timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
 	Metadata               types.Object      `tfsdk:"metadata"`
 	MitigationActionChoice types.Object      `tfsdk:"mitigation_action_choice"`
 	MitigationChoice       types.Object      `tfsdk:"mitigation_choice"`
 }
 
-type CdnLoadbalancerDDoSMitigationRuleMitigationActionChoice struct {
+type CdnLoadbalancerMitigationActionChoice struct {
 	Block types.Bool `tfsdk:"block"`
 }
 
-type CdnLoadbalancerDDoSMitigationRuleMitigationChoice struct {
+type CdnLoadbalancerMitigationChoice struct {
 	DdosClientSource types.Object `tfsdk:"ddos_client_source"`
 	IpPrefixList     types.Object `tfsdk:"ip_prefix_list"`
 }
 
-type CdnLoadbalancerDDoSMitigationRuleDdosClientSource struct {
+type CdnLoadbalancerDdosClientSrc struct {
 	AsnList                  types.Object `tfsdk:"asn_list"`
 	CountryList              types.List   `tfsdk:"country_list"`
 	Ja4TlsFingerprintMatcher types.Object `tfsdk:"ja4_tls_fingerprint_matcher"`
 	TlsFingerprintMatcher    types.Object `tfsdk:"tls_fingerprint_matcher"`
 }
 
-type CdnLoadbalancerPolicyAsnMatchList struct {
+type CdnLoadbalancerAsnMatchList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type CdnLoadbalancerPolicyJA4TlsFingerprintMatcherType struct {
+type CdnLoadbalancerJA4TlsFingerprintMatcherType struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 }
 
-type CdnLoadbalancerPolicyTlsFingerprintMatcherType struct {
+type CdnLoadbalancerTlsFingerprintMatcherType struct {
 	Classes        types.List `tfsdk:"classes"`
 	ExactValues    types.List `tfsdk:"exact_values"`
 	ExcludedValues types.List `tfsdk:"excluded_values"`
@@ -464,22 +456,22 @@ type CdnLoadbalancerDDoSMitigationRuleIpPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
-type CdnLoadbalancerCommonCacheRuleDefaultCacheAction struct {
+type CdnLoadbalancerDefaultCacheAction struct {
 	CacheActionsChoice types.Object `tfsdk:"cache_actions_choice"`
 }
 
-type CdnLoadbalancerDefaultCacheActionCacheActionsChoice struct {
+type CdnLoadbalancerCacheActionsChoice struct {
 	CacheDisabled    types.Bool   `tfsdk:"cache_disabled"`
 	CacheTtlDefault  types.String `tfsdk:"cache_ttl_default"`
 	CacheTtlOverride types.String `tfsdk:"cache_ttl_override"`
 }
 
-type CdnLoadbalancerVirtualHostDnsInfoDnsInfo struct {
+type CdnLoadbalancerDnsInfo struct {
 	IpAddress   types.String `tfsdk:"ip_address"`
 	Ipv6Address types.String `tfsdk:"ipv6_address"`
 }
 
-type CdnLoadbalancerPolicyGraphQLRule struct {
+type CdnLoadbalancerGraphQLRule struct {
 	DomainChoice    types.Object `tfsdk:"domain_choice"`
 	ExactPath       types.String `tfsdk:"exact_path"`
 	GraphqlSettings types.Object `tfsdk:"graphql_settings"`
@@ -493,37 +485,35 @@ type CdnLoadbalancerGraphQLRuleDomainChoice struct {
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type CdnLoadbalancerPolicyGraphQLSettingsType struct {
+type CdnLoadbalancerGraphQLSettingsType struct {
 	AllowIntrospectionQueriesChoice types.Object `tfsdk:"allow_introspection_queries_choice"`
 	MaxBatchedQueries               types.Int64  `tfsdk:"max_batched_queries"`
 	MaxDepth                        types.Int64  `tfsdk:"max_depth"`
 	MaxTotalLength                  types.Int64  `tfsdk:"max_total_length"`
 }
 
-type CdnLoadbalancerGraphQLSettingsTypeAllowIntrospectionQueriesChoice struct {
+type CdnLoadbalancerAllowIntrospectionQueriesChoice struct {
 	DisableIntrospection types.Bool `tfsdk:"disable_introspection"`
 	EnableIntrospection  types.Bool `tfsdk:"enable_introspection"`
 }
 
-type CdnLoadbalancerGraphQLRuleMethodChoice struct {
+type CdnLoadbalancerMethodChoice struct {
 	MethodGet  types.Bool `tfsdk:"method_get"`
 	MethodPost types.Bool `tfsdk:"method_post"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeIpReputationChoice struct {
+type CdnLoadbalancerIpReputationChoice struct {
 	DisableIpReputation types.Bool   `tfsdk:"disable_ip_reputation"`
 	EnableIpReputation  types.Object `tfsdk:"enable_ip_reputation"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeEnableIpReputation struct {
+type CdnLoadbalancerEnableIpReputation struct {
 	IpThreatCategories types.List `tfsdk:"ip_threat_categories"`
 }
 
-type CdnLoadbalancerCommonWafJWTValidation struct {
+type CdnLoadbalancerJWTVal struct {
 	Action                  types.Object `tfsdk:"action"`
 	JwksConfigurationChoice types.Object `tfsdk:"jwks_configuration_choice"`
-	MandatoryClaims         types.Object `tfsdk:"mandatory_claims"`
-	ReservedClaims          types.Object `tfsdk:"reserved_claims"`
 	Target                  types.Object `tfsdk:"target"`
 	TokenLocation           types.Object `tfsdk:"token_location"`
 }
@@ -533,207 +523,120 @@ type CdnLoadbalancerAction struct {
 }
 
 type CdnLoadbalancerActionActionChoice struct {
-	Block  types.Bool `tfsdk:"block"`
-	Report types.Bool `tfsdk:"report"`
+	Block types.Bool `tfsdk:"block"`
 }
 
-type CdnLoadbalancerJWTValidationJwksConfigurationChoice struct {
+type CdnLoadbalancerJwksCfgChoice struct {
 	AuthorizationServer types.Object `tfsdk:"authorization_server"`
 	JwksConfig          types.Object `tfsdk:"jwks_config"`
 }
 
-type CdnLoadbalancerJWTValidationAuthorizationServer struct {
+type CdnLoadbalancerAuthzServer struct {
 	AuthorizationServers types.List `tfsdk:"authorization_servers"`
 }
 
-type CdnLoadbalancerJWTValidationJwksConfig struct {
+type CdnLoadbalancerJwksConfig struct {
 	Cleartext types.String `tfsdk:"cleartext"`
 }
 
-type CdnLoadbalancerCommonWafMandatoryClaims struct {
-	ClaimNames types.List `tfsdk:"claim_names"`
-}
-
-type CdnLoadbalancerCommonWafReservedClaims struct {
-	AudienceValidationChoice types.Object `tfsdk:"audience_validation_choice"`
-	IssuerValidationChoice   types.Object `tfsdk:"issuer_validation_choice"`
-	ValidatePeriodChoice     types.Object `tfsdk:"validate_period_choice"`
-}
-
-type CdnLoadbalancerReservedClaimsAudienceValidationChoice struct {
-	Audience        types.Object `tfsdk:"audience"`
-	AudienceDisable types.Bool   `tfsdk:"audience_disable"`
-}
-
-type CdnLoadbalancerReservedClaimsAudience struct {
-	Audiences types.List `tfsdk:"audiences"`
-}
-
-type CdnLoadbalancerReservedClaimsIssuerValidationChoice struct {
-	Issuer        types.String `tfsdk:"issuer"`
-	IssuerDisable types.Bool   `tfsdk:"issuer_disable"`
-}
-
-type CdnLoadbalancerReservedClaimsValidatePeriodChoice struct {
-	ValidatePeriodDisable types.Bool `tfsdk:"validate_period_disable"`
-	ValidatePeriodEnable  types.Bool `tfsdk:"validate_period_enable"`
-}
-
-type CdnLoadbalancerCommonWafTarget struct {
+type CdnLoadbalancerTarget struct {
 	TargetChoice types.Object `tfsdk:"target_choice"`
 }
 
-type CdnLoadbalancerTargetTargetChoice struct {
-	AllEndpoint types.Bool   `tfsdk:"all_endpoint"`
-	ApiGroups   types.Object `tfsdk:"api_groups"`
-	BasePaths   types.Object `tfsdk:"base_paths"`
+type CdnLoadbalancerTargetChoice struct {
+	BasePaths types.Object `tfsdk:"base_paths"`
 }
 
-type CdnLoadbalancerTargetApiGroups struct {
-	ApiGroups types.List `tfsdk:"api_groups"`
-}
-
-type CdnLoadbalancerTargetBasePaths struct {
+type CdnLoadbalancerBasePaths struct {
 	BasePaths types.List `tfsdk:"base_paths"`
 }
 
-type CdnLoadbalancerCommonWafTokenLocation struct {
+type CdnLoadbalancerTokenLocation struct {
 	TokenLocationChoice types.Object `tfsdk:"token_location_choice"`
 }
 
-type CdnLoadbalancerTokenLocationTokenLocationChoice struct {
+type CdnLoadbalancerTokenLocationChoice struct {
 	BearerToken types.Bool `tfsdk:"bearer_token"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeL7DdosAutoMitigationActionChoice struct {
+type CdnLoadbalancerL7DdosAutoMitigationActionChoice struct {
 	L7DdosActionBlock       types.Bool   `tfsdk:"l7_ddos_action_block"`
 	L7DdosActionDefault     types.Bool   `tfsdk:"l7_ddos_action_default"`
 	L7DdosActionJsChallenge types.Object `tfsdk:"l7_ddos_action_js_challenge"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeL7DdosActionJsChallenge struct {
+type CdnLoadbalancerL7DdosActionJsChallenge struct {
 	CookieExpiry  types.Int64  `tfsdk:"cookie_expiry"`
 	CustomPage    types.String `tfsdk:"custom_page"`
 	JsScriptDelay types.Int64  `tfsdk:"js_script_delay"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice struct {
+type CdnLoadbalancerLoadbalancerTypeChoice struct {
 	Http          types.Object `tfsdk:"http"`
 	Https         types.Object `tfsdk:"https"`
 	HttpsAutoCert types.Object `tfsdk:"https_auto_cert"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeHttp struct {
-	DnsVolterraManaged types.Bool   `tfsdk:"dns_volterra_managed"`
-	PortChoice         types.Object `tfsdk:"port_choice"`
+type CdnLoadbalancerHttp struct {
+	DnsVolterraManaged types.Bool `tfsdk:"dns_volterra_managed"`
 }
 
-type CdnLoadbalancerProxyTypeHttpPortChoice struct {
-	Port       types.Int64  `tfsdk:"port"`
-	PortRanges types.String `tfsdk:"port_ranges"`
-}
-
-type CdnLoadbalancerGlobalSpecTypeHttps struct {
+type CdnLoadbalancerHttps struct {
 	AddHsts        types.Bool   `tfsdk:"add_hsts"`
 	HttpRedirect   types.Bool   `tfsdk:"http_redirect"`
 	TlsCertOptions types.Object `tfsdk:"tls_cert_options"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerTlsCertOptions struct {
+type CdnLoadbalancerTlsCertOptions struct {
 	TlsCertificatesChoice types.Object `tfsdk:"tls_certificates_choice"`
 }
 
-type CdnLoadbalancerTlsCertOptionsTlsCertificatesChoice struct {
+type CdnLoadbalancerTlsCertificatesChoice struct {
 	TlsCertParams   types.Object `tfsdk:"tls_cert_params"`
 	TlsInlineParams types.Object `tfsdk:"tls_inline_params"`
 }
 
-type CdnLoadbalancerTlsCertOptionsTlsCertParams struct {
+type CdnLoadbalancerTlsCertParams struct {
 	Certificates types.List   `tfsdk:"certificates"`
-	MtlsChoice   types.Object `tfsdk:"mtls_choice"`
 	TlsConfig    types.Object `tfsdk:"tls_config"`
 }
 
-type CdnLoadbalancerDownstreamTLSCertsParamsMtlsChoice struct {
-	NoMtls  types.Bool   `tfsdk:"no_mtls"`
-	UseMtls types.Object `tfsdk:"use_mtls"`
-}
-
-type CdnLoadbalancerDownstreamTLSCertsParamsUseMtls struct {
-	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
-	CrlChoice                 types.Object `tfsdk:"crl_choice"`
-	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
-}
-
-type CdnLoadbalancerDownstreamTlsValidationContextCrlChoice struct {
-	Crl   types.Object `tfsdk:"crl"`
-	NoCrl types.Bool   `tfsdk:"no_crl"`
-}
-
-type CdnLoadbalancerDownstreamTlsValidationContextTrustedCaChoice struct {
-	TrustedCa    types.Object `tfsdk:"trusted_ca"`
-	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
-}
-
-type CdnLoadbalancerDownstreamTlsValidationContextXfccHeaderChoice struct {
-	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
-	XfccOptions  types.Object `tfsdk:"xfcc_options"`
-}
-
-type CdnLoadbalancerDownstreamTlsValidationContextXfccOptions struct {
-	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
-}
-
-type CdnLoadbalancerViewsTlsConfig struct {
+type CdnLoadbalancerTlsConfig struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type CdnLoadbalancerTlsConfigChoice struct {
+type CdnLoadbalancerChoice struct {
 	CustomSecurity  types.Object `tfsdk:"custom_security"`
 	DefaultSecurity types.Bool   `tfsdk:"default_security"`
 	LowSecurity     types.Bool   `tfsdk:"low_security"`
 	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
 }
 
-type CdnLoadbalancerTlsConfigCustomSecurity struct {
+type CdnLoadbalancerCustomSec struct {
 	CipherSuites types.List `tfsdk:"cipher_suites"`
 	MaxVersion   types.List `tfsdk:"max_version"`
 	MinVersion   types.List `tfsdk:"min_version"`
 }
 
-type CdnLoadbalancerTlsCertOptionsTlsInlineParams struct {
-	MtlsChoice      types.Object `tfsdk:"mtls_choice"`
+type CdnLoadbalancerTlsInlineParams struct {
 	TlsCertificates types.List   `tfsdk:"tls_certificates"`
 	TlsConfig       types.Object `tfsdk:"tls_config"`
 }
 
-type CdnLoadbalancerDownstreamTlsParamsTypeMtlsChoice struct {
-	NoMtls  types.Bool   `tfsdk:"no_mtls"`
-	UseMtls types.Object `tfsdk:"use_mtls"`
-}
-
-type CdnLoadbalancerDownstreamTlsParamsTypeUseMtls struct {
-	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
-	CrlChoice                 types.Object `tfsdk:"crl_choice"`
-	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
-}
-
-type CdnLoadbalancerTlsCertificateType struct {
+type CdnLoadbalancerTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type CdnLoadbalancerTlsCertificateTypeOcspStaplingChoice struct {
+type CdnLoadbalancerOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type CdnLoadbalancerTlsCertificateTypeCustomHashAlgorithms struct {
+type CdnLoadbalancerCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -741,29 +644,30 @@ type CdnLoadbalancerSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type CdnLoadbalancerSecretTypeSecretInfoChoice struct {
+type CdnLoadbalancerSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type CdnLoadbalancerSecretTypeBlindfoldSecretInfo struct {
+type CdnLoadbalancerBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type CdnLoadbalancerSecretTypeClearSecretInfo struct {
+type CdnLoadbalancerClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeHttpsAutoCert struct {
+type CdnLoadbalancerHttpsAutoCert struct {
 	AddHsts      types.Bool   `tfsdk:"add_hsts"`
 	HttpRedirect types.Bool   `tfsdk:"http_redirect"`
 	TlsConfig    types.Object `tfsdk:"tls_config"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerCDNTLSConfig struct {
+type CdnLoadbalancerCDNTLSConfig struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -772,12 +676,12 @@ type CdnLoadbalancerCDNTLSConfigChoice struct {
 	Tls_12Plus types.Bool `tfsdk:"tls_12_plus"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeMaliciousUserDetectionChoice struct {
+type CdnLoadbalancerMaliciousUserDetectionChoice struct {
 	DisableMaliciousUserDetection types.Bool `tfsdk:"disable_malicious_user_detection"`
 	EnableMaliciousUserDetection  types.Bool `tfsdk:"enable_malicious_user_detection"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerCdnOriginPoolType struct {
+type CdnLoadbalancerCdnOriginPoolType struct {
 	MoreOriginOptions    types.Object `tfsdk:"more_origin_options"`
 	OriginRequestTimeout types.String `tfsdk:"origin_request_timeout"`
 	OriginServers        types.List   `tfsdk:"origin_servers"`
@@ -785,12 +689,12 @@ type CdnLoadbalancerCdnLoadbalancerCdnOriginPoolType struct {
 	TlsChoice            types.Object `tfsdk:"tls_choice"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerOriginAdvancedConfiguration struct {
+type CdnLoadbalancerOriginAdvancedCfg struct {
 	EnableByteRangeRequest types.Bool `tfsdk:"enable_byte_range_request"`
 	WebsocketProxy         types.Bool `tfsdk:"websocket_proxy"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerCDNOriginServerType struct {
+type CdnLoadbalancerCDNOriginServerType struct {
 	Choice types.Object `tfsdk:"choice"`
 	Port   types.Int64  `tfsdk:"port"`
 }
@@ -800,82 +704,36 @@ type CdnLoadbalancerCDNOriginServerTypeChoice struct {
 	PublicName types.Object `tfsdk:"public_name"`
 }
 
-type CdnLoadbalancerCDNOriginServerTypePublicIp struct {
+type CdnLoadbalancerPublicIp struct {
 	PublicIpChoice types.Object `tfsdk:"public_ip_choice"`
 }
 
-type CdnLoadbalancerOriginServerPublicIPPublicIpChoice struct {
-	Ip   types.String `tfsdk:"ip"`
-	Ipv6 types.String `tfsdk:"ipv6"`
+type CdnLoadbalancerPublicIpChoice struct {
+	Ip types.String `tfsdk:"ip"`
 }
 
-type CdnLoadbalancerCDNOriginServerTypePublicName struct {
+type CdnLoadbalancerPublicName struct {
 	DnsName         types.String `tfsdk:"dns_name"`
 	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
 }
 
-type CdnLoadbalancerOriginPoolOriginServerPublicName struct {
+type CdnLoadbalancerOriginServerPublicName struct {
 	DnsName         types.String `tfsdk:"dns_name"`
 	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
 }
 
-type CdnLoadbalancerCdnOriginPoolTypeTlsChoice struct {
-	NoTls  types.Bool   `tfsdk:"no_tls"`
-	UseTls types.Object `tfsdk:"use_tls"`
+type CdnLoadbalancerTlsChoice struct {
+	NoTls  types.Bool `tfsdk:"no_tls"`
+	UseTls types.Bool `tfsdk:"use_tls"`
 }
 
-type CdnLoadbalancerCdnOriginPoolTypeUseTls struct {
-	MaxSessionKeysTypeChoice types.Object `tfsdk:"max_session_keys_type_choice"`
-	MtlsChoice               types.Object `tfsdk:"mtls_choice"`
-	ServerValidationChoice   types.Object `tfsdk:"server_validation_choice"`
-	SniChoice                types.Object `tfsdk:"sni_choice"`
-	TlsConfig                types.Object `tfsdk:"tls_config"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersMaxSessionKeysTypeChoice struct {
-	DefaultSessionKeyCaching types.Bool  `tfsdk:"default_session_key_caching"`
-	DisableSessionKeyCaching types.Bool  `tfsdk:"disable_session_key_caching"`
-	MaxSessionKeys           types.Int64 `tfsdk:"max_session_keys"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersMtlsChoice struct {
-	NoMtls     types.Bool   `tfsdk:"no_mtls"`
-	UseMtls    types.Object `tfsdk:"use_mtls"`
-	UseMtlsObj types.Object `tfsdk:"use_mtls_obj"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersUseMtls struct {
-	TlsCertificates types.List `tfsdk:"tls_certificates"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersServerValidationChoice struct {
-	SkipServerVerification types.Bool   `tfsdk:"skip_server_verification"`
-	UseServerVerification  types.Object `tfsdk:"use_server_verification"`
-	VolterraTrustedCa      types.Bool   `tfsdk:"volterra_trusted_ca"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersUseServerVerification struct {
-	TrustedCaChoice types.Object `tfsdk:"trusted_ca_choice"`
-}
-
-type CdnLoadbalancerUpstreamTlsValidationContextTrustedCaChoice struct {
-	TrustedCa    types.Object `tfsdk:"trusted_ca"`
-	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
-}
-
-type CdnLoadbalancerUpstreamTlsParametersSniChoice struct {
-	DisableSni         types.Bool   `tfsdk:"disable_sni"`
-	Sni                types.String `tfsdk:"sni"`
-	UseHostHeaderAsSni types.Bool   `tfsdk:"use_host_header_as_sni"`
-}
-
-type CdnLoadbalancerCdnLoadbalancerOtherSettings struct {
+type CdnLoadbalancerOtherSettings struct {
 	AddLocation    types.Bool   `tfsdk:"add_location"`
 	HeaderOptions  types.Object `tfsdk:"header_options"`
 	LoggingOptions types.Object `tfsdk:"logging_options"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerHeaderControlType struct {
+type CdnLoadbalancerHeaderControlType struct {
 	RequestHeadersToAdd     types.List `tfsdk:"request_headers_to_add"`
 	RequestHeadersToRemove  types.List `tfsdk:"request_headers_to_remove"`
 	ResponseHeadersToAdd    types.List `tfsdk:"response_headers_to_add"`
@@ -883,26 +741,25 @@ type CdnLoadbalancerCdnLoadbalancerHeaderControlType struct {
 }
 
 type CdnLoadbalancerHeaderManipulationOptionType struct {
-	Append      types.Bool   `tfsdk:"append"`
 	Name        types.String `tfsdk:"name"`
 	ValueChoice types.Object `tfsdk:"value_choice"`
 }
 
-type CdnLoadbalancerHeaderManipulationOptionTypeValueChoice struct {
+type CdnLoadbalancerValueChoice struct {
 	SecretValue types.Object `tfsdk:"secret_value"`
 	Value       types.String `tfsdk:"value"`
 }
 
-type CdnLoadbalancerHeaderManipulationOptionTypeSecretValue struct {
+type CdnLoadbalancerSecretValue struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerLoggingOptionsType struct {
+type CdnLoadbalancerLoggingOptionsType struct {
 	ClientLogOptions types.Object `tfsdk:"client_log_options"`
 	OriginLogOptions types.Object `tfsdk:"origin_log_options"`
 }
 
-type CdnLoadbalancerCdnLoadbalancerLogHeaderOptions struct {
+type CdnLoadbalancerLogHeaderOptions struct {
 	HeaderList types.List `tfsdk:"header_list"`
 }
 
@@ -914,41 +771,41 @@ type CdnLoadbalancerCookieManipulationOptionType struct {
 	SecureChoice          types.Object `tfsdk:"secure_choice"`
 }
 
-type CdnLoadbalancerCookieManipulationOptionTypeCookieTamperingChoice struct {
+type CdnLoadbalancerCookieTamperingChoice struct {
 	DisableTamperingProtection types.Bool `tfsdk:"disable_tampering_protection"`
 	EnableTamperingProtection  types.Bool `tfsdk:"enable_tampering_protection"`
 }
 
-type CdnLoadbalancerCookieManipulationOptionTypeHttponlyChoice struct {
+type CdnLoadbalancerHttponlyChoice struct {
 	AddHttponly    types.Bool `tfsdk:"add_httponly"`
 	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
 }
 
-type CdnLoadbalancerCookieManipulationOptionTypeSamesiteChoice struct {
+type CdnLoadbalancerSamesiteChoice struct {
 	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
 	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
 	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
 	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
 }
 
-type CdnLoadbalancerCookieManipulationOptionTypeSecureChoice struct {
+type CdnLoadbalancerSecureChoice struct {
 	AddSecure    types.Bool `tfsdk:"add_secure"`
 	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeRateLimitChoice struct {
+type CdnLoadbalancerRateLimitChoice struct {
 	ApiRateLimit     types.Object `tfsdk:"api_rate_limit"`
 	DisableRateLimit types.Bool   `tfsdk:"disable_rate_limit"`
 	RateLimit        types.Object `tfsdk:"rate_limit"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeApiRateLimit struct {
+type CdnLoadbalancerApiRateLimit struct {
 	ApiEndpointRules    types.List   `tfsdk:"api_endpoint_rules"`
 	IpAllowedListChoice types.Object `tfsdk:"ip_allowed_list_choice"`
 	ServerUrlRules      types.List   `tfsdk:"server_url_rules"`
 }
 
-type CdnLoadbalancerCommonWafApiEndpointRule struct {
+type CdnLoadbalancerApiEndpointRule struct {
 	ApiEndpointMethod types.Object `tfsdk:"api_endpoint_method"`
 	ApiEndpointPath   types.String `tfsdk:"api_endpoint_path"`
 	ClientMatcher     types.Object `tfsdk:"client_matcher"`
@@ -957,7 +814,7 @@ type CdnLoadbalancerCommonWafApiEndpointRule struct {
 	RequestMatcher    types.Object `tfsdk:"request_matcher"`
 }
 
-type CdnLoadbalancerPolicyClientMatcher struct {
+type CdnLoadbalancerClientMatcher struct {
 	ClientChoice          types.Object `tfsdk:"client_choice"`
 	IpAsnChoice           types.Object `tfsdk:"ip_asn_choice"`
 	TlsFingerprintMatcher types.Object `tfsdk:"tls_fingerprint_matcher"`
@@ -973,11 +830,11 @@ type CdnLoadbalancerClientMatcherClientSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type CdnLoadbalancerClientMatcherIpThreatCategoryList struct {
+type CdnLoadbalancerIpThreatCategoryList struct {
 	IpThreatCategories types.List `tfsdk:"ip_threat_categories"`
 }
 
-type CdnLoadbalancerClientMatcherIpAsnChoice struct {
+type CdnLoadbalancerIpAsnChoice struct {
 	AnyIp        types.Bool   `tfsdk:"any_ip"`
 	AsnList      types.Object `tfsdk:"asn_list"`
 	AsnMatcher   types.Object `tfsdk:"asn_matcher"`
@@ -1009,30 +866,30 @@ type CdnLoadbalancerApiEndpointRuleDomainChoice struct {
 	SpecificDomain types.String `tfsdk:"specific_domain"`
 }
 
-type CdnLoadbalancerApiEndpointRuleRateLimiterChoice struct {
+type CdnLoadbalancerRateLimiterChoice struct {
 	InlineRateLimiter types.Object `tfsdk:"inline_rate_limiter"`
 	RefRateLimiter    types.Object `tfsdk:"ref_rate_limiter"`
 }
 
-type CdnLoadbalancerApiEndpointRuleInlineRateLimiter struct {
+type CdnLoadbalancerInlineRateLimiter struct {
 	CountByChoice types.Object `tfsdk:"count_by_choice"`
 	Threshold     types.Int64  `tfsdk:"threshold"`
 	Unit          types.List   `tfsdk:"unit"`
 }
 
-type CdnLoadbalancerInlineRateLimiterCountByChoice struct {
+type CdnLoadbalancerCountByChoice struct {
 	RefUserId       types.Object `tfsdk:"ref_user_id"`
 	UseHttpLbUserId types.Bool   `tfsdk:"use_http_lb_user_id"`
 }
 
-type CdnLoadbalancerPolicyRequestMatcher struct {
+type CdnLoadbalancerReqMatcher struct {
 	CookieMatchers types.List `tfsdk:"cookie_matchers"`
 	Headers        types.List `tfsdk:"headers"`
 	JwtClaims      types.List `tfsdk:"jwt_claims"`
 	QueryParams    types.List `tfsdk:"query_params"`
 }
 
-type CdnLoadbalancerPolicyJWTClaimMatcherType struct {
+type CdnLoadbalancerJWTClaimMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
@@ -1045,42 +902,41 @@ type CdnLoadbalancerJWTClaimMatcherTypeMatchChoice struct {
 }
 
 type CdnLoadbalancerJWTClaimMatcherTypeItem struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type CdnLoadbalancerAPIRateLimitIpAllowedListChoice struct {
+type CdnLoadbalancerIpAllowedListChoice struct {
 	BypassRateLimitingRules types.Object `tfsdk:"bypass_rate_limiting_rules"`
 	CustomIpAllowedList     types.Object `tfsdk:"custom_ip_allowed_list"`
 	IpAllowedList           types.Object `tfsdk:"ip_allowed_list"`
 	NoIpAllowedList         types.Bool   `tfsdk:"no_ip_allowed_list"`
 }
 
-type CdnLoadbalancerAPIRateLimitBypassRateLimitingRules struct {
+type CdnLoadbalancerBypassRateLimitingRules struct {
 	BypassRateLimitingRules types.List `tfsdk:"bypass_rate_limiting_rules"`
 }
 
-type CdnLoadbalancerCommonWafBypassRateLimitingRule struct {
+type CdnLoadbalancerBypassRateLimitingRule struct {
 	ClientMatcher         types.Object `tfsdk:"client_matcher"`
 	DestinationTypeChoice types.Object `tfsdk:"destination_type_choice"`
 	DomainChoice          types.Object `tfsdk:"domain_choice"`
 	RequestMatcher        types.Object `tfsdk:"request_matcher"`
 }
 
-type CdnLoadbalancerBypassRateLimitingRuleDestinationTypeChoice struct {
+type CdnLoadbalancerDestTypeChoice struct {
 	AnyUrl      types.Bool   `tfsdk:"any_url"`
 	ApiEndpoint types.Object `tfsdk:"api_endpoint"`
 	ApiGroups   types.Object `tfsdk:"api_groups"`
 	BasePath    types.String `tfsdk:"base_path"`
 }
 
-type CdnLoadbalancerBypassRateLimitingRuleApiEndpoint struct {
+type CdnLoadbalancerApiEndpoint struct {
 	Methods types.List   `tfsdk:"methods"`
 	Path    types.String `tfsdk:"path"`
 }
 
-type CdnLoadbalancerBypassRateLimitingRuleApiGroups struct {
+type CdnLoadbalancerApiGroups struct {
 	ApiGroups types.List `tfsdk:"api_groups"`
 }
 
@@ -1089,16 +945,16 @@ type CdnLoadbalancerBypassRateLimitingRuleDomainChoice struct {
 	SpecificDomain types.String `tfsdk:"specific_domain"`
 }
 
-type CdnLoadbalancerAPIRateLimitCustomIpAllowedList struct {
+type CdnLoadbalancerCustomIpAllowedList struct {
 	RateLimiterAllowedPrefixes types.List `tfsdk:"rate_limiter_allowed_prefixes"`
 }
 
-type CdnLoadbalancerAPIRateLimitIpAllowedList struct {
+type CdnLoadbalancerIpAllowedList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type CdnLoadbalancerCommonWafServerUrlRule struct {
+type CdnLoadbalancerServerUrlRule struct {
 	ApiGroup          types.String `tfsdk:"api_group"`
 	BasePath          types.String `tfsdk:"base_path"`
 	ClientMatcher     types.Object `tfsdk:"client_matcher"`
@@ -1123,7 +979,7 @@ type CdnLoadbalancerServerUrlRuleInlineRateLimiter struct {
 	Unit          types.List   `tfsdk:"unit"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeRateLimit struct {
+type CdnLoadbalancerRateLimit struct {
 	IpAllowedListChoice types.Object `tfsdk:"ip_allowed_list_choice"`
 	PolicyChoice        types.Object `tfsdk:"policy_choice"`
 	RateLimiter         types.Object `tfsdk:"rate_limiter"`
@@ -1144,18 +1000,17 @@ type CdnLoadbalancerRateLimitConfigTypeIpAllowedList struct {
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type CdnLoadbalancerRateLimitConfigTypePolicyChoice struct {
+type CdnLoadbalancerPolicyChoice struct {
 	NoPolicies types.Bool   `tfsdk:"no_policies"`
 	Policies   types.Object `tfsdk:"policies"`
 }
 
-type CdnLoadbalancerRateLimitConfigTypePolicies struct {
+type CdnLoadbalancerPolicies struct {
 	Policies types.List `tfsdk:"policies"`
 }
 
-type CdnLoadbalancerRateLimiterRateLimitValue struct {
+type CdnLoadbalancerRateLimitValue struct {
 	ActionChoice     types.Object `tfsdk:"action_choice"`
-	AlgorithmChoice  types.Object `tfsdk:"algorithm_choice"`
 	BurstMultiplier  types.Int64  `tfsdk:"burst_multiplier"`
 	PeriodMultiplier types.Int64  `tfsdk:"period_multiplier"`
 	TotalNumber      types.Int64  `tfsdk:"total_number"`
@@ -1167,87 +1022,81 @@ type CdnLoadbalancerRateLimitValueActionChoice struct {
 	Disabled    types.Bool   `tfsdk:"disabled"`
 }
 
-type CdnLoadbalancerRateLimitValueActionBlock struct {
+type CdnLoadbalancerActionBlock struct {
 	BlockDurationChoice types.Object `tfsdk:"block_duration_choice"`
 }
 
-type CdnLoadbalancerRateLimitBlockActionBlockDurationChoice struct {
+type CdnLoadbalancerBlockDurationChoice struct {
 	Hours   types.Object `tfsdk:"hours"`
 	Minutes types.Object `tfsdk:"minutes"`
 	Seconds types.Object `tfsdk:"seconds"`
 }
 
-type CdnLoadbalancerRateLimitBlockActionHours struct {
+type CdnLoadbalancerHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type CdnLoadbalancerRateLimitBlockActionMinutes struct {
+type CdnLoadbalancerMinutes struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type CdnLoadbalancerRateLimitBlockActionSeconds struct {
+type CdnLoadbalancerSeconds struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type CdnLoadbalancerRateLimitValueAlgorithmChoice struct {
-	LeakyBucket types.Bool `tfsdk:"leaky_bucket"`
-	TokenBucket types.Bool `tfsdk:"token_bucket"`
-}
-
-type CdnLoadbalancerVirtualHostServiceDomain struct {
+type CdnLoadbalancerSvcDomain struct {
 	Domain        types.String `tfsdk:"domain"`
 	ServiceDomain types.String `tfsdk:"service_domain"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeServicePolicyChoice struct {
+type CdnLoadbalancerSvcPolicyChoice struct {
 	ActiveServicePolicies        types.Object `tfsdk:"active_service_policies"`
 	NoServicePolicies            types.Bool   `tfsdk:"no_service_policies"`
 	ServicePoliciesFromNamespace types.Bool   `tfsdk:"service_policies_from_namespace"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeActiveServicePolicies struct {
+type CdnLoadbalancerActiveSvcPolicies struct {
 	Policies types.List `tfsdk:"policies"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeSlowDdosMitigationChoice struct {
+type CdnLoadbalancerSlowDdosMitigationChoice struct {
 	SlowDdosMitigation    types.Object `tfsdk:"slow_ddos_mitigation"`
 	SystemDefaultTimeouts types.Bool   `tfsdk:"system_default_timeouts"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeSlowDdosMitigation struct {
+type CdnLoadbalancerSlowDdosMitigation struct {
 	RequestHeadersTimeout types.Int64  `tfsdk:"request_headers_timeout"`
 	RequestTimeoutChoice  types.Object `tfsdk:"request_timeout_choice"`
 }
 
-type CdnLoadbalancerSlowDDoSMitigationRequestTimeoutChoice struct {
+type CdnLoadbalancerReqTimeoutChoice struct {
 	DisableRequestTimeout types.Bool  `tfsdk:"disable_request_timeout"`
 	RequestTimeout        types.Int64 `tfsdk:"request_timeout"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeUserIdChoice struct {
+type CdnLoadbalancerUserIdChoice struct {
 	UserIdClientIp     types.Bool   `tfsdk:"user_id_client_ip"`
 	UserIdentification types.Object `tfsdk:"user_identification"`
 }
 
-type CdnLoadbalancerGlobalSpecTypeWafChoice struct {
+type CdnLoadbalancerWafChoice struct {
 	AppFirewall types.Object `tfsdk:"app_firewall"`
 	DisableWaf  types.Bool   `tfsdk:"disable_waf"`
 }
 
-type CdnLoadbalancerCommonWafWafExclusion struct {
+type CdnLoadbalancerWafExclusion struct {
 	WafExclusionChoice types.Object `tfsdk:"waf_exclusion_choice"`
 }
 
-type CdnLoadbalancerWafExclusionWafExclusionChoice struct {
+type CdnLoadbalancerWafExclusionChoice struct {
 	WafExclusionInlineRules types.Object `tfsdk:"waf_exclusion_inline_rules"`
-	WafExclusionPolicy      types.Object `tfsdk:"waf_exclusion_policy"`
 }
 
-type CdnLoadbalancerWafExclusionWafExclusionInlineRules struct {
+type CdnLoadbalancerWafExclusionInlineRules struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type CdnLoadbalancerPolicySimpleWafExclusionRule struct {
+type CdnLoadbalancerSimpleWafExclusionRule struct {
 	DomainChoice                   types.Object      `tfsdk:"domain_choice"`
 	ExpirationTimestamp            timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
 	Metadata                       types.Object      `tfsdk:"metadata"`
@@ -1262,41 +1111,41 @@ type CdnLoadbalancerSimpleWafExclusionRuleDomainChoice struct {
 	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
-type CdnLoadbalancerSimpleWafExclusionRulePathChoice struct {
+type CdnLoadbalancerPathChoice struct {
 	AnyPath    types.Bool   `tfsdk:"any_path"`
 	PathPrefix types.String `tfsdk:"path_prefix"`
 	PathRegex  types.String `tfsdk:"path_regex"`
 }
 
-type CdnLoadbalancerSimpleWafExclusionRuleWafAdvancedConfigurationChoice struct {
+type CdnLoadbalancerWafAdvancedCfgChoice struct {
 	AppFirewallDetectionControl types.Object `tfsdk:"app_firewall_detection_control"`
 	WafSkipProcessing           types.Bool   `tfsdk:"waf_skip_processing"`
 }
 
-type CdnLoadbalancerSimpleWafExclusionRuleAppFirewallDetectionControl struct {
+type CdnLoadbalancerAppFirewallDetectionControl struct {
 	ExcludeAttackTypeContexts types.List `tfsdk:"exclude_attack_type_contexts"`
 	ExcludeBotNameContexts    types.List `tfsdk:"exclude_bot_name_contexts"`
 	ExcludeSignatureContexts  types.List `tfsdk:"exclude_signature_contexts"`
 	ExcludeViolationContexts  types.List `tfsdk:"exclude_violation_contexts"`
 }
 
-type CdnLoadbalancerPolicyAppFirewallAttackTypeContext struct {
+type CdnLoadbalancerAppFirewallAttackTypeContext struct {
 	Context           types.List   `tfsdk:"context"`
 	ContextName       types.String `tfsdk:"context_name"`
 	ExcludeAttackType types.List   `tfsdk:"exclude_attack_type"`
 }
 
-type CdnLoadbalancerPolicyBotNameContext struct {
+type CdnLoadbalancerBotNameContext struct {
 	BotName types.String `tfsdk:"bot_name"`
 }
 
-type CdnLoadbalancerPolicyAppFirewallSignatureContext struct {
+type CdnLoadbalancerAppFirewallSignatureContext struct {
 	Context     types.List   `tfsdk:"context"`
 	ContextName types.String `tfsdk:"context_name"`
 	SignatureId types.Int64  `tfsdk:"signature_id"`
 }
 
-type CdnLoadbalancerPolicyAppFirewallViolationContext struct {
+type CdnLoadbalancerAppFirewallViolationContext struct {
 	Context          types.List   `tfsdk:"context"`
 	ContextName      types.String `tfsdk:"context_name"`
 	ExcludeViolation types.List   `tfsdk:"exclude_violation"`
@@ -1364,6 +1213,16 @@ var CdnLoadbalancerAutoCertInfoModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
+	"dns_zones": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
 }
 
 // Attribute map for ArrayOfPointerField --> DnsRecords
@@ -1372,6 +1231,14 @@ var CdnLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap = map[string]attr.Typ
 	"name":  types.StringType,
 	"type":  types.StringType,
 	"value": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> DnsZones
+var CdnLoadbalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> BlockedClients
@@ -1587,9 +1454,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeModelAttributeMap = map[stri
 										},
 										"regex_values": types.ListType{
 											ElemType: types.StringType,
-										},
-										"transformers": types.ListType{
-											ElemType: types.StringType,
 										}},
 								},
 								"challenge_action_choice": types.ObjectType{
@@ -1602,7 +1466,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeModelAttributeMap = map[stri
 									ElemType: types.ObjectType{
 										AttrTypes: map[string]attr.Type{
 
-											"invert_matcher": types.BoolType,
 											"match_choice": types.ObjectType{
 												AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap,
 											},
@@ -1772,9 +1635,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListModelAttributeMap = 
 								},
 								"regex_values": types.ListType{
 									ElemType: types.StringType,
-								},
-								"transformers": types.ListType{
-									ElemType: types.StringType,
 								}},
 						},
 						"challenge_action_choice": types.ObjectType{
@@ -1787,7 +1647,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListModelAttributeMap = 
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 
-									"invert_matcher": types.BoolType,
 									"match_choice": types.ObjectType{
 										AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap,
 									},
@@ -1894,9 +1753,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesModelAttributeM
 					},
 					"regex_values": types.ListType{
 						ElemType: types.StringType,
-					},
-					"transformers": types.ListType{
-						ElemType: types.StringType,
 					}},
 			},
 			"challenge_action_choice": types.ObjectType{
@@ -1909,7 +1765,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesModelAttributeM
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"invert_matcher": types.BoolType,
 						"match_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap,
 						},
@@ -2015,9 +1870,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttrib
 			},
 			"regex_values": types.ListType{
 				ElemType: types.StringType,
-			},
-			"transformers": types.ListType{
-				ElemType: types.StringType,
 			}},
 	},
 	"challenge_action_choice": types.ObjectType{
@@ -2030,7 +1882,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttrib
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"invert_matcher": types.BoolType,
 				"match_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap,
 				},
@@ -2133,9 +1984,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchers
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for OneOfField --> AsnChoice
@@ -2190,9 +2038,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcher
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> ChallengeAction
@@ -2223,7 +2068,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecClientChoic
 // Attribute map for ArrayOfPointerField --> CookieMatchers
 var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"match_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap,
 	},
@@ -2233,8 +2077,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatch
 // Attribute map for RequiredOneOfField --> Match
 var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap = map[string]attr.Type{
 
-	"check_not_present": types.BoolType,
-	"check_present":     types.BoolType,
 	"item": types.ObjectType{
 		AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchItemModelAttributeMap,
 	},
@@ -2247,9 +2089,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatch
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -2292,9 +2131,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHeadersMatc
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -2405,9 +2241,6 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParams
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -2783,22 +2616,6 @@ var CdnLoadbalancerJwtValidationModelAttributeMap = map[string]attr.Type{
 	},
 	"jwks_configuration_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerJwtValidationJwksConfigurationModelAttributeMap,
-	}, "mandatory_claims": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"claim_names": types.ListType{
-				ElemType: types.StringType,
-			}},
-	}, "reserved_claims": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"audience_validation_choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationModelAttributeMap,
-			},
-			"issuer_validation_choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsIssuerValidationModelAttributeMap,
-			},
-			"validate_period_choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsValidatePeriodModelAttributeMap,
-			}},
 	}, "target": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"target_choice": types.ObjectType{
@@ -2823,8 +2640,7 @@ var CdnLoadbalancerJwtValidationActionModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> ActionChoice
 var CdnLoadbalancerJwtValidationActionActionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"block":  types.BoolType,
-	"report": types.BoolType,
+	"block": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> JwksConfiguration
@@ -2867,59 +2683,6 @@ var CdnLoadbalancerJwtValidationJwksConfigurationJwksConfigModelAttributeMap = m
 	"cleartext": types.StringType,
 }
 
-// Attribute map for PointerField --> MandatoryClaims
-var CdnLoadbalancerJwtValidationMandatoryClaimsModelAttributeMap = map[string]attr.Type{
-
-	"claim_names": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> ReservedClaims
-var CdnLoadbalancerJwtValidationReservedClaimsModelAttributeMap = map[string]attr.Type{
-
-	"audience_validation_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationModelAttributeMap,
-	},
-	"issuer_validation_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsIssuerValidationModelAttributeMap,
-	},
-	"validate_period_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsValidatePeriodModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> AudienceValidation
-var CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationModelAttributeMap = map[string]attr.Type{
-
-	"audience": types.ObjectType{
-		AttrTypes: CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationAudienceModelAttributeMap,
-	},
-	"audience_disable": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Audience
-var CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationAudienceModelAttributeMap = map[string]attr.Type{
-
-	"audiences": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> IssuerValidation
-var CdnLoadbalancerJwtValidationReservedClaimsIssuerValidationModelAttributeMap = map[string]attr.Type{
-
-	"issuer":         types.StringType,
-	"issuer_disable": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> ValidatePeriod
-var CdnLoadbalancerJwtValidationReservedClaimsValidatePeriodModelAttributeMap = map[string]attr.Type{
-
-	"validate_period_disable": types.BoolType,
-	"validate_period_enable":  types.BoolType,
-}
-
 // Attribute map for RequiredPointerField --> Target
 var CdnLoadbalancerJwtValidationTargetModelAttributeMap = map[string]attr.Type{
 
@@ -2931,20 +2694,8 @@ var CdnLoadbalancerJwtValidationTargetModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> Target
 var CdnLoadbalancerJwtValidationTargetTargetModelAttributeMap = map[string]attr.Type{
 
-	"all_endpoint": types.BoolType,
-	"api_groups": types.ObjectType{
-		AttrTypes: CdnLoadbalancerJwtValidationTargetTargetApiGroupsModelAttributeMap,
-	},
 	"base_paths": types.ObjectType{
 		AttrTypes: CdnLoadbalancerJwtValidationTargetTargetBasePathsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> ApiGroups
-var CdnLoadbalancerJwtValidationTargetTargetApiGroupsModelAttributeMap = map[string]attr.Type{
-
-	"api_groups": types.ListType{
-		ElemType: types.StringType,
 	},
 }
 
@@ -3006,16 +2757,6 @@ var CdnLoadbalancerLoadbalancerTypeModelAttributeMap = map[string]attr.Type{
 var CdnLoadbalancerLoadbalancerTypeHttpModelAttributeMap = map[string]attr.Type{
 
 	"dns_volterra_managed": types.BoolType,
-	"port_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpPortChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PortChoice
-var CdnLoadbalancerLoadbalancerTypeHttpPortChoiceModelAttributeMap = map[string]attr.Type{
-
-	"port":        types.Int64Type,
-	"port_ranges": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Https
@@ -3061,9 +2802,6 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCe
 				"tenant":    types.StringType,
 			},
 		},
-	},
-	"mtls_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap,
 	}, "tls_config": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"choice": types.ObjectType{
@@ -3078,81 +2816,6 @@ var CdnLoadbalancerCertificatesObjectRefModelAttributeMap = map[string]attr.Type
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> MtlsChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_mtls": types.BoolType,
-	"use_mtls": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseMtls
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
-
-	"client_certificate_optional": types.BoolType,
-	"crl_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
-	},
-	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
-	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> CrlChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
-
-	"crl": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
-	},
-	"no_crl": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Crl
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
-	},
-	"trusted_ca_url": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerField --> TlsConfig
@@ -3191,9 +2854,6 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCe
 // Attribute map for PointerOfOneOfField --> TlsInlineParams
 var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsModelAttributeMap = map[string]attr.Type{
 
-	"mtls_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceModelAttributeMap,
-	},
 	"tls_certificates": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -3215,81 +2875,6 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsIn
 			"choice": types.ObjectType{
 				AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigChoiceModelAttributeMap,
 			}},
-	},
-}
-
-// Attribute map for RequiredOneOfField --> MtlsChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_mtls": types.BoolType,
-	"use_mtls": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseMtls
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
-
-	"client_certificate_optional": types.BoolType,
-	"crl_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
-	},
-	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
-	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> CrlChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
-
-	"crl": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
-	},
-	"no_crl": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Crl
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
-	},
-	"trusted_ca_url": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
 	},
 }
 
@@ -3343,6 +2928,7 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsIn
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3493,8 +3079,7 @@ var CdnLoadbalancerOriginPoolOriginServersChoicePublicIpModelAttributeMap = map[
 // Attribute map for RequiredOneOfField --> PublicIpChoice
 var CdnLoadbalancerOriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
+	"ip": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> PublicName
@@ -3514,225 +3099,8 @@ var CdnLoadbalancerOriginPoolPublicNameModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> TlsChoice
 var CdnLoadbalancerOriginPoolTlsChoiceModelAttributeMap = map[string]attr.Type{
 
-	"no_tls": types.BoolType,
-	"use_tls": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseTls
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsModelAttributeMap = map[string]attr.Type{
-
-	"max_session_keys_type_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap,
-	},
-	"mtls_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap,
-	},
-	"server_validation_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap,
-	},
-	"sni_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap,
-	}, "tls_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredOneOfField --> MaxSessionKeysType
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap = map[string]attr.Type{
-
-	"default_session_key_caching": types.BoolType,
-	"disable_session_key_caching": types.BoolType,
-	"max_session_keys":            types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> MtlsChoice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_mtls": types.BoolType,
-	"use_mtls": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap,
-	},
-	"use_mtls_obj": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseMtls
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
-
-	"tls_certificates": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"certificate_url": types.StringType,
-				"description":     types.StringType,
-				"ocsp_stapling_choice": types.ObjectType{
-					AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
-				}, "private_key": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"secret_info_choice": types.ObjectType{
-							AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
-						}},
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> TlsCertificates
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesModelAttributeMap = map[string]attr.Type{
-
-	"certificate_url": types.StringType,
-	"description":     types.StringType,
-	"ocsp_stapling_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
-	}, "private_key": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for OneOfField --> OcspStaplingChoice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap = map[string]attr.Type{
-
-	"custom_hash_algorithms": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap,
-	},
-	"disable_ocsp_stapling": types.BoolType,
-	"use_system_defaults":   types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> CustomHashAlgorithms
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap = map[string]attr.Type{
-
-	"hash_algorithms": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredPointerField --> PrivateKey
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"location":            types.StringType,
-	"store_provider":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> UseMtlsObj
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> ServerValidationChoice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap = map[string]attr.Type{
-
-	"skip_server_verification": types.BoolType,
-	"use_server_verification": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap,
-	},
-	"volterra_trusted_ca": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> UseServerVerification
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceTrustedCaModelAttributeMap,
-	},
-	"trusted_ca_url": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> SniChoice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_sni":            types.BoolType,
-	"sni":                    types.StringType,
-	"use_host_header_as_sni": types.BoolType,
-}
-
-// Attribute map for RequiredPointerField --> TlsConfig
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap = map[string]attr.Type{
-
-	"choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> Choice
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
-
-	"custom_security": types.ObjectType{
-		AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap,
-	},
-	"default_security": types.BoolType,
-	"low_security":     types.BoolType,
-	"medium_security":  types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> CustomSecurity
-var CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
-
-	"cipher_suites": types.ListType{
-		ElemType: types.StringType,
-	},
-	"max_version": types.ListType{
-		ElemType: types.StringType,
-	},
-	"min_version": types.ListType{
-		ElemType: types.StringType,
-	},
+	"no_tls":  types.BoolType,
+	"use_tls": types.BoolType,
 }
 
 // Attribute map for PointerField --> OtherSettings
@@ -3744,8 +3112,7 @@ var CdnLoadbalancerOtherSettingsModelAttributeMap = map[string]attr.Type{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"append": types.BoolType,
-						"name":   types.StringType,
+						"name": types.StringType,
 						"value_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceModelAttributeMap,
 						},
@@ -3759,8 +3126,7 @@ var CdnLoadbalancerOtherSettingsModelAttributeMap = map[string]attr.Type{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"append": types.BoolType,
-						"name":   types.StringType,
+						"name": types.StringType,
 						"value_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddValueChoiceModelAttributeMap,
 						},
@@ -3792,8 +3158,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap = map[string]attr
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"append": types.BoolType,
-				"name":   types.StringType,
+				"name": types.StringType,
 				"value_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceModelAttributeMap,
 				},
@@ -3807,8 +3172,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap = map[string]attr
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"append": types.BoolType,
-				"name":   types.StringType,
+				"name": types.StringType,
 				"value_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddValueChoiceModelAttributeMap,
 				},
@@ -3823,8 +3187,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap = map[string]attr
 // Attribute map for ArrayOfPointerField --> RequestHeadersToAdd
 var CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddModelAttributeMap = map[string]attr.Type{
 
-	"append": types.BoolType,
-	"name":   types.StringType,
+	"name": types.StringType,
 	"value_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceModelAttributeMap,
 	},
@@ -3856,6 +3219,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceSecre
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3876,8 +3240,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddValueChoiceSecre
 // Attribute map for ArrayOfPointerField --> ResponseHeadersToAdd
 var CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddModelAttributeMap = map[string]attr.Type{
 
-	"append": types.BoolType,
-	"name":   types.StringType,
+	"name": types.StringType,
 	"value_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddValueChoiceModelAttributeMap,
 	},
@@ -3909,6 +3272,7 @@ var CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddValueChoiceSecr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -4061,7 +3425,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitModelAttributeMap = map[string]att
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 
-									"invert_matcher": types.BoolType,
 									"match_choice": types.ObjectType{
 										AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 									},
@@ -4148,7 +3511,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitModelAttributeMap = map[string]att
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 
-									"invert_matcher": types.BoolType,
 									"match_choice": types.ObjectType{
 										AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 									},
@@ -4238,7 +3600,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesModelAttributeMap 
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"invert_matcher": types.BoolType,
 						"match_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 						},
@@ -4489,7 +3850,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherMode
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"invert_matcher": types.BoolType,
 				"match_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 				},
@@ -4538,7 +3898,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherMode
 // Attribute map for ArrayOfPointerField --> CookieMatchers
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"match_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 	},
@@ -4548,8 +3907,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCook
 // Attribute map for RequiredOneOfField --> Match
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap = map[string]attr.Type{
 
-	"check_not_present": types.BoolType,
-	"check_present":     types.BoolType,
 	"item": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap,
 	},
@@ -4562,9 +3919,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCook
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -4598,9 +3952,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherHead
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for ArrayOfPointerField --> JwtClaims
@@ -4632,9 +3983,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtC
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for ArrayOfPointerField --> QueryParams
@@ -4664,9 +4012,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQuer
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -4723,7 +4068,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 
-									"invert_matcher": types.BoolType,
 									"match_choice": types.ObjectType{
 										AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 									},
@@ -4806,7 +4150,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"invert_matcher": types.BoolType,
 						"match_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 						},
@@ -5030,7 +4373,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"invert_matcher": types.BoolType,
 				"match_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 				},
@@ -5079,7 +4421,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 // Attribute map for ArrayOfPointerField --> CookieMatchers
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"match_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 	},
@@ -5089,8 +4430,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 // Attribute map for RequiredOneOfField --> Match
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap = map[string]attr.Type{
 
-	"check_not_present": types.BoolType,
-	"check_present":     types.BoolType,
 	"item": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap,
 	},
@@ -5103,9 +4442,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -5139,9 +4475,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for ArrayOfPointerField --> JwtClaims
@@ -5173,9 +4506,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for ArrayOfPointerField --> QueryParams
@@ -5205,9 +4535,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -5281,7 +4608,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesModelAttributeMap = 
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"invert_matcher": types.BoolType,
 						"match_choice": types.ObjectType{
 							AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 						},
@@ -5523,7 +4849,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelA
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"invert_matcher": types.BoolType,
 				"match_choice": types.ObjectType{
 					AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 				},
@@ -5572,7 +4897,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelA
 // Attribute map for ArrayOfPointerField --> CookieMatchers
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"match_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap,
 	},
@@ -5582,8 +4906,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookie
 // Attribute map for RequiredOneOfField --> Match
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap = map[string]attr.Type{
 
-	"check_not_present": types.BoolType,
-	"check_present":     types.BoolType,
 	"item": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap,
 	},
@@ -5596,9 +4918,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookie
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -5632,9 +4951,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherHeader
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for ArrayOfPointerField --> JwtClaims
@@ -5664,9 +4980,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtCla
 		ElemType: types.StringType,
 	},
 	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -5700,9 +5013,6 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryP
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> RateLimit
@@ -5717,9 +5027,6 @@ var CdnLoadbalancerRateLimitChoiceRateLimitModelAttributeMap = map[string]attr.T
 		AttrTypes: map[string]attr.Type{
 			"action_choice": types.ObjectType{
 				AttrTypes: CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceModelAttributeMap,
-			},
-			"algorithm_choice": types.ObjectType{
-				AttrTypes: CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterAlgorithmModelAttributeMap,
 			},
 			"burst_multiplier":  types.Int64Type,
 			"period_multiplier": types.Int64Type,
@@ -5806,9 +5113,6 @@ var CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterModelAttributeMap = map[st
 	"action_choice": types.ObjectType{
 		AttrTypes: CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceModelAttributeMap,
 	},
-	"algorithm_choice": types.ObjectType{
-		AttrTypes: CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterAlgorithmModelAttributeMap,
-	},
 	"burst_multiplier":  types.Int64Type,
 	"period_multiplier": types.Int64Type,
 	"total_number":      types.Int64Type,
@@ -5864,13 +5168,6 @@ var CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceActionBlockBlo
 var CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceActionBlockBlockDurationChoiceSecondsModelAttributeMap = map[string]attr.Type{
 
 	"duration": types.Int64Type,
-}
-
-// Attribute map for OneOfField --> Algorithm
-var CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterAlgorithmModelAttributeMap = map[string]attr.Type{
-
-	"leaky_bucket": types.BoolType,
-	"token_bucket": types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> ServiceDomains
@@ -6047,9 +5344,6 @@ var CdnLoadbalancerWafExclusionWafExclusionChoiceModelAttributeMap = map[string]
 
 	"waf_exclusion_inline_rules": types.ObjectType{
 		AttrTypes: CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesModelAttributeMap,
-	},
-	"waf_exclusion_policy": types.ObjectType{
-		AttrTypes: CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionPolicyModelAttributeMap,
 	},
 }
 
@@ -6229,14 +5523,6 @@ var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesWaf
 	},
 }
 
-// Attribute map for RequiredPointerOfOneOfField --> WafExclusionPolicy
-var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionPolicyModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCCdnLoadbalancer{}
 
@@ -6251,8 +5537,8 @@ func (d *DataSourceF5XCCdnLoadbalancer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
-		Description:         "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
+		MarkdownDescription: "CDN Loadbalancer view defines a required parameters that can be used in CRUD, to create and manage CDN loadbalancer.<br>It can be used to create CDN loadbalancer and HTTPS loadbalancer.<br><br>View will create following child objects.<br><br>* Virtual-host<br>* routes<br>* endpoints<br>* advertise policy",
+		Description:         "CDN Loadbalancer view defines a required parameters that can be used in CRUD, to create and manage CDN loadbalancer. It can be used to create CDN loadbalancer and HTTPS loadbalancer. View will create following child objects. Virtual-host routes endpoints advertise policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -6353,14 +5639,43 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 							},
 						},
 					},
+					"dns_zones": schema.ListNestedAttribute{
+						Description: "DNS Zone References DNS Zone references in use by this object",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"namespace": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"tenant": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
+						},
+					},
 				},
 			},
 			"auto_cert_state": schema.ListAttribute{
-				Description: "Auto Cert State State of auto certificate generation.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
+				Description:        "Auto Cert State State of auto certificate generation.",
+				Required:           false,
+				Optional:           false,
+				Computed:           true,
+				ElementType:        types.StringType,
+				DeprecationMessage: "This field is deprecated and will be removed in future release.",
 			},
 			"blocked_clients": schema.ListNestedAttribute{
 				Description: "Client Blocking Rules Define rules to block IP Prefixes or AS numbers.",
@@ -6917,13 +6232,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																						Optional:    false,
 																						Computed:    true,
 																					},
-																					"transformers": schema.ListAttribute{
-																						Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
 																				},
 																			},
 																		},
@@ -7022,13 +6330,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"transformers": schema.ListAttribute{
-																	Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																	ElementType: types.StringType,
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 															},
 														},
 														"challenge_action_choice": schema.SingleNestedAttribute{
@@ -7093,30 +6394,12 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 															Computed:    true,
 															NestedObject: schema.NestedAttributeObject{
 																Attributes: map[string]schema.Attribute{
-																	"invert_matcher": schema.BoolAttribute{
-																		Description: "invert_matcher Invert Match of the expression defined",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
 																	"match_choice": schema.SingleNestedAttribute{
 																		Description: "match Select Match Options.",
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
 																		Attributes: map[string]schema.Attribute{
-																			"check_not_present": schema.BoolAttribute{
-																				Description: "check_not_present Check that the cookie is not present.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"check_present": schema.BoolAttribute{
-																				Description: "check_present Check that the cookie is present.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
 																			"item": schema.SingleNestedAttribute{
 																				Description: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
 																				Required:    false,
@@ -7132,13 +6415,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																					},
 																					"regex_values": schema.ListAttribute{
 																						Description: "regex values A list of regular expressions to match the input against.",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"transformers": schema.ListAttribute{
-																						Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																						ElementType: types.StringType,
 																						Required:    false,
 																						Optional:    false,
@@ -7232,13 +6508,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																					},
 																					"regex_values": schema.ListAttribute{
 																						Description: "regex values A list of regular expressions to match the input against.",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"transformers": schema.ListAttribute{
-																						Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																						ElementType: types.StringType,
 																						Required:    false,
 																						Optional:    false,
@@ -7469,13 +6738,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																					},
 																					"regex_values": schema.ListAttribute{
 																						Description: "regex values A list of regular expressions to match the input against.",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"transformers": schema.ListAttribute{
-																						Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																						ElementType: types.StringType,
 																						Required:    false,
 																						Optional:    false,
@@ -8194,12 +7456,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 										Optional:    false,
 										Computed:    true,
 									},
-									"report": schema.BoolAttribute{
-										Description: "report Allow the request and report the issue",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 								},
 							},
 						},
@@ -8257,98 +7513,7 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
-									},
-								},
-							},
-						},
-					},
-					"mandatory_claims": schema.SingleNestedAttribute{
-						Description: "Mandatory Claims Configuration for validation of mandatory claims. The system will verify that the claim exists in JWT. If the claim does not exist JWT token validation will fail.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"claim_names": schema.ListAttribute{
-								Description: "Claim names",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"reserved_claims": schema.SingleNestedAttribute{
-						Description: "reserved_claims Configuration required for validation of reserved claims. If some claims are absent in the token validation of these claims should be disabled.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"audience_validation_choice": schema.SingleNestedAttribute{
-								Description: "audience_validation The value of the aud claim in the JWT token should match one of the configured values",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"audience": schema.SingleNestedAttribute{
-										Description: "audience",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"audiences": schema.ListAttribute{
-												Description: "audiences",
-												ElementType: types.StringType,
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"audience_disable": schema.BoolAttribute{
-										Description: "audience_disable",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-							"issuer_validation_choice": schema.SingleNestedAttribute{
-								Description: "issuer_validation The value of the iss claim in the JWT token should exactly match the configured value",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"issuer": schema.StringAttribute{
-										Description: "issuer",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"issuer_disable": schema.BoolAttribute{
-										Description: "issuer_disable",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-							"validate_period_choice": schema.SingleNestedAttribute{
-								Description: "validate_period Validate that current time is before the Expiration Time (as specified in the exp claim). If exp claim is not present JWT validation fails. If Not Before (nbf) claim is present in the JWT token validate that current time is after the nbf value.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"validate_period_disable": schema.BoolAttribute{
-										Description: "validate_period_disable",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"validate_period_enable": schema.BoolAttribute{
-										Description: "validate_period_enable",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
+										Sensitive:   true,
 									},
 								},
 							},
@@ -8366,27 +7531,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"all_endpoint": schema.BoolAttribute{
-										Description: "all_endpoint JWT validation is applied to all requests handled by this Load Balancer. If JWT is missing or invalid, the configured action (Block or Report) will be applied.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"api_groups": schema.SingleNestedAttribute{
-										Description: "api group Validation will be performed for the endpoints mentioned in the API Groups",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"api_groups": schema.ListAttribute{
-												Description: "api group",
-												ElementType: types.StringType,
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"base_paths": schema.SingleNestedAttribute{
 										Description: "base paths Validation will be performed for selected path prefixes",
 										Required:    false,
@@ -8494,26 +7638,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 								Optional:    false,
 								Computed:    true,
 							},
-							"port_choice": schema.SingleNestedAttribute{
-								Description: "HTTP Port Choice Available options: user provided port or system default port or port range",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"port": schema.Int64Attribute{
-										Description: "HTTP port to listen HTTP port to Listen.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"port_ranges": schema.StringAttribute{
-										Description: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
 						},
 					},
 					"https": schema.SingleNestedAttribute{
@@ -8576,143 +7700,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
-																},
-															},
-														},
-													},
-													"mtls_choice": schema.SingleNestedAttribute{
-														Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"no_mtls": schema.BoolAttribute{
-																Description: "No mTLS",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"use_mtls": schema.SingleNestedAttribute{
-																Description: "Use mTLS",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"client_certificate_optional": schema.BoolAttribute{
-																		Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"crl_choice": schema.SingleNestedAttribute{
-																		Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"crl": schema.SingleNestedAttribute{
-																				Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"name": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"namespace": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"tenant": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																			"no_crl": schema.BoolAttribute{
-																				Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"trusted_ca_choice": schema.SingleNestedAttribute{
-																		Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"trusted_ca": schema.SingleNestedAttribute{
-																				Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"name": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"namespace": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"tenant": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																			"trusted_ca_url": schema.StringAttribute{
-																				Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_disabled": schema.BoolAttribute{
-																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"xfcc_options": schema.SingleNestedAttribute{
-																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"xfcc_header_elements": schema.ListAttribute{
-																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																		},
-																	},
 																},
 															},
 														},
@@ -8788,143 +7775,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"mtls_choice": schema.SingleNestedAttribute{
-														Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"no_mtls": schema.BoolAttribute{
-																Description: "No mTLS",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"use_mtls": schema.SingleNestedAttribute{
-																Description: "Use mTLS",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"client_certificate_optional": schema.BoolAttribute{
-																		Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"crl_choice": schema.SingleNestedAttribute{
-																		Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"crl": schema.SingleNestedAttribute{
-																				Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"name": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"namespace": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"tenant": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																			"no_crl": schema.BoolAttribute{
-																				Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"trusted_ca_choice": schema.SingleNestedAttribute{
-																		Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"trusted_ca": schema.SingleNestedAttribute{
-																				Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"name": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"namespace": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"tenant": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																			"trusted_ca_url": schema.StringAttribute{
-																				Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"xfcc_header_choice": schema.SingleNestedAttribute{
-																		Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_disabled": schema.BoolAttribute{
-																				Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"xfcc_options": schema.SingleNestedAttribute{
-																				Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				Attributes: map[string]schema.Attribute{
-																					"xfcc_header_elements": schema.ListAttribute{
-																						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																						ElementType: types.StringType,
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
 													"tls_certificates": schema.ListNestedAttribute{
 														Description: "tls_certificates Users can add one or more certificates that share the same set of domains. for example, domain.com and *.domain.com - but use different signature algorithms",
 														Required:    false,
@@ -9034,8 +7884,15 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																							Required:    false,
 																							Optional:    false,
 																							Computed:    true,
+																							Sensitive:   true,
 																						},
 																					},
+																				},
+																				"none": schema.BoolAttribute{
+																					Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
 																				},
 																			},
 																		},
@@ -9248,12 +8105,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 															Optional:    false,
 															Computed:    true,
 														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPV6 Public IPV6 address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 													},
 												},
 											},
@@ -9281,7 +8132,7 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 									},
 								},
 								"port": schema.Int64Attribute{
-									Description: "Port Port the workload can be reached on Enter a custom port only if your origin server uses a non-default port. Leave the value as 0 to automatically use 443 (TLS) or 80 (non-TLS).",
+									Description: "Port Port the workload can be reached on",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -9321,363 +8172,11 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 								Optional:    false,
 								Computed:    true,
 							},
-							"use_tls": schema.SingleNestedAttribute{
+							"use_tls": schema.BoolAttribute{
 								Description: "Use TLS Origin servers use TLS",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"max_session_keys_type_choice": schema.SingleNestedAttribute{
-										Description: "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"default_session_key_caching": schema.BoolAttribute{
-												Description: "Default Session Key Caching Default session key caching. Only one session key will be cached.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"disable_session_key_caching": schema.BoolAttribute{
-												Description: "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"max_session_keys": schema.Int64Attribute{
-												Description: "Max Session Keys Cached Number of session keys that are cached.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"mtls_choice": schema.SingleNestedAttribute{
-										Description: "Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"no_mtls": schema.BoolAttribute{
-												Description: "No mTLS",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"use_mtls": schema.SingleNestedAttribute{
-												Description: "Inline Certificate (legacy)",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"tls_certificates": schema.ListNestedAttribute{
-														Description: "mTLS certificate mTLS Client Certificate",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														NestedObject: schema.NestedAttributeObject{
-															Attributes: map[string]schema.Attribute{
-																"certificate_url": schema.StringAttribute{
-																	Description: "certificate_url TLS certificate. Certificate or certificate chain in PEM format including the PEM headers.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"description": schema.StringAttribute{
-																	Description: "description Description for the certificate",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"ocsp_stapling_choice": schema.SingleNestedAttribute{
-																	Description: "OCSP Response choice OCSP Stapling choice",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"custom_hash_algorithms": schema.SingleNestedAttribute{
-																			Description: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"hash_algorithms": schema.ListAttribute{
-																					Description: "Hash Algorithms Ordered list of hash algorithms to be used.",
-																					ElementType: types.StringType,
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																			},
-																		},
-																		"disable_ocsp_stapling": schema.BoolAttribute{
-																			Description: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"use_system_defaults": schema.BoolAttribute{
-																			Description: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																	},
-																},
-																"private_key": schema.SingleNestedAttribute{
-																	Description: "private_key TLS Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. TLS key has to match the accompanying certificate.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"secret_info_choice": schema.SingleNestedAttribute{
-																			Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"blindfold_secret_info": schema.SingleNestedAttribute{
-																					Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																					Attributes: map[string]schema.Attribute{
-																						"decryption_provider": schema.StringAttribute{
-																							Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																						"location": schema.StringAttribute{
-																							Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																						"store_provider": schema.StringAttribute{
-																							Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																					},
-																				},
-																				"clear_secret_info": schema.SingleNestedAttribute{
-																					Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																					Attributes: map[string]schema.Attribute{
-																						"provider": schema.StringAttribute{
-																							Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																						"url": schema.StringAttribute{
-																							Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											"use_mtls_obj": schema.SingleNestedAttribute{
-												Description: "Root CA Certificate",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"name": schema.StringAttribute{
-														Description: "",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"namespace": schema.StringAttribute{
-														Description: "",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"tenant": schema.StringAttribute{
-														Description: "",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-									"server_validation_choice": schema.SingleNestedAttribute{
-										Description: "Server verification choice Choose whether to perform origin server verification.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"skip_server_verification": schema.BoolAttribute{
-												Description: "Skip Server Verification Skip origin server verification",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"use_server_verification": schema.SingleNestedAttribute{
-												Description: "Use Server Verification Perform origin server verification using the provided Root CA Certificate",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"trusted_ca_choice": schema.SingleNestedAttribute{
-														Description: "trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"trusted_ca": schema.SingleNestedAttribute{
-																Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"name": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"tenant": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"trusted_ca_url": schema.StringAttribute{
-																Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-											},
-											"volterra_trusted_ca": schema.BoolAttribute{
-												Description: "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"sni_choice": schema.SingleNestedAttribute{
-										Description: "sni choice Select SNI to be used for upstream connection",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"disable_sni": schema.BoolAttribute{
-												Description: "disable_sni Do not use SNI.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"sni": schema.StringAttribute{
-												Description: "sni SNI value to be used.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"use_host_header_as_sni": schema.BoolAttribute{
-												Description: "use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"tls_config": schema.SingleNestedAttribute{
-										Description: "TLS Config TLS parameters such as min/max TLS version and ciphers",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"choice": schema.SingleNestedAttribute{
-												Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"custom_security": schema.SingleNestedAttribute{
-														Description: "Custom Security Custom selection of TLS versions and cipher suites",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"cipher_suites": schema.ListAttribute{
-																Description: "cipher_suites The TLS listener will only support the specified cipher list.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"max_version": schema.ListAttribute{
-																Description: "maximum_protocol_version Maximum TLS protocol version.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"min_version": schema.ListAttribute{
-																Description: "minimum_protocol_version Minimum TLS protocol version.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-													"default_security": schema.BoolAttribute{
-														Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"low_security": schema.BoolAttribute{
-														Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"medium_security": schema.BoolAttribute{
-														Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-								},
 							},
 						},
 					},
@@ -9708,12 +8207,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"append": schema.BoolAttribute{
-											Description: "append Should the value be appended? If true, the value is appended to existing values. Default value is do not append",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 										"name": schema.StringAttribute{
 											Description: "name Name of the HTTP header.",
 											Required:    false,
@@ -9781,8 +8274,15 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
+																			Sensitive:   true,
 																		},
 																	},
+																},
+																"none": schema.BoolAttribute{
+																	Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
 																},
 															},
 														},
@@ -9813,12 +8313,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"append": schema.BoolAttribute{
-											Description: "append Should the value be appended? If true, the value is appended to existing values. Default value is do not append",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 										"name": schema.StringAttribute{
 											Description: "name Name of the HTTP header.",
 											Required:    false,
@@ -9886,8 +8380,15 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
+																			Sensitive:   true,
 																		},
 																	},
+																},
+																"none": schema.BoolAttribute{
+																	Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
 																},
 															},
 														},
@@ -10451,30 +8952,12 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 													Computed:    true,
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
-															"invert_matcher": schema.BoolAttribute{
-																Description: "invert_matcher Invert Match of the expression defined",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description: "match Select Match Options.",
 																Required:    false,
 																Optional:    false,
 																Computed:    true,
 																Attributes: map[string]schema.Attribute{
-																	"check_not_present": schema.BoolAttribute{
-																		Description: "check_not_present Check that the cookie is not present.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"check_present": schema.BoolAttribute{
-																		Description: "check_present Check that the cookie is present.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
 																		Required:    false,
@@ -10490,13 +8973,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -10566,13 +9042,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																				Optional:    false,
 																				Computed:    true,
 																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
 																		},
 																	},
 																},
@@ -10632,13 +9101,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -10709,13 +9171,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -11057,30 +9512,12 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																	Computed:    true,
 																	NestedObject: schema.NestedAttributeObject{
 																		Attributes: map[string]schema.Attribute{
-																			"invert_matcher": schema.BoolAttribute{
-																				Description: "invert_matcher Invert Match of the expression defined",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
 																			"match_choice": schema.SingleNestedAttribute{
 																				Description: "match Select Match Options.",
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
 																				Attributes: map[string]schema.Attribute{
-																					"check_not_present": schema.BoolAttribute{
-																						Description: "check_not_present Check that the cookie is not present.",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"check_present": schema.BoolAttribute{
-																						Description: "check_present Check that the cookie is present.",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
 																					"item": schema.SingleNestedAttribute{
 																						Description: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
 																						Required:    false,
@@ -11096,13 +9533,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																							},
 																							"regex_values": schema.ListAttribute{
 																								Description: "regex values A list of regular expressions to match the input against.",
-																								ElementType: types.StringType,
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																							"transformers": schema.ListAttribute{
-																								Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																								ElementType: types.StringType,
 																								Required:    false,
 																								Optional:    false,
@@ -11172,13 +9602,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																								Optional:    false,
 																								Computed:    true,
 																							},
-																							"transformers": schema.ListAttribute{
-																								Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																								ElementType: types.StringType,
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
 																						},
 																					},
 																				},
@@ -11238,13 +9661,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																							},
 																							"regex_values": schema.ListAttribute{
 																								Description: "regex values A list of regular expressions to match the input against.",
-																								ElementType: types.StringType,
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																							"transformers": schema.ListAttribute{
-																								Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																								ElementType: types.StringType,
 																								Required:    false,
 																								Optional:    false,
@@ -11315,13 +9731,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																							},
 																							"regex_values": schema.ListAttribute{
 																								Description: "regex values A list of regular expressions to match the input against.",
-																								ElementType: types.StringType,
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																							"transformers": schema.ListAttribute{
-																								Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																								ElementType: types.StringType,
 																								Required:    false,
 																								Optional:    false,
@@ -11770,30 +10179,12 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 													Computed:    true,
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
-															"invert_matcher": schema.BoolAttribute{
-																Description: "invert_matcher Invert Match of the expression defined",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description: "match Select Match Options.",
 																Required:    false,
 																Optional:    false,
 																Computed:    true,
 																Attributes: map[string]schema.Attribute{
-																	"check_not_present": schema.BoolAttribute{
-																		Description: "check_not_present Check that the cookie is not present.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"check_present": schema.BoolAttribute{
-																		Description: "check_present Check that the cookie is present.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
 																		Required:    false,
@@ -11809,13 +10200,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -11885,13 +10269,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																				Optional:    false,
 																				Computed:    true,
 																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
 																		},
 																	},
 																},
@@ -11951,13 +10328,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -12028,13 +10398,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 																			},
 																			"regex_values": schema.ListAttribute{
 																				Description: "regex values A list of regular expressions to match the input against.",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"transformers": schema.ListAttribute{
-																				Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
 																				ElementType: types.StringType,
 																				Required:    false,
 																				Optional:    false,
@@ -12260,26 +10623,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 											},
 											"disabled": schema.BoolAttribute{
 												Description: "Disabled",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"algorithm_choice": schema.SingleNestedAttribute{
-										Description: "algorithm The algorithm used for the RateLimitValue, learn more: https://gitlab.com/f5/volterra/ves.io/opera/-/wikis/Rate-limiting-explanations",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"leaky_bucket": schema.BoolAttribute{
-												Description: "LeakyBucketRateLimiter Leaky-Bucket is the default rate limiter algorithm for F5",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"token_bucket": schema.BoolAttribute{
-												Description: "TokenBucketRateLimiter Token-Bucket is a rate limiter algorithm that is stricter with enforcing limits",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
@@ -12898,32 +11241,6 @@ func (r *DataSourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request data
 									},
 								},
 							},
-							"waf_exclusion_policy": schema.SingleNestedAttribute{
-								Description: "Custom Policy A policy containing an ordered list of rules that can be applied to one or more Load Balancers or Routes.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"namespace": schema.StringAttribute{
-										Description: "",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"tenant": schema.StringAttribute{
-										Description: "",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
 						},
 					},
 				},
@@ -12985,7 +11302,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "cdn_loadbalancer", err))
 		return
 	}
 
@@ -13048,22 +11365,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> AutoCertInfo
 	if specData.GetAutoCertInfo() != nil {
-		var cdnLoadbalancerVirtualHostAutoCertInfoTypeModel = &CdnLoadbalancerVirtualHostAutoCertInfoType{}
+		var cdnLoadbalancerAutoCertInfoTypeModel = &CdnLoadbalancerAutoCertInfoType{}
 		autoCertInfoElement := specData.GetAutoCertInfo()
 
 		// data specToModelNested TimeStampField --> AutoCertExpiry
 		if autoCertInfoElement.GetAutoCertExpiry() != nil {
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339ProtobufPointerValue(autoCertInfoElement.GetAutoCertExpiry())
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339ProtobufPointerValue(autoCertInfoElement.GetAutoCertExpiry())
 		} else {
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339Null()
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339Null()
 		}
 
 		// data specToModelNested StringField --> AutoCertIssuer
 		if autoCertInfoElement.GetAutoCertIssuer() != "" {
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringValue(autoCertInfoElement.GetAutoCertIssuer())
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertIssuer = types.StringValue(autoCertInfoElement.GetAutoCertIssuer())
 		} else {
 			// Empty string, set to null
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringNull()
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertIssuer = types.StringNull()
 		}
 
 		// data specToModelNested EnumField --> AutoCertState
@@ -13075,52 +11392,52 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = listValue
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertState = listValue
 		} else {
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested StringField --> AutoCertSubject
 		if autoCertInfoElement.GetAutoCertSubject() != "" {
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
 		} else {
 			// Empty string, set to null
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
+			cdnLoadbalancerAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
 		}
 
 		// data specToModelNested ArrayOfPointerField --> DnsRecords
 		if len(autoCertInfoElement.GetDnsRecords()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			dnsRecordsElements := make([]CdnLoadbalancerVirtualHostDNSRecord, 0, len(autoCertInfoElement.GetDnsRecords()))
+			dnsRecordsElements := make([]CdnLoadbalancerDNSRecord, 0, len(autoCertInfoElement.GetDnsRecords()))
 			for _, dnsRecordsElement := range autoCertInfoElement.GetDnsRecords() {
-				cdnLoadbalancerVirtualHostDNSRecordModel := CdnLoadbalancerVirtualHostDNSRecord{}
+				cdnLoadbalancerDNSRecordModel := CdnLoadbalancerDNSRecord{}
 
 				// data specToModelNested StringField --> Name
 				if dnsRecordsElement.GetName() != "" {
-					cdnLoadbalancerVirtualHostDNSRecordModel.Name = types.StringValue(dnsRecordsElement.GetName())
+					cdnLoadbalancerDNSRecordModel.Name = types.StringValue(dnsRecordsElement.GetName())
 				} else {
 					// Empty string, set to null
-					cdnLoadbalancerVirtualHostDNSRecordModel.Name = types.StringNull()
+					cdnLoadbalancerDNSRecordModel.Name = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Type
 				if dnsRecordsElement.GetType() != "" {
-					cdnLoadbalancerVirtualHostDNSRecordModel.Type = types.StringValue(dnsRecordsElement.GetType())
+					cdnLoadbalancerDNSRecordModel.Type = types.StringValue(dnsRecordsElement.GetType())
 				} else {
 					// Empty string, set to null
-					cdnLoadbalancerVirtualHostDNSRecordModel.Type = types.StringNull()
+					cdnLoadbalancerDNSRecordModel.Type = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Value
 				if dnsRecordsElement.GetValue() != "" {
-					cdnLoadbalancerVirtualHostDNSRecordModel.Value = types.StringValue(dnsRecordsElement.GetValue())
+					cdnLoadbalancerDNSRecordModel.Value = types.StringValue(dnsRecordsElement.GetValue())
 				} else {
 					// Empty string, set to null
-					cdnLoadbalancerVirtualHostDNSRecordModel.Value = types.StringNull()
+					cdnLoadbalancerDNSRecordModel.Value = types.StringNull()
 				}
 
-				dnsRecordsElements = append(dnsRecordsElements, cdnLoadbalancerVirtualHostDNSRecordModel)
+				dnsRecordsElements = append(dnsRecordsElements, cdnLoadbalancerDNSRecordModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13129,19 +11446,69 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.DnsRecords = dnsRecordsListValue
+			cdnLoadbalancerAutoCertInfoTypeModel.DnsRecords = dnsRecordsListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
+			cdnLoadbalancerAutoCertInfoTypeModel.DnsRecords = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap})
+		}
+
+		// data specToModelNested ArrayOfPointerField --> DnsZones
+		if len(autoCertInfoElement.GetDnsZones()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			dnsZonesElements := make([]ObjectRefTypeModel, 0, len(autoCertInfoElement.GetDnsZones()))
+			for _, dnsZonesElement := range autoCertInfoElement.GetDnsZones() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// data specToModelNested RequiredStringField --> Name
+				if dnsZonesElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested RequiredStringField --> Namespace
+				if dnsZonesElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Tenant
+				if dnsZonesElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			dnsZonesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnLoadbalancerDnsZonesObjectRefModelAttributeMap}, dnsZonesElements)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			cdnLoadbalancerAutoCertInfoTypeModel.DnsZones = dnsZonesListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			cdnLoadbalancerAutoCertInfoTypeModel.DnsZones = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerDnsZonesObjectRefModelAttributeMap})
 		}
 
 		autoCertInfoObj, autoCertInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerAutoCertInfoModelAttributeMap,
-			cdnLoadbalancerVirtualHostAutoCertInfoTypeModel,
+			cdnLoadbalancerAutoCertInfoTypeModel,
 		)
 		response.Diagnostics.Append(autoCertInfoDiags...)
 		data.AutoCertInfo = autoCertInfoObj
@@ -13168,10 +11535,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> BlockedClients
 	if len(specData.GetBlockedClients()) > 0 {
-		blockedClientsElements := make([]CdnLoadbalancerCommonWafSimpleClientSrcRule, 0, len(specData.GetBlockedClients()))
+		blockedClientsElements := make([]CdnLoadbalancerSimpleClientSrcRule, 0, len(specData.GetBlockedClients()))
 
 		for _, blockedClientsElement := range specData.GetBlockedClients() {
-			cdnLoadbalancerCommonWafSimpleClientSrcRuleModel := CdnLoadbalancerCommonWafSimpleClientSrcRule{}
+			cdnLoadbalancerSimpleClientSrcRuleModel := CdnLoadbalancerSimpleClientSrcRule{}
 
 			// data SpecToModelNested RequiredArrayOfEnumField --> Actions
 			if len(blockedClientsElement.GetActions()) > 0 {
@@ -13186,9 +11553,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Actions = listValue
+				cdnLoadbalancerSimpleClientSrcRuleModel.Actions = listValue
 			} else {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Actions = types.ListNull(types.StringType)
+				cdnLoadbalancerSimpleClientSrcRuleModel.Actions = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredOneOfField --> ClientSourceChoice
@@ -13373,17 +11740,17 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ClientSourceChoice = finalObj
+				cdnLoadbalancerSimpleClientSrcRuleModel.ClientSourceChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ClientSourceChoice = types.ObjectNull(CdnLoadbalancerBlockedClientsClientSourceChoiceModelAttributeMap)
+				cdnLoadbalancerSimpleClientSrcRuleModel.ClientSourceChoice = types.ObjectNull(CdnLoadbalancerBlockedClientsClientSourceChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested TimeStampField --> ExpirationTimestamp
 			if blockedClientsElement.GetExpirationTimestamp() != nil {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(blockedClientsElement.GetExpirationTimestamp())
+				cdnLoadbalancerSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(blockedClientsElement.GetExpirationTimestamp())
 			} else {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+				cdnLoadbalancerSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 			}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -13416,7 +11783,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+				cdnLoadbalancerSimpleClientSrcRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -13425,10 +11792,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerBlockedClientsMetadataModelAttributeMap)
+				cdnLoadbalancerSimpleClientSrcRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerBlockedClientsMetadataModelAttributeMap)
 			}
 
-			blockedClientsElements = append(blockedClientsElements, cdnLoadbalancerCommonWafSimpleClientSrcRuleModel)
+			blockedClientsElements = append(blockedClientsElements, cdnLoadbalancerSimpleClientSrcRuleModel)
 		}
 
 		{
@@ -13480,7 +11847,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		challengeTypeChoiceChoices := specData.GetChallengeType()
 
 		// The model struct that will be populated by the nested template.
-		var challengeTypeChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeChallengeTypeChoice{}
+		var challengeTypeChoiceChoicesModel = &CdnLoadbalancerChallengeTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -14110,7 +12477,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// data specToModelNested PointerField --> RuleList
 				if policyBasedChallengeElement.GetRuleList() != nil {
 					// Create the nested Go struct
-					cdnLoadbalancerCommonWafChallengeRuleListModel := &CdnLoadbalancerCommonWafChallengeRuleList{}
+					cdnLoadbalancerChallengeRuleListModel := &CdnLoadbalancerChallengeRuleList{}
 					ruleListElement := policyBasedChallengeElement.GetRuleList()
 
 					// Recursively populate the nested struct
@@ -14119,9 +12486,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					if len(ruleListElement.GetRules()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						rulesElements := make([]CdnLoadbalancerCommonWafChallengeRule, 0, len(ruleListElement.GetRules()))
+						rulesElements := make([]CdnLoadbalancerChallengeRule, 0, len(ruleListElement.GetRules()))
 						for _, rulesElement := range ruleListElement.GetRules() {
-							cdnLoadbalancerCommonWafChallengeRuleModel := CdnLoadbalancerCommonWafChallengeRule{}
+							cdnLoadbalancerChallengeRuleModel := CdnLoadbalancerChallengeRule{}
 
 							// data specToModelNested RequiredPointerField --> Metadata
 							if rulesElement.GetMetadata() != nil {
@@ -14153,7 +12520,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerCommonWafChallengeRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+								cdnLoadbalancerChallengeRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -14162,13 +12529,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnLoadbalancerCommonWafChallengeRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesMetadataModelAttributeMap)
+								cdnLoadbalancerChallengeRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesMetadataModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredPointerField --> Spec
 							if rulesElement.GetSpec() != nil {
 								// Create the nested Go struct
-								cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel := &CdnLoadbalancerServicePolicyRuleChallengeRuleSpec{}
+								cdnLoadbalancerChallengeRuleSpecModel := &CdnLoadbalancerChallengeRuleSpec{}
 								specElement := rulesElement.GetSpec()
 
 								// Recursively populate the nested struct
@@ -14177,12 +12544,12 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if len(specElement.GetArgMatchers()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									argMatchersElements := make([]CdnLoadbalancerPolicyArgMatcherType, 0, len(specElement.GetArgMatchers()))
+									argMatchersElements := make([]CdnLoadbalancerArgMatcherType, 0, len(specElement.GetArgMatchers()))
 									for _, argMatchersElement := range specElement.GetArgMatchers() {
-										cdnLoadbalancerPolicyArgMatcherTypeModel := CdnLoadbalancerPolicyArgMatcherType{}
+										cdnLoadbalancerArgMatcherTypeModel := CdnLoadbalancerArgMatcherType{}
 
 										// data specToModelNested BoolField --> InvertMatcher
-										cdnLoadbalancerPolicyArgMatcherTypeModel.InvertMatcher = types.BoolValue(bool(argMatchersElement.GetInvertMatcher()))
+										cdnLoadbalancerArgMatcherTypeModel.InvertMatcher = types.BoolValue(bool(argMatchersElement.GetInvertMatcher()))
 
 										// data specToModelNested RequiredOneOfField --> Match
 										// <no value>
@@ -14248,24 +12615,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 														itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 													}
 
-													// data SpecToModelNested ArrayOfEnumField --> Transformers
-													if len(itemElement.GetTransformers()) > 0 {
-														transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-														for _, v := range itemElement.GetTransformers() {
-															if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																transformersStrings = append(transformersStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														itemAttributeMap["transformers"] = listValue
-													} else {
-														itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-													}
-
 													itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchersMatchItemModelAttributeMap, itemAttributeMap)
 													response.Diagnostics.Append(itemObjDiags...)
 													if response.Diagnostics.HasError() {
@@ -14290,21 +12639,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerPolicyArgMatcherTypeModel.MatchChoice = finalObj
+											cdnLoadbalancerArgMatcherTypeModel.MatchChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerPolicyArgMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchersMatchModelAttributeMap)
+											cdnLoadbalancerArgMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchersMatchModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if argMatchersElement.GetName() != "" {
-											cdnLoadbalancerPolicyArgMatcherTypeModel.Name = types.StringValue(argMatchersElement.GetName())
+											cdnLoadbalancerArgMatcherTypeModel.Name = types.StringValue(argMatchersElement.GetName())
 										} else {
 											// Empty string, set to null
-											cdnLoadbalancerPolicyArgMatcherTypeModel.Name = types.StringNull()
+											cdnLoadbalancerArgMatcherTypeModel.Name = types.StringNull()
 										}
 
-										argMatchersElements = append(argMatchersElements, cdnLoadbalancerPolicyArgMatcherTypeModel)
+										argMatchersElements = append(argMatchersElements, cdnLoadbalancerArgMatcherTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14313,13 +12662,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ArgMatchers = argMatchersListValue
+									cdnLoadbalancerChallengeRuleSpecModel.ArgMatchers = argMatchersListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ArgMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchersModelAttributeMap})
+									cdnLoadbalancerChallengeRuleSpecModel.ArgMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecArgMatchersModelAttributeMap})
 								}
 
 								// data specToModelNested OneOfField --> AsnChoice
@@ -14460,16 +12809,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.AsnChoice = finalObj
+									cdnLoadbalancerChallengeRuleSpecModel.AsnChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.AsnChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecAsnChoiceModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.AsnChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecAsnChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested PointerField --> BodyMatcher
 								if specElement.GetBodyMatcher() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerPolicyMatcherTypeModel := &CdnLoadbalancerPolicyMatcherType{}
+									cdnLoadbalancerMatcherTypeModel := &CdnLoadbalancerMatcherType{}
 									bodyMatcherElement := specElement.GetBodyMatcher()
 
 									// Recursively populate the nested struct
@@ -14481,9 +12830,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyMatcherTypeModel.ExactValues = listValue
+										cdnLoadbalancerMatcherTypeModel.ExactValues = listValue
 									} else {
-										cdnLoadbalancerPolicyMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+										cdnLoadbalancerMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested ArrayOfStringField --> RegexValues
@@ -14493,36 +12842,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyMatcherTypeModel.RegexValues = listValue
+										cdnLoadbalancerMatcherTypeModel.RegexValues = listValue
 									} else {
-										cdnLoadbalancerPolicyMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
-									}
-
-									// data SpecToModelNested ArrayOfEnumField --> Transformers
-									if len(bodyMatcherElement.GetTransformers()) > 0 {
-										transformersStrings := make([]string, 0, len(bodyMatcherElement.GetTransformers()))
-										for _, v := range bodyMatcherElement.GetTransformers() {
-											if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-												transformersStrings = append(transformersStrings, strVal)
-											}
-										}
-										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-										response.Diagnostics.Append(listDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cdnLoadbalancerPolicyMatcherTypeModel.Transformers = listValue
-									} else {
-										cdnLoadbalancerPolicyMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+										cdnLoadbalancerMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerPolicyMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap, cdnLoadbalancerPolicyMatcherTypeModel)
+									cdnLoadbalancerMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap, cdnLoadbalancerMatcherTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.BodyMatcher = cdnLoadbalancerPolicyMatcherTypeModelObj
+									cdnLoadbalancerChallengeRuleSpecModel.BodyMatcher = cdnLoadbalancerMatcherTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -14531,7 +12862,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.BodyMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.BodyMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> ChallengeAction
@@ -14586,10 +12917,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ChallengeActionChoice = finalObj
+									cdnLoadbalancerChallengeRuleSpecModel.ChallengeActionChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ChallengeActionChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecChallengeActionModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.ChallengeActionChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecChallengeActionModelAttributeMap)
 								}
 
 								// data specToModelNested OneOfField --> ClientChoice
@@ -14658,22 +12989,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ClientChoice = finalObj
+									cdnLoadbalancerChallengeRuleSpecModel.ClientChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ClientChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecClientChoiceModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.ClientChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecClientChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested ArrayOfPointerField --> CookieMatchers
 								if len(specElement.GetCookieMatchers()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									cookieMatchersElements := make([]CdnLoadbalancerPolicyCookieMatcherType, 0, len(specElement.GetCookieMatchers()))
+									cookieMatchersElements := make([]CdnLoadbalancerCookieMatcherType, 0, len(specElement.GetCookieMatchers()))
 									for _, cookieMatchersElement := range specElement.GetCookieMatchers() {
-										cdnLoadbalancerPolicyCookieMatcherTypeModel := CdnLoadbalancerPolicyCookieMatcherType{}
-
-										// data specToModelNested BoolField --> InvertMatcher
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
+										cdnLoadbalancerCookieMatcherTypeModel := CdnLoadbalancerCookieMatcherType{}
 
 										// data specToModelNested RequiredOneOfField --> Match
 										// <no value>
@@ -14686,24 +13014,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											cookieMatchersmatchChoiceChoices := cookieMatchersElement.GetMatch()
 
 											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
-											_, isCheckNotPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckNotPresent)
-
-											if isCheckNotPresent {
-												cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
-											} else {
-												cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
-											_, isCheckPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckPresent)
-
-											if isCheckPresent {
-												cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
-											} else {
-												cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
-											}
 
 											// data specToModelNested PointerOfOneOfField --> Item
 											// <no value>
@@ -14739,24 +13049,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 														itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 													}
 
-													// data SpecToModelNested ArrayOfEnumField --> Transformers
-													if len(itemElement.GetTransformers()) > 0 {
-														transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-														for _, v := range itemElement.GetTransformers() {
-															if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																transformersStrings = append(transformersStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														itemAttributeMap["transformers"] = listValue
-													} else {
-														itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-													}
-
 													itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchItemModelAttributeMap, itemAttributeMap)
 													response.Diagnostics.Append(itemObjDiags...)
 													if response.Diagnostics.HasError() {
@@ -14781,21 +13073,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = finalObj
+											cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap)
+											cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersMatchModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredStringField --> Name
 										if cookieMatchersElement.GetName() != "" {
-											cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
+											cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
 										} else {
 											// Empty string, set to null
-											cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringNull()
+											cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringNull()
 										}
 
-										cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerPolicyCookieMatcherTypeModel)
+										cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerCookieMatcherTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14804,19 +13096,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.CookieMatchers = cookieMatchersListValue
+									cdnLoadbalancerChallengeRuleSpecModel.CookieMatchers = cookieMatchersListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersModelAttributeMap})
+									cdnLoadbalancerChallengeRuleSpecModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecCookieMatchersModelAttributeMap})
 								}
 
 								// data specToModelNested PointerField --> DomainMatcher
 								if specElement.GetDomainMatcher() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerPolicyMatcherTypeBasicModel := &CdnLoadbalancerPolicyMatcherTypeBasic{}
+									cdnLoadbalancerMatcherTypeBasicModel := &CdnLoadbalancerMatcherTypeBasic{}
 									domainMatcherElement := specElement.GetDomainMatcher()
 
 									// Recursively populate the nested struct
@@ -14828,9 +13120,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyMatcherTypeBasicModel.ExactValues = listValue
+										cdnLoadbalancerMatcherTypeBasicModel.ExactValues = listValue
 									} else {
-										cdnLoadbalancerPolicyMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
+										cdnLoadbalancerMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested ArrayOfStringField --> RegexValues
@@ -14840,18 +13132,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyMatcherTypeBasicModel.RegexValues = listValue
+										cdnLoadbalancerMatcherTypeBasicModel.RegexValues = listValue
 									} else {
-										cdnLoadbalancerPolicyMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
+										cdnLoadbalancerMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerPolicyMatcherTypeBasicModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecDomainMatcherModelAttributeMap, cdnLoadbalancerPolicyMatcherTypeBasicModel)
+									cdnLoadbalancerMatcherTypeBasicModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecDomainMatcherModelAttributeMap, cdnLoadbalancerMatcherTypeBasicModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.DomainMatcher = cdnLoadbalancerPolicyMatcherTypeBasicModelObj
+									cdnLoadbalancerChallengeRuleSpecModel.DomainMatcher = cdnLoadbalancerMatcherTypeBasicModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -14860,14 +13152,14 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.DomainMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecDomainMatcherModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.DomainMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecDomainMatcherModelAttributeMap)
 								}
 
 								// data specToModelNested TimeStampField --> ExpirationTimestamp
 								if specElement.GetExpirationTimestamp() != nil {
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specElement.GetExpirationTimestamp())
+									cdnLoadbalancerChallengeRuleSpecModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specElement.GetExpirationTimestamp())
 								} else {
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+									cdnLoadbalancerChallengeRuleSpecModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 								}
 
 								// data specToModelNested ArrayOfPointerField --> Headers
@@ -14945,24 +13237,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 														itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 													}
 
-													// data SpecToModelNested ArrayOfEnumField --> Transformers
-													if len(itemElement.GetTransformers()) > 0 {
-														transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-														for _, v := range itemElement.GetTransformers() {
-															if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																transformersStrings = append(transformersStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														itemAttributeMap["transformers"] = listValue
-													} else {
-														itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-													}
-
 													itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHeadersMatchItemModelAttributeMap, itemAttributeMap)
 													response.Diagnostics.Append(itemObjDiags...)
 													if response.Diagnostics.HasError() {
@@ -15010,25 +13284,25 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.Headers = headersListValue
+									cdnLoadbalancerChallengeRuleSpecModel.Headers = headersListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHeadersModelAttributeMap})
+									cdnLoadbalancerChallengeRuleSpecModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHeadersModelAttributeMap})
 								}
 
 								// data specToModelNested PointerField --> HttpMethod
 								if specElement.GetHttpMethod() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerPolicyHttpMethodMatcherTypeModel := &CdnLoadbalancerPolicyHttpMethodMatcherType{}
+									cdnLoadbalancerHttpMethodMatcherTypeModel := &CdnLoadbalancerHttpMethodMatcherType{}
 									httpMethodElement := specElement.GetHttpMethod()
 
 									// Recursively populate the nested struct
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
+									cdnLoadbalancerHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
 
 									// data SpecToModelNested ArrayOfEnumField --> Methods
 									if len(httpMethodElement.GetMethods()) > 0 {
@@ -15043,18 +13317,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.Methods = listValue
+										cdnLoadbalancerHttpMethodMatcherTypeModel.Methods = listValue
 									} else {
-										cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
+										cdnLoadbalancerHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerPolicyHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHttpMethodModelAttributeMap, cdnLoadbalancerPolicyHttpMethodMatcherTypeModel)
+									cdnLoadbalancerHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHttpMethodModelAttributeMap, cdnLoadbalancerHttpMethodMatcherTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.HttpMethod = cdnLoadbalancerPolicyHttpMethodMatcherTypeModelObj
+									cdnLoadbalancerChallengeRuleSpecModel.HttpMethod = cdnLoadbalancerHttpMethodMatcherTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -15063,7 +13337,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.HttpMethod = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHttpMethodModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.HttpMethod = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecHttpMethodModelAttributeMap)
 								}
 
 								// data specToModelNested OneOfField --> IpChoice
@@ -15221,22 +13495,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.IpChoice = finalObj
+									cdnLoadbalancerChallengeRuleSpecModel.IpChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.IpChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecIpChoiceModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.IpChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecIpChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested PointerField --> Path
 								if specElement.GetPath() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerPolicyPathMatcherTypeModel := &CdnLoadbalancerPolicyPathMatcherType{}
+									cdnLoadbalancerPathMatcherTypeModel := &CdnLoadbalancerPathMatcherType{}
 									pathElement := specElement.GetPath()
 
 									// Recursively populate the nested struct
 
 									// data specToModelNested BoolField --> EncodedPathMatcher
-									cdnLoadbalancerPolicyPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
+									cdnLoadbalancerPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
 
 									// data specToModelNested ArrayOfStringField --> ExactValues
 									if len(pathElement.GetExactValues()) > 0 {
@@ -15245,13 +13519,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyPathMatcherTypeModel.ExactValues = listValue
+										cdnLoadbalancerPathMatcherTypeModel.ExactValues = listValue
 									} else {
-										cdnLoadbalancerPolicyPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+										cdnLoadbalancerPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
+									cdnLoadbalancerPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
 
 									// data specToModelNested ArrayOfStringField --> PrefixValues
 									if len(pathElement.GetPrefixValues()) > 0 {
@@ -15260,9 +13534,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyPathMatcherTypeModel.PrefixValues = listValue
+										cdnLoadbalancerPathMatcherTypeModel.PrefixValues = listValue
 									} else {
-										cdnLoadbalancerPolicyPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
+										cdnLoadbalancerPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested ArrayOfStringField --> RegexValues
@@ -15272,9 +13546,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyPathMatcherTypeModel.RegexValues = listValue
+										cdnLoadbalancerPathMatcherTypeModel.RegexValues = listValue
 									} else {
-										cdnLoadbalancerPolicyPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
+										cdnLoadbalancerPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested ArrayOfStringField --> SuffixValues
@@ -15284,9 +13558,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyPathMatcherTypeModel.SuffixValues = listValue
+										cdnLoadbalancerPathMatcherTypeModel.SuffixValues = listValue
 									} else {
-										cdnLoadbalancerPolicyPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
+										cdnLoadbalancerPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
 									}
 
 									// data SpecToModelNested ArrayOfEnumField --> Transformers
@@ -15302,18 +13576,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerPolicyPathMatcherTypeModel.Transformers = listValue
+										cdnLoadbalancerPathMatcherTypeModel.Transformers = listValue
 									} else {
-										cdnLoadbalancerPolicyPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+										cdnLoadbalancerPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerPolicyPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecPathModelAttributeMap, cdnLoadbalancerPolicyPathMatcherTypeModel)
+									cdnLoadbalancerPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecPathModelAttributeMap, cdnLoadbalancerPathMatcherTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.Path = cdnLoadbalancerPolicyPathMatcherTypeModelObj
+									cdnLoadbalancerChallengeRuleSpecModel.Path = cdnLoadbalancerPathMatcherTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -15322,26 +13596,26 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.Path = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecPathModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.Path = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecPathModelAttributeMap)
 								}
 
 								// data specToModelNested ArrayOfPointerField --> QueryParams
 								if len(specElement.GetQueryParams()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									queryParamsElements := make([]CdnLoadbalancerPolicyQueryParameterMatcherType, 0, len(specElement.GetQueryParams()))
+									queryParamsElements := make([]CdnLoadbalancerQueryParamMatcherType, 0, len(specElement.GetQueryParams()))
 									for _, queryParamsElement := range specElement.GetQueryParams() {
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel := CdnLoadbalancerPolicyQueryParameterMatcherType{}
+										cdnLoadbalancerQueryParamMatcherTypeModel := CdnLoadbalancerQueryParamMatcherType{}
 
 										// data specToModelNested BoolField --> InvertMatcher
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
+										cdnLoadbalancerQueryParamMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
 
 										// data specToModelNested RequiredStringField --> Key
 										if queryParamsElement.GetKey() != "" {
-											cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+											cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 										} else {
 											// Empty string, set to null
-											cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringNull()
+											cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringNull()
 										}
 
 										// data specToModelNested RequiredOneOfField --> Match
@@ -15408,24 +13682,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 														itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 													}
 
-													// data SpecToModelNested ArrayOfEnumField --> Transformers
-													if len(itemElement.GetTransformers()) > 0 {
-														transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-														for _, v := range itemElement.GetTransformers() {
-															if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																transformersStrings = append(transformersStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														itemAttributeMap["transformers"] = listValue
-													} else {
-														itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-													}
-
 													itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParamsMatchItemModelAttributeMap, itemAttributeMap)
 													response.Diagnostics.Append(itemObjDiags...)
 													if response.Diagnostics.HasError() {
@@ -15450,13 +13706,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = finalObj
+											cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParamsMatchModelAttributeMap)
+											cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParamsMatchModelAttributeMap)
 										}
 
-										queryParamsElements = append(queryParamsElements, cdnLoadbalancerPolicyQueryParameterMatcherTypeModel)
+										queryParamsElements = append(queryParamsElements, cdnLoadbalancerQueryParamMatcherTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -15465,13 +13721,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.QueryParams = queryParamsListValue
+									cdnLoadbalancerChallengeRuleSpecModel.QueryParams = queryParamsListValue
 
 								} else {
 									// The source list is empty or nil.
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// Assign a null `types.ListValue`.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParamsModelAttributeMap})
+									cdnLoadbalancerChallengeRuleSpecModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecQueryParamsModelAttributeMap})
 								}
 
 								// data specToModelNested OneOfField --> TlsFingerprintChoice
@@ -15561,19 +13817,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.TlsFingerprintChoice = finalObj
+									cdnLoadbalancerChallengeRuleSpecModel.TlsFingerprintChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel.TlsFingerprintChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecTlsFingerprintChoiceModelAttributeMap)
+									cdnLoadbalancerChallengeRuleSpecModel.TlsFingerprintChoice = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecTlsFingerprintChoiceModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttributeMap, cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModel)
+								cdnLoadbalancerChallengeRuleSpecModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttributeMap, cdnLoadbalancerChallengeRuleSpecModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerCommonWafChallengeRuleModel.Spec = cdnLoadbalancerServicePolicyRuleChallengeRuleSpecModelObj
+								cdnLoadbalancerChallengeRuleModel.Spec = cdnLoadbalancerChallengeRuleSpecModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -15582,10 +13838,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnLoadbalancerCommonWafChallengeRuleModel.Spec = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttributeMap)
+								cdnLoadbalancerChallengeRuleModel.Spec = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecModelAttributeMap)
 							}
 
-							rulesElements = append(rulesElements, cdnLoadbalancerCommonWafChallengeRuleModel)
+							rulesElements = append(rulesElements, cdnLoadbalancerChallengeRuleModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -15594,22 +13850,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						cdnLoadbalancerCommonWafChallengeRuleListModel.Rules = rulesListValue
+						cdnLoadbalancerChallengeRuleListModel.Rules = rulesListValue
 
 					} else {
 						// The source list is empty or nil.
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// Assign a null `types.ListValue`.
-						cdnLoadbalancerCommonWafChallengeRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesModelAttributeMap})
+						cdnLoadbalancerChallengeRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesModelAttributeMap})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					cdnLoadbalancerCommonWafChallengeRuleListModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListModelAttributeMap, cdnLoadbalancerCommonWafChallengeRuleListModel)
+					cdnLoadbalancerChallengeRuleListModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListModelAttributeMap, cdnLoadbalancerChallengeRuleListModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					policyBasedChallengeAttributeMap["rule_list"] = cdnLoadbalancerCommonWafChallengeRuleListModelObj
+					policyBasedChallengeAttributeMap["rule_list"] = cdnLoadbalancerChallengeRuleListModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -15661,12 +13917,8 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		cdnLoadbalancerCorsPolicyModel.AllowCredentials = types.BoolValue(bool(corsPolicyElement.GetAllowCredentials()))
 
 		// data specToModelNested StringField --> AllowHeaders
-		if corsPolicyElement.GetAllowHeaders() != "" {
-			cdnLoadbalancerCorsPolicyModel.AllowHeaders = types.StringValue(corsPolicyElement.GetAllowHeaders())
-		} else {
-			// Empty string, set to null
-			cdnLoadbalancerCorsPolicyModel.AllowHeaders = types.StringNull()
-		}
+		// The resource defaults this field to "", so API "" must stay "" to match it.
+		cdnLoadbalancerCorsPolicyModel.AllowHeaders = types.StringValue(corsPolicyElement.GetAllowHeaders())
 
 		// data specToModelNested StringField --> AllowMethods
 		if corsPolicyElement.GetAllowMethods() != "" {
@@ -15704,12 +13956,8 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		cdnLoadbalancerCorsPolicyModel.Disabled = types.BoolValue(bool(corsPolicyElement.GetDisabled()))
 
 		// data specToModelNested StringField --> ExposeHeaders
-		if corsPolicyElement.GetExposeHeaders() != "" {
-			cdnLoadbalancerCorsPolicyModel.ExposeHeaders = types.StringValue(corsPolicyElement.GetExposeHeaders())
-		} else {
-			// Empty string, set to null
-			cdnLoadbalancerCorsPolicyModel.ExposeHeaders = types.StringNull()
-		}
+		// The resource defaults this field to "", so API "" must stay "" to match it.
+		cdnLoadbalancerCorsPolicyModel.ExposeHeaders = types.StringValue(corsPolicyElement.GetExposeHeaders())
 
 		// data specToModelNested IntField --> MaximumAge
 		cdnLoadbalancerCorsPolicyModel.MaximumAge = types.Int32Value(corsPolicyElement.GetMaximumAge())
@@ -15825,7 +14073,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> CustomCacheRule
 	if specData.GetCustomCacheRule() != nil {
-		var cdnLoadbalancerCommonCacheRuleCustomCacheRuleModel = &CdnLoadbalancerCommonCacheRuleCustomCacheRule{}
+		var cdnLoadbalancerCustomCacheRuleModel = &CdnLoadbalancerCustomCacheRule{}
 		customCacheRuleElement := specData.GetCustomCacheRule()
 
 		// data specToModelNested ArrayOfPointerField --> CdnCacheRules
@@ -15869,19 +14117,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCommonCacheRuleCustomCacheRuleModel.CdnCacheRules = cdnCacheRulesListValue
+			cdnLoadbalancerCustomCacheRuleModel.CdnCacheRules = cdnCacheRulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnLoadbalancerCommonCacheRuleCustomCacheRuleModel.CdnCacheRules = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerCdnCacheRulesObjectRefModelAttributeMap})
+			cdnLoadbalancerCustomCacheRuleModel.CdnCacheRules = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerCdnCacheRulesObjectRefModelAttributeMap})
 		}
 
 		customCacheRuleObj, customCacheRuleDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerCustomCacheRuleModelAttributeMap,
-			cdnLoadbalancerCommonCacheRuleCustomCacheRuleModel,
+			cdnLoadbalancerCustomCacheRuleModel,
 		)
 		response.Diagnostics.Append(customCacheRuleDiags...)
 		data.CustomCacheRule = customCacheRuleObj
@@ -15891,10 +14139,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> DataGuardRules
 	if len(specData.GetDataGuardRules()) > 0 {
-		dataGuardRulesElements := make([]CdnLoadbalancerPolicySimpleDataGuardRule, 0, len(specData.GetDataGuardRules()))
+		dataGuardRulesElements := make([]CdnLoadbalancerSimpleDataGuardRule, 0, len(specData.GetDataGuardRules()))
 
 		for _, dataGuardRulesElement := range specData.GetDataGuardRules() {
-			cdnLoadbalancerPolicySimpleDataGuardRuleModel := CdnLoadbalancerPolicySimpleDataGuardRule{}
+			cdnLoadbalancerSimpleDataGuardRuleModel := CdnLoadbalancerSimpleDataGuardRule{}
 
 			// data specToModelNested RequiredOneOfField --> ActionChoice
 			// <no value>
@@ -15939,10 +14187,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.ActionChoice = finalObj
+				cdnLoadbalancerSimpleDataGuardRuleModel.ActionChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.ActionChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesActionChoiceModelAttributeMap)
+				cdnLoadbalancerSimpleDataGuardRuleModel.ActionChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesActionChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -15999,10 +14247,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.DomainChoice = finalObj
+				cdnLoadbalancerSimpleDataGuardRuleModel.DomainChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesDomainChoiceModelAttributeMap)
+				cdnLoadbalancerSimpleDataGuardRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesDomainChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -16035,7 +14283,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+				cdnLoadbalancerSimpleDataGuardRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -16044,13 +14292,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDataGuardRulesMetadataModelAttributeMap)
+				cdnLoadbalancerSimpleDataGuardRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDataGuardRulesMetadataModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredPointerField --> Path
 			if dataGuardRulesElement.GetPath() != nil {
 				// Create the nested Go struct
-				cdnLoadbalancerPathMatcherTypeModel := &CdnLoadbalancerPathMatcherType{}
+				cdnLoadbalancerSchemaPathMatcherTypeModel := &CdnLoadbalancerSchemaPathMatcherType{}
 				pathElement := dataGuardRulesElement.GetPath()
 
 				// Recursively populate the nested struct
@@ -16110,19 +14358,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					cdnLoadbalancerPathMatcherTypeModel.PathMatchChoice = finalObj
+					cdnLoadbalancerSchemaPathMatcherTypeModel.PathMatchChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					cdnLoadbalancerPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesPathPathMatchModelAttributeMap)
+					cdnLoadbalancerSchemaPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesPathPathMatchModelAttributeMap)
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				cdnLoadbalancerPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDataGuardRulesPathModelAttributeMap, cdnLoadbalancerPathMatcherTypeModel)
+				cdnLoadbalancerSchemaPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDataGuardRulesPathModelAttributeMap, cdnLoadbalancerSchemaPathMatcherTypeModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.Path = cdnLoadbalancerPathMatcherTypeModelObj
+				cdnLoadbalancerSimpleDataGuardRuleModel.Path = cdnLoadbalancerSchemaPathMatcherTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -16131,10 +14379,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerPolicySimpleDataGuardRuleModel.Path = types.ObjectNull(CdnLoadbalancerDataGuardRulesPathModelAttributeMap)
+				cdnLoadbalancerSimpleDataGuardRuleModel.Path = types.ObjectNull(CdnLoadbalancerDataGuardRulesPathModelAttributeMap)
 			}
 
-			dataGuardRulesElements = append(dataGuardRulesElements, cdnLoadbalancerPolicySimpleDataGuardRuleModel)
+			dataGuardRulesElements = append(dataGuardRulesElements, cdnLoadbalancerSimpleDataGuardRuleModel)
 		}
 
 		{
@@ -16161,16 +14409,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> DdosMitigationRules
 	if len(specData.GetDdosMitigationRules()) > 0 {
-		ddosMitigationRulesElements := make([]CdnLoadbalancerCommonSecurityDDoSMitigationRule, 0, len(specData.GetDdosMitigationRules()))
+		ddosMitigationRulesElements := make([]CdnLoadbalancerDDoSMitigationRule, 0, len(specData.GetDdosMitigationRules()))
 
 		for _, ddosMitigationRulesElement := range specData.GetDdosMitigationRules() {
-			cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel := CdnLoadbalancerCommonSecurityDDoSMitigationRule{}
+			cdnLoadbalancerDDoSMitigationRuleModel := CdnLoadbalancerDDoSMitigationRule{}
 
 			// data specToModelNested TimeStampField --> ExpirationTimestamp
 			if ddosMitigationRulesElement.GetExpirationTimestamp() != nil {
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(ddosMitigationRulesElement.GetExpirationTimestamp())
+				cdnLoadbalancerDDoSMitigationRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(ddosMitigationRulesElement.GetExpirationTimestamp())
 			} else {
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+				cdnLoadbalancerDDoSMitigationRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 			}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -16203,7 +14451,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+				cdnLoadbalancerDDoSMitigationRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -16212,7 +14460,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap)
+				cdnLoadbalancerDDoSMitigationRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredOneOfField --> MitigationAction
@@ -16249,10 +14497,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.MitigationActionChoice = finalObj
+				cdnLoadbalancerDDoSMitigationRuleModel.MitigationActionChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.MitigationActionChoice = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMitigationActionModelAttributeMap)
+				cdnLoadbalancerDDoSMitigationRuleModel.MitigationActionChoice = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMitigationActionModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredOneOfField --> MitigationChoice
@@ -16280,7 +14528,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						// data specToModelNested PointerField --> AsnList
 						if ddosClientSourceElement.GetAsnList() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyAsnMatchListModel := &CdnLoadbalancerPolicyAsnMatchList{}
+							cdnLoadbalancerAsnMatchListModel := &CdnLoadbalancerAsnMatchList{}
 							asnListElement := ddosClientSourceElement.GetAsnList()
 
 							// Recursively populate the nested struct
@@ -16293,18 +14541,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyAsnMatchListModel.AsNumbers = listValue
+								cdnLoadbalancerAsnMatchListModel.AsNumbers = listValue
 							} else {
-								cdnLoadbalancerPolicyAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
+								cdnLoadbalancerAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceAsnListModelAttributeMap, cdnLoadbalancerPolicyAsnMatchListModel)
+							cdnLoadbalancerAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceAsnListModelAttributeMap, cdnLoadbalancerAsnMatchListModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							ddosClientSourceAttributeMap["asn_list"] = cdnLoadbalancerPolicyAsnMatchListModelObj
+							ddosClientSourceAttributeMap["asn_list"] = cdnLoadbalancerAsnMatchListModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -16337,7 +14585,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						// data specToModelNested PointerField --> Ja4TlsFingerprintMatcher
 						if ddosClientSourceElement.GetJa4TlsFingerprintMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModel := &CdnLoadbalancerPolicyJA4TlsFingerprintMatcherType{}
+							cdnLoadbalancerJA4TlsFingerprintMatcherTypeModel := &CdnLoadbalancerJA4TlsFingerprintMatcherType{}
 							ja4TlsFingerprintMatcherElement := ddosClientSourceElement.GetJa4TlsFingerprintMatcher()
 
 							// Recursively populate the nested struct
@@ -16349,18 +14597,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModel.ExactValues = listValue
+								cdnLoadbalancerJA4TlsFingerprintMatcherTypeModel.ExactValues = listValue
 							} else {
-								cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+								cdnLoadbalancerJA4TlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceJa4TlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModel)
+							cdnLoadbalancerJA4TlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceJa4TlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerJA4TlsFingerprintMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							ddosClientSourceAttributeMap["ja4_tls_fingerprint_matcher"] = cdnLoadbalancerPolicyJA4TlsFingerprintMatcherTypeModelObj
+							ddosClientSourceAttributeMap["ja4_tls_fingerprint_matcher"] = cdnLoadbalancerJA4TlsFingerprintMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -16375,7 +14623,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						// data specToModelNested PointerField --> TlsFingerprintMatcher
 						if ddosClientSourceElement.GetTlsFingerprintMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel := &CdnLoadbalancerPolicyTlsFingerprintMatcherType{}
+							cdnLoadbalancerTlsFingerprintMatcherTypeModel := &CdnLoadbalancerTlsFingerprintMatcherType{}
 							tlsFingerprintMatcherElement := ddosClientSourceElement.GetTlsFingerprintMatcher()
 
 							// Recursively populate the nested struct
@@ -16393,9 +14641,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = listValue
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = listValue
 							} else {
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested ArrayOfStringField --> ExactValues
@@ -16405,9 +14653,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = listValue
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = listValue
 							} else {
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested ArrayOfStringField --> ExcludedValues
@@ -16417,18 +14665,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
 							} else {
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel)
+							cdnLoadbalancerTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerDdosMitigationRulesMitigationChoiceDdosClientSourceTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerTlsFingerprintMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							ddosClientSourceAttributeMap["tls_fingerprint_matcher"] = cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj
+							ddosClientSourceAttributeMap["tls_fingerprint_matcher"] = cdnLoadbalancerTlsFingerprintMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -16512,13 +14760,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.MitigationChoice = finalObj
+				cdnLoadbalancerDDoSMitigationRuleModel.MitigationChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel.MitigationChoice = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMitigationChoiceModelAttributeMap)
+				cdnLoadbalancerDDoSMitigationRuleModel.MitigationChoice = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMitigationChoiceModelAttributeMap)
 			}
 
-			ddosMitigationRulesElements = append(ddosMitigationRulesElements, cdnLoadbalancerCommonSecurityDDoSMitigationRuleModel)
+			ddosMitigationRulesElements = append(ddosMitigationRulesElements, cdnLoadbalancerDDoSMitigationRuleModel)
 		}
 
 		{
@@ -16545,7 +14793,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> DefaultCacheAction
 	if specData.GetDefaultCacheAction() != nil {
-		var cdnLoadbalancerCommonCacheRuleDefaultCacheActionModel = &CdnLoadbalancerCommonCacheRuleDefaultCacheAction{}
+		var cdnLoadbalancerDefaultCacheActionModel = &CdnLoadbalancerDefaultCacheAction{}
 		defaultCacheActionElement := specData.GetDefaultCacheAction()
 
 		// data specToModelNested OneOfField --> CacheActions
@@ -16601,16 +14849,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnLoadbalancerCommonCacheRuleDefaultCacheActionModel.CacheActionsChoice = finalObj
+			cdnLoadbalancerDefaultCacheActionModel.CacheActionsChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnLoadbalancerCommonCacheRuleDefaultCacheActionModel.CacheActionsChoice = types.ObjectNull(CdnLoadbalancerDefaultCacheActionCacheActionsModelAttributeMap)
+			cdnLoadbalancerDefaultCacheActionModel.CacheActionsChoice = types.ObjectNull(CdnLoadbalancerDefaultCacheActionCacheActionsModelAttributeMap)
 		}
 
 		defaultCacheActionObj, defaultCacheActionDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerDefaultCacheActionModelAttributeMap,
-			cdnLoadbalancerCommonCacheRuleDefaultCacheActionModel,
+			cdnLoadbalancerDefaultCacheActionModel,
 		)
 		response.Diagnostics.Append(defaultCacheActionDiags...)
 		data.DefaultCacheAction = defaultCacheActionObj
@@ -16620,28 +14868,28 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> DnsInfo
 	if len(specData.GetDnsInfo()) > 0 {
-		dnsInfoElements := make([]CdnLoadbalancerVirtualHostDnsInfoDnsInfo, 0, len(specData.GetDnsInfo()))
+		dnsInfoElements := make([]CdnLoadbalancerDnsInfo, 0, len(specData.GetDnsInfo()))
 
 		for _, dnsInfoElement := range specData.GetDnsInfo() {
-			cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel := CdnLoadbalancerVirtualHostDnsInfoDnsInfo{}
+			cdnLoadbalancerDnsInfoModel := CdnLoadbalancerDnsInfo{}
 
 			// data specToModelNested StringField --> IpAddress
 			if dnsInfoElement.GetIpAddress() != "" {
-				cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
+				cdnLoadbalancerDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringNull()
+				cdnLoadbalancerDnsInfoModel.IpAddress = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Ipv6Address
 			if dnsInfoElement.GetIpv6Address() != "" {
-				cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
+				cdnLoadbalancerDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringNull()
+				cdnLoadbalancerDnsInfoModel.Ipv6Address = types.StringNull()
 			}
 
-			dnsInfoElements = append(dnsInfoElements, cdnLoadbalancerVirtualHostDnsInfoDnsInfoModel)
+			dnsInfoElements = append(dnsInfoElements, cdnLoadbalancerDnsInfoModel)
 		}
 
 		{
@@ -16682,10 +14930,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> GraphqlRules
 	if len(specData.GetGraphqlRules()) > 0 {
-		graphqlRulesElements := make([]CdnLoadbalancerPolicyGraphQLRule, 0, len(specData.GetGraphqlRules()))
+		graphqlRulesElements := make([]CdnLoadbalancerGraphQLRule, 0, len(specData.GetGraphqlRules()))
 
 		for _, graphqlRulesElement := range specData.GetGraphqlRules() {
-			cdnLoadbalancerPolicyGraphQLRuleModel := CdnLoadbalancerPolicyGraphQLRule{}
+			cdnLoadbalancerGraphQLRuleModel := CdnLoadbalancerGraphQLRule{}
 
 			// data specToModelNested RequiredOneOfField --> DomainChoice
 			// <no value>
@@ -16741,24 +14989,24 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerPolicyGraphQLRuleModel.DomainChoice = finalObj
+				cdnLoadbalancerGraphQLRuleModel.DomainChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerPolicyGraphQLRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesDomainChoiceModelAttributeMap)
+				cdnLoadbalancerGraphQLRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesDomainChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredStringField --> ExactPath
 			if graphqlRulesElement.GetExactPath() != "" {
-				cdnLoadbalancerPolicyGraphQLRuleModel.ExactPath = types.StringValue(graphqlRulesElement.GetExactPath())
+				cdnLoadbalancerGraphQLRuleModel.ExactPath = types.StringValue(graphqlRulesElement.GetExactPath())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerPolicyGraphQLRuleModel.ExactPath = types.StringNull()
+				cdnLoadbalancerGraphQLRuleModel.ExactPath = types.StringNull()
 			}
 
 			// data specToModelNested PointerField --> GraphqlSettings
 			if graphqlRulesElement.GetGraphqlSettings() != nil {
 				// Create the nested Go struct
-				cdnLoadbalancerPolicyGraphQLSettingsTypeModel := &CdnLoadbalancerPolicyGraphQLSettingsType{}
+				cdnLoadbalancerGraphQLSettingsTypeModel := &CdnLoadbalancerGraphQLSettingsType{}
 				graphqlSettingsElement := graphqlRulesElement.GetGraphqlSettings()
 
 				// Recursively populate the nested struct
@@ -16806,28 +15054,28 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					cdnLoadbalancerPolicyGraphQLSettingsTypeModel.AllowIntrospectionQueriesChoice = finalObj
+					cdnLoadbalancerGraphQLSettingsTypeModel.AllowIntrospectionQueriesChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					cdnLoadbalancerPolicyGraphQLSettingsTypeModel.AllowIntrospectionQueriesChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesGraphqlSettingsAllowIntrospectionQueriesChoiceModelAttributeMap)
+					cdnLoadbalancerGraphQLSettingsTypeModel.AllowIntrospectionQueriesChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesGraphqlSettingsAllowIntrospectionQueriesChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredUintField --> MaxBatchedQueries
-				cdnLoadbalancerPolicyGraphQLSettingsTypeModel.MaxBatchedQueries = types.Int64Value(int64(graphqlSettingsElement.GetMaxBatchedQueries()))
+				cdnLoadbalancerGraphQLSettingsTypeModel.MaxBatchedQueries = types.Int64Value(int64(graphqlSettingsElement.GetMaxBatchedQueries()))
 
 				// data specToModelNested RequiredUintField --> MaxDepth
-				cdnLoadbalancerPolicyGraphQLSettingsTypeModel.MaxDepth = types.Int64Value(int64(graphqlSettingsElement.GetMaxDepth()))
+				cdnLoadbalancerGraphQLSettingsTypeModel.MaxDepth = types.Int64Value(int64(graphqlSettingsElement.GetMaxDepth()))
 
 				// data specToModelNested RequiredUintField --> MaxTotalLength
-				cdnLoadbalancerPolicyGraphQLSettingsTypeModel.MaxTotalLength = types.Int64Value(int64(graphqlSettingsElement.GetMaxTotalLength()))
+				cdnLoadbalancerGraphQLSettingsTypeModel.MaxTotalLength = types.Int64Value(int64(graphqlSettingsElement.GetMaxTotalLength()))
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				cdnLoadbalancerPolicyGraphQLSettingsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerGraphqlRulesGraphqlSettingsModelAttributeMap, cdnLoadbalancerPolicyGraphQLSettingsTypeModel)
+				cdnLoadbalancerGraphQLSettingsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerGraphqlRulesGraphqlSettingsModelAttributeMap, cdnLoadbalancerGraphQLSettingsTypeModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerPolicyGraphQLRuleModel.GraphqlSettings = cdnLoadbalancerPolicyGraphQLSettingsTypeModelObj
+				cdnLoadbalancerGraphQLRuleModel.GraphqlSettings = cdnLoadbalancerGraphQLSettingsTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -16836,7 +15084,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerPolicyGraphQLRuleModel.GraphqlSettings = types.ObjectNull(CdnLoadbalancerGraphqlRulesGraphqlSettingsModelAttributeMap)
+				cdnLoadbalancerGraphQLRuleModel.GraphqlSettings = types.ObjectNull(CdnLoadbalancerGraphqlRulesGraphqlSettingsModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -16869,7 +15117,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerPolicyGraphQLRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+				cdnLoadbalancerGraphQLRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -16878,7 +15126,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerPolicyGraphQLRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap)
+				cdnLoadbalancerGraphQLRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredOneOfField --> MethodChoice
@@ -16924,13 +15172,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerPolicyGraphQLRuleModel.MethodChoice = finalObj
+				cdnLoadbalancerGraphQLRuleModel.MethodChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerPolicyGraphQLRuleModel.MethodChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesMethodChoiceModelAttributeMap)
+				cdnLoadbalancerGraphQLRuleModel.MethodChoice = types.ObjectNull(CdnLoadbalancerGraphqlRulesMethodChoiceModelAttributeMap)
 			}
 
-			graphqlRulesElements = append(graphqlRulesElements, cdnLoadbalancerPolicyGraphQLRuleModel)
+			graphqlRulesElements = append(graphqlRulesElements, cdnLoadbalancerGraphQLRuleModel)
 		}
 
 		{
@@ -16956,12 +15204,8 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 	}
 
 	// data SpecToModelRoot StringField --> HostName
-	if specData.GetHostName() != "" {
-		data.HostName = types.StringValue(specData.GetHostName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.HostName = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.HostName = types.StringValue(specData.GetHostName())
 
 	// data SpecToModelRoot OneOfField --> IpReputationChoice
 	// false
@@ -16973,7 +15217,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		ipReputationChoiceChoices := specData.GetIpReputationChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ipReputationChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeIpReputationChoice{}
+		var ipReputationChoiceChoicesModel = &CdnLoadbalancerIpReputationChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -17047,7 +15291,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> JwtValidation
 	if specData.GetJwtValidation() != nil {
-		var cdnLoadbalancerCommonWafJWTValidationModel = &CdnLoadbalancerCommonWafJWTValidation{}
+		var cdnLoadbalancerJWTValModel = &CdnLoadbalancerJWTVal{}
 		jwtValidationElement := specData.GetJwtValidation()
 
 		// data specToModelNested RequiredPointerField --> Action
@@ -17079,15 +15323,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					actionactionChoiceChoicesAttributeMap["block"] = types.BoolNull()
 				}
 
-				// data specToModelNested BoolOfOneOfPointerField --> Report
-				_, isReport := actionactionChoiceChoices.(*ves_io_schema.Action_Report)
-
-				if isReport {
-					actionactionChoiceChoicesAttributeMap["report"] = types.BoolValue(true)
-				} else {
-					actionactionChoiceChoicesAttributeMap["report"] = types.BoolNull()
-				}
-
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -17113,7 +15348,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCommonWafJWTValidationModel.Action = cdnLoadbalancerActionModelObj
+			cdnLoadbalancerJWTValModel.Action = cdnLoadbalancerActionModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -17122,7 +15357,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// here because the API may always return a non-nil struct (with REDACTED values) for this
 			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCommonWafJWTValidationModel.Action = types.ObjectNull(CdnLoadbalancerJwtValidationActionModelAttributeMap)
+			cdnLoadbalancerJWTValModel.Action = types.ObjectNull(CdnLoadbalancerJwtValidationActionModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> JwksConfiguration
@@ -17250,252 +15485,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnLoadbalancerCommonWafJWTValidationModel.JwksConfigurationChoice = finalObj
+			cdnLoadbalancerJWTValModel.JwksConfigurationChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnLoadbalancerCommonWafJWTValidationModel.JwksConfigurationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationJwksConfigurationModelAttributeMap)
-		}
-
-		// data specToModelNested PointerField --> MandatoryClaims
-		if jwtValidationElement.GetMandatoryClaims() != nil {
-			// Create the nested Go struct
-			cdnLoadbalancerCommonWafMandatoryClaimsModel := &CdnLoadbalancerCommonWafMandatoryClaims{}
-			mandatoryClaimsElement := jwtValidationElement.GetMandatoryClaims()
-
-			// Recursively populate the nested struct
-
-			// data specToModelNested ArrayOfStringField --> ClaimNames
-			if len(mandatoryClaimsElement.GetClaimNames()) > 0 {
-				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, mandatoryClaimsElement.GetClaimNames())
-				response.Diagnostics.Append(listDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cdnLoadbalancerCommonWafMandatoryClaimsModel.ClaimNames = listValue
-			} else {
-				cdnLoadbalancerCommonWafMandatoryClaimsModel.ClaimNames = types.ListNull(types.StringType)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCommonWafMandatoryClaimsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationMandatoryClaimsModelAttributeMap, cdnLoadbalancerCommonWafMandatoryClaimsModel)
-			response.Diagnostics.Append(objDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			cdnLoadbalancerCommonWafJWTValidationModel.MandatoryClaims = cdnLoadbalancerCommonWafMandatoryClaimsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCommonWafJWTValidationModel.MandatoryClaims = types.ObjectNull(CdnLoadbalancerJwtValidationMandatoryClaimsModelAttributeMap)
-		}
-
-		// data specToModelNested PointerField --> ReservedClaims
-		if jwtValidationElement.GetReservedClaims() != nil {
-			// Create the nested Go struct
-			cdnLoadbalancerCommonWafReservedClaimsModel := &CdnLoadbalancerCommonWafReservedClaims{}
-			reservedClaimsElement := jwtValidationElement.GetReservedClaims()
-
-			// Recursively populate the nested struct
-
-			// data specToModelNested RequiredOneOfField --> AudienceValidation
-			// <no value>
-			if reservedClaimsElement.GetAudienceValidation() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				reservedClaimsaudienceValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				reservedClaimsaudienceValidationChoiceChoices := reservedClaimsElement.GetAudienceValidation()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested PointerOfOneOfField --> Audience
-				// <no value>
-				// false
-				{
-					audienceOptionsWrapper, isAudience := reservedClaimsaudienceValidationChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_Audience)
-					audienceAttributeMap := make(map[string]attr.Value)
-
-					if isAudience && audienceOptionsWrapper != nil && audienceOptionsWrapper.Audience != nil {
-						audienceElement := audienceOptionsWrapper.Audience
-
-						// data specToModelNested RequiredArrayOfStringField --> Audiences
-						if len(audienceElement.GetAudiences()) > 0 {
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, audienceElement.GetAudiences())
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							audienceAttributeMap["audiences"] = listValue
-						} else {
-							audienceAttributeMap["audiences"] = types.ListNull(types.StringType)
-						}
-
-						audienceObj, audienceObjDiags := types.ObjectValue(CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationAudienceModelAttributeMap, audienceAttributeMap)
-						response.Diagnostics.Append(audienceObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						reservedClaimsaudienceValidationChoiceChoicesAttributeMap["audience"] = audienceObj
-					} else {
-						reservedClaimsaudienceValidationChoiceChoicesAttributeMap["audience"] = types.ObjectNull(CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationAudienceModelAttributeMap)
-					}
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> AudienceDisable
-				_, isAudienceDisable := reservedClaimsaudienceValidationChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_AudienceDisable)
-
-				if isAudienceDisable {
-					reservedClaimsaudienceValidationChoiceChoicesAttributeMap["audience_disable"] = types.BoolValue(true)
-				} else {
-					reservedClaimsaudienceValidationChoiceChoicesAttributeMap["audience_disable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, reservedClaimsaudienceValidationChoiceChoicesObjDiags := types.ObjectValue(
-					CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationModelAttributeMap, // The attribute schema for the OneOf choices
-					reservedClaimsaudienceValidationChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(reservedClaimsaudienceValidationChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafReservedClaimsModel.AudienceValidationChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafReservedClaimsModel.AudienceValidationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationReservedClaimsAudienceValidationModelAttributeMap)
-			}
-
-			// data specToModelNested RequiredOneOfField --> IssuerValidation
-			// <no value>
-			if reservedClaimsElement.GetIssuerValidation() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				reservedClaimsissuerValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				reservedClaimsissuerValidationChoiceChoices := reservedClaimsElement.GetIssuerValidation()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested StringOfOneOfField --> Issuer
-				issuerItem, isIssuer := reservedClaimsissuerValidationChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_Issuer)
-
-				if isIssuer {
-					reservedClaimsissuerValidationChoiceChoicesAttributeMap["issuer"] = types.StringValue(string(issuerItem.Issuer))
-				} else {
-					// Empty string, set to null
-					reservedClaimsissuerValidationChoiceChoicesAttributeMap["issuer"] = types.StringNull()
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> IssuerDisable
-				_, isIssuerDisable := reservedClaimsissuerValidationChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_IssuerDisable)
-
-				if isIssuerDisable {
-					reservedClaimsissuerValidationChoiceChoicesAttributeMap["issuer_disable"] = types.BoolValue(true)
-				} else {
-					reservedClaimsissuerValidationChoiceChoicesAttributeMap["issuer_disable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, reservedClaimsissuerValidationChoiceChoicesObjDiags := types.ObjectValue(
-					CdnLoadbalancerJwtValidationReservedClaimsIssuerValidationModelAttributeMap, // The attribute schema for the OneOf choices
-					reservedClaimsissuerValidationChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(reservedClaimsissuerValidationChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafReservedClaimsModel.IssuerValidationChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafReservedClaimsModel.IssuerValidationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationReservedClaimsIssuerValidationModelAttributeMap)
-			}
-
-			// data specToModelNested RequiredOneOfField --> ValidatePeriod
-			// <no value>
-			if reservedClaimsElement.GetValidatePeriod() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				reservedClaimsvalidatePeriodChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				reservedClaimsvalidatePeriodChoiceChoices := reservedClaimsElement.GetValidatePeriod()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested BoolOfOneOfPointerField --> ValidatePeriodDisable
-				_, isValidatePeriodDisable := reservedClaimsvalidatePeriodChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_ValidatePeriodDisable)
-
-				if isValidatePeriodDisable {
-					reservedClaimsvalidatePeriodChoiceChoicesAttributeMap["validate_period_disable"] = types.BoolValue(true)
-				} else {
-					reservedClaimsvalidatePeriodChoiceChoicesAttributeMap["validate_period_disable"] = types.BoolNull()
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> ValidatePeriodEnable
-				_, isValidatePeriodEnable := reservedClaimsvalidatePeriodChoiceChoices.(*ves_io_schema_views_common_waf.ReservedClaims_ValidatePeriodEnable)
-
-				if isValidatePeriodEnable {
-					reservedClaimsvalidatePeriodChoiceChoicesAttributeMap["validate_period_enable"] = types.BoolValue(true)
-				} else {
-					reservedClaimsvalidatePeriodChoiceChoicesAttributeMap["validate_period_enable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, reservedClaimsvalidatePeriodChoiceChoicesObjDiags := types.ObjectValue(
-					CdnLoadbalancerJwtValidationReservedClaimsValidatePeriodModelAttributeMap, // The attribute schema for the OneOf choices
-					reservedClaimsvalidatePeriodChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(reservedClaimsvalidatePeriodChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafReservedClaimsModel.ValidatePeriodChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafReservedClaimsModel.ValidatePeriodChoice = types.ObjectNull(CdnLoadbalancerJwtValidationReservedClaimsValidatePeriodModelAttributeMap)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCommonWafReservedClaimsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationReservedClaimsModelAttributeMap, cdnLoadbalancerCommonWafReservedClaimsModel)
-			response.Diagnostics.Append(objDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			cdnLoadbalancerCommonWafJWTValidationModel.ReservedClaims = cdnLoadbalancerCommonWafReservedClaimsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCommonWafJWTValidationModel.ReservedClaims = types.ObjectNull(CdnLoadbalancerJwtValidationReservedClaimsModelAttributeMap)
+			cdnLoadbalancerJWTValModel.JwksConfigurationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationJwksConfigurationModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredPointerField --> Target
 		if jwtValidationElement.GetTarget() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerCommonWafTargetModel := &CdnLoadbalancerCommonWafTarget{}
+			cdnLoadbalancerTargetModel := &CdnLoadbalancerTarget{}
 			targetElement := jwtValidationElement.GetTarget()
 
 			// Recursively populate the nested struct
@@ -17511,48 +15510,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				targettargetChoiceChoices := targetElement.GetTarget()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested BoolOfOneOfPointerField --> AllEndpoint
-				_, isAllEndpoint := targettargetChoiceChoices.(*ves_io_schema_views_common_waf.Target_AllEndpoint)
-
-				if isAllEndpoint {
-					targettargetChoiceChoicesAttributeMap["all_endpoint"] = types.BoolValue(true)
-				} else {
-					targettargetChoiceChoicesAttributeMap["all_endpoint"] = types.BoolNull()
-				}
-
-				// data specToModelNested PointerOfOneOfField --> ApiGroups
-				// <no value>
-				// false
-				{
-					apiGroupsOptionsWrapper, isApiGroups := targettargetChoiceChoices.(*ves_io_schema_views_common_waf.Target_ApiGroups)
-					apiGroupsAttributeMap := make(map[string]attr.Value)
-
-					if isApiGroups && apiGroupsOptionsWrapper != nil && apiGroupsOptionsWrapper.ApiGroups != nil {
-						apiGroupsElement := apiGroupsOptionsWrapper.ApiGroups
-
-						// data specToModelNested RequiredArrayOfStringField --> ApiGroups
-						if len(apiGroupsElement.GetApiGroups()) > 0 {
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, apiGroupsElement.GetApiGroups())
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							apiGroupsAttributeMap["api_groups"] = listValue
-						} else {
-							apiGroupsAttributeMap["api_groups"] = types.ListNull(types.StringType)
-						}
-
-						apiGroupsObj, apiGroupsObjDiags := types.ObjectValue(CdnLoadbalancerJwtValidationTargetTargetApiGroupsModelAttributeMap, apiGroupsAttributeMap)
-						response.Diagnostics.Append(apiGroupsObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						targettargetChoiceChoicesAttributeMap["api_groups"] = apiGroupsObj
-					} else {
-						targettargetChoiceChoicesAttributeMap["api_groups"] = types.ObjectNull(CdnLoadbalancerJwtValidationTargetTargetApiGroupsModelAttributeMap)
-					}
-				}
 
 				// data specToModelNested PointerOfOneOfField --> BasePaths
 				// <no value>
@@ -17600,19 +15557,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafTargetModel.TargetChoice = finalObj
+				cdnLoadbalancerTargetModel.TargetChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafTargetModel.TargetChoice = types.ObjectNull(CdnLoadbalancerJwtValidationTargetTargetModelAttributeMap)
+				cdnLoadbalancerTargetModel.TargetChoice = types.ObjectNull(CdnLoadbalancerJwtValidationTargetTargetModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCommonWafTargetModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationTargetModelAttributeMap, cdnLoadbalancerCommonWafTargetModel)
+			cdnLoadbalancerTargetModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationTargetModelAttributeMap, cdnLoadbalancerTargetModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCommonWafJWTValidationModel.Target = cdnLoadbalancerCommonWafTargetModelObj
+			cdnLoadbalancerJWTValModel.Target = cdnLoadbalancerTargetModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -17621,13 +15578,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// here because the API may always return a non-nil struct (with REDACTED values) for this
 			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCommonWafJWTValidationModel.Target = types.ObjectNull(CdnLoadbalancerJwtValidationTargetModelAttributeMap)
+			cdnLoadbalancerJWTValModel.Target = types.ObjectNull(CdnLoadbalancerJwtValidationTargetModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredPointerField --> TokenLocation
 		if jwtValidationElement.GetTokenLocation() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerCommonWafTokenLocationModel := &CdnLoadbalancerCommonWafTokenLocation{}
+			cdnLoadbalancerTokenLocationModel := &CdnLoadbalancerTokenLocation{}
 			tokenLocationElement := jwtValidationElement.GetTokenLocation()
 
 			// Recursively populate the nested struct
@@ -17666,19 +15623,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafTokenLocationModel.TokenLocationChoice = finalObj
+				cdnLoadbalancerTokenLocationModel.TokenLocationChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafTokenLocationModel.TokenLocationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationTokenLocationTokenLocationModelAttributeMap)
+				cdnLoadbalancerTokenLocationModel.TokenLocationChoice = types.ObjectNull(CdnLoadbalancerJwtValidationTokenLocationTokenLocationModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCommonWafTokenLocationModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationTokenLocationModelAttributeMap, cdnLoadbalancerCommonWafTokenLocationModel)
+			cdnLoadbalancerTokenLocationModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerJwtValidationTokenLocationModelAttributeMap, cdnLoadbalancerTokenLocationModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCommonWafJWTValidationModel.TokenLocation = cdnLoadbalancerCommonWafTokenLocationModelObj
+			cdnLoadbalancerJWTValModel.TokenLocation = cdnLoadbalancerTokenLocationModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -17687,13 +15644,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// here because the API may always return a non-nil struct (with REDACTED values) for this
 			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCommonWafJWTValidationModel.TokenLocation = types.ObjectNull(CdnLoadbalancerJwtValidationTokenLocationModelAttributeMap)
+			cdnLoadbalancerJWTValModel.TokenLocation = types.ObjectNull(CdnLoadbalancerJwtValidationTokenLocationModelAttributeMap)
 		}
 
 		jwtValidationObj, jwtValidationDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerJwtValidationModelAttributeMap,
-			cdnLoadbalancerCommonWafJWTValidationModel,
+			cdnLoadbalancerJWTValModel,
 		)
 		response.Diagnostics.Append(jwtValidationDiags...)
 		data.JwtValidation = jwtValidationObj
@@ -17711,7 +15668,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		l7DdosAutoMitigationActionChoiceChoices := specData.GetL7DdosAutoMitigationAction()
 
 		// The model struct that will be populated by the nested template.
-		var l7DdosAutoMitigationActionChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeL7DdosAutoMitigationActionChoice{}
+		var l7DdosAutoMitigationActionChoiceChoicesModel = &CdnLoadbalancerL7DdosAutoMitigationActionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -17798,7 +15755,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		loadbalancerTypeChoiceChoices := specData.GetLoadbalancerType()
 
 		// The model struct that will be populated by the nested template.
-		var loadbalancerTypeChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice{}
+		var loadbalancerTypeChoiceChoicesModel = &CdnLoadbalancerLoadbalancerTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -17814,57 +15771,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 				// data specToModelNested BoolField --> DnsVolterraManaged
 				httpAttributeMap["dns_volterra_managed"] = types.BoolValue(bool(httpElement.GetDnsVolterraManaged()))
-
-				// data specToModelNested RequiredOneOfField --> PortChoice
-				// <no value>
-				if httpElement.GetPortChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					httpportChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					httpportChoiceChoices := httpElement.GetPortChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested UintOfOneOfField --> Port
-					portItem, isPort := httpportChoiceChoices.(*ves_io_schema_views_http_loadbalancer.ProxyTypeHttp_Port)
-
-					if isPort {
-						httpportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-					} else {
-						// Empty uint, set to null
-						httpportChoiceChoicesAttributeMap["port"] = types.Int64Null()
-					}
-
-					// data specToModelNested StringOfOneOfField --> PortRanges
-					portRangesItem, isPortRanges := httpportChoiceChoices.(*ves_io_schema_views_http_loadbalancer.ProxyTypeHttp_PortRanges)
-
-					if isPortRanges {
-						httpportChoiceChoicesAttributeMap["port_ranges"] = types.StringValue(string(portRangesItem.PortRanges))
-					} else {
-						// Empty string, set to null
-						httpportChoiceChoicesAttributeMap["port_ranges"] = types.StringNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, httpportChoiceChoicesObjDiags := types.ObjectValue(
-						CdnLoadbalancerLoadbalancerTypeHttpPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						httpportChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(httpportChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					httpAttributeMap["port_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpAttributeMap["port_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpPortChoiceModelAttributeMap)
-				}
 
 				httpObj, httpObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpModelAttributeMap, httpAttributeMap)
 				response.Diagnostics.Append(httpObjDiags...)
@@ -17896,7 +15802,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// data specToModelNested PointerField --> TlsCertOptions
 				if httpsElement.GetTlsCertOptions() != nil {
 					// Create the nested Go struct
-					cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModel := &CdnLoadbalancerCdnLoadbalancerTlsCertOptions{}
+					cdnLoadbalancerTlsCertOptionsModel := &CdnLoadbalancerTlsCertOptions{}
 					tlsCertOptionsElement := httpsElement.GetTlsCertOptions()
 
 					// Recursively populate the nested struct
@@ -17973,322 +15879,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									tlsCertParamsAttributeMap["certificates"] = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerCertificatesObjectRefModelAttributeMap})
 								}
 
-								// data specToModelNested RequiredOneOfField --> MtlsChoice
-								// <no value>
-								if tlsCertParamsElement.GetMtlsChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									tlsCertParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									tlsCertParamsmtlsChoiceChoices := tlsCertParamsElement.GetMtlsChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoMtls
-									_, isNoMtls := tlsCertParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTLSCertsParams_NoMtls)
-
-									if isNoMtls {
-										tlsCertParamsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
-									} else {
-										tlsCertParamsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
-									}
-
-									// data specToModelNested PointerOfOneOfField --> UseMtls
-									// <no value>
-									// false
-									{
-										useMtlsOptionsWrapper, isUseMtls := tlsCertParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTLSCertsParams_UseMtls)
-										useMtlsAttributeMap := make(map[string]attr.Value)
-
-										if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
-											useMtlsElement := useMtlsOptionsWrapper.UseMtls
-
-											// data specToModelNested BoolField --> ClientCertificateOptional
-											useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsElement.GetClientCertificateOptional()))
-
-											// data specToModelNested OneOfField --> CrlChoice
-											if useMtlsElement.GetCrlChoice() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlscrlChoiceChoices := useMtlsElement.GetCrlChoice()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested PointerOfOneOfField --> Crl
-												// <no value>
-												// false
-												{
-													crlOptionsWrapper, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
-													crlAttributeMap := make(map[string]attr.Value)
-
-													if isCrl && crlOptionsWrapper != nil && crlOptionsWrapper.Crl != nil {
-														crlElement := crlOptionsWrapper.Crl
-
-														// data specToModelNested RequiredStringField --> Name
-														if crlElement.GetName() != "" {
-															crlAttributeMap["name"] = types.StringValue(crlElement.GetName())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["name"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Namespace
-														if crlElement.GetNamespace() != "" {
-															crlAttributeMap["namespace"] = types.StringValue(crlElement.GetNamespace())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["namespace"] = types.StringNull()
-														}
-
-														// data specToModelNested StringField --> Tenant
-														if crlElement.GetTenant() != "" {
-															crlAttributeMap["tenant"] = types.StringValue(crlElement.GetTenant())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["tenant"] = types.StringNull()
-														}
-
-														crlObj, crlObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
-														response.Diagnostics.Append(crlObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
-													} else {
-														useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
-													}
-												}
-
-												// data specToModelNested BoolOfOneOfPointerField --> NoCrl
-												_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
-
-												if isNoCrl {
-													useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
-												} else {
-													useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlscrlChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["crl_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["crl_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
-											}
-
-											// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-											// <no value>
-											if useMtlsElement.GetTrustedCaChoice() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlstrustedCaChoiceChoices := useMtlsElement.GetTrustedCaChoice()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested PointerOfOneOfField --> TrustedCa
-												// <no value>
-												// false
-												{
-													trustedCaOptionsWrapper, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
-													trustedCaAttributeMap := make(map[string]attr.Value)
-
-													if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
-														trustedCaElement := trustedCaOptionsWrapper.TrustedCa
-
-														// data specToModelNested RequiredStringField --> Name
-														if trustedCaElement.GetName() != "" {
-															trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["name"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Namespace
-														if trustedCaElement.GetNamespace() != "" {
-															trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["namespace"] = types.StringNull()
-														}
-
-														// data specToModelNested StringField --> Tenant
-														if trustedCaElement.GetTenant() != "" {
-															trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["tenant"] = types.StringNull()
-														}
-
-														trustedCaObj, trustedCaObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-														response.Diagnostics.Append(trustedCaObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-													} else {
-														useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
-													}
-												}
-
-												// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-												trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
-
-												if isTrustedCaUrl {
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-												} else {
-													// Empty string, set to null
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlstrustedCaChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["trusted_ca_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-											}
-
-											// data specToModelNested OneOfField --> XfccHeader
-											if useMtlsElement.GetXfccHeader() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-												_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-												if isXfccDisabled {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-												}
-
-												// data specToModelNested PointerOfOneOfField --> XfccOptions
-												// <no value>
-												// false
-												{
-													xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-													xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-													if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-														xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-														// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-
-														xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-														response.Diagnostics.Append(xfccOptionsObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-													} else {
-														useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-													}
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlsxfccHeaderChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-											}
-
-											useMtlsObj, useMtlsObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-											response.Diagnostics.Append(useMtlsObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											tlsCertParamsmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
-										} else {
-											tlsCertParamsmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap)
-										}
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, tlsCertParamsmtlsChoiceChoicesObjDiags := types.ObjectValue(
-										CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										tlsCertParamsmtlsChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(tlsCertParamsmtlsChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									tlsCertParamsAttributeMap["mtls_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tlsCertParamsAttributeMap["mtls_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap)
-								}
-
 								// data specToModelNested PointerField --> TlsConfig
 								if tlsCertParamsElement.GetTlsConfig() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerViewsTlsConfigModel := &CdnLoadbalancerViewsTlsConfig{}
+									cdnLoadbalancerTlsConfigModel := &CdnLoadbalancerTlsConfig{}
 									tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 									// Recursively populate the nested struct
@@ -18406,19 +16000,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerViewsTlsConfigModel.Choice = finalObj
+										cdnLoadbalancerTlsConfigModel.Choice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
+										cdnLoadbalancerTlsConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, cdnLoadbalancerViewsTlsConfigModel)
+									cdnLoadbalancerTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, cdnLoadbalancerTlsConfigModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									tlsCertParamsAttributeMap["tls_config"] = cdnLoadbalancerViewsTlsConfigModelObj
+									tlsCertParamsAttributeMap["tls_config"] = cdnLoadbalancerTlsConfigModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -18451,340 +16045,28 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							if isTlsInlineParams && tlsInlineParamsOptionsWrapper != nil && tlsInlineParamsOptionsWrapper.TlsInlineParams != nil {
 								tlsInlineParamsElement := tlsInlineParamsOptionsWrapper.TlsInlineParams
 
-								// data specToModelNested RequiredOneOfField --> MtlsChoice
-								// <no value>
-								if tlsInlineParamsElement.GetMtlsChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									tlsInlineParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									tlsInlineParamsmtlsChoiceChoices := tlsInlineParamsElement.GetMtlsChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoMtls
-									_, isNoMtls := tlsInlineParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_NoMtls)
-
-									if isNoMtls {
-										tlsInlineParamsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
-									} else {
-										tlsInlineParamsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
-									}
-
-									// data specToModelNested PointerOfOneOfField --> UseMtls
-									// <no value>
-									// false
-									{
-										useMtlsOptionsWrapper, isUseMtls := tlsInlineParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_UseMtls)
-										useMtlsAttributeMap := make(map[string]attr.Value)
-
-										if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
-											useMtlsElement := useMtlsOptionsWrapper.UseMtls
-
-											// data specToModelNested BoolField --> ClientCertificateOptional
-											useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsElement.GetClientCertificateOptional()))
-
-											// data specToModelNested OneOfField --> CrlChoice
-											if useMtlsElement.GetCrlChoice() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlscrlChoiceChoices := useMtlsElement.GetCrlChoice()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested PointerOfOneOfField --> Crl
-												// <no value>
-												// false
-												{
-													crlOptionsWrapper, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
-													crlAttributeMap := make(map[string]attr.Value)
-
-													if isCrl && crlOptionsWrapper != nil && crlOptionsWrapper.Crl != nil {
-														crlElement := crlOptionsWrapper.Crl
-
-														// data specToModelNested RequiredStringField --> Name
-														if crlElement.GetName() != "" {
-															crlAttributeMap["name"] = types.StringValue(crlElement.GetName())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["name"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Namespace
-														if crlElement.GetNamespace() != "" {
-															crlAttributeMap["namespace"] = types.StringValue(crlElement.GetNamespace())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["namespace"] = types.StringNull()
-														}
-
-														// data specToModelNested StringField --> Tenant
-														if crlElement.GetTenant() != "" {
-															crlAttributeMap["tenant"] = types.StringValue(crlElement.GetTenant())
-														} else {
-															// Empty string, set to null
-															crlAttributeMap["tenant"] = types.StringNull()
-														}
-
-														crlObj, crlObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
-														response.Diagnostics.Append(crlObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
-													} else {
-														useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
-													}
-												}
-
-												// data specToModelNested BoolOfOneOfPointerField --> NoCrl
-												_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
-
-												if isNoCrl {
-													useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
-												} else {
-													useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlscrlChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["crl_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["crl_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
-											}
-
-											// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-											// <no value>
-											if useMtlsElement.GetTrustedCaChoice() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlstrustedCaChoiceChoices := useMtlsElement.GetTrustedCaChoice()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested PointerOfOneOfField --> TrustedCa
-												// <no value>
-												// false
-												{
-													trustedCaOptionsWrapper, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
-													trustedCaAttributeMap := make(map[string]attr.Value)
-
-													if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
-														trustedCaElement := trustedCaOptionsWrapper.TrustedCa
-
-														// data specToModelNested RequiredStringField --> Name
-														if trustedCaElement.GetName() != "" {
-															trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["name"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Namespace
-														if trustedCaElement.GetNamespace() != "" {
-															trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["namespace"] = types.StringNull()
-														}
-
-														// data specToModelNested StringField --> Tenant
-														if trustedCaElement.GetTenant() != "" {
-															trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
-														} else {
-															// Empty string, set to null
-															trustedCaAttributeMap["tenant"] = types.StringNull()
-														}
-
-														trustedCaObj, trustedCaObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-														response.Diagnostics.Append(trustedCaObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-													} else {
-														useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
-													}
-												}
-
-												// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-												trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
-
-												if isTrustedCaUrl {
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-												} else {
-													// Empty string, set to null
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlstrustedCaChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["trusted_ca_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-											}
-
-											// data specToModelNested OneOfField --> XfccHeader
-											if useMtlsElement.GetXfccHeader() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-												_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-												if isXfccDisabled {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-												}
-
-												// data specToModelNested PointerOfOneOfField --> XfccOptions
-												// <no value>
-												// false
-												{
-													xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-													xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-													if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
-														xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
-
-														// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-														if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
-															xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
-															for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
-																if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																	xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-																}
-															}
-															listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-															response.Diagnostics.Append(listDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-														} else {
-															xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-														}
-
-														xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-														response.Diagnostics.Append(xfccOptionsObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-													} else {
-														useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-													}
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-													useMtlsxfccHeaderChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-											}
-
-											useMtlsObj, useMtlsObjDiags := types.ObjectValue(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-											response.Diagnostics.Append(useMtlsObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											tlsInlineParamsmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
-										} else {
-											tlsInlineParamsmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceUseMtlsModelAttributeMap)
-										}
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, tlsInlineParamsmtlsChoiceChoicesObjDiags := types.ObjectValue(
-										CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										tlsInlineParamsmtlsChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(tlsInlineParamsmtlsChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									tlsInlineParamsAttributeMap["mtls_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tlsInlineParamsAttributeMap["mtls_choice"] = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsMtlsChoiceModelAttributeMap)
-								}
-
 								// data specToModelNested RequiredArrayOfPointerField --> TlsCertificates
 								if len(tlsInlineParamsElement.GetTlsCertificates()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									tlsCertificatesElements := make([]CdnLoadbalancerTlsCertificateType, 0, len(tlsInlineParamsElement.GetTlsCertificates()))
+									tlsCertificatesElements := make([]CdnLoadbalancerTlsCertType, 0, len(tlsInlineParamsElement.GetTlsCertificates()))
 									for _, tlsCertificatesElement := range tlsInlineParamsElement.GetTlsCertificates() {
-										cdnLoadbalancerTlsCertificateTypeModel := CdnLoadbalancerTlsCertificateType{}
+										cdnLoadbalancerTlsCertTypeModel := CdnLoadbalancerTlsCertType{}
 
 										// data specToModelNested RequiredStringField --> CertificateUrl
 										if tlsCertificatesElement.GetCertificateUrl() != "" {
-											cdnLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+											cdnLoadbalancerTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 										} else {
 											// Empty string, set to null
-											cdnLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+											cdnLoadbalancerTlsCertTypeModel.CertificateUrl = types.StringNull()
 										}
 
 										// data specToModelNested StringField --> Description
 										if tlsCertificatesElement.GetDescription() != "" {
-											cdnLoadbalancerTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+											cdnLoadbalancerTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 										} else {
 											// Empty string, set to null
-											cdnLoadbalancerTlsCertificateTypeModel.Description = types.StringNull()
+											cdnLoadbalancerTlsCertTypeModel.Description = types.StringNull()
 										}
 
 										// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -18868,10 +16150,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+											cdnLoadbalancerTlsCertTypeModel.OcspStaplingChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+											cdnLoadbalancerTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredPointerField --> PrivateKey
@@ -18976,6 +16258,15 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													}
 												}
 
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -19013,7 +16304,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerTlsCertificateTypeModel.PrivateKey = cdnLoadbalancerSecretTypeModelObj
+											cdnLoadbalancerTlsCertTypeModel.PrivateKey = cdnLoadbalancerSecretTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -19022,10 +16313,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											// here because the API may always return a non-nil struct (with REDACTED values) for this
 											// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											cdnLoadbalancerTlsCertificateTypeModel.PrivateKey = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsCertificatesPrivateKeyModelAttributeMap)
+											cdnLoadbalancerTlsCertTypeModel.PrivateKey = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsCertificatesPrivateKeyModelAttributeMap)
 										}
 
-										tlsCertificatesElements = append(tlsCertificatesElements, cdnLoadbalancerTlsCertificateTypeModel)
+										tlsCertificatesElements = append(tlsCertificatesElements, cdnLoadbalancerTlsCertTypeModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19046,7 +16337,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// data specToModelNested PointerField --> TlsConfig
 								if tlsInlineParamsElement.GetTlsConfig() != nil {
 									// Create the nested Go struct
-									cdnLoadbalancerViewsTlsConfigModel := &CdnLoadbalancerViewsTlsConfig{}
+									cdnLoadbalancerTlsConfigModel := &CdnLoadbalancerTlsConfig{}
 									tlsConfigElement := tlsInlineParamsElement.GetTlsConfig()
 
 									// Recursively populate the nested struct
@@ -19164,19 +16455,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerViewsTlsConfigModel.Choice = finalObj
+										cdnLoadbalancerTlsConfigModel.Choice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigChoiceModelAttributeMap)
+										cdnLoadbalancerTlsConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigChoiceModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigModelAttributeMap, cdnLoadbalancerViewsTlsConfigModel)
+									cdnLoadbalancerTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigModelAttributeMap, cdnLoadbalancerTlsConfigModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									tlsInlineParamsAttributeMap["tls_config"] = cdnLoadbalancerViewsTlsConfigModelObj
+									tlsInlineParamsAttributeMap["tls_config"] = cdnLoadbalancerTlsConfigModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -19212,19 +16503,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModel.TlsCertificatesChoice = finalObj
+						cdnLoadbalancerTlsCertOptionsModel.TlsCertificatesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModel.TlsCertificatesChoice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceModelAttributeMap)
+						cdnLoadbalancerTlsCertOptionsModel.TlsCertificatesChoice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModel)
+					cdnLoadbalancerTlsCertOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsModelAttributeMap, cdnLoadbalancerTlsCertOptionsModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					httpsAttributeMap["tls_cert_options"] = cdnLoadbalancerCdnLoadbalancerTlsCertOptionsModelObj
+					httpsAttributeMap["tls_cert_options"] = cdnLoadbalancerTlsCertOptionsModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -19266,7 +16557,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// data specToModelNested PointerField --> TlsConfig
 				if httpsAutoCertElement.GetTlsConfig() != nil {
 					// Create the nested Go struct
-					cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModel := &CdnLoadbalancerCdnLoadbalancerCDNTLSConfig{}
+					cdnLoadbalancerCDNTLSConfigModel := &CdnLoadbalancerCDNTLSConfig{}
 					tlsConfigElement := httpsAutoCertElement.GetTlsConfig()
 
 					// Recursively populate the nested struct
@@ -19314,19 +16605,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModel.Choice = finalObj
+						cdnLoadbalancerCDNTLSConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
+						cdnLoadbalancerCDNTLSConfigModel.Choice = types.ObjectNull(CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModel)
+					cdnLoadbalancerCDNTLSConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap, cdnLoadbalancerCDNTLSConfigModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					httpsAutoCertAttributeMap["tls_config"] = cdnLoadbalancerCdnLoadbalancerCDNTLSConfigModelObj
+					httpsAutoCertAttributeMap["tls_config"] = cdnLoadbalancerCDNTLSConfigModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -19379,7 +16670,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		maliciousUserDetectionChoiceChoices := specData.GetMaliciousUserDetectionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var maliciousUserDetectionChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeMaliciousUserDetectionChoice{}
+		var maliciousUserDetectionChoiceChoicesModel = &CdnLoadbalancerMaliciousUserDetectionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -19423,30 +16714,30 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot RequiredPointerField --> OriginPool
 	if specData.GetOriginPool() != nil {
-		var cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel = &CdnLoadbalancerCdnLoadbalancerCdnOriginPoolType{}
+		var cdnLoadbalancerCdnOriginPoolTypeModel = &CdnLoadbalancerCdnOriginPoolType{}
 		originPoolElement := specData.GetOriginPool()
 
 		// data specToModelNested PointerField --> MoreOriginOptions
 		if originPoolElement.GetMoreOriginOptions() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModel := &CdnLoadbalancerCdnLoadbalancerOriginAdvancedConfiguration{}
+			cdnLoadbalancerOriginAdvancedCfgModel := &CdnLoadbalancerOriginAdvancedCfg{}
 			moreOriginOptionsElement := originPoolElement.GetMoreOriginOptions()
 
 			// Recursively populate the nested struct
 
 			// data specToModelNested BoolField --> EnableByteRangeRequest
-			cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModel.EnableByteRangeRequest = types.BoolValue(bool(moreOriginOptionsElement.GetEnableByteRangeRequest()))
+			cdnLoadbalancerOriginAdvancedCfgModel.EnableByteRangeRequest = types.BoolValue(bool(moreOriginOptionsElement.GetEnableByteRangeRequest()))
 
 			// data specToModelNested BoolField --> WebsocketProxy
-			cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModel.WebsocketProxy = types.BoolValue(bool(moreOriginOptionsElement.GetWebsocketProxy()))
+			cdnLoadbalancerOriginAdvancedCfgModel.WebsocketProxy = types.BoolValue(bool(moreOriginOptionsElement.GetWebsocketProxy()))
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolMoreOriginOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModel)
+			cdnLoadbalancerOriginAdvancedCfgModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolMoreOriginOptionsModelAttributeMap, cdnLoadbalancerOriginAdvancedCfgModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.MoreOriginOptions = cdnLoadbalancerCdnLoadbalancerOriginAdvancedConfigurationModelObj
+			cdnLoadbalancerCdnOriginPoolTypeModel.MoreOriginOptions = cdnLoadbalancerOriginAdvancedCfgModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -19455,24 +16746,24 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.MoreOriginOptions = types.ObjectNull(CdnLoadbalancerOriginPoolMoreOriginOptionsModelAttributeMap)
+			cdnLoadbalancerCdnOriginPoolTypeModel.MoreOriginOptions = types.ObjectNull(CdnLoadbalancerOriginPoolMoreOriginOptionsModelAttributeMap)
 		}
 
 		// data specToModelNested StringField --> OriginRequestTimeout
 		if originPoolElement.GetOriginRequestTimeout() != "" {
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.OriginRequestTimeout = types.StringValue(originPoolElement.GetOriginRequestTimeout())
+			cdnLoadbalancerCdnOriginPoolTypeModel.OriginRequestTimeout = types.StringValue(originPoolElement.GetOriginRequestTimeout())
 		} else {
 			// Empty string, set to null
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.OriginRequestTimeout = types.StringNull()
+			cdnLoadbalancerCdnOriginPoolTypeModel.OriginRequestTimeout = types.StringNull()
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> OriginServers
 		if len(originPoolElement.GetOriginServers()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			originServersElements := make([]CdnLoadbalancerCdnLoadbalancerCDNOriginServerType, 0, len(originPoolElement.GetOriginServers()))
+			originServersElements := make([]CdnLoadbalancerCDNOriginServerType, 0, len(originPoolElement.GetOriginServers()))
 			for _, originServersElement := range originPoolElement.GetOriginServers() {
-				cdnLoadbalancerCdnLoadbalancerCDNOriginServerTypeModel := CdnLoadbalancerCdnLoadbalancerCDNOriginServerType{}
+				cdnLoadbalancerCDNOriginServerTypeModel := CdnLoadbalancerCDNOriginServerType{}
 
 				// data specToModelNested RequiredOneOfField --> Choice
 				// <no value>
@@ -19516,16 +16807,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								} else {
 									// Empty string, set to null
 									publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
-								}
-
-								// data specToModelNested StringOfOneOfField --> Ipv6
-								ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-								if isIpv6 {
-									publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-								} else {
-									// Empty string, set to null
-									publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
 								}
 
 								// --- End of Choices ---
@@ -19603,16 +16884,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					cdnLoadbalancerCdnLoadbalancerCDNOriginServerTypeModel.Choice = finalObj
+					cdnLoadbalancerCDNOriginServerTypeModel.Choice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					cdnLoadbalancerCdnLoadbalancerCDNOriginServerTypeModel.Choice = types.ObjectNull(CdnLoadbalancerOriginPoolOriginServersChoiceModelAttributeMap)
+					cdnLoadbalancerCDNOriginServerTypeModel.Choice = types.ObjectNull(CdnLoadbalancerOriginPoolOriginServersChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested UintField --> Port
-				cdnLoadbalancerCdnLoadbalancerCDNOriginServerTypeModel.Port = types.Int64Value(int64(originServersElement.GetPort()))
+				cdnLoadbalancerCDNOriginServerTypeModel.Port = types.Int64Value(int64(originServersElement.GetPort()))
 
-				originServersElements = append(originServersElements, cdnLoadbalancerCdnLoadbalancerCDNOriginServerTypeModel)
+				originServersElements = append(originServersElements, cdnLoadbalancerCDNOriginServerTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19621,41 +16902,41 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.OriginServers = originServersListValue
+			cdnLoadbalancerCdnOriginPoolTypeModel.OriginServers = originServersListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.OriginServers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOriginPoolOriginServersModelAttributeMap})
+			cdnLoadbalancerCdnOriginPoolTypeModel.OriginServers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOriginPoolOriginServersModelAttributeMap})
 		}
 
 		// data specToModelNested PointerField --> PublicName
 		if originPoolElement.GetPublicName() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerOriginPoolOriginServerPublicNameModel := &CdnLoadbalancerOriginPoolOriginServerPublicName{}
+			cdnLoadbalancerOriginServerPublicNameModel := &CdnLoadbalancerOriginServerPublicName{}
 			publicNameElement := originPoolElement.GetPublicName()
 
 			// Recursively populate the nested struct
 
 			// data specToModelNested RequiredStringField --> DnsName
 			if publicNameElement.GetDnsName() != "" {
-				cdnLoadbalancerOriginPoolOriginServerPublicNameModel.DnsName = types.StringValue(publicNameElement.GetDnsName())
+				cdnLoadbalancerOriginServerPublicNameModel.DnsName = types.StringValue(publicNameElement.GetDnsName())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerOriginPoolOriginServerPublicNameModel.DnsName = types.StringNull()
+				cdnLoadbalancerOriginServerPublicNameModel.DnsName = types.StringNull()
 			}
 
 			// data specToModelNested UintField --> RefreshInterval
-			cdnLoadbalancerOriginPoolOriginServerPublicNameModel.RefreshInterval = types.Int64Value(int64(publicNameElement.GetRefreshInterval()))
+			cdnLoadbalancerOriginServerPublicNameModel.RefreshInterval = types.Int64Value(int64(publicNameElement.GetRefreshInterval()))
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerOriginPoolOriginServerPublicNameModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolPublicNameModelAttributeMap, cdnLoadbalancerOriginPoolOriginServerPublicNameModel)
+			cdnLoadbalancerOriginServerPublicNameModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolPublicNameModelAttributeMap, cdnLoadbalancerOriginServerPublicNameModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.PublicName = cdnLoadbalancerOriginPoolOriginServerPublicNameModelObj
+			cdnLoadbalancerCdnOriginPoolTypeModel.PublicName = cdnLoadbalancerOriginServerPublicNameModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -19664,7 +16945,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.PublicName = types.ObjectNull(CdnLoadbalancerOriginPoolPublicNameModelAttributeMap)
+			cdnLoadbalancerCdnOriginPoolTypeModel.PublicName = types.ObjectNull(CdnLoadbalancerOriginPoolPublicNameModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> TlsChoice
@@ -19688,830 +16969,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				originPooltlsChoiceChoicesAttributeMap["no_tls"] = types.BoolNull()
 			}
 
-			// data specToModelNested PointerOfOneOfField --> UseTls
-			// <no value>
-			// false
-			{
-				useTlsOptionsWrapper, isUseTls := originPooltlsChoiceChoices.(*ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType_UseTls)
-				useTlsAttributeMap := make(map[string]attr.Value)
-
-				if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
-					useTlsElement := useTlsOptionsWrapper.UseTls
-
-					// data specToModelNested RequiredOneOfField --> MaxSessionKeysType
-					// <no value>
-					if useTlsElement.GetMaxSessionKeysType() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						useTlsmaxSessionKeysTypeChoiceChoices := useTlsElement.GetMaxSessionKeysType()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DefaultSessionKeyCaching
-						_, isDefaultSessionKeyCaching := useTlsmaxSessionKeysTypeChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_DefaultSessionKeyCaching)
-
-						if isDefaultSessionKeyCaching {
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["default_session_key_caching"] = types.BoolValue(true)
-						} else {
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["default_session_key_caching"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableSessionKeyCaching
-						_, isDisableSessionKeyCaching := useTlsmaxSessionKeysTypeChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_DisableSessionKeyCaching)
-
-						if isDisableSessionKeyCaching {
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["disable_session_key_caching"] = types.BoolValue(true)
-						} else {
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["disable_session_key_caching"] = types.BoolNull()
-						}
-
-						// data specToModelNested UintOfOneOfField --> MaxSessionKeys
-						maxSessionKeysItem, isMaxSessionKeys := useTlsmaxSessionKeysTypeChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_MaxSessionKeys)
-
-						if isMaxSessionKeys {
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["max_session_keys"] = types.Int64Value(int64(maxSessionKeysItem.MaxSessionKeys))
-						} else {
-							// Empty uint, set to null
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap["max_session_keys"] = types.Int64Null()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, useTlsmaxSessionKeysTypeChoiceChoicesObjDiags := types.ObjectValue(
-							CdnLoadbalancerOriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap, // The attribute schema for the OneOf choices
-							useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(useTlsmaxSessionKeysTypeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						useTlsAttributeMap["max_session_keys_type_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						useTlsAttributeMap["max_session_keys_type_choice"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredOneOfField --> MtlsChoice
-					// <no value>
-					if useTlsElement.GetMtlsChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						useTlsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						useTlsmtlsChoiceChoices := useTlsElement.GetMtlsChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> NoMtls
-						_, isNoMtls := useTlsmtlsChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_NoMtls)
-
-						if isNoMtls {
-							useTlsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
-						} else {
-							useTlsmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> UseMtls
-						// <no value>
-						// false
-						{
-							useMtlsOptionsWrapper, isUseMtls := useTlsmtlsChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseMtls)
-							useMtlsAttributeMap := make(map[string]attr.Value)
-
-							if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
-								useMtlsElement := useMtlsOptionsWrapper.UseMtls
-
-								// data specToModelNested RequiredArrayOfPointerField --> TlsCertificates
-								if len(useMtlsElement.GetTlsCertificates()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									tlsCertificatesElements := make([]CdnLoadbalancerTlsCertificateType, 0, len(useMtlsElement.GetTlsCertificates()))
-									for _, tlsCertificatesElement := range useMtlsElement.GetTlsCertificates() {
-										cdnLoadbalancerTlsCertificateTypeModel := CdnLoadbalancerTlsCertificateType{}
-
-										// data specToModelNested RequiredStringField --> CertificateUrl
-										if tlsCertificatesElement.GetCertificateUrl() != "" {
-											cdnLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
-										} else {
-											// Empty string, set to null
-											cdnLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Description
-										if tlsCertificatesElement.GetDescription() != "" {
-											cdnLoadbalancerTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
-										} else {
-											// Empty string, set to null
-											cdnLoadbalancerTlsCertificateTypeModel.Description = types.StringNull()
-										}
-
-										// data specToModelNested OneOfField --> OcspStaplingChoice
-										if tlsCertificatesElement.GetOcspStaplingChoice() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											tlsCertificatesocspStaplingChoiceChoices := tlsCertificatesElement.GetOcspStaplingChoice()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested PointerOfOneOfField --> CustomHashAlgorithms
-											// <no value>
-											// false
-											{
-												customHashAlgorithmsOptionsWrapper, isCustomHashAlgorithms := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_CustomHashAlgorithms)
-												customHashAlgorithmsAttributeMap := make(map[string]attr.Value)
-
-												if isCustomHashAlgorithms && customHashAlgorithmsOptionsWrapper != nil && customHashAlgorithmsOptionsWrapper.CustomHashAlgorithms != nil {
-													customHashAlgorithmsElement := customHashAlgorithmsOptionsWrapper.CustomHashAlgorithms
-
-													// data SpecToModelNested RequiredArrayOfEnumField --> HashAlgorithms
-													if len(customHashAlgorithmsElement.GetHashAlgorithms()) > 0 {
-														hashAlgorithmsStrings := make([]string, 0, len(customHashAlgorithmsElement.GetHashAlgorithms()))
-														for _, v := range customHashAlgorithmsElement.GetHashAlgorithms() {
-															if strVal, exists := ves_io_schema.HashAlgorithm_name[int32(v)]; exists {
-																hashAlgorithmsStrings = append(hashAlgorithmsStrings, strVal)
-															}
-														}
-														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, hashAlgorithmsStrings)
-														response.Diagnostics.Append(listDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														customHashAlgorithmsAttributeMap["hash_algorithms"] = listValue
-													} else {
-														customHashAlgorithmsAttributeMap["hash_algorithms"] = types.ListNull(types.StringType)
-													}
-
-													customHashAlgorithmsObj, customHashAlgorithmsObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap, customHashAlgorithmsAttributeMap)
-													response.Diagnostics.Append(customHashAlgorithmsObjDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = customHashAlgorithmsObj
-												} else {
-													tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap)
-												}
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> DisableOcspStapling
-											_, isDisableOcspStapling := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_DisableOcspStapling)
-
-											if isDisableOcspStapling {
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolValue(true)
-											} else {
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> UseSystemDefaults
-											_, isUseSystemDefaults := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_UseSystemDefaults)
-
-											if isUseSystemDefaults {
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolValue(true)
-											} else {
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolNull()
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, tlsCertificatesocspStaplingChoiceChoicesObjDiags := types.ObjectValue(
-												CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(tlsCertificatesocspStaplingChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
-										}
-
-										// data specToModelNested RequiredPointerField --> PrivateKey
-										if tlsCertificatesElement.GetPrivateKey() != nil {
-											// Create the nested Go struct
-											cdnLoadbalancerSecretTypeModel := &CdnLoadbalancerSecretType{}
-											privateKeyElement := tlsCertificatesElement.GetPrivateKey()
-
-											// Recursively populate the nested struct
-
-											// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-											// <no value>
-											if privateKeyElement.GetSecretInfoOneof() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates.
-												// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-												privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-												// <no value>
-												// false
-												{
-													blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
-														blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
-
-														// data specToModelNested StringField --> DecryptionProvider
-														if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Location
-														if blindfoldSecretInfoElement.GetLocation() != "" {
-															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-														}
-
-														// data specToModelNested StringField --> StoreProvider
-														if blindfoldSecretInfoElement.GetStoreProvider() != "" {
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-														}
-
-														blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-														response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-													} else {
-														privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-													}
-												}
-
-												// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// <no value>
-												// false
-												{
-													clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
-														clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
-
-														// data specToModelNested StringField --> Provider
-														if clearSecretInfoElement.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// data specToModelNested RequiredStringField --> Url
-														if clearSecretInfoElement.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(clearSecretInfoObjDiags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-													}
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-													CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-													privateKeysecretInfoChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												cdnLoadbalancerSecretTypeModel.SecretInfoChoice = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-												// secret_info_choice object from prior Terraform state so that the model reflects what the
-												// user originally configured and Terraform does not detect a false drift.
-												{
-													savedSecretInfoChoicePath := path.Root("origin_pool").AtName("tls_choice").AtName("use_tls").AtName("mtls_choice").AtName("use_mtls").AtName("tls_certificates").AtListIndex(0).AtName("private_key").AtName("secret_info_choice")
-													var savedSecretInfoChoice types.Object
-													stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-													if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-														cdnLoadbalancerSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-													} else {
-														cdnLoadbalancerSecretTypeModel.SecretInfoChoice = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap)
-													}
-												}
-											}
-
-											// This field needs to be converted to a types.ObjectValue before assignment.
-											cdnLoadbalancerSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap, cdnLoadbalancerSecretTypeModel)
-											response.Diagnostics.Append(objDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											cdnLoadbalancerTlsCertificateTypeModel.PrivateKey = cdnLoadbalancerSecretTypeModelObj
-
-										} else {
-											// The source field is nil (e.g. redacted by the API).
-											// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-											// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-											// here because the API may always return a non-nil struct (with REDACTED values) for this
-											// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-											// The target is a types.Object, so we use types.ObjectNull.
-											cdnLoadbalancerTlsCertificateTypeModel.PrivateKey = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap)
-										}
-
-										tlsCertificatesElements = append(tlsCertificatesElements, cdnLoadbalancerTlsCertificateTypeModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									tlsCertificatesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesModelAttributeMap}, tlsCertificatesElements)
-									response.Diagnostics.Append(listDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									useMtlsAttributeMap["tls_certificates"] = tlsCertificatesListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									useMtlsAttributeMap["tls_certificates"] = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesModelAttributeMap})
-								}
-
-								useMtlsObj, useMtlsObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-								response.Diagnostics.Append(useMtlsObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								useTlsmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
-							} else {
-								useTlsmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap)
-							}
-						}
-
-						// data specToModelNested PointerOfOneOfField --> UseMtlsObj
-						// <no value>
-						// false
-						{
-							useMtlsObjOptionsWrapper, isUseMtlsObj := useTlsmtlsChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseMtlsObj)
-							useMtlsObjAttributeMap := make(map[string]attr.Value)
-
-							if isUseMtlsObj && useMtlsObjOptionsWrapper != nil && useMtlsObjOptionsWrapper.UseMtlsObj != nil {
-								useMtlsObjElement := useMtlsObjOptionsWrapper.UseMtlsObj
-
-								// data specToModelNested RequiredStringField --> Name
-								if useMtlsObjElement.GetName() != "" {
-									useMtlsObjAttributeMap["name"] = types.StringValue(useMtlsObjElement.GetName())
-								} else {
-									// Empty string, set to null
-									useMtlsObjAttributeMap["name"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Namespace
-								if useMtlsObjElement.GetNamespace() != "" {
-									useMtlsObjAttributeMap["namespace"] = types.StringValue(useMtlsObjElement.GetNamespace())
-								} else {
-									// Empty string, set to null
-									useMtlsObjAttributeMap["namespace"] = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Tenant
-								if useMtlsObjElement.GetTenant() != "" {
-									useMtlsObjAttributeMap["tenant"] = types.StringValue(useMtlsObjElement.GetTenant())
-								} else {
-									// Empty string, set to null
-									useMtlsObjAttributeMap["tenant"] = types.StringNull()
-								}
-
-								useMtlsObjObj, useMtlsObjObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap, useMtlsObjAttributeMap)
-								response.Diagnostics.Append(useMtlsObjObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								useTlsmtlsChoiceChoicesAttributeMap["use_mtls_obj"] = useMtlsObjObj
-							} else {
-								useTlsmtlsChoiceChoicesAttributeMap["use_mtls_obj"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, useTlsmtlsChoiceChoicesObjDiags := types.ObjectValue(
-							CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							useTlsmtlsChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(useTlsmtlsChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						useTlsAttributeMap["mtls_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						useTlsAttributeMap["mtls_choice"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredOneOfField --> ServerValidationChoice
-					// <no value>
-					if useTlsElement.GetServerValidationChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						useTlsserverValidationChoiceChoices := useTlsElement.GetServerValidationChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> SkipServerVerification
-						_, isSkipServerVerification := useTlsserverValidationChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_SkipServerVerification)
-
-						if isSkipServerVerification {
-							useTlsserverValidationChoiceChoicesAttributeMap["skip_server_verification"] = types.BoolValue(true)
-						} else {
-							useTlsserverValidationChoiceChoicesAttributeMap["skip_server_verification"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> UseServerVerification
-						// <no value>
-						// false
-						{
-							useServerVerificationOptionsWrapper, isUseServerVerification := useTlsserverValidationChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseServerVerification)
-							useServerVerificationAttributeMap := make(map[string]attr.Value)
-
-							if isUseServerVerification && useServerVerificationOptionsWrapper != nil && useServerVerificationOptionsWrapper.UseServerVerification != nil {
-								useServerVerificationElement := useServerVerificationOptionsWrapper.UseServerVerification
-
-								// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-								// <no value>
-								if useServerVerificationElement.GetTrustedCaChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									useServerVerificationtrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									useServerVerificationtrustedCaChoiceChoices := useServerVerificationElement.GetTrustedCaChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested PointerOfOneOfField --> TrustedCa
-									// <no value>
-									// false
-									{
-										trustedCaOptionsWrapper, isTrustedCa := useServerVerificationtrustedCaChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsValidationContext_TrustedCa)
-										trustedCaAttributeMap := make(map[string]attr.Value)
-
-										if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
-											trustedCaElement := trustedCaOptionsWrapper.TrustedCa
-
-											// data specToModelNested RequiredStringField --> Name
-											if trustedCaElement.GetName() != "" {
-												trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
-											} else {
-												// Empty string, set to null
-												trustedCaAttributeMap["name"] = types.StringNull()
-											}
-
-											// data specToModelNested RequiredStringField --> Namespace
-											if trustedCaElement.GetNamespace() != "" {
-												trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
-											} else {
-												// Empty string, set to null
-												trustedCaAttributeMap["namespace"] = types.StringNull()
-											}
-
-											// data specToModelNested StringField --> Tenant
-											if trustedCaElement.GetTenant() != "" {
-												trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
-											} else {
-												// Empty string, set to null
-												trustedCaAttributeMap["tenant"] = types.StringNull()
-											}
-
-											trustedCaObj, trustedCaObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-											response.Diagnostics.Append(trustedCaObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											useServerVerificationtrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-										} else {
-											useServerVerificationtrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceTrustedCaModelAttributeMap)
-										}
-									}
-
-									// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-									trustedCaUrlItem, isTrustedCaUrl := useServerVerificationtrustedCaChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsValidationContext_TrustedCaUrl)
-
-									if isTrustedCaUrl {
-										useServerVerificationtrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-									} else {
-										// Empty string, set to null
-										useServerVerificationtrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, useServerVerificationtrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-										CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										useServerVerificationtrustedCaChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(useServerVerificationtrustedCaChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									useServerVerificationAttributeMap["trusted_ca_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									useServerVerificationAttributeMap["trusted_ca_choice"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedCaChoiceModelAttributeMap)
-								}
-
-								useServerVerificationObj, useServerVerificationObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap, useServerVerificationAttributeMap)
-								response.Diagnostics.Append(useServerVerificationObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								useTlsserverValidationChoiceChoicesAttributeMap["use_server_verification"] = useServerVerificationObj
-							} else {
-								useTlsserverValidationChoiceChoicesAttributeMap["use_server_verification"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap)
-							}
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> VolterraTrustedCa
-						_, isVolterraTrustedCa := useTlsserverValidationChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_VolterraTrustedCa)
-
-						if isVolterraTrustedCa {
-							useTlsserverValidationChoiceChoicesAttributeMap["volterra_trusted_ca"] = types.BoolValue(true)
-						} else {
-							useTlsserverValidationChoiceChoicesAttributeMap["volterra_trusted_ca"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, useTlsserverValidationChoiceChoicesObjDiags := types.ObjectValue(
-							CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							useTlsserverValidationChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(useTlsserverValidationChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						useTlsAttributeMap["server_validation_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredOneOfField --> SniChoice
-					// <no value>
-					if useTlsElement.GetSniChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						useTlssniChoiceChoices := useTlsElement.GetSniChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableSni
-						_, isDisableSni := useTlssniChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_DisableSni)
-
-						if isDisableSni {
-							useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolValue(true)
-						} else {
-							useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Sni
-						sniItem, isSni := useTlssniChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_Sni)
-
-						if isSni {
-							useTlssniChoiceChoicesAttributeMap["sni"] = types.StringValue(string(sniItem.Sni))
-						} else {
-							// Empty string, set to null
-							useTlssniChoiceChoicesAttributeMap["sni"] = types.StringNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> UseHostHeaderAsSni
-						_, isUseHostHeaderAsSni := useTlssniChoiceChoices.(*ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseHostHeaderAsSni)
-
-						if isUseHostHeaderAsSni {
-							useTlssniChoiceChoicesAttributeMap["use_host_header_as_sni"] = types.BoolValue(true)
-						} else {
-							useTlssniChoiceChoicesAttributeMap["use_host_header_as_sni"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, useTlssniChoiceChoicesObjDiags := types.ObjectValue(
-							CdnLoadbalancerOriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							useTlssniChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(useTlssniChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						useTlsAttributeMap["sni_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						useTlsAttributeMap["sni_choice"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredPointerField --> TlsConfig
-					if useTlsElement.GetTlsConfig() != nil {
-						// Create the nested Go struct
-						cdnLoadbalancerViewsTlsConfigModel := &CdnLoadbalancerViewsTlsConfig{}
-						tlsConfigElement := useTlsElement.GetTlsConfig()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> Choice
-						// <no value>
-						if tlsConfigElement.GetChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							tlsConfigchoiceChoices := tlsConfigElement.GetChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> CustomSecurity
-							// <no value>
-							// false
-							{
-								customSecurityOptionsWrapper, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
-								customSecurityAttributeMap := make(map[string]attr.Value)
-
-								if isCustomSecurity && customSecurityOptionsWrapper != nil && customSecurityOptionsWrapper.CustomSecurity != nil {
-									customSecurityElement := customSecurityOptionsWrapper.CustomSecurity
-
-									// data specToModelNested RequiredArrayOfStringField --> CipherSuites
-									if len(customSecurityElement.GetCipherSuites()) > 0 {
-										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, customSecurityElement.GetCipherSuites())
-										response.Diagnostics.Append(listDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										customSecurityAttributeMap["cipher_suites"] = listValue
-									} else {
-										customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested EnumField --> MaxVersion
-									if customSecurityElement.GetMaxVersion().String() != "" {
-										stringValue := types.StringValue(customSecurityElement.GetMaxVersion().String())
-										stringSlice := []types.String{stringValue}
-										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(listDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										customSecurityAttributeMap["max_version"] = listValue
-									} else {
-										customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested EnumField --> MinVersion
-									if customSecurityElement.GetMinVersion().String() != "" {
-										stringValue := types.StringValue(customSecurityElement.GetMinVersion().String())
-										stringSlice := []types.String{stringValue}
-										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(listDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										customSecurityAttributeMap["min_version"] = listValue
-									} else {
-										customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
-									}
-
-									customSecurityObj, customSecurityObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
-									response.Diagnostics.Append(customSecurityObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
-								} else {
-									tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
-							_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
-
-							if isDefaultSecurity {
-								tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
-							} else {
-								tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
-							_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
-
-							if isLowSecurity {
-								tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
-							} else {
-								tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
-							_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
-
-							if isMediumSecurity {
-								tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
-							} else {
-								tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, tlsConfigchoiceChoicesObjDiags := types.ObjectValue(
-								CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								tlsConfigchoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(tlsConfigchoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							cdnLoadbalancerViewsTlsConfigModel.Choice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							cdnLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						cdnLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap, cdnLoadbalancerViewsTlsConfigModel)
-						response.Diagnostics.Append(objDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						useTlsAttributeMap["tls_config"] = cdnLoadbalancerViewsTlsConfigModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						useTlsAttributeMap["tls_config"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap)
-					}
-
-					useTlsObj, useTlsObjDiags := types.ObjectValue(CdnLoadbalancerOriginPoolTlsChoiceUseTlsModelAttributeMap, useTlsAttributeMap)
-					response.Diagnostics.Append(useTlsObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originPooltlsChoiceChoicesAttributeMap["use_tls"] = useTlsObj
-				} else {
-					originPooltlsChoiceChoicesAttributeMap["use_tls"] = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceUseTlsModelAttributeMap)
-				}
+			// data specToModelNested BoolOfOneOfPointerField --> UseTls
+			_, isUseTls := originPooltlsChoiceChoices.(*ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType_UseTls)
+
+			if isUseTls {
+				originPooltlsChoiceChoicesAttributeMap["use_tls"] = types.BoolValue(true)
+			} else {
+				originPooltlsChoiceChoicesAttributeMap["use_tls"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -20527,16 +16991,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.TlsChoice = finalObj
+			cdnLoadbalancerCdnOriginPoolTypeModel.TlsChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel.TlsChoice = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceModelAttributeMap)
+			cdnLoadbalancerCdnOriginPoolTypeModel.TlsChoice = types.ObjectNull(CdnLoadbalancerOriginPoolTlsChoiceModelAttributeMap)
 		}
 
 		originPoolObj, originPoolDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerOriginPoolModelAttributeMap,
-			cdnLoadbalancerCdnLoadbalancerCdnOriginPoolTypeModel,
+			cdnLoadbalancerCdnOriginPoolTypeModel,
 		)
 		response.Diagnostics.Append(originPoolDiags...)
 		if response.Diagnostics.HasError() {
@@ -20549,16 +17013,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> OtherSettings
 	if specData.GetOtherSettings() != nil {
-		var cdnLoadbalancerCdnLoadbalancerOtherSettingsModel = &CdnLoadbalancerCdnLoadbalancerOtherSettings{}
+		var cdnLoadbalancerOtherSettingsModel = &CdnLoadbalancerOtherSettings{}
 		otherSettingsElement := specData.GetOtherSettings()
 
 		// data specToModelNested BoolField --> AddLocation
-		cdnLoadbalancerCdnLoadbalancerOtherSettingsModel.AddLocation = types.BoolValue(bool(otherSettingsElement.GetAddLocation()))
+		cdnLoadbalancerOtherSettingsModel.AddLocation = types.BoolValue(bool(otherSettingsElement.GetAddLocation()))
 
 		// data specToModelNested PointerField --> HeaderOptions
 		if otherSettingsElement.GetHeaderOptions() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel := &CdnLoadbalancerCdnLoadbalancerHeaderControlType{}
+			cdnLoadbalancerHeaderControlTypeModel := &CdnLoadbalancerHeaderControlType{}
 			headerOptionsElement := otherSettingsElement.GetHeaderOptions()
 
 			// Recursively populate the nested struct
@@ -20570,9 +17034,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				requestHeadersToAddElements := make([]CdnLoadbalancerHeaderManipulationOptionType, 0, len(headerOptionsElement.GetRequestHeadersToAdd()))
 				for _, requestHeadersToAddElement := range headerOptionsElement.GetRequestHeadersToAdd() {
 					cdnLoadbalancerHeaderManipulationOptionTypeModel := CdnLoadbalancerHeaderManipulationOptionType{}
-
-					// data specToModelNested BoolField --> Append
-					cdnLoadbalancerHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(requestHeadersToAddElement.GetAppend()))
 
 					// data specToModelNested RequiredStringField --> Name
 					if requestHeadersToAddElement.GetName() != "" {
@@ -20698,6 +17159,15 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20766,13 +17236,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
+				cdnLoadbalancerHeaderControlTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddModelAttributeMap})
+				cdnLoadbalancerHeaderControlTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsRequestHeadersToAddModelAttributeMap})
 			}
 
 			// data specToModelNested ArrayOfStringField --> RequestHeadersToRemove
@@ -20782,9 +17252,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.RequestHeadersToRemove = listValue
+				cdnLoadbalancerHeaderControlTypeModel.RequestHeadersToRemove = listValue
 			} else {
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.RequestHeadersToRemove = types.ListNull(types.StringType)
+				cdnLoadbalancerHeaderControlTypeModel.RequestHeadersToRemove = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested ArrayOfPointerField --> ResponseHeadersToAdd
@@ -20794,9 +17264,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				responseHeadersToAddElements := make([]CdnLoadbalancerHeaderManipulationOptionType, 0, len(headerOptionsElement.GetResponseHeadersToAdd()))
 				for _, responseHeadersToAddElement := range headerOptionsElement.GetResponseHeadersToAdd() {
 					cdnLoadbalancerHeaderManipulationOptionTypeModel := CdnLoadbalancerHeaderManipulationOptionType{}
-
-					// data specToModelNested BoolField --> Append
-					cdnLoadbalancerHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(responseHeadersToAddElement.GetAppend()))
 
 					// data specToModelNested RequiredStringField --> Name
 					if responseHeadersToAddElement.GetName() != "" {
@@ -20922,6 +17389,15 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20990,13 +17466,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
+				cdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddModelAttributeMap})
+				cdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerOtherSettingsHeaderOptionsResponseHeadersToAddModelAttributeMap})
 			}
 
 			// data specToModelNested ArrayOfStringField --> ResponseHeadersToRemove
@@ -21006,18 +17482,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToRemove = listValue
+				cdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToRemove = listValue
 			} else {
-				cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToRemove = types.ListNull(types.StringType)
+				cdnLoadbalancerHeaderControlTypeModel.ResponseHeadersToRemove = types.ListNull(types.StringType)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModel)
+			cdnLoadbalancerHeaderControlTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap, cdnLoadbalancerHeaderControlTypeModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCdnLoadbalancerOtherSettingsModel.HeaderOptions = cdnLoadbalancerCdnLoadbalancerHeaderControlTypeModelObj
+			cdnLoadbalancerOtherSettingsModel.HeaderOptions = cdnLoadbalancerHeaderControlTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -21026,13 +17502,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCdnLoadbalancerOtherSettingsModel.HeaderOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap)
+			cdnLoadbalancerOtherSettingsModel.HeaderOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsHeaderOptionsModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> LoggingOptions
 		if otherSettingsElement.GetLoggingOptions() != nil {
 			// Create the nested Go struct
-			cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel := &CdnLoadbalancerCdnLoadbalancerLoggingOptionsType{}
+			cdnLoadbalancerLoggingOptionsTypeModel := &CdnLoadbalancerLoggingOptionsType{}
 			loggingOptionsElement := otherSettingsElement.GetLoggingOptions()
 
 			// Recursively populate the nested struct
@@ -21040,7 +17516,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// data specToModelNested PointerField --> ClientLogOptions
 			if loggingOptionsElement.GetClientLogOptions() != nil {
 				// Create the nested Go struct
-				cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel := &CdnLoadbalancerCdnLoadbalancerLogHeaderOptions{}
+				cdnLoadbalancerLogHeaderOptionsModel := &CdnLoadbalancerLogHeaderOptions{}
 				clientLogOptionsElement := loggingOptionsElement.GetClientLogOptions()
 
 				// Recursively populate the nested struct
@@ -21052,18 +17528,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel.HeaderList = listValue
+					cdnLoadbalancerLogHeaderOptionsModel.HeaderList = listValue
 				} else {
-					cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel.HeaderList = types.ListNull(types.StringType)
+					cdnLoadbalancerLogHeaderOptionsModel.HeaderList = types.ListNull(types.StringType)
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsClientLogOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel)
+				cdnLoadbalancerLogHeaderOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsClientLogOptionsModelAttributeMap, cdnLoadbalancerLogHeaderOptionsModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel.ClientLogOptions = cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModelObj
+				cdnLoadbalancerLoggingOptionsTypeModel.ClientLogOptions = cdnLoadbalancerLogHeaderOptionsModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -21072,13 +17548,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel.ClientLogOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsClientLogOptionsModelAttributeMap)
+				cdnLoadbalancerLoggingOptionsTypeModel.ClientLogOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsClientLogOptionsModelAttributeMap)
 			}
 
 			// data specToModelNested PointerField --> OriginLogOptions
 			if loggingOptionsElement.GetOriginLogOptions() != nil {
 				// Create the nested Go struct
-				cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel := &CdnLoadbalancerCdnLoadbalancerLogHeaderOptions{}
+				cdnLoadbalancerLogHeaderOptionsModel := &CdnLoadbalancerLogHeaderOptions{}
 				originLogOptionsElement := loggingOptionsElement.GetOriginLogOptions()
 
 				// Recursively populate the nested struct
@@ -21090,18 +17566,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel.HeaderList = listValue
+					cdnLoadbalancerLogHeaderOptionsModel.HeaderList = listValue
 				} else {
-					cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel.HeaderList = types.ListNull(types.StringType)
+					cdnLoadbalancerLogHeaderOptionsModel.HeaderList = types.ListNull(types.StringType)
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsOriginLogOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModel)
+				cdnLoadbalancerLogHeaderOptionsModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsOriginLogOptionsModelAttributeMap, cdnLoadbalancerLogHeaderOptionsModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel.OriginLogOptions = cdnLoadbalancerCdnLoadbalancerLogHeaderOptionsModelObj
+				cdnLoadbalancerLoggingOptionsTypeModel.OriginLogOptions = cdnLoadbalancerLogHeaderOptionsModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -21110,16 +17586,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel.OriginLogOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsOriginLogOptionsModelAttributeMap)
+				cdnLoadbalancerLoggingOptionsTypeModel.OriginLogOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsOriginLogOptionsModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsModelAttributeMap, cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModel)
+			cdnLoadbalancerLoggingOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerOtherSettingsLoggingOptionsModelAttributeMap, cdnLoadbalancerLoggingOptionsTypeModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnLoadbalancerCdnLoadbalancerOtherSettingsModel.LoggingOptions = cdnLoadbalancerCdnLoadbalancerLoggingOptionsTypeModelObj
+			cdnLoadbalancerOtherSettingsModel.LoggingOptions = cdnLoadbalancerLoggingOptionsTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -21128,13 +17604,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			cdnLoadbalancerCdnLoadbalancerOtherSettingsModel.LoggingOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsModelAttributeMap)
+			cdnLoadbalancerOtherSettingsModel.LoggingOptions = types.ObjectNull(CdnLoadbalancerOtherSettingsLoggingOptionsModelAttributeMap)
 		}
 
 		otherSettingsObj, otherSettingsDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerOtherSettingsModelAttributeMap,
-			cdnLoadbalancerCdnLoadbalancerOtherSettingsModel,
+			cdnLoadbalancerOtherSettingsModel,
 		)
 		response.Diagnostics.Append(otherSettingsDiags...)
 		data.OtherSettings = otherSettingsObj
@@ -21403,7 +17879,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		rateLimitChoiceChoices := specData.GetRateLimitChoice()
 
 		// The model struct that will be populated by the nested template.
-		var rateLimitChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeRateLimitChoice{}
+		var rateLimitChoiceChoicesModel = &CdnLoadbalancerRateLimitChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -21421,20 +17897,20 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if len(apiRateLimitElement.GetApiEndpointRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					apiEndpointRulesElements := make([]CdnLoadbalancerCommonWafApiEndpointRule, 0, len(apiRateLimitElement.GetApiEndpointRules()))
+					apiEndpointRulesElements := make([]CdnLoadbalancerApiEndpointRule, 0, len(apiRateLimitElement.GetApiEndpointRules()))
 					for _, apiEndpointRulesElement := range apiRateLimitElement.GetApiEndpointRules() {
-						cdnLoadbalancerCommonWafApiEndpointRuleModel := CdnLoadbalancerCommonWafApiEndpointRule{}
+						cdnLoadbalancerApiEndpointRuleModel := CdnLoadbalancerApiEndpointRule{}
 
 						// data specToModelNested PointerField --> ApiEndpointMethod
 						if apiEndpointRulesElement.GetApiEndpointMethod() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyHttpMethodMatcherTypeModel := &CdnLoadbalancerPolicyHttpMethodMatcherType{}
+							cdnLoadbalancerHttpMethodMatcherTypeModel := &CdnLoadbalancerHttpMethodMatcherType{}
 							apiEndpointMethodElement := apiEndpointRulesElement.GetApiEndpointMethod()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested BoolField --> InvertMatcher
-							cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(apiEndpointMethodElement.GetInvertMatcher()))
+							cdnLoadbalancerHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(apiEndpointMethodElement.GetInvertMatcher()))
 
 							// data SpecToModelNested ArrayOfEnumField --> Methods
 							if len(apiEndpointMethodElement.GetMethods()) > 0 {
@@ -21449,18 +17925,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.Methods = listValue
+								cdnLoadbalancerHttpMethodMatcherTypeModel.Methods = listValue
 							} else {
-								cdnLoadbalancerPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
+								cdnLoadbalancerHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesApiEndpointMethodModelAttributeMap, cdnLoadbalancerPolicyHttpMethodMatcherTypeModel)
+							cdnLoadbalancerHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesApiEndpointMethodModelAttributeMap, cdnLoadbalancerHttpMethodMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ApiEndpointMethod = cdnLoadbalancerPolicyHttpMethodMatcherTypeModelObj
+							cdnLoadbalancerApiEndpointRuleModel.ApiEndpointMethod = cdnLoadbalancerHttpMethodMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -21469,21 +17945,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ApiEndpointMethod = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesApiEndpointMethodModelAttributeMap)
+							cdnLoadbalancerApiEndpointRuleModel.ApiEndpointMethod = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesApiEndpointMethodModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> ApiEndpointPath
 						if apiEndpointRulesElement.GetApiEndpointPath() != "" {
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ApiEndpointPath = types.StringValue(apiEndpointRulesElement.GetApiEndpointPath())
+							cdnLoadbalancerApiEndpointRuleModel.ApiEndpointPath = types.StringValue(apiEndpointRulesElement.GetApiEndpointPath())
 						} else {
 							// Empty string, set to null
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ApiEndpointPath = types.StringNull()
+							cdnLoadbalancerApiEndpointRuleModel.ApiEndpointPath = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> ClientMatcher
 						if apiEndpointRulesElement.GetClientMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyClientMatcherModel := &CdnLoadbalancerPolicyClientMatcher{}
+							cdnLoadbalancerClientMatcherModel := &CdnLoadbalancerClientMatcher{}
 							clientMatcherElement := apiEndpointRulesElement.GetClientMatcher()
 
 							// Recursively populate the nested struct
@@ -21594,10 +18070,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = finalObj
+								cdnLoadbalancerClientMatcherModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClientChoiceModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredOneOfField --> IpAsnChoice
@@ -21861,16 +18337,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = finalObj
+								cdnLoadbalancerClientMatcherModel.IpAsnChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherIpAsnChoiceModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherIpAsnChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> TlsFingerprintMatcher
 							if clientMatcherElement.GetTlsFingerprintMatcher() != nil {
 								// Create the nested Go struct
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel := &CdnLoadbalancerPolicyTlsFingerprintMatcherType{}
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel := &CdnLoadbalancerTlsFingerprintMatcherType{}
 								tlsFingerprintMatcherElement := clientMatcherElement.GetTlsFingerprintMatcher()
 
 								// Recursively populate the nested struct
@@ -21888,9 +18364,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> ExactValues
@@ -21900,9 +18376,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> ExcludedValues
@@ -21912,18 +18388,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel)
+								cdnLoadbalancerTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerTlsFingerprintMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj
+								cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerTlsFingerprintMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -21932,16 +18408,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap, cdnLoadbalancerPolicyClientMatcherModel)
+							cdnLoadbalancerClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap, cdnLoadbalancerClientMatcherModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ClientMatcher = cdnLoadbalancerPolicyClientMatcherModelObj
+							cdnLoadbalancerApiEndpointRuleModel.ClientMatcher = cdnLoadbalancerClientMatcherModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -21950,7 +18426,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap)
+							cdnLoadbalancerApiEndpointRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -21997,10 +18473,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.DomainChoice = finalObj
+							cdnLoadbalancerApiEndpointRuleModel.DomainChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesDomainChoiceModelAttributeMap)
+							cdnLoadbalancerApiEndpointRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesDomainChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> RateLimiterChoice
@@ -22196,16 +18672,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.RateLimiterChoice = finalObj
+							cdnLoadbalancerApiEndpointRuleModel.RateLimiterChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.RateLimiterChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRateLimiterChoiceModelAttributeMap)
+							cdnLoadbalancerApiEndpointRuleModel.RateLimiterChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRateLimiterChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> RequestMatcher
 						if apiEndpointRulesElement.GetRequestMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyRequestMatcherModel := &CdnLoadbalancerPolicyRequestMatcher{}
+							cdnLoadbalancerReqMatcherModel := &CdnLoadbalancerReqMatcher{}
 							requestMatcherElement := apiEndpointRulesElement.GetRequestMatcher()
 
 							// Recursively populate the nested struct
@@ -22214,12 +18690,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							if len(requestMatcherElement.GetCookieMatchers()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								cookieMatchersElements := make([]CdnLoadbalancerPolicyCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
+								cookieMatchersElements := make([]CdnLoadbalancerCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
 								for _, cookieMatchersElement := range requestMatcherElement.GetCookieMatchers() {
-									cdnLoadbalancerPolicyCookieMatcherTypeModel := CdnLoadbalancerPolicyCookieMatcherType{}
-
-									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
+									cdnLoadbalancerCookieMatcherTypeModel := CdnLoadbalancerCookieMatcherType{}
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -22232,24 +18705,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										cookieMatchersmatchChoiceChoices := cookieMatchersElement.GetMatch()
 
 										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
-										_, isCheckNotPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckNotPresent)
-
-										if isCheckNotPresent {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
-										} else {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
-										}
-
-										// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
-										_, isCheckPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckPresent)
-
-										if isCheckPresent {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
-										} else {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
-										}
 
 										// data specToModelNested PointerOfOneOfField --> Item
 										// <no value>
@@ -22285,24 +18740,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -22327,21 +18764,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
+										cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if cookieMatchersElement.GetName() != "" {
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
+										cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringNull()
+										cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringNull()
 									}
 
-									cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerPolicyCookieMatcherTypeModel)
+									cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerCookieMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22350,13 +18787,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = cookieMatchersListValue
+								cdnLoadbalancerReqMatcherModel.CookieMatchers = cookieMatchersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherCookieMatchersModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> Headers
@@ -22434,24 +18871,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherHeadersMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -22499,25 +18918,25 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.Headers = headersListValue
+								cdnLoadbalancerReqMatcherModel.Headers = headersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherHeadersModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherHeadersModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> JwtClaims
 							if len(requestMatcherElement.GetJwtClaims()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								jwtClaimsElements := make([]CdnLoadbalancerPolicyJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
+								jwtClaimsElements := make([]CdnLoadbalancerJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
 								for _, jwtClaimsElement := range requestMatcherElement.GetJwtClaims() {
-									cdnLoadbalancerPolicyJWTClaimMatcherTypeModel := CdnLoadbalancerPolicyJWTClaimMatcherType{}
+									cdnLoadbalancerJWTClaimMatcherTypeModel := CdnLoadbalancerJWTClaimMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
+									cdnLoadbalancerJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -22583,24 +19002,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtClaimsMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -22625,21 +19026,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
+										cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if jwtClaimsElement.GetName() != "" {
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
+										cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringNull()
+										cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringNull()
 									}
 
-									jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerPolicyJWTClaimMatcherTypeModel)
+									jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerJWTClaimMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22648,32 +19049,32 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = jwtClaimsListValue
+								cdnLoadbalancerReqMatcherModel.JwtClaims = jwtClaimsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtClaimsModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherJwtClaimsModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> QueryParams
 							if len(requestMatcherElement.GetQueryParams()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								queryParamsElements := make([]CdnLoadbalancerPolicyQueryParameterMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
+								queryParamsElements := make([]CdnLoadbalancerQueryParamMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
 								for _, queryParamsElement := range requestMatcherElement.GetQueryParams() {
-									cdnLoadbalancerPolicyQueryParameterMatcherTypeModel := CdnLoadbalancerPolicyQueryParameterMatcherType{}
+									cdnLoadbalancerQueryParamMatcherTypeModel := CdnLoadbalancerQueryParamMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
+									cdnLoadbalancerQueryParamMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredStringField --> Key
 									if queryParamsElement.GetKey() != "" {
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+										cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringNull()
+										cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> Match
@@ -22740,24 +19141,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQueryParamsMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -22782,13 +19165,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQueryParamsMatchModelAttributeMap)
+										cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQueryParamsMatchModelAttributeMap)
 									}
 
-									queryParamsElements = append(queryParamsElements, cdnLoadbalancerPolicyQueryParameterMatcherTypeModel)
+									queryParamsElements = append(queryParamsElements, cdnLoadbalancerQueryParamMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22797,22 +19180,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = queryParamsListValue
+								cdnLoadbalancerReqMatcherModel.QueryParams = queryParamsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQueryParamsModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQueryParamsModelAttributeMap})
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyRequestMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherModelAttributeMap, cdnLoadbalancerPolicyRequestMatcherModel)
+							cdnLoadbalancerReqMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherModelAttributeMap, cdnLoadbalancerReqMatcherModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.RequestMatcher = cdnLoadbalancerPolicyRequestMatcherModelObj
+							cdnLoadbalancerApiEndpointRuleModel.RequestMatcher = cdnLoadbalancerReqMatcherModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -22821,10 +19204,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnLoadbalancerCommonWafApiEndpointRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherModelAttributeMap)
+							cdnLoadbalancerApiEndpointRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherModelAttributeMap)
 						}
 
-						apiEndpointRulesElements = append(apiEndpointRulesElements, cdnLoadbalancerCommonWafApiEndpointRuleModel)
+						apiEndpointRulesElements = append(apiEndpointRulesElements, cdnLoadbalancerApiEndpointRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22868,14 +19251,14 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							if len(bypassRateLimitingRulesElement.GetBypassRateLimitingRules()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								bypassRateLimitingRulesElements := make([]CdnLoadbalancerCommonWafBypassRateLimitingRule, 0, len(bypassRateLimitingRulesElement.GetBypassRateLimitingRules()))
+								bypassRateLimitingRulesElements := make([]CdnLoadbalancerBypassRateLimitingRule, 0, len(bypassRateLimitingRulesElement.GetBypassRateLimitingRules()))
 								for _, bypassRateLimitingRulesElement := range bypassRateLimitingRulesElement.GetBypassRateLimitingRules() {
-									cdnLoadbalancerCommonWafBypassRateLimitingRuleModel := CdnLoadbalancerCommonWafBypassRateLimitingRule{}
+									cdnLoadbalancerBypassRateLimitingRuleModel := CdnLoadbalancerBypassRateLimitingRule{}
 
 									// data specToModelNested PointerField --> ClientMatcher
 									if bypassRateLimitingRulesElement.GetClientMatcher() != nil {
 										// Create the nested Go struct
-										cdnLoadbalancerPolicyClientMatcherModel := &CdnLoadbalancerPolicyClientMatcher{}
+										cdnLoadbalancerClientMatcherModel := &CdnLoadbalancerClientMatcher{}
 										clientMatcherElement := bypassRateLimitingRulesElement.GetClientMatcher()
 
 										// Recursively populate the nested struct
@@ -22986,10 +19369,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = finalObj
+											cdnLoadbalancerClientMatcherModel.ClientChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherClientChoiceModelAttributeMap)
+											cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherClientChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredOneOfField --> IpAsnChoice
@@ -23253,16 +19636,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = finalObj
+											cdnLoadbalancerClientMatcherModel.IpAsnChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherIpAsnChoiceModelAttributeMap)
+											cdnLoadbalancerClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherIpAsnChoiceModelAttributeMap)
 										}
 
 										// data specToModelNested PointerField --> TlsFingerprintMatcher
 										if clientMatcherElement.GetTlsFingerprintMatcher() != nil {
 											// Create the nested Go struct
-											cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel := &CdnLoadbalancerPolicyTlsFingerprintMatcherType{}
+											cdnLoadbalancerTlsFingerprintMatcherTypeModel := &CdnLoadbalancerTlsFingerprintMatcherType{}
 											tlsFingerprintMatcherElement := clientMatcherElement.GetTlsFingerprintMatcher()
 
 											// Recursively populate the nested struct
@@ -23280,9 +19663,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 												if response.Diagnostics.HasError() {
 													return
 												}
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = listValue
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = listValue
 											} else {
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested ArrayOfStringField --> ExactValues
@@ -23292,9 +19675,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 												if response.Diagnostics.HasError() {
 													return
 												}
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = listValue
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = listValue
 											} else {
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested ArrayOfStringField --> ExcludedValues
@@ -23304,18 +19687,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 												if response.Diagnostics.HasError() {
 													return
 												}
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
 											} else {
-												cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
+												cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel)
+											cdnLoadbalancerTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerTlsFingerprintMatcherTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj
+											cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerTlsFingerprintMatcherTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -23324,16 +19707,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											// because the API may always return a non-nil struct (with REDACTED values) for this field,
 											// making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
+											cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										cdnLoadbalancerPolicyClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap, cdnLoadbalancerPolicyClientMatcherModel)
+										cdnLoadbalancerClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap, cdnLoadbalancerClientMatcherModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.ClientMatcher = cdnLoadbalancerPolicyClientMatcherModelObj
+										cdnLoadbalancerBypassRateLimitingRuleModel.ClientMatcher = cdnLoadbalancerClientMatcherModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -23342,7 +19725,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										// because the API may always return a non-nil struct (with REDACTED values) for this field,
 										// making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap)
+										cdnLoadbalancerBypassRateLimitingRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> DestinationType
@@ -23468,10 +19851,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.DestinationTypeChoice = finalObj
+										cdnLoadbalancerBypassRateLimitingRuleModel.DestinationTypeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.DestinationTypeChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDestinationTypeModelAttributeMap)
+										cdnLoadbalancerBypassRateLimitingRuleModel.DestinationTypeChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDestinationTypeModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -23518,16 +19901,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.DomainChoice = finalObj
+										cdnLoadbalancerBypassRateLimitingRuleModel.DomainChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDomainChoiceModelAttributeMap)
+										cdnLoadbalancerBypassRateLimitingRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDomainChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested PointerField --> RequestMatcher
 									if bypassRateLimitingRulesElement.GetRequestMatcher() != nil {
 										// Create the nested Go struct
-										cdnLoadbalancerPolicyRequestMatcherModel := &CdnLoadbalancerPolicyRequestMatcher{}
+										cdnLoadbalancerReqMatcherModel := &CdnLoadbalancerReqMatcher{}
 										requestMatcherElement := bypassRateLimitingRulesElement.GetRequestMatcher()
 
 										// Recursively populate the nested struct
@@ -23536,12 +19919,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if len(requestMatcherElement.GetCookieMatchers()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											cookieMatchersElements := make([]CdnLoadbalancerPolicyCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
+											cookieMatchersElements := make([]CdnLoadbalancerCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
 											for _, cookieMatchersElement := range requestMatcherElement.GetCookieMatchers() {
-												cdnLoadbalancerPolicyCookieMatcherTypeModel := CdnLoadbalancerPolicyCookieMatcherType{}
-
-												// data specToModelNested BoolField --> InvertMatcher
-												cdnLoadbalancerPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
+												cdnLoadbalancerCookieMatcherTypeModel := CdnLoadbalancerCookieMatcherType{}
 
 												// data specToModelNested RequiredOneOfField --> Match
 												// <no value>
@@ -23554,24 +19934,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													cookieMatchersmatchChoiceChoices := cookieMatchersElement.GetMatch()
 
 													// Process nested choices, populating the temporary attribute map
-
-													// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
-													_, isCheckNotPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckNotPresent)
-
-													if isCheckNotPresent {
-														cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
-													} else {
-														cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
-													}
-
-													// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
-													_, isCheckPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckPresent)
-
-													if isCheckPresent {
-														cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
-													} else {
-														cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
-													}
 
 													// data specToModelNested PointerOfOneOfField --> Item
 													// <no value>
@@ -23607,24 +19969,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 																itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 															}
 
-															// data SpecToModelNested ArrayOfEnumField --> Transformers
-															if len(itemElement.GetTransformers()) > 0 {
-																transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-																for _, v := range itemElement.GetTransformers() {
-																	if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																		transformersStrings = append(transformersStrings, strVal)
-																	}
-																}
-																listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-																response.Diagnostics.Append(listDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-																itemAttributeMap["transformers"] = listValue
-															} else {
-																itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-															}
-
 															itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap, itemAttributeMap)
 															response.Diagnostics.Append(itemObjDiags...)
 															if response.Diagnostics.HasError() {
@@ -23649,21 +19993,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = finalObj
+													cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
+													cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
 												}
 
 												// data specToModelNested RequiredStringField --> Name
 												if cookieMatchersElement.GetName() != "" {
-													cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
+													cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringNull()
+													cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringNull()
 												}
 
-												cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerPolicyCookieMatcherTypeModel)
+												cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerCookieMatcherTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -23672,13 +20016,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = cookieMatchersListValue
+											cdnLoadbalancerReqMatcherModel.CookieMatchers = cookieMatchersListValue
 
 										} else {
 											// The source list is empty or nil.
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// Assign a null `types.ListValue`.
-											cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersModelAttributeMap})
+											cdnLoadbalancerReqMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherCookieMatchersModelAttributeMap})
 										}
 
 										// data specToModelNested ArrayOfPointerField --> Headers
@@ -23756,24 +20100,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 																itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 															}
 
-															// data SpecToModelNested ArrayOfEnumField --> Transformers
-															if len(itemElement.GetTransformers()) > 0 {
-																transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-																for _, v := range itemElement.GetTransformers() {
-																	if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																		transformersStrings = append(transformersStrings, strVal)
-																	}
-																}
-																listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-																response.Diagnostics.Append(listDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-																itemAttributeMap["transformers"] = listValue
-															} else {
-																itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-															}
-
 															itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherHeadersMatchItemModelAttributeMap, itemAttributeMap)
 															response.Diagnostics.Append(itemObjDiags...)
 															if response.Diagnostics.HasError() {
@@ -23821,25 +20147,25 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerPolicyRequestMatcherModel.Headers = headersListValue
+											cdnLoadbalancerReqMatcherModel.Headers = headersListValue
 
 										} else {
 											// The source list is empty or nil.
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// Assign a null `types.ListValue`.
-											cdnLoadbalancerPolicyRequestMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherHeadersModelAttributeMap})
+											cdnLoadbalancerReqMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherHeadersModelAttributeMap})
 										}
 
 										// data specToModelNested ArrayOfPointerField --> JwtClaims
 										if len(requestMatcherElement.GetJwtClaims()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											jwtClaimsElements := make([]CdnLoadbalancerPolicyJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
+											jwtClaimsElements := make([]CdnLoadbalancerJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
 											for _, jwtClaimsElement := range requestMatcherElement.GetJwtClaims() {
-												cdnLoadbalancerPolicyJWTClaimMatcherTypeModel := CdnLoadbalancerPolicyJWTClaimMatcherType{}
+												cdnLoadbalancerJWTClaimMatcherTypeModel := CdnLoadbalancerJWTClaimMatcherType{}
 
 												// data specToModelNested BoolField --> InvertMatcher
-												cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
+												cdnLoadbalancerJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
 
 												// data specToModelNested RequiredOneOfField --> Match
 												// <no value>
@@ -23905,24 +20231,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 																itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 															}
 
-															// data SpecToModelNested ArrayOfEnumField --> Transformers
-															if len(itemElement.GetTransformers()) > 0 {
-																transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-																for _, v := range itemElement.GetTransformers() {
-																	if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																		transformersStrings = append(transformersStrings, strVal)
-																	}
-																}
-																listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-																response.Diagnostics.Append(listDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-																itemAttributeMap["transformers"] = listValue
-															} else {
-																itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-															}
-
 															itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherJwtClaimsMatchItemModelAttributeMap, itemAttributeMap)
 															response.Diagnostics.Append(itemObjDiags...)
 															if response.Diagnostics.HasError() {
@@ -23947,21 +20255,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = finalObj
+													cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
+													cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
 												}
 
 												// data specToModelNested RequiredStringField --> Name
 												if jwtClaimsElement.GetName() != "" {
-													cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
+													cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringNull()
+													cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringNull()
 												}
 
-												jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerPolicyJWTClaimMatcherTypeModel)
+												jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerJWTClaimMatcherTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -23970,32 +20278,32 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = jwtClaimsListValue
+											cdnLoadbalancerReqMatcherModel.JwtClaims = jwtClaimsListValue
 
 										} else {
 											// The source list is empty or nil.
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// Assign a null `types.ListValue`.
-											cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherJwtClaimsModelAttributeMap})
+											cdnLoadbalancerReqMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherJwtClaimsModelAttributeMap})
 										}
 
 										// data specToModelNested ArrayOfPointerField --> QueryParams
 										if len(requestMatcherElement.GetQueryParams()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											queryParamsElements := make([]CdnLoadbalancerPolicyQueryParameterMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
+											queryParamsElements := make([]CdnLoadbalancerQueryParamMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
 											for _, queryParamsElement := range requestMatcherElement.GetQueryParams() {
-												cdnLoadbalancerPolicyQueryParameterMatcherTypeModel := CdnLoadbalancerPolicyQueryParameterMatcherType{}
+												cdnLoadbalancerQueryParamMatcherTypeModel := CdnLoadbalancerQueryParamMatcherType{}
 
 												// data specToModelNested BoolField --> InvertMatcher
-												cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
+												cdnLoadbalancerQueryParamMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
 
 												// data specToModelNested RequiredStringField --> Key
 												if queryParamsElement.GetKey() != "" {
-													cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+													cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringNull()
+													cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringNull()
 												}
 
 												// data specToModelNested RequiredOneOfField --> Match
@@ -24062,24 +20370,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 																itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 															}
 
-															// data SpecToModelNested ArrayOfEnumField --> Transformers
-															if len(itemElement.GetTransformers()) > 0 {
-																transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-																for _, v := range itemElement.GetTransformers() {
-																	if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-																		transformersStrings = append(transformersStrings, strVal)
-																	}
-																}
-																listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-																response.Diagnostics.Append(listDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-																itemAttributeMap["transformers"] = listValue
-															} else {
-																itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-															}
-
 															itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherQueryParamsMatchItemModelAttributeMap, itemAttributeMap)
 															response.Diagnostics.Append(itemObjDiags...)
 															if response.Diagnostics.HasError() {
@@ -24104,13 +20394,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = finalObj
+													cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherQueryParamsMatchModelAttributeMap)
+													cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherQueryParamsMatchModelAttributeMap)
 												}
 
-												queryParamsElements = append(queryParamsElements, cdnLoadbalancerPolicyQueryParameterMatcherTypeModel)
+												queryParamsElements = append(queryParamsElements, cdnLoadbalancerQueryParamMatcherTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -24119,22 +20409,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 											if response.Diagnostics.HasError() {
 												return
 											}
-											cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = queryParamsListValue
+											cdnLoadbalancerReqMatcherModel.QueryParams = queryParamsListValue
 
 										} else {
 											// The source list is empty or nil.
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// Assign a null `types.ListValue`.
-											cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherQueryParamsModelAttributeMap})
+											cdnLoadbalancerReqMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherQueryParamsModelAttributeMap})
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										cdnLoadbalancerPolicyRequestMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherModelAttributeMap, cdnLoadbalancerPolicyRequestMatcherModel)
+										cdnLoadbalancerReqMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherModelAttributeMap, cdnLoadbalancerReqMatcherModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.RequestMatcher = cdnLoadbalancerPolicyRequestMatcherModelObj
+										cdnLoadbalancerBypassRateLimitingRuleModel.RequestMatcher = cdnLoadbalancerReqMatcherModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -24143,10 +20433,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										// because the API may always return a non-nil struct (with REDACTED values) for this field,
 										// making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cdnLoadbalancerCommonWafBypassRateLimitingRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherModelAttributeMap)
+										cdnLoadbalancerBypassRateLimitingRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesRequestMatcherModelAttributeMap)
 									}
 
-									bypassRateLimitingRulesElements = append(bypassRateLimitingRulesElements, cdnLoadbalancerCommonWafBypassRateLimitingRuleModel)
+									bypassRateLimitingRulesElements = append(bypassRateLimitingRulesElements, cdnLoadbalancerBypassRateLimitingRuleModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -24323,30 +20613,30 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if len(apiRateLimitElement.GetServerUrlRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					serverUrlRulesElements := make([]CdnLoadbalancerCommonWafServerUrlRule, 0, len(apiRateLimitElement.GetServerUrlRules()))
+					serverUrlRulesElements := make([]CdnLoadbalancerServerUrlRule, 0, len(apiRateLimitElement.GetServerUrlRules()))
 					for _, serverUrlRulesElement := range apiRateLimitElement.GetServerUrlRules() {
-						cdnLoadbalancerCommonWafServerUrlRuleModel := CdnLoadbalancerCommonWafServerUrlRule{}
+						cdnLoadbalancerServerUrlRuleModel := CdnLoadbalancerServerUrlRule{}
 
 						// data specToModelNested StringField --> ApiGroup
 						if serverUrlRulesElement.GetApiGroup() != "" {
-							cdnLoadbalancerCommonWafServerUrlRuleModel.ApiGroup = types.StringValue(serverUrlRulesElement.GetApiGroup())
+							cdnLoadbalancerServerUrlRuleModel.ApiGroup = types.StringValue(serverUrlRulesElement.GetApiGroup())
 						} else {
 							// Empty string, set to null
-							cdnLoadbalancerCommonWafServerUrlRuleModel.ApiGroup = types.StringNull()
+							cdnLoadbalancerServerUrlRuleModel.ApiGroup = types.StringNull()
 						}
 
 						// data specToModelNested RequiredStringField --> BasePath
 						if serverUrlRulesElement.GetBasePath() != "" {
-							cdnLoadbalancerCommonWafServerUrlRuleModel.BasePath = types.StringValue(serverUrlRulesElement.GetBasePath())
+							cdnLoadbalancerServerUrlRuleModel.BasePath = types.StringValue(serverUrlRulesElement.GetBasePath())
 						} else {
 							// Empty string, set to null
-							cdnLoadbalancerCommonWafServerUrlRuleModel.BasePath = types.StringNull()
+							cdnLoadbalancerServerUrlRuleModel.BasePath = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> ClientMatcher
 						if serverUrlRulesElement.GetClientMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyClientMatcherModel := &CdnLoadbalancerPolicyClientMatcher{}
+							cdnLoadbalancerClientMatcherModel := &CdnLoadbalancerClientMatcher{}
 							clientMatcherElement := serverUrlRulesElement.GetClientMatcher()
 
 							// Recursively populate the nested struct
@@ -24457,10 +20747,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = finalObj
+								cdnLoadbalancerClientMatcherModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicyClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientChoiceModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredOneOfField --> IpAsnChoice
@@ -24724,16 +21014,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = finalObj
+								cdnLoadbalancerClientMatcherModel.IpAsnChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicyClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherIpAsnChoiceModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.IpAsnChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherIpAsnChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> TlsFingerprintMatcher
 							if clientMatcherElement.GetTlsFingerprintMatcher() != nil {
 								// Create the nested Go struct
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel := &CdnLoadbalancerPolicyTlsFingerprintMatcherType{}
+								cdnLoadbalancerTlsFingerprintMatcherTypeModel := &CdnLoadbalancerTlsFingerprintMatcherType{}
 								tlsFingerprintMatcherElement := clientMatcherElement.GetTlsFingerprintMatcher()
 
 								// Recursively populate the nested struct
@@ -24751,9 +21041,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.Classes = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> ExactValues
@@ -24763,9 +21053,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> ExcludedValues
@@ -24775,18 +21065,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = listValue
 								} else {
-									cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
+									cdnLoadbalancerTlsFingerprintMatcherTypeModel.ExcludedValues = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModel)
+								cdnLoadbalancerTlsFingerprintMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherTlsFingerprintMatcherModelAttributeMap, cdnLoadbalancerTlsFingerprintMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerPolicyTlsFingerprintMatcherTypeModelObj
+								cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = cdnLoadbalancerTlsFingerprintMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -24795,16 +21085,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnLoadbalancerPolicyClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
+								cdnLoadbalancerClientMatcherModel.TlsFingerprintMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherTlsFingerprintMatcherModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap, cdnLoadbalancerPolicyClientMatcherModel)
+							cdnLoadbalancerClientMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap, cdnLoadbalancerClientMatcherModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnLoadbalancerCommonWafServerUrlRuleModel.ClientMatcher = cdnLoadbalancerPolicyClientMatcherModelObj
+							cdnLoadbalancerServerUrlRuleModel.ClientMatcher = cdnLoadbalancerClientMatcherModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -24813,7 +21103,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnLoadbalancerCommonWafServerUrlRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap)
+							cdnLoadbalancerServerUrlRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -24860,10 +21150,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							cdnLoadbalancerCommonWafServerUrlRuleModel.DomainChoice = finalObj
+							cdnLoadbalancerServerUrlRuleModel.DomainChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							cdnLoadbalancerCommonWafServerUrlRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesDomainChoiceModelAttributeMap)
+							cdnLoadbalancerServerUrlRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesDomainChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> RateLimiterChoice
@@ -25059,16 +21349,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							cdnLoadbalancerCommonWafServerUrlRuleModel.RateLimiterChoice = finalObj
+							cdnLoadbalancerServerUrlRuleModel.RateLimiterChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							cdnLoadbalancerCommonWafServerUrlRuleModel.RateLimiterChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRateLimiterChoiceModelAttributeMap)
+							cdnLoadbalancerServerUrlRuleModel.RateLimiterChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRateLimiterChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> RequestMatcher
 						if serverUrlRulesElement.GetRequestMatcher() != nil {
 							// Create the nested Go struct
-							cdnLoadbalancerPolicyRequestMatcherModel := &CdnLoadbalancerPolicyRequestMatcher{}
+							cdnLoadbalancerReqMatcherModel := &CdnLoadbalancerReqMatcher{}
 							requestMatcherElement := serverUrlRulesElement.GetRequestMatcher()
 
 							// Recursively populate the nested struct
@@ -25077,12 +21367,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							if len(requestMatcherElement.GetCookieMatchers()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								cookieMatchersElements := make([]CdnLoadbalancerPolicyCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
+								cookieMatchersElements := make([]CdnLoadbalancerCookieMatcherType, 0, len(requestMatcherElement.GetCookieMatchers()))
 								for _, cookieMatchersElement := range requestMatcherElement.GetCookieMatchers() {
-									cdnLoadbalancerPolicyCookieMatcherTypeModel := CdnLoadbalancerPolicyCookieMatcherType{}
-
-									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
+									cdnLoadbalancerCookieMatcherTypeModel := CdnLoadbalancerCookieMatcherType{}
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -25095,24 +21382,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										cookieMatchersmatchChoiceChoices := cookieMatchersElement.GetMatch()
 
 										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
-										_, isCheckNotPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckNotPresent)
-
-										if isCheckNotPresent {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
-										} else {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
-										}
-
-										// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
-										_, isCheckPresent := cookieMatchersmatchChoiceChoices.(*ves_io_schema_policy.CookieMatcherType_CheckPresent)
-
-										if isCheckPresent {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
-										} else {
-											cookieMatchersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
-										}
 
 										// data specToModelNested PointerOfOneOfField --> Item
 										// <no value>
@@ -25148,24 +21417,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -25190,21 +21441,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
+										cdnLoadbalancerCookieMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if cookieMatchersElement.GetName() != "" {
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
+										cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyCookieMatcherTypeModel.Name = types.StringNull()
+										cdnLoadbalancerCookieMatcherTypeModel.Name = types.StringNull()
 									}
 
-									cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerPolicyCookieMatcherTypeModel)
+									cookieMatchersElements = append(cookieMatchersElements, cdnLoadbalancerCookieMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -25213,13 +21464,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = cookieMatchersListValue
+								cdnLoadbalancerReqMatcherModel.CookieMatchers = cookieMatchersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherCookieMatchersModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> Headers
@@ -25297,24 +21548,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherHeadersMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -25362,25 +21595,25 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.Headers = headersListValue
+								cdnLoadbalancerReqMatcherModel.Headers = headersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherHeadersModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.Headers = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherHeadersModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> JwtClaims
 							if len(requestMatcherElement.GetJwtClaims()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								jwtClaimsElements := make([]CdnLoadbalancerPolicyJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
+								jwtClaimsElements := make([]CdnLoadbalancerJWTClaimMatcherType, 0, len(requestMatcherElement.GetJwtClaims()))
 								for _, jwtClaimsElement := range requestMatcherElement.GetJwtClaims() {
-									cdnLoadbalancerPolicyJWTClaimMatcherTypeModel := CdnLoadbalancerPolicyJWTClaimMatcherType{}
+									cdnLoadbalancerJWTClaimMatcherTypeModel := CdnLoadbalancerJWTClaimMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
+									cdnLoadbalancerJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -25446,24 +21679,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtClaimsMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -25488,21 +21703,21 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
+										cdnLoadbalancerJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtClaimsMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if jwtClaimsElement.GetName() != "" {
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
+										cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyJWTClaimMatcherTypeModel.Name = types.StringNull()
+										cdnLoadbalancerJWTClaimMatcherTypeModel.Name = types.StringNull()
 									}
 
-									jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerPolicyJWTClaimMatcherTypeModel)
+									jwtClaimsElements = append(jwtClaimsElements, cdnLoadbalancerJWTClaimMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -25511,32 +21726,32 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = jwtClaimsListValue
+								cdnLoadbalancerReqMatcherModel.JwtClaims = jwtClaimsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtClaimsModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherJwtClaimsModelAttributeMap})
 							}
 
 							// data specToModelNested ArrayOfPointerField --> QueryParams
 							if len(requestMatcherElement.GetQueryParams()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								queryParamsElements := make([]CdnLoadbalancerPolicyQueryParameterMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
+								queryParamsElements := make([]CdnLoadbalancerQueryParamMatcherType, 0, len(requestMatcherElement.GetQueryParams()))
 								for _, queryParamsElement := range requestMatcherElement.GetQueryParams() {
-									cdnLoadbalancerPolicyQueryParameterMatcherTypeModel := CdnLoadbalancerPolicyQueryParameterMatcherType{}
+									cdnLoadbalancerQueryParamMatcherTypeModel := CdnLoadbalancerQueryParamMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
+									cdnLoadbalancerQueryParamMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredStringField --> Key
 									if queryParamsElement.GetKey() != "" {
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+										cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 									} else {
 										// Empty string, set to null
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.Key = types.StringNull()
+										cdnLoadbalancerQueryParamMatcherTypeModel.Key = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> Match
@@ -25603,24 +21818,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
 												}
 
-												// data SpecToModelNested ArrayOfEnumField --> Transformers
-												if len(itemElement.GetTransformers()) > 0 {
-													transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
-													for _, v := range itemElement.GetTransformers() {
-														if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-															transformersStrings = append(transformersStrings, strVal)
-														}
-													}
-													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-													response.Diagnostics.Append(listDiags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													itemAttributeMap["transformers"] = listValue
-												} else {
-													itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-												}
-
 												itemObj, itemObjDiags := types.ObjectValue(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryParamsMatchItemModelAttributeMap, itemAttributeMap)
 												response.Diagnostics.Append(itemObjDiags...)
 												if response.Diagnostics.HasError() {
@@ -25645,13 +21842,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = finalObj
+										cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnLoadbalancerPolicyQueryParameterMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryParamsMatchModelAttributeMap)
+										cdnLoadbalancerQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryParamsMatchModelAttributeMap)
 									}
 
-									queryParamsElements = append(queryParamsElements, cdnLoadbalancerPolicyQueryParameterMatcherTypeModel)
+									queryParamsElements = append(queryParamsElements, cdnLoadbalancerQueryParamMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -25660,22 +21857,22 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = queryParamsListValue
+								cdnLoadbalancerReqMatcherModel.QueryParams = queryParamsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								cdnLoadbalancerPolicyRequestMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryParamsModelAttributeMap})
+								cdnLoadbalancerReqMatcherModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherQueryParamsModelAttributeMap})
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnLoadbalancerPolicyRequestMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelAttributeMap, cdnLoadbalancerPolicyRequestMatcherModel)
+							cdnLoadbalancerReqMatcherModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelAttributeMap, cdnLoadbalancerReqMatcherModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnLoadbalancerCommonWafServerUrlRuleModel.RequestMatcher = cdnLoadbalancerPolicyRequestMatcherModelObj
+							cdnLoadbalancerServerUrlRuleModel.RequestMatcher = cdnLoadbalancerReqMatcherModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -25684,10 +21881,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnLoadbalancerCommonWafServerUrlRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelAttributeMap)
+							cdnLoadbalancerServerUrlRuleModel.RequestMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRequestMatcherModelAttributeMap)
 						}
 
-						serverUrlRulesElements = append(serverUrlRulesElements, cdnLoadbalancerCommonWafServerUrlRuleModel)
+						serverUrlRulesElements = append(serverUrlRulesElements, cdnLoadbalancerServerUrlRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -26005,7 +22202,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// data specToModelNested PointerField --> RateLimiter
 				if rateLimitElement.GetRateLimiter() != nil {
 					// Create the nested Go struct
-					cdnLoadbalancerRateLimiterRateLimitValueModel := &CdnLoadbalancerRateLimiterRateLimitValue{}
+					cdnLoadbalancerRateLimitValueModel := &CdnLoadbalancerRateLimitValue{}
 					rateLimiterElement := rateLimitElement.GetRateLimiter()
 
 					// Recursively populate the nested struct
@@ -26166,68 +22363,20 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cdnLoadbalancerRateLimiterRateLimitValueModel.ActionChoice = finalObj
+						cdnLoadbalancerRateLimitValueModel.ActionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cdnLoadbalancerRateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested OneOfField --> Algorithm
-					if rateLimiterElement.GetAlgorithm() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						rateLimiteralgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						rateLimiteralgorithmChoiceChoices := rateLimiterElement.GetAlgorithm()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> LeakyBucket
-						_, isLeakyBucket := rateLimiteralgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket)
-
-						if isLeakyBucket {
-							rateLimiteralgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolValue(true)
-						} else {
-							rateLimiteralgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> TokenBucket
-						_, isTokenBucket := rateLimiteralgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_TokenBucket)
-
-						if isTokenBucket {
-							rateLimiteralgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolValue(true)
-						} else {
-							rateLimiteralgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, rateLimiteralgorithmChoiceChoicesObjDiags := types.ObjectValue(
-							CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterAlgorithmModelAttributeMap, // The attribute schema for the OneOf choices
-							rateLimiteralgorithmChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(rateLimiteralgorithmChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cdnLoadbalancerRateLimiterRateLimitValueModel.AlgorithmChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cdnLoadbalancerRateLimiterRateLimitValueModel.AlgorithmChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterAlgorithmModelAttributeMap)
+						cdnLoadbalancerRateLimitValueModel.ActionChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterActionChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested UintField --> BurstMultiplier
-					cdnLoadbalancerRateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(rateLimiterElement.GetBurstMultiplier()))
+					cdnLoadbalancerRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(rateLimiterElement.GetBurstMultiplier()))
 
 					// data specToModelNested UintField --> PeriodMultiplier
-					cdnLoadbalancerRateLimiterRateLimitValueModel.PeriodMultiplier = types.Int64Value(int64(rateLimiterElement.GetPeriodMultiplier()))
+					cdnLoadbalancerRateLimitValueModel.PeriodMultiplier = types.Int64Value(int64(rateLimiterElement.GetPeriodMultiplier()))
 
 					// data specToModelNested RequiredUintField --> TotalNumber
-					cdnLoadbalancerRateLimiterRateLimitValueModel.TotalNumber = types.Int64Value(int64(rateLimiterElement.GetTotalNumber()))
+					cdnLoadbalancerRateLimitValueModel.TotalNumber = types.Int64Value(int64(rateLimiterElement.GetTotalNumber()))
 
 					// data specToModelNested RequiredEnumField --> Unit
 					if rateLimiterElement.GetUnit().String() != "" {
@@ -26238,18 +22387,18 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						cdnLoadbalancerRateLimiterRateLimitValueModel.Unit = listValue
+						cdnLoadbalancerRateLimitValueModel.Unit = listValue
 					} else {
-						cdnLoadbalancerRateLimiterRateLimitValueModel.Unit = types.ListNull(types.StringType)
+						cdnLoadbalancerRateLimitValueModel.Unit = types.ListNull(types.StringType)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					cdnLoadbalancerRateLimiterRateLimitValueModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterModelAttributeMap, cdnLoadbalancerRateLimiterRateLimitValueModel)
+					cdnLoadbalancerRateLimitValueModelObj, objDiags := types.ObjectValueFrom(ctx, CdnLoadbalancerRateLimitChoiceRateLimitRateLimiterModelAttributeMap, cdnLoadbalancerRateLimitValueModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					rateLimitAttributeMap["rate_limiter"] = cdnLoadbalancerRateLimiterRateLimitValueModelObj
+					rateLimitAttributeMap["rate_limiter"] = cdnLoadbalancerRateLimitValueModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -26294,28 +22443,28 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> ServiceDomains
 	if len(specData.GetServiceDomains()) > 0 {
-		serviceDomainsElements := make([]CdnLoadbalancerVirtualHostServiceDomain, 0, len(specData.GetServiceDomains()))
+		serviceDomainsElements := make([]CdnLoadbalancerSvcDomain, 0, len(specData.GetServiceDomains()))
 
 		for _, serviceDomainsElement := range specData.GetServiceDomains() {
-			cdnLoadbalancerVirtualHostServiceDomainModel := CdnLoadbalancerVirtualHostServiceDomain{}
+			cdnLoadbalancerSvcDomainModel := CdnLoadbalancerSvcDomain{}
 
 			// data specToModelNested StringField --> Domain
 			if serviceDomainsElement.GetDomain() != "" {
-				cdnLoadbalancerVirtualHostServiceDomainModel.Domain = types.StringValue(serviceDomainsElement.GetDomain())
+				cdnLoadbalancerSvcDomainModel.Domain = types.StringValue(serviceDomainsElement.GetDomain())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerVirtualHostServiceDomainModel.Domain = types.StringNull()
+				cdnLoadbalancerSvcDomainModel.Domain = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> ServiceDomain
 			if serviceDomainsElement.GetServiceDomain() != "" {
-				cdnLoadbalancerVirtualHostServiceDomainModel.ServiceDomain = types.StringValue(serviceDomainsElement.GetServiceDomain())
+				cdnLoadbalancerSvcDomainModel.ServiceDomain = types.StringValue(serviceDomainsElement.GetServiceDomain())
 			} else {
 				// Empty string, set to null
-				cdnLoadbalancerVirtualHostServiceDomainModel.ServiceDomain = types.StringNull()
+				cdnLoadbalancerSvcDomainModel.ServiceDomain = types.StringNull()
 			}
 
-			serviceDomainsElements = append(serviceDomainsElements, cdnLoadbalancerVirtualHostServiceDomainModel)
+			serviceDomainsElements = append(serviceDomainsElements, cdnLoadbalancerSvcDomainModel)
 		}
 
 		{
@@ -26350,7 +22499,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		servicePolicyChoiceChoices := specData.GetServicePolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var servicePolicyChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeServicePolicyChoice{}
+		var servicePolicyChoiceChoicesModel = &CdnLoadbalancerSvcPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -26473,7 +22622,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		slowDdosMitigationChoiceChoices := specData.GetSlowDdosMitigationChoice()
 
 		// The model struct that will be populated by the nested template.
-		var slowDdosMitigationChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeSlowDdosMitigationChoice{}
+		var slowDdosMitigationChoiceChoicesModel = &CdnLoadbalancerSlowDdosMitigationChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -26582,10 +22731,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> TrustedClients
 	if len(specData.GetTrustedClients()) > 0 {
-		trustedClientsElements := make([]CdnLoadbalancerCommonWafSimpleClientSrcRule, 0, len(specData.GetTrustedClients()))
+		trustedClientsElements := make([]CdnLoadbalancerSimpleClientSrcRule, 0, len(specData.GetTrustedClients()))
 
 		for _, trustedClientsElement := range specData.GetTrustedClients() {
-			cdnLoadbalancerCommonWafSimpleClientSrcRuleModel := CdnLoadbalancerCommonWafSimpleClientSrcRule{}
+			cdnLoadbalancerSimpleClientSrcRuleModel := CdnLoadbalancerSimpleClientSrcRule{}
 
 			// data SpecToModelNested RequiredArrayOfEnumField --> Actions
 			if len(trustedClientsElement.GetActions()) > 0 {
@@ -26600,9 +22749,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Actions = listValue
+				cdnLoadbalancerSimpleClientSrcRuleModel.Actions = listValue
 			} else {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Actions = types.ListNull(types.StringType)
+				cdnLoadbalancerSimpleClientSrcRuleModel.Actions = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredOneOfField --> ClientSourceChoice
@@ -26787,17 +22936,17 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ClientSourceChoice = finalObj
+				cdnLoadbalancerSimpleClientSrcRuleModel.ClientSourceChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ClientSourceChoice = types.ObjectNull(CdnLoadbalancerTrustedClientsClientSourceChoiceModelAttributeMap)
+				cdnLoadbalancerSimpleClientSrcRuleModel.ClientSourceChoice = types.ObjectNull(CdnLoadbalancerTrustedClientsClientSourceChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested TimeStampField --> ExpirationTimestamp
 			if trustedClientsElement.GetExpirationTimestamp() != nil {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(trustedClientsElement.GetExpirationTimestamp())
+				cdnLoadbalancerSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(trustedClientsElement.GetExpirationTimestamp())
 			} else {
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+				cdnLoadbalancerSimpleClientSrcRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 			}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -26830,7 +22979,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+				cdnLoadbalancerSimpleClientSrcRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -26839,10 +22988,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				cdnLoadbalancerCommonWafSimpleClientSrcRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerTrustedClientsMetadataModelAttributeMap)
+				cdnLoadbalancerSimpleClientSrcRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerTrustedClientsMetadataModelAttributeMap)
 			}
 
-			trustedClientsElements = append(trustedClientsElements, cdnLoadbalancerCommonWafSimpleClientSrcRuleModel)
+			trustedClientsElements = append(trustedClientsElements, cdnLoadbalancerSimpleClientSrcRuleModel)
 		}
 
 		{
@@ -26877,7 +23026,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		userIdChoiceChoices := specData.GetUserIdChoice()
 
 		// The model struct that will be populated by the nested template.
-		var userIdChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeUserIdChoice{}
+		var userIdChoiceChoicesModel = &CdnLoadbalancerUserIdChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -26965,7 +23114,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 		wafChoiceChoices := specData.GetWafChoice()
 
 		// The model struct that will be populated by the nested template.
-		var wafChoiceChoicesModel = &CdnLoadbalancerGlobalSpecTypeWafChoice{}
+		var wafChoiceChoicesModel = &CdnLoadbalancerWafChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -27045,7 +23194,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> WafExclusion
 	if specData.GetWafExclusion() != nil {
-		var cdnLoadbalancerCommonWafWafExclusionModel = &CdnLoadbalancerCommonWafWafExclusion{}
+		var cdnLoadbalancerWafExclusionModel = &CdnLoadbalancerWafExclusion{}
 		wafExclusionElement := specData.GetWafExclusion()
 
 		// data specToModelNested OneOfField --> WafExclusionChoice
@@ -27073,9 +23222,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 					if len(wafExclusionInlineRulesElement.GetRules()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						rulesElements := make([]CdnLoadbalancerPolicySimpleWafExclusionRule, 0, len(wafExclusionInlineRulesElement.GetRules()))
+						rulesElements := make([]CdnLoadbalancerSimpleWafExclusionRule, 0, len(wafExclusionInlineRulesElement.GetRules()))
 						for _, rulesElement := range wafExclusionInlineRulesElement.GetRules() {
-							cdnLoadbalancerPolicySimpleWafExclusionRuleModel := CdnLoadbalancerPolicySimpleWafExclusionRule{}
+							cdnLoadbalancerSimpleWafExclusionRuleModel := CdnLoadbalancerSimpleWafExclusionRule{}
 
 							// data specToModelNested RequiredOneOfField --> DomainChoice
 							// <no value>
@@ -27131,17 +23280,17 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.DomainChoice = finalObj
+								cdnLoadbalancerSimpleWafExclusionRuleModel.DomainChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesDomainChoiceModelAttributeMap)
+								cdnLoadbalancerSimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesDomainChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested TimeStampField --> ExpirationTimestamp
 							if rulesElement.GetExpirationTimestamp() != nil {
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(rulesElement.GetExpirationTimestamp())
+								cdnLoadbalancerSimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(rulesElement.GetExpirationTimestamp())
 							} else {
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+								cdnLoadbalancerSimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 							}
 
 							// data specToModelNested RequiredPointerField --> Metadata
@@ -27174,7 +23323,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
+								cdnLoadbalancerSimpleWafExclusionRuleModel.Metadata = cdnLoadbalancerMessageMetaTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -27183,7 +23332,7 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesMetadataModelAttributeMap)
+								cdnLoadbalancerSimpleWafExclusionRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesMetadataModelAttributeMap)
 							}
 
 							// data SpecToModelNested ArrayOfEnumField --> Methods
@@ -27199,9 +23348,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.Methods = listValue
+								cdnLoadbalancerSimpleWafExclusionRuleModel.Methods = listValue
 							} else {
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.Methods = types.ListNull(types.StringType)
+								cdnLoadbalancerSimpleWafExclusionRuleModel.Methods = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> PathChoice
@@ -27258,10 +23407,10 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.PathChoice = finalObj
+								cdnLoadbalancerSimpleWafExclusionRuleModel.PathChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.PathChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesPathChoiceModelAttributeMap)
+								cdnLoadbalancerSimpleWafExclusionRuleModel.PathChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesPathChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested OneOfField --> WafAdvancedConfiguration
@@ -27289,9 +23438,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											excludeAttackTypeContextsElements := make([]CdnLoadbalancerPolicyAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()))
+											excludeAttackTypeContextsElements := make([]CdnLoadbalancerAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()))
 											for _, excludeAttackTypeContextsElement := range appFirewallDetectionControlElement.GetExcludeAttackTypeContexts() {
-												cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel := CdnLoadbalancerPolicyAppFirewallAttackTypeContext{}
+												cdnLoadbalancerAppFirewallAttackTypeContextModel := CdnLoadbalancerAppFirewallAttackTypeContext{}
 
 												// data specToModelNested RequiredEnumField --> Context
 												if excludeAttackTypeContextsElement.GetContext().String() != "" {
@@ -27302,17 +23451,17 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													if response.Diagnostics.HasError() {
 														return
 													}
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.Context = listValue
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.Context = listValue
 												} else {
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested StringField --> ContextName
 												if excludeAttackTypeContextsElement.GetContextName() != "" {
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
 												}
 
 												// data specToModelNested RequiredEnumField --> ExcludeAttackType
@@ -27324,12 +23473,12 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													if response.Diagnostics.HasError() {
 														return
 													}
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
 												} else {
-													cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
+													cdnLoadbalancerAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
 												}
 
-												excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, cdnLoadbalancerPolicyAppFirewallAttackTypeContextModel)
+												excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, cdnLoadbalancerAppFirewallAttackTypeContextModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27351,19 +23500,19 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											excludeBotNameContextsElements := make([]CdnLoadbalancerPolicyBotNameContext, 0, len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()))
+											excludeBotNameContextsElements := make([]CdnLoadbalancerBotNameContext, 0, len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()))
 											for _, excludeBotNameContextsElement := range appFirewallDetectionControlElement.GetExcludeBotNameContexts() {
-												cdnLoadbalancerPolicyBotNameContextModel := CdnLoadbalancerPolicyBotNameContext{}
+												cdnLoadbalancerBotNameContextModel := CdnLoadbalancerBotNameContext{}
 
 												// data specToModelNested RequiredStringField --> BotName
 												if excludeBotNameContextsElement.GetBotName() != "" {
-													cdnLoadbalancerPolicyBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
+													cdnLoadbalancerBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyBotNameContextModel.BotName = types.StringNull()
+													cdnLoadbalancerBotNameContextModel.BotName = types.StringNull()
 												}
 
-												excludeBotNameContextsElements = append(excludeBotNameContextsElements, cdnLoadbalancerPolicyBotNameContextModel)
+												excludeBotNameContextsElements = append(excludeBotNameContextsElements, cdnLoadbalancerBotNameContextModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27385,9 +23534,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											excludeSignatureContextsElements := make([]CdnLoadbalancerPolicyAppFirewallSignatureContext, 0, len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()))
+											excludeSignatureContextsElements := make([]CdnLoadbalancerAppFirewallSignatureContext, 0, len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()))
 											for _, excludeSignatureContextsElement := range appFirewallDetectionControlElement.GetExcludeSignatureContexts() {
-												cdnLoadbalancerPolicyAppFirewallSignatureContextModel := CdnLoadbalancerPolicyAppFirewallSignatureContext{}
+												cdnLoadbalancerAppFirewallSignatureContextModel := CdnLoadbalancerAppFirewallSignatureContext{}
 
 												// data specToModelNested RequiredEnumField --> Context
 												if excludeSignatureContextsElement.GetContext().String() != "" {
@@ -27398,23 +23547,23 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													if response.Diagnostics.HasError() {
 														return
 													}
-													cdnLoadbalancerPolicyAppFirewallSignatureContextModel.Context = listValue
+													cdnLoadbalancerAppFirewallSignatureContextModel.Context = listValue
 												} else {
-													cdnLoadbalancerPolicyAppFirewallSignatureContextModel.Context = types.ListNull(types.StringType)
+													cdnLoadbalancerAppFirewallSignatureContextModel.Context = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested StringField --> ContextName
 												if excludeSignatureContextsElement.GetContextName() != "" {
-													cdnLoadbalancerPolicyAppFirewallSignatureContextModel.ContextName = types.StringValue(excludeSignatureContextsElement.GetContextName())
+													cdnLoadbalancerAppFirewallSignatureContextModel.ContextName = types.StringValue(excludeSignatureContextsElement.GetContextName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyAppFirewallSignatureContextModel.ContextName = types.StringNull()
+													cdnLoadbalancerAppFirewallSignatureContextModel.ContextName = types.StringNull()
 												}
 
 												// data specToModelNested RequiredUintField --> SignatureId
-												cdnLoadbalancerPolicyAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
+												cdnLoadbalancerAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
 
-												excludeSignatureContextsElements = append(excludeSignatureContextsElements, cdnLoadbalancerPolicyAppFirewallSignatureContextModel)
+												excludeSignatureContextsElements = append(excludeSignatureContextsElements, cdnLoadbalancerAppFirewallSignatureContextModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27436,9 +23585,9 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 										if len(appFirewallDetectionControlElement.GetExcludeViolationContexts()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											excludeViolationContextsElements := make([]CdnLoadbalancerPolicyAppFirewallViolationContext, 0, len(appFirewallDetectionControlElement.GetExcludeViolationContexts()))
+											excludeViolationContextsElements := make([]CdnLoadbalancerAppFirewallViolationContext, 0, len(appFirewallDetectionControlElement.GetExcludeViolationContexts()))
 											for _, excludeViolationContextsElement := range appFirewallDetectionControlElement.GetExcludeViolationContexts() {
-												cdnLoadbalancerPolicyAppFirewallViolationContextModel := CdnLoadbalancerPolicyAppFirewallViolationContext{}
+												cdnLoadbalancerAppFirewallViolationContextModel := CdnLoadbalancerAppFirewallViolationContext{}
 
 												// data specToModelNested RequiredEnumField --> Context
 												if excludeViolationContextsElement.GetContext().String() != "" {
@@ -27449,17 +23598,17 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													if response.Diagnostics.HasError() {
 														return
 													}
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.Context = listValue
+													cdnLoadbalancerAppFirewallViolationContextModel.Context = listValue
 												} else {
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.Context = types.ListNull(types.StringType)
+													cdnLoadbalancerAppFirewallViolationContextModel.Context = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested StringField --> ContextName
 												if excludeViolationContextsElement.GetContextName() != "" {
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.ContextName = types.StringValue(excludeViolationContextsElement.GetContextName())
+													cdnLoadbalancerAppFirewallViolationContextModel.ContextName = types.StringValue(excludeViolationContextsElement.GetContextName())
 												} else {
 													// Empty string, set to null
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.ContextName = types.StringNull()
+													cdnLoadbalancerAppFirewallViolationContextModel.ContextName = types.StringNull()
 												}
 
 												// data specToModelNested RequiredEnumField --> ExcludeViolation
@@ -27471,12 +23620,12 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 													if response.Diagnostics.HasError() {
 														return
 													}
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.ExcludeViolation = listValue
+													cdnLoadbalancerAppFirewallViolationContextModel.ExcludeViolation = listValue
 												} else {
-													cdnLoadbalancerPolicyAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
+													cdnLoadbalancerAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
 												}
 
-												excludeViolationContextsElements = append(excludeViolationContextsElements, cdnLoadbalancerPolicyAppFirewallViolationContextModel)
+												excludeViolationContextsElements = append(excludeViolationContextsElements, cdnLoadbalancerAppFirewallViolationContextModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27527,13 +23676,13 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.WafAdvancedConfigurationChoice = finalObj
+								cdnLoadbalancerSimpleWafExclusionRuleModel.WafAdvancedConfigurationChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								cdnLoadbalancerPolicySimpleWafExclusionRuleModel.WafAdvancedConfigurationChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesWafAdvancedConfigurationModelAttributeMap)
+								cdnLoadbalancerSimpleWafExclusionRuleModel.WafAdvancedConfigurationChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesWafAdvancedConfigurationModelAttributeMap)
 							}
 
-							rulesElements = append(rulesElements, cdnLoadbalancerPolicySimpleWafExclusionRuleModel)
+							rulesElements = append(rulesElements, cdnLoadbalancerSimpleWafExclusionRuleModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -27562,50 +23711,6 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 				}
 			}
 
-			// data specToModelNested RequiredPointerOfOneOfField --> WafExclusionPolicy
-			// <no value>
-			{
-				wafExclusionPolicyOptionsWrapper, isWafExclusionPolicy := wafExclusionwafExclusionChoiceChoices.(*ves_io_schema_views_common_waf.WafExclusion_WafExclusionPolicy)
-				wafExclusionPolicyAttributeMap := make(map[string]attr.Value)
-
-				if isWafExclusionPolicy && wafExclusionPolicyOptionsWrapper != nil && wafExclusionPolicyOptionsWrapper.WafExclusionPolicy != nil {
-					wafExclusionPolicyElement := wafExclusionPolicyOptionsWrapper.WafExclusionPolicy
-
-					// data specToModelNested RequiredStringField --> Name
-					if wafExclusionPolicyElement.GetName() != "" {
-						wafExclusionPolicyAttributeMap["name"] = types.StringValue(wafExclusionPolicyElement.GetName())
-					} else {
-						// Empty string, set to null
-						wafExclusionPolicyAttributeMap["name"] = types.StringNull()
-					}
-
-					// data specToModelNested RequiredStringField --> Namespace
-					if wafExclusionPolicyElement.GetNamespace() != "" {
-						wafExclusionPolicyAttributeMap["namespace"] = types.StringValue(wafExclusionPolicyElement.GetNamespace())
-					} else {
-						// Empty string, set to null
-						wafExclusionPolicyAttributeMap["namespace"] = types.StringNull()
-					}
-
-					// data specToModelNested StringField --> Tenant
-					if wafExclusionPolicyElement.GetTenant() != "" {
-						wafExclusionPolicyAttributeMap["tenant"] = types.StringValue(wafExclusionPolicyElement.GetTenant())
-					} else {
-						// Empty string, set to null
-						wafExclusionPolicyAttributeMap["tenant"] = types.StringNull()
-					}
-
-					wafExclusionPolicyObj, wafExclusionPolicyObjDiags := types.ObjectValue(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionPolicyModelAttributeMap, wafExclusionPolicyAttributeMap)
-					response.Diagnostics.Append(wafExclusionPolicyObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					wafExclusionwafExclusionChoiceChoicesAttributeMap["waf_exclusion_policy"] = wafExclusionPolicyObj
-				} else {
-					wafExclusionwafExclusionChoiceChoicesAttributeMap["waf_exclusion_policy"] = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionPolicyModelAttributeMap)
-				}
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -27619,16 +23724,16 @@ func (d *DataSourceF5XCCdnLoadbalancer) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnLoadbalancerCommonWafWafExclusionModel.WafExclusionChoice = finalObj
+			cdnLoadbalancerWafExclusionModel.WafExclusionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnLoadbalancerCommonWafWafExclusionModel.WafExclusionChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceModelAttributeMap)
+			cdnLoadbalancerWafExclusionModel.WafExclusionChoice = types.ObjectNull(CdnLoadbalancerWafExclusionWafExclusionChoiceModelAttributeMap)
 		}
 
 		wafExclusionObj, wafExclusionDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnLoadbalancerWafExclusionModelAttributeMap,
-			cdnLoadbalancerCommonWafWafExclusionModel,
+			cdnLoadbalancerWafExclusionModel,
 		)
 		response.Diagnostics.Append(wafExclusionDiags...)
 		data.WafExclusion = wafExclusionObj

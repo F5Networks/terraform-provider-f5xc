@@ -23,7 +23,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -41,6 +40,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -346,18 +346,7 @@ type SvcPolicyRuleMaxUrlSizeChoice struct {
 }
 
 type SvcPolicyRuleSegmentPolicyType struct {
-	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
-}
-
-type SvcPolicyRuleDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-}
-
-type SvcPolicyRuleDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
 }
 
 type SvcPolicyRuleSrcSegmentChoice struct {
@@ -1022,45 +1011,9 @@ var ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap = map[s
 // Attribute map for PointerField --> SegmentPolicy
 var ServicePolicyRuleSegmentPolicyModelAttributeMap = map[string]attr.Type{
 
-	"dst_segment_choice": types.ObjectType{
-		AttrTypes: ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap,
-	},
 	"src_segment_choice": types.ObjectType{
 		AttrTypes: ServicePolicyRuleSegmentPolicySrcSegmentChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
-	},
-	"intra_segment": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"namespace": types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var ServicePolicyRuleSegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> SrcSegmentChoice
@@ -1085,6 +1038,14 @@ var ServicePolicyRuleSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap =
 			},
 		},
 	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var ServicePolicyRuleSegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> TlsFingerprintChoice
@@ -1242,8 +1203,8 @@ func (r *ResourceF5XCServicePolicyRule) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Challenge Rule Spec A Challenge Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a challenge rule, the configured challenge is enforced.",
-		Description:         "Challenge Rule Spec A Challenge Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a challenge rule, the configured challenge is enforced.",
+		MarkdownDescription: "A service_policy_rule object consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are<br>extracted from or derived from an L7 request API. A request API is considered to match a rule if all predicates in the rule evaluate to true for that request.<br>Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a rule, the action specified for the rule is<br>enforced for that request.<br><br>A service_policy_rule can be part of exactly one service_policy and must belong to the same namespace as the service policy.",
+		Description:         "A service_policy_rule object consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match a rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a rule, the action specified for the rule is enforced for that request. A service_policy_rule can be part of exactly one service_policy and must belong to the same namespace as the service policy.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1441,14 +1402,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -1552,7 +1514,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -1599,14 +1561,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"transformers": schema.ListAttribute{
 						Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-						MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+						MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 						ElementType:         types.StringType,
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+						Computed:            false,
 						Validators: []validator.List{
 							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+							listvalidator.SizeAtMost(9),
+							listvalidator.UniqueValues(),
 						},
 					},
 				},
@@ -1765,6 +1728,8 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								Computed:            false,
 								Validators: []validator.List{
 									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BOTNETS", "DENIAL_OF_SERVICE", "MOBILE_THREATS", "NETWORK", "PHISHING", "PROXY", "REPUTATION", "SCANNERS", "SPAM_SOURCES", "TOR_PROXY", "WEB_ATTACKS", "WINDOWS_EXPLOITS"}...)),
+									listvalidator.SizeAtMost(32),
+									listvalidator.UniqueValues(),
 								},
 							},
 						},
@@ -1861,14 +1826,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -2023,14 +1989,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -2071,14 +2038,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"methods": schema.ListAttribute{
 						Description:         "methods List of methods values to match against.",
-						MarkdownDescription: "methods List of methods values to match against.<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)<br>**Default:** `ANY`",
+						MarkdownDescription: "methods List of methods values to match against.<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)",
 						ElementType:         types.StringType,
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ANY")),
+						Computed:            false,
 						Validators: []validator.List{
 							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+							listvalidator.SizeAtMost(16),
+							listvalidator.UniqueValues(),
 						},
 					},
 				},
@@ -2154,7 +2122,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -2204,7 +2172,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(128),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 									listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
@@ -2305,14 +2273,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -2495,14 +2464,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"transformers": schema.ListAttribute{
 						Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-						MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+						MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 						ElementType:         types.StringType,
 						Required:            false,
 						Optional:            true,
-						Computed:            true,
-						Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+						Computed:            false,
 						Validators: []validator.List{
 							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+							listvalidator.SizeAtMost(9),
+							listvalidator.UniqueValues(),
 						},
 					},
 				},
@@ -2640,14 +2610,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 										},
 										"transformers": schema.ListAttribute{
 											Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+											MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+												listvalidator.SizeAtMost(9),
+												listvalidator.UniqueValues(),
 											},
 										},
 									},
@@ -3128,86 +3099,6 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
-					"dst_segment_choice": schema.SingleNestedAttribute{
-						Description:         "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-						MarkdownDescription: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Object{
-							exactlyoneofvalidator.ExactlyOneOf(
-								"dst_any",
-								"dst_segments",
-								"intra_segment",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"dst_any": schema.BoolAttribute{
-								Description:         "Any segment Traffic is not matched against any segment",
-								MarkdownDescription: "Any segment Traffic is not matched against any segment",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"dst_segments": schema.SingleNestedAttribute{
-								Description:         "List of segments Traffic is matched against destination segment in selected segments",
-								MarkdownDescription: "List of segments Traffic is matched against destination segment in selected segments",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"segments": schema.ListNestedAttribute{
-										Description:         "Segments Select list of segments",
-										MarkdownDescription: "Segments Select list of segments",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-												"namespace": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-												"tenant": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            false,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							"intra_segment": schema.BoolAttribute{
-								Description:         "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-								MarkdownDescription: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-						},
-					},
 					"src_segment_choice": schema.SingleNestedAttribute{
 						Description:         "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
 						MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
@@ -3267,7 +3158,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -3323,14 +3214,15 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						Attributes: map[string]schema.Attribute{
 							"classes": schema.ListAttribute{
 								Description:         "classes A list of known classes of TLS fingerprints to match the input TLS JA3 fingerprint against.",
-								MarkdownDescription: "classes A list of known classes of TLS fingerprints to match the input TLS JA3 fingerprint against.<br>**Valid Options:** `['ADWARE', 'ADWIND', 'ANY_MALICIOUS_FINGERPRINT', 'DRIDEX', 'GOOTKIT', 'GOZI', 'JBIFROST', 'QUAKBOT', 'RANSOMWARE', 'TOFSEE', 'TORRENTLOCKER', 'TRICKBOT', 'TROLDESH']` (Multiple selection allowed)<br>**Default:** `TLS_FINGERPRINT_NONE`",
+								MarkdownDescription: "classes A list of known classes of TLS fingerprints to match the input TLS JA3 fingerprint against.<br>**Valid Options:** `['ADWARE', 'ADWIND', 'ANY_MALICIOUS_FINGERPRINT', 'DRIDEX', 'GOOTKIT', 'GOZI', 'JBIFROST', 'QUAKBOT', 'RANSOMWARE', 'TOFSEE', 'TORRENTLOCKER', 'TRICKBOT', 'TROLDESH']` (Multiple selection allowed)",
 								ElementType:         types.StringType,
 								Required:            false,
 								Optional:            true,
-								Computed:            true,
-								Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TLS_FINGERPRINT_NONE")),
+								Computed:            false,
 								Validators: []validator.List{
 									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ADWARE", "ADWIND", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "RANSOMWARE", "TOFSEE", "TORRENTLOCKER", "TRICKBOT", "TROLDESH"}...)),
+									listvalidator.SizeAtMost(16),
+									listvalidator.UniqueValues(),
 								},
 							},
 							"exact_values": schema.ListAttribute{
@@ -3545,13 +3437,13 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 												},
 												"exclude_violation": schema.ListAttribute{
 													Description:         "ViolationType",
-													MarkdownDescription: "ViolationType<br>**Allowed Values (choose one):** `['VIOL_ASM_COOKIE_MODIFIED', 'VIOL_COOKIE_MODIFIED', 'VIOL_EVASION_APACHE_WHITESPACE', 'VIOL_EVASION_BARE_BYTE_DECODING', 'VIOL_EVASION_DIRECTORY_TRAVERSALS', 'VIOL_EVASION_IIS_BACKSLASHES', 'VIOL_EVASION_IIS_UNICODE_CODEPOINTS', 'VIOL_EVASION_MULTIPLE_DECODING', 'VIOL_EVASION_PERCENT_U_DECODING', 'VIOL_FILETYPE', 'VIOL_FILE_UPLOAD', 'VIOL_FILE_UPLOAD_IN_BODY', 'VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE', 'VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING', 'VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER', 'VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START', 'VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS', 'VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST', 'VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST', 'VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS', 'VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT', 'VIOL_JSON_MALFORMED', 'VIOL_MALFORMED_REQUEST', 'VIOL_MANDATORY_HEADER', 'VIOL_METHOD', 'VIOL_REQUEST_MAX_LENGTH', 'VIOL_XML_MALFORMED']`",
+													MarkdownDescription: "ViolationType<br>**Allowed Values (choose one):** `['VIOL_ASM_COOKIE_MODIFIED', 'VIOL_COOKIE_MALFORMED', 'VIOL_COOKIE_MODIFIED', 'VIOL_ENCODING', 'VIOL_EVASION_APACHE_WHITESPACE', 'VIOL_EVASION_BAD_UNESCAPE', 'VIOL_EVASION_BARE_BYTE_DECODING', 'VIOL_EVASION_DIRECTORY_TRAVERSALS', 'VIOL_EVASION_IIS_BACKSLASHES', 'VIOL_EVASION_IIS_UNICODE_CODEPOINTS', 'VIOL_EVASION_MULTIPLE_DECODING', 'VIOL_EVASION_PERCENT_U_DECODING', 'VIOL_FILETYPE', 'VIOL_FILE_UPLOAD', 'VIOL_FILE_UPLOAD_IN_BODY', 'VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE', 'VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING', 'VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST', 'VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER', 'VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START', 'VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS', 'VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS', 'VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST', 'VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST', 'VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS', 'VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT', 'VIOL_JSON_MALFORMED', 'VIOL_MALFORMED_REQUEST', 'VIOL_MANDATORY_HEADER', 'VIOL_METHOD', 'VIOL_REQUEST_MAX_LENGTH', 'VIOL_XML_MALFORMED']`",
 													ElementType:         types.StringType,
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.List{
-														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIOL_ASM_COOKIE_MODIFIED", "VIOL_COOKIE_MODIFIED", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_JSON_MALFORMED", "VIOL_MALFORMED_REQUEST", "VIOL_MANDATORY_HEADER", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_XML_MALFORMED"}...)),
+														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIOL_ASM_COOKIE_MODIFIED", "VIOL_COOKIE_MALFORMED", "VIOL_COOKIE_MODIFIED", "VIOL_ENCODING", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_JSON_MALFORMED", "VIOL_MALFORMED_REQUEST", "VIOL_MANDATORY_HEADER", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_XML_MALFORMED"}...)),
 														listvalidator.SizeAtMost(1),
 													},
 												},
@@ -3646,9 +3538,17 @@ func (r *ResourceF5XCServicePolicyRule) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCServicePolicyRuleModel
 
 	// Read Terraform plan data into the model
@@ -5487,6 +5387,9 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> SegmentPolicy
 		if !data.SegmentPolicy.IsNull() && !data.SegmentPolicy.IsUnknown() {
 			segmentPolicySpec := &ves_io_schema_policy.SegmentPolicyType{}
+			segmentPolicySpec.DstSegmentChoice = &ves_io_schema_policy.SegmentPolicyType_DstAny{
+				DstAny: &ves_io_schema.Empty{},
+			}
 			spec.SegmentPolicy = segmentPolicySpec
 			var segmentPolicyModel SvcPolicyRuleSegmentPolicyType
 
@@ -5495,76 +5398,6 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			response.Diagnostics.Append(diags...)
 			if response.Diagnostics.HasError() {
 				return
-			}
-
-			// resource modelToSpecNested OneOfField --> DstSegmentChoice
-			if !segmentPolicyModel.DstSegmentChoice.IsNull() && !segmentPolicyModel.DstSegmentChoice.IsUnknown() {
-				segmentPolicyDstSegmentChoiceModel := SvcPolicyRuleDstSegmentChoice{}
-				response.Diagnostics.Append(segmentPolicyModel.DstSegmentChoice.As(ctx, &segmentPolicyDstSegmentChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DstAny
-				if !segmentPolicyDstSegmentChoiceModel.DstAny.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstAny.IsUnknown() {
-					dstAnySpecBool := &ves_io_schema_policy.SegmentPolicyType_DstAny{}
-					dstAnySpecBool.DstAny = &ves_io_schema.Empty{}
-					segmentPolicySpec.DstSegmentChoice = dstAnySpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> DstSegments
-				if !segmentPolicyDstSegmentChoiceModel.DstSegments.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstSegments.IsUnknown() {
-					var svcPolicyRuleDstSegmentsModel SvcPolicyRuleDstSegments
-					response.Diagnostics.Append(segmentPolicyDstSegmentChoiceModel.DstSegments.As(ctx, &svcPolicyRuleDstSegmentsModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dstSegmentsOneOfSpec := &ves_io_schema_policy.SegmentPolicyType_DstSegments{}
-					dstSegmentsOneOfSpec.DstSegments = &ves_io_schema_views.SegmentRefList{}
-					segmentPolicySpec.DstSegmentChoice = dstSegmentsOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfPointerField --> Segments
-					if !svcPolicyRuleDstSegmentsModel.Segments.IsNull() && !svcPolicyRuleDstSegmentsModel.Segments.IsUnknown() && len(svcPolicyRuleDstSegmentsModel.Segments.Elements()) > 0 {
-						// 1. Convert the types.List into a slice of the model's Go struct
-						var segmentsElements []ObjectRefTypeModel
-						response.Diagnostics.Append(svcPolicyRuleDstSegmentsModel.Segments.ElementsAs(ctx, &segmentsElements, false)...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// 2. Initialize the spec slice
-						segmentsSpec := make([]*ves_io_schema_views.ObjectRefType, len(segmentsElements))
-						dstSegmentsOneOfSpec.DstSegments.Segments = segmentsSpec
-
-						// 3. Iterate over the converted Go slice
-						for i, segmentsElement := range segmentsElements {
-							// Initialize the spec struct for the current element
-							dstSegmentsOneOfSpec.DstSegments.Segments[i] = &ves_io_schema_views.ObjectRefType{}
-
-							// Recursively process nested elements
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !segmentsElement.Name.IsNull() && !segmentsElement.Name.IsUnknown() {
-								dstSegmentsOneOfSpec.DstSegments.Segments[i].Name = string(segmentsElement.Name.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !segmentsElement.Namespace.IsNull() && !segmentsElement.Namespace.IsUnknown() {
-								dstSegmentsOneOfSpec.DstSegments.Segments[i].Namespace = string(segmentsElement.Namespace.ValueString())
-							}
-
-						}
-					}
-
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> IntraSegment
-				if !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsNull() && !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsUnknown() {
-					intraSegmentSpecBool := &ves_io_schema_policy.SegmentPolicyType_IntraSegment{}
-					intraSegmentSpecBool.IntraSegment = &ves_io_schema.Empty{}
-					segmentPolicySpec.DstSegmentChoice = intraSegmentSpecBool
-				}
-
 			}
 
 			// resource modelToSpecNested OneOfField --> SrcSegmentChoice
@@ -6025,7 +5858,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6048,7 +5881,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_service_policy_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "service_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "service_policy_rule", err),
 		)
 		return
 	}
@@ -6441,6 +6274,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleArgMatchersMatchModelAttributeMap)
 			}
 
@@ -6474,14 +6308,12 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleArgMatchersModelAttributeMap,
 		}
 		nullArgMatchersList := basetypes.NewListNull(argMatchersObjectType)
-		var priorValArgMatchers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("arg_matchers"), &priorValArgMatchers)
-		if !priorValArgMatchers.IsNull() && !priorValArgMatchers.IsUnknown() {
-			data.ArgMatchers = priorValArgMatchers
+		if !data.ArgMatchers.IsNull() && !data.ArgMatchers.IsUnknown() && len(data.ArgMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ArgMatchers = basetypes.NewListValueMust(argMatchersObjectType, nil)
 		} else {
 			data.ArgMatchers = nullArgMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
@@ -6827,6 +6659,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleBotActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleBotActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleBotActionActionTypeModelAttributeMap)
 		}
 
@@ -7229,6 +7062,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleCookieMatchersMatchModelAttributeMap)
 			}
 
@@ -7262,14 +7096,12 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleCookieMatchersModelAttributeMap,
 		}
 		nullCookieMatchersList := basetypes.NewListNull(cookieMatchersObjectType)
-		var priorValCookieMatchers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("cookie_matchers"), &priorValCookieMatchers)
-		if !priorValCookieMatchers.IsNull() && !priorValCookieMatchers.IsUnknown() {
-			data.CookieMatchers = priorValCookieMatchers
+		if !data.CookieMatchers.IsNull() && !data.CookieMatchers.IsUnknown() && len(data.CookieMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CookieMatchers = basetypes.NewListValueMust(cookieMatchersObjectType, nil)
 		} else {
 			data.CookieMatchers = nullCookieMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> DomainMatcher
@@ -7472,6 +7304,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleHeadersMatchModelAttributeMap)
 			}
 
@@ -7505,14 +7338,12 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleHeadersModelAttributeMap,
 		}
 		nullHeadersList := basetypes.NewListNull(headersObjectType)
-		var priorValHeaders types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("headers"), &priorValHeaders)
-		if !priorValHeaders.IsNull() && !priorValHeaders.IsUnknown() {
-			data.Headers = priorValHeaders
+		if !data.Headers.IsNull() && !data.Headers.IsUnknown() && len(data.Headers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Headers = basetypes.NewListValueMust(headersObjectType, nil)
 		} else {
 			data.Headers = nullHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> HttpMethod
@@ -7724,9 +7555,31 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ip_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					} else {
-						ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					}
 				}
 
@@ -7738,9 +7591,31 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					} else {
-						ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					}
 				}
 
@@ -7925,6 +7800,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleJwtClaimsMatchModelAttributeMap)
 			}
 
@@ -7958,14 +7834,12 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleJwtClaimsModelAttributeMap,
 		}
 		nullJwtClaimsList := basetypes.NewListNull(jwtClaimsObjectType)
-		var priorValJwtClaims types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("jwt_claims"), &priorValJwtClaims)
-		if !priorValJwtClaims.IsNull() && !priorValJwtClaims.IsUnknown() {
-			data.JwtClaims = priorValJwtClaims
+		if !data.JwtClaims.IsNull() && !data.JwtClaims.IsUnknown() && len(data.JwtClaims.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.JwtClaims = basetypes.NewListValueMust(jwtClaimsObjectType, nil)
 		} else {
 			data.JwtClaims = nullJwtClaimsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> LabelMatcher
@@ -8081,6 +7955,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleModifyActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleModifyActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleMumActionActionTypeModelAttributeMap)
 		}
 
@@ -8393,6 +8268,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleQueryParamsMatchModelAttributeMap)
 			}
 
@@ -8418,14 +8294,12 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleQueryParamsModelAttributeMap,
 		}
 		nullQueryParamsList := basetypes.NewListNull(queryParamsObjectType)
-		var priorValQueryParams types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("query_params"), &priorValQueryParams)
-		if !priorValQueryParams.IsNull() && !priorValQueryParams.IsUnknown() {
-			data.QueryParams = priorValQueryParams
+		if !data.QueryParams.IsNull() && !data.QueryParams.IsUnknown() && len(data.QueryParams.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.QueryParams = basetypes.NewListValueMust(queryParamsObjectType, nil)
 		} else {
 			data.QueryParams = nullQueryParamsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> RequestConstraints
@@ -8493,6 +8367,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
 		}
 
@@ -8556,6 +8431,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
 		}
 
@@ -8619,6 +8495,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
 		}
 
@@ -8682,6 +8559,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
 		}
 
@@ -8745,6 +8623,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
 		}
 
@@ -8808,6 +8687,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
 		}
 
@@ -8871,6 +8751,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
 		}
 
@@ -8934,6 +8815,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
 		}
 
@@ -8997,6 +8879,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
 		}
 
@@ -9060,6 +8943,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
 		}
 
@@ -9123,6 +9007,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
 		}
 
@@ -9186,6 +9071,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
 		}
 
@@ -9249,6 +9135,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap)
 		}
 
@@ -9270,151 +9157,6 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 	if specData.GetSegmentPolicy() != nil {
 		var svcPolicyRuleSegmentPolicyTypeModel = &SvcPolicyRuleSegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
-
-		// resource specToModelNested OneOfField --> DstSegmentChoice
-		// CreateSpecType: GetDstSegmentChoice() returns the oneof interface value.
-		if segmentPolicyElement.GetDstSegmentChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-			var dstAnyInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			if !dstAnyInMap {
-				if _, found := rawSpecMap["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			_, isDstAnyForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-			if dstAnyInMap || isDstAnyForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DstSegments
-			// CreateSpecType
-			// true
-			{
-				dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-				dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-				if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-					dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-					// resource specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(dstSegmentsElement.GetSegments()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-						for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-							objectRefTypeModelModel := ObjectRefTypeModel{}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if segmentsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
-							}
-
-							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(segmentsListDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap})
-					}
-
-					dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-					response.Diagnostics.Append(dstSegmentsObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-				} else {
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-			var intraSegmentInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			if !intraSegmentInMap {
-				if _, found := rawSpecMap["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			_, isIntraSegmentForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-			if intraSegmentInMap || isIntraSegmentForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-				ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				segmentPolicydstSegmentChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = finalObj
-		} else {
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested OneOfField --> SrcSegmentChoice
 		// CreateSpecType: GetSrcSegmentChoice() returns the oneof interface value.
@@ -9536,6 +9278,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
@@ -10040,6 +9783,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleWafActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleWafActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleWafActionActionTypeModelAttributeMap)
 		}
 
@@ -10113,7 +9857,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_service_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "service_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "service_policy_rule", err),
 		)
 		return
 	}
@@ -10500,6 +10244,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleArgMatchersMatchModelAttributeMap)
 			}
 
@@ -10533,14 +10278,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			AttrTypes: ServicePolicyRuleArgMatchersModelAttributeMap,
 		}
 		nullArgMatchersList := basetypes.NewListNull(argMatchersObjectType)
-		var priorValArgMatchers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("arg_matchers"), &priorValArgMatchers)
-		if !priorValArgMatchers.IsNull() && !priorValArgMatchers.IsUnknown() {
-			data.ArgMatchers = priorValArgMatchers
+		if !data.ArgMatchers.IsNull() && !data.ArgMatchers.IsUnknown() && len(data.ArgMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ArgMatchers = basetypes.NewListValueMust(argMatchersObjectType, nil)
 		} else {
 			data.ArgMatchers = nullArgMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
@@ -10739,7 +10482,14 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.AsnChoice = types.ObjectNull(ServicePolicyRuleAsnChoiceModelAttributeMap)
+
+		if data.AsnChoice.IsNull() || data.AsnChoice.IsUnknown() || ((data.AsnChoice.Attributes()["any_asn"].IsNull() || data.AsnChoice.Attributes()["any_asn"].IsUnknown()) && (data.AsnChoice.Attributes()["asn_list"].(types.Object).IsNull() || data.AsnChoice.Attributes()["asn_list"].(types.Object).IsUnknown() || (data.AsnChoice.Attributes()["asn_list"].(types.Object).Attributes()["as_numbers"].IsNull() || data.AsnChoice.Attributes()["asn_list"].(types.Object).Attributes()["as_numbers"].IsUnknown())) && (data.AsnChoice.Attributes()["asn_matcher"].(types.Object).IsNull() || data.AsnChoice.Attributes()["asn_matcher"].(types.Object).IsUnknown() || (data.AsnChoice.Attributes()["asn_matcher"].(types.Object).Attributes()["asn_sets"].IsNull() || data.AsnChoice.Attributes()["asn_matcher"].(types.Object).Attributes()["asn_sets"].IsUnknown()))) {
+			data.AsnChoice = types.ObjectValueMust(ServicePolicyRuleAsnChoiceModelAttributeMap, map[string]attr.Value{
+				"any_asn":     types.BoolValue(true),
+				"asn_list":    types.ObjectNull(ServicePolicyRuleAsnChoiceAsnListModelAttributeMap),
+				"asn_matcher": types.ObjectNull(ServicePolicyRuleAsnChoiceAsnMatcherModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> BodyMatcher
@@ -10886,7 +10636,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleBotActionModel.ActionTypeChoice = finalObj
 		} else {
-			svcPolicyRuleBotActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleBotActionActionTypeModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleBotActionModel.ActionTypeChoice = types.ObjectValueMust(ServicePolicyRuleBotActionActionTypeModelAttributeMap, map[string]attr.Value{
+				"bot_skip_processing": types.BoolNull(),
+				"none":                types.BoolValue(true),
+			})
 		}
 
 		botActionObj, botActionDiags := utils.GoStructToObjectValue(
@@ -11135,7 +10889,16 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.ClientChoice = types.ObjectNull(ServicePolicyRuleClientChoiceModelAttributeMap)
+
+		if data.ClientChoice.IsNull() || data.ClientChoice.IsUnknown() || ((data.ClientChoice.Attributes()["any_client"].IsNull() || data.ClientChoice.Attributes()["any_client"].IsUnknown()) && (data.ClientChoice.Attributes()["client_name"].IsNull() || data.ClientChoice.Attributes()["client_name"].IsUnknown()) && (data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).IsNull() || data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).IsUnknown() || ((data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).Attributes()["exact_values"].IsNull() || data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).Attributes()["exact_values"].IsUnknown()) && (data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).Attributes()["regex_values"].IsNull() || data.ClientChoice.Attributes()["client_name_matcher"].(types.Object).Attributes()["regex_values"].IsUnknown()))) && (data.ClientChoice.Attributes()["client_selector"].(types.Object).IsNull() || data.ClientChoice.Attributes()["client_selector"].(types.Object).IsUnknown() || (data.ClientChoice.Attributes()["client_selector"].(types.Object).Attributes()["expressions"].IsNull() || data.ClientChoice.Attributes()["client_selector"].(types.Object).Attributes()["expressions"].IsUnknown())) && (data.ClientChoice.Attributes()["ip_threat_category_list"].(types.Object).IsNull() || data.ClientChoice.Attributes()["ip_threat_category_list"].(types.Object).IsUnknown() || (data.ClientChoice.Attributes()["ip_threat_category_list"].(types.Object).Attributes()["ip_threat_categories"].IsNull() || data.ClientChoice.Attributes()["ip_threat_category_list"].(types.Object).Attributes()["ip_threat_categories"].IsUnknown()))) {
+			data.ClientChoice = types.ObjectValueMust(ServicePolicyRuleClientChoiceModelAttributeMap, map[string]attr.Value{
+				"any_client":              types.BoolValue(true),
+				"client_name":             types.StringNull(),
+				"client_name_matcher":     types.ObjectNull(ServicePolicyRuleClientChoiceClientNameMatcherModelAttributeMap),
+				"client_selector":         types.ObjectNull(ServicePolicyRuleClientChoiceClientSelectorModelAttributeMap),
+				"ip_threat_category_list": types.ObjectNull(ServicePolicyRuleClientChoiceIpThreatCategoryListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> CookieMatchers
@@ -11288,6 +11051,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleCookieMatchersMatchModelAttributeMap)
 			}
 
@@ -11321,14 +11085,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			AttrTypes: ServicePolicyRuleCookieMatchersModelAttributeMap,
 		}
 		nullCookieMatchersList := basetypes.NewListNull(cookieMatchersObjectType)
-		var priorValCookieMatchers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("cookie_matchers"), &priorValCookieMatchers)
-		if !priorValCookieMatchers.IsNull() && !priorValCookieMatchers.IsUnknown() {
-			data.CookieMatchers = priorValCookieMatchers
+		if !data.CookieMatchers.IsNull() && !data.CookieMatchers.IsUnknown() && len(data.CookieMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CookieMatchers = basetypes.NewListValueMust(cookieMatchersObjectType, nil)
 		} else {
 			data.CookieMatchers = nullCookieMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> DomainMatcher
@@ -11531,6 +11293,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleHeadersMatchModelAttributeMap)
 			}
 
@@ -11564,14 +11327,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			AttrTypes: ServicePolicyRuleHeadersModelAttributeMap,
 		}
 		nullHeadersList := basetypes.NewListNull(headersObjectType)
-		var priorValHeaders types.List
-		_ = request.State.GetAttribute(ctx, path.Root("headers"), &priorValHeaders)
-		if !priorValHeaders.IsNull() && !priorValHeaders.IsUnknown() {
-			data.Headers = priorValHeaders
+		if !data.Headers.IsNull() && !data.Headers.IsUnknown() && len(data.Headers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Headers = basetypes.NewListValueMust(headersObjectType, nil)
 		} else {
 			data.Headers = nullHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> HttpMethod
@@ -11783,9 +11544,31 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ip_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					} else {
-						ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					}
 				}
 
@@ -11797,9 +11580,31 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					} else {
-						ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					}
 				}
 
@@ -11831,7 +11636,14 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IpChoice = types.ObjectNull(ServicePolicyRuleIpChoiceModelAttributeMap)
+
+		if data.IpChoice.IsNull() || data.IpChoice.IsUnknown() || ((data.IpChoice.Attributes()["any_ip"].IsNull() || data.IpChoice.Attributes()["any_ip"].IsUnknown()) && (data.IpChoice.Attributes()["ip_matcher"].(types.Object).IsNull() || data.IpChoice.Attributes()["ip_matcher"].(types.Object).IsUnknown() || ((data.IpChoice.Attributes()["ip_matcher"].(types.Object).Attributes()["invert_matcher"].IsNull() || data.IpChoice.Attributes()["ip_matcher"].(types.Object).Attributes()["invert_matcher"].IsUnknown()) && (data.IpChoice.Attributes()["ip_matcher"].(types.Object).Attributes()["prefix_sets"].IsNull() || data.IpChoice.Attributes()["ip_matcher"].(types.Object).Attributes()["prefix_sets"].IsUnknown()))) && (data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).IsNull() || data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).IsUnknown() || ((data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["invert_match"].IsNull() || data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["invert_match"].IsUnknown()) && (data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["ip_prefixes"].IsNull() || data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["ip_prefixes"].IsUnknown()) && (data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["ipv6_prefixes"].IsNull() || data.IpChoice.Attributes()["ip_prefix_list"].(types.Object).Attributes()["ipv6_prefixes"].IsUnknown())))) {
+			data.IpChoice = types.ObjectValueMust(ServicePolicyRuleIpChoiceModelAttributeMap, map[string]attr.Value{
+				"any_ip":         types.BoolValue(true),
+				"ip_matcher":     types.ObjectNull(ServicePolicyRuleIpChoiceIpMatcherModelAttributeMap),
+				"ip_prefix_list": types.ObjectNull(ServicePolicyRuleIpChoiceIpPrefixListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> JwtClaims
@@ -11984,6 +11796,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleJwtClaimsMatchModelAttributeMap)
 			}
 
@@ -12017,14 +11830,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			AttrTypes: ServicePolicyRuleJwtClaimsModelAttributeMap,
 		}
 		nullJwtClaimsList := basetypes.NewListNull(jwtClaimsObjectType)
-		var priorValJwtClaims types.List
-		_ = request.State.GetAttribute(ctx, path.Root("jwt_claims"), &priorValJwtClaims)
-		if !priorValJwtClaims.IsNull() && !priorValJwtClaims.IsUnknown() {
-			data.JwtClaims = priorValJwtClaims
+		if !data.JwtClaims.IsNull() && !data.JwtClaims.IsUnknown() && len(data.JwtClaims.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.JwtClaims = basetypes.NewListValueMust(jwtClaimsObjectType, nil)
 		} else {
 			data.JwtClaims = nullJwtClaimsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> LabelMatcher
@@ -12140,7 +11951,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleModifyActionModel.ActionTypeChoice = finalObj
 		} else {
-			svcPolicyRuleModifyActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleMumActionActionTypeModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleModifyActionModel.ActionTypeChoice = types.ObjectValueMust(ServicePolicyRuleMumActionActionTypeModelAttributeMap, map[string]attr.Value{
+				"default":         types.BoolValue(true),
+				"skip_processing": types.BoolNull(),
+			})
 		}
 
 		mumActionObj, mumActionDiags := utils.GoStructToObjectValue(
@@ -12452,6 +12267,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleQueryParamsMatchModelAttributeMap)
 			}
 
@@ -12477,14 +12293,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			AttrTypes: ServicePolicyRuleQueryParamsModelAttributeMap,
 		}
 		nullQueryParamsList := basetypes.NewListNull(queryParamsObjectType)
-		var priorValQueryParams types.List
-		_ = request.State.GetAttribute(ctx, path.Root("query_params"), &priorValQueryParams)
-		if !priorValQueryParams.IsNull() && !priorValQueryParams.IsUnknown() {
-			data.QueryParams = priorValQueryParams
+		if !data.QueryParams.IsNull() && !data.QueryParams.IsUnknown() && len(data.QueryParams.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.QueryParams = basetypes.NewListValueMust(queryParamsObjectType, nil)
 		} else {
 			data.QueryParams = nullQueryParamsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> RequestConstraints
@@ -12552,7 +12366,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap, map[string]attr.Value{
+				"max_cookie_count_exceeds": types.Int64Null(),
+				"max_cookie_count_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxCookieKeySizeChoice
@@ -12615,7 +12433,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_cookie_key_size_exceeds": types.Int64Null(),
+				"max_cookie_key_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxCookieValueSizeChoice
@@ -12678,7 +12500,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_cookie_value_size_exceeds": types.Int64Null(),
+				"max_cookie_value_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxHeaderCountChoice
@@ -12741,7 +12567,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap, map[string]attr.Value{
+				"max_header_count_exceeds": types.Int64Null(),
+				"max_header_count_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxHeaderKeySizeChoice
@@ -12804,7 +12634,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_header_key_size_exceeds": types.Int64Null(),
+				"max_header_key_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxHeaderValueSizeChoice
@@ -12867,7 +12701,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_header_value_size_exceeds": types.Int64Null(),
+				"max_header_value_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxParameterCountChoice
@@ -12930,7 +12768,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap, map[string]attr.Value{
+				"max_parameter_count_exceeds": types.Int64Null(),
+				"max_parameter_count_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxParameterNameSizeChoice
@@ -12993,7 +12835,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_parameter_name_size_exceeds": types.Int64Null(),
+				"max_parameter_name_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxParameterValueSizeChoice
@@ -13056,7 +12902,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_parameter_value_size_exceeds": types.Int64Null(),
+				"max_parameter_value_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxQuerySizeChoice
@@ -13119,7 +12969,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_query_size_exceeds": types.Int64Null(),
+				"max_query_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxRequestLineSizeChoice
@@ -13182,7 +13036,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_request_line_size_exceeds": types.Int64Null(),
+				"max_request_line_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxRequestSizeChoice
@@ -13245,7 +13103,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_request_size_exceeds": types.Int64Null(),
+				"max_request_size_none":    types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> MaxUrlSizeChoice
@@ -13308,7 +13170,11 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = finalObj
 		} else {
-			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = types.ObjectValueMust(ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap, map[string]attr.Value{
+				"max_url_size_exceeds": types.Int64Null(),
+				"max_url_size_none":    types.BoolValue(true),
+			})
 		}
 
 		requestConstraintsObj, requestConstraintsDiags := utils.GoStructToObjectValue(
@@ -13329,151 +13195,6 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 	if specData.GetSegmentPolicy() != nil {
 		var svcPolicyRuleSegmentPolicyTypeModel = &SvcPolicyRuleSegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
-
-		// resource specToModelNested OneOfField --> DstSegmentChoice
-		// CreateSpecType: GetDstSegmentChoice() returns the oneof interface value.
-		if segmentPolicyElement.GetDstSegmentChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-			var dstAnyInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			if !dstAnyInMap {
-				if _, found := rawSpecMap["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			_, isDstAnyForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-			if dstAnyInMap || isDstAnyForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DstSegments
-			// CreateSpecType
-			// true
-			{
-				dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-				dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-				if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-					dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-					// resource specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(dstSegmentsElement.GetSegments()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-						for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-							objectRefTypeModelModel := ObjectRefTypeModel{}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if segmentsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
-							}
-
-							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(segmentsListDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap})
-					}
-
-					dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-					response.Diagnostics.Append(dstSegmentsObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-				} else {
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-			var intraSegmentInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			if !intraSegmentInMap {
-				if _, found := rawSpecMap["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			_, isIntraSegmentForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-			if intraSegmentInMap || isIntraSegmentForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-				ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				segmentPolicydstSegmentChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = finalObj
-		} else {
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested OneOfField --> SrcSegmentChoice
 		// CreateSpecType: GetSrcSegmentChoice() returns the oneof interface value.
@@ -13595,6 +13316,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
@@ -14099,7 +13821,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleWafActionModel.ActionTypeChoice = finalObj
 		} else {
-			svcPolicyRuleWafActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleWafActionActionTypeModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			svcPolicyRuleWafActionModel.ActionTypeChoice = types.ObjectValueMust(ServicePolicyRuleWafActionActionTypeModelAttributeMap, map[string]attr.Value{
+				"app_firewall_detection_control": types.ObjectNull(ServicePolicyRuleWafActionActionTypeAppFirewallDetectionControlModelAttributeMap),
+				"none":                           types.BoolValue(true),
+				"waf_skip_processing":            types.BoolNull(),
+			})
 		}
 
 		wafActionObj, wafActionDiags := utils.GoStructToObjectValue(
@@ -14113,7 +13840,16 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		}
 		data.WafAction = wafActionObj
 	} else {
-		data.WafAction = types.ObjectNull(ServicePolicyRuleWafActionModelAttributeMap)
+
+		if data.WafAction.IsNull() || data.WafAction.IsUnknown() || (data.WafAction.Attributes()["action_type_choice"].(types.Object).IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).IsUnknown() || ((data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).IsUnknown() || ((data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_attack_type_contexts"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_attack_type_contexts"].IsUnknown()) && (data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_bot_name_contexts"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_bot_name_contexts"].IsUnknown()) && (data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_signature_contexts"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_signature_contexts"].IsUnknown()) && (data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_violation_contexts"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["app_firewall_detection_control"].(types.Object).Attributes()["exclude_violation_contexts"].IsUnknown()))) && (data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["none"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["none"].IsUnknown()) && (data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["waf_skip_processing"].IsNull() || data.WafAction.Attributes()["action_type_choice"].(types.Object).Attributes()["waf_skip_processing"].IsUnknown()))) {
+			data.WafAction = types.ObjectValueMust(ServicePolicyRuleWafActionModelAttributeMap, map[string]attr.Value{
+				"action_type_choice": types.ObjectValueMust(ServicePolicyRuleWafActionActionTypeModelAttributeMap, map[string]attr.Value{
+					"app_firewall_detection_control": types.ObjectNull(ServicePolicyRuleWafActionActionTypeAppFirewallDetectionControlModelAttributeMap),
+					"none":                           types.BoolValue(true),
+					"waf_skip_processing":            types.BoolNull(),
+				}),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -14125,6 +13861,12 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCServicePolicyRuleModel
@@ -15983,6 +15725,9 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> SegmentPolicy
 		if !data.SegmentPolicy.IsNull() && !data.SegmentPolicy.IsUnknown() {
 			segmentPolicySpec := &ves_io_schema_policy.SegmentPolicyType{}
+			segmentPolicySpec.DstSegmentChoice = &ves_io_schema_policy.SegmentPolicyType_DstAny{
+				DstAny: &ves_io_schema.Empty{},
+			}
 			spec.SegmentPolicy = segmentPolicySpec
 			var segmentPolicyModel SvcPolicyRuleSegmentPolicyType
 
@@ -15991,76 +15736,6 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			response.Diagnostics.Append(diags...)
 			if response.Diagnostics.HasError() {
 				return
-			}
-
-			// resource modelToSpecNested OneOfField --> DstSegmentChoice
-			if !segmentPolicyModel.DstSegmentChoice.IsNull() && !segmentPolicyModel.DstSegmentChoice.IsUnknown() {
-				segmentPolicyDstSegmentChoiceModel := SvcPolicyRuleDstSegmentChoice{}
-				response.Diagnostics.Append(segmentPolicyModel.DstSegmentChoice.As(ctx, &segmentPolicyDstSegmentChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DstAny
-				if !segmentPolicyDstSegmentChoiceModel.DstAny.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstAny.IsUnknown() {
-					dstAnySpecBool := &ves_io_schema_policy.SegmentPolicyType_DstAny{}
-					dstAnySpecBool.DstAny = &ves_io_schema.Empty{}
-					segmentPolicySpec.DstSegmentChoice = dstAnySpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> DstSegments
-				if !segmentPolicyDstSegmentChoiceModel.DstSegments.IsNull() && !segmentPolicyDstSegmentChoiceModel.DstSegments.IsUnknown() {
-					var svcPolicyRuleDstSegmentsModel SvcPolicyRuleDstSegments
-					response.Diagnostics.Append(segmentPolicyDstSegmentChoiceModel.DstSegments.As(ctx, &svcPolicyRuleDstSegmentsModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dstSegmentsOneOfSpec := &ves_io_schema_policy.SegmentPolicyType_DstSegments{}
-					dstSegmentsOneOfSpec.DstSegments = &ves_io_schema_views.SegmentRefList{}
-					segmentPolicySpec.DstSegmentChoice = dstSegmentsOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfPointerField --> Segments
-					if !svcPolicyRuleDstSegmentsModel.Segments.IsNull() && !svcPolicyRuleDstSegmentsModel.Segments.IsUnknown() && len(svcPolicyRuleDstSegmentsModel.Segments.Elements()) > 0 {
-						// 1. Convert the types.List into a slice of the model's Go struct
-						var segmentsElements []ObjectRefTypeModel
-						response.Diagnostics.Append(svcPolicyRuleDstSegmentsModel.Segments.ElementsAs(ctx, &segmentsElements, false)...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// 2. Initialize the spec slice
-						segmentsSpec := make([]*ves_io_schema_views.ObjectRefType, len(segmentsElements))
-						dstSegmentsOneOfSpec.DstSegments.Segments = segmentsSpec
-
-						// 3. Iterate over the converted Go slice
-						for i, segmentsElement := range segmentsElements {
-							// Initialize the spec struct for the current element
-							dstSegmentsOneOfSpec.DstSegments.Segments[i] = &ves_io_schema_views.ObjectRefType{}
-
-							// Recursively process nested elements
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !segmentsElement.Name.IsNull() && !segmentsElement.Name.IsUnknown() {
-								dstSegmentsOneOfSpec.DstSegments.Segments[i].Name = string(segmentsElement.Name.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !segmentsElement.Namespace.IsNull() && !segmentsElement.Namespace.IsUnknown() {
-								dstSegmentsOneOfSpec.DstSegments.Segments[i].Namespace = string(segmentsElement.Namespace.ValueString())
-							}
-
-						}
-					}
-
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> IntraSegment
-				if !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsNull() && !segmentPolicyDstSegmentChoiceModel.IntraSegment.IsUnknown() {
-					intraSegmentSpecBool := &ves_io_schema_policy.SegmentPolicyType_IntraSegment{}
-					intraSegmentSpecBool.IntraSegment = &ves_io_schema.Empty{}
-					segmentPolicySpec.DstSegmentChoice = intraSegmentSpecBool
-				}
-
 			}
 
 			// resource modelToSpecNested OneOfField --> SrcSegmentChoice
@@ -16521,7 +16196,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -16537,7 +16212,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_service_policy_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "service_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "service_policy_rule", err),
 		)
 		return
 	}
@@ -16552,7 +16227,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_service_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "service_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "service_policy_rule", err),
 		)
 		return
 	}
@@ -16658,34 +16333,27 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -16714,17 +16382,23 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -16939,6 +16613,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleArgMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleArgMatchersMatchModelAttributeMap)
 			}
 
@@ -16972,14 +16647,12 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleArgMatchersModelAttributeMap,
 		}
 		nullArgMatchersList := basetypes.NewListNull(argMatchersObjectType)
-		var priorValArgMatchers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("arg_matchers"), &priorValArgMatchers)
-		if !priorValArgMatchers.IsNull() && !priorValArgMatchers.IsUnknown() {
-			data.ArgMatchers = priorValArgMatchers
+		if !data.ArgMatchers.IsNull() && !data.ArgMatchers.IsUnknown() && len(data.ArgMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ArgMatchers = basetypes.NewListValueMust(argMatchersObjectType, nil)
 		} else {
 			data.ArgMatchers = nullArgMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
@@ -17325,6 +16998,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleBotActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleBotActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleBotActionActionTypeModelAttributeMap)
 		}
 
@@ -17727,6 +17401,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleCookieMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleCookieMatchersMatchModelAttributeMap)
 			}
 
@@ -17760,14 +17435,12 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleCookieMatchersModelAttributeMap,
 		}
 		nullCookieMatchersList := basetypes.NewListNull(cookieMatchersObjectType)
-		var priorValCookieMatchers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("cookie_matchers"), &priorValCookieMatchers)
-		if !priorValCookieMatchers.IsNull() && !priorValCookieMatchers.IsUnknown() {
-			data.CookieMatchers = priorValCookieMatchers
+		if !data.CookieMatchers.IsNull() && !data.CookieMatchers.IsUnknown() && len(data.CookieMatchers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CookieMatchers = basetypes.NewListValueMust(cookieMatchersObjectType, nil)
 		} else {
 			data.CookieMatchers = nullCookieMatchersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> DomainMatcher
@@ -17970,6 +17643,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleHeadersMatchModelAttributeMap)
 			}
 
@@ -18003,14 +17677,12 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleHeadersModelAttributeMap,
 		}
 		nullHeadersList := basetypes.NewListNull(headersObjectType)
-		var priorValHeaders types.List
-		_ = request.State.GetAttribute(ctx, path.Root("headers"), &priorValHeaders)
-		if !priorValHeaders.IsNull() && !priorValHeaders.IsUnknown() {
-			data.Headers = priorValHeaders
+		if !data.Headers.IsNull() && !data.Headers.IsUnknown() && len(data.Headers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Headers = basetypes.NewListValueMust(headersObjectType, nil)
 		} else {
 			data.Headers = nullHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> HttpMethod
@@ -18222,9 +17894,31 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ip_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					} else {
-						ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpPrefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 					}
 				}
 
@@ -18236,9 +17930,31 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					} else {
-						ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+						var priorValIpv6Prefixes types.List
+						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("ip_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 					}
 				}
 
@@ -18423,6 +18139,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleJwtClaimsMatchModelAttributeMap)
 			}
 
@@ -18456,14 +18173,12 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleJwtClaimsModelAttributeMap,
 		}
 		nullJwtClaimsList := basetypes.NewListNull(jwtClaimsObjectType)
-		var priorValJwtClaims types.List
-		_ = request.State.GetAttribute(ctx, path.Root("jwt_claims"), &priorValJwtClaims)
-		if !priorValJwtClaims.IsNull() && !priorValJwtClaims.IsUnknown() {
-			data.JwtClaims = priorValJwtClaims
+		if !data.JwtClaims.IsNull() && !data.JwtClaims.IsUnknown() && len(data.JwtClaims.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.JwtClaims = basetypes.NewListValueMust(jwtClaimsObjectType, nil)
 		} else {
 			data.JwtClaims = nullJwtClaimsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> LabelMatcher
@@ -18579,6 +18294,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleModifyActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleModifyActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleMumActionActionTypeModelAttributeMap)
 		}
 
@@ -18891,6 +18607,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				svcPolicyRuleQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleQueryParamsMatchModelAttributeMap)
 			}
 
@@ -18916,14 +18633,12 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			AttrTypes: ServicePolicyRuleQueryParamsModelAttributeMap,
 		}
 		nullQueryParamsList := basetypes.NewListNull(queryParamsObjectType)
-		var priorValQueryParams types.List
-		_ = request.State.GetAttribute(ctx, path.Root("query_params"), &priorValQueryParams)
-		if !priorValQueryParams.IsNull() && !priorValQueryParams.IsUnknown() {
-			data.QueryParams = priorValQueryParams
+		if !data.QueryParams.IsNull() && !data.QueryParams.IsUnknown() && len(data.QueryParams.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.QueryParams = basetypes.NewListValueMust(queryParamsObjectType, nil)
 		} else {
 			data.QueryParams = nullQueryParamsList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> RequestConstraints
@@ -18991,6 +18706,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
 		}
 
@@ -19054,6 +18770,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
 		}
 
@@ -19117,6 +18834,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
 		}
 
@@ -19180,6 +18898,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
 		}
 
@@ -19243,6 +18962,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
 		}
 
@@ -19306,6 +19026,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
 		}
 
@@ -19369,6 +19090,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
 		}
 
@@ -19432,6 +19154,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
 		}
 
@@ -19495,6 +19218,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
 		}
 
@@ -19558,6 +19282,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
 		}
 
@@ -19621,6 +19346,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
 		}
 
@@ -19684,6 +19410,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
 		}
 
@@ -19747,6 +19474,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleReqConstraintTypeModel.MaxUrlSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap)
 		}
 
@@ -19768,151 +19496,6 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	if specData.GetSegmentPolicy() != nil {
 		var svcPolicyRuleSegmentPolicyTypeModel = &SvcPolicyRuleSegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
-
-		// resource specToModelNested OneOfField --> DstSegmentChoice
-		// CreateSpecType: GetDstSegmentChoice() returns the oneof interface value.
-		if segmentPolicyElement.GetDstSegmentChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DstAny
-			var dstAnyInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			if !dstAnyInMap {
-				if _, found := rawSpecMap["dst_any"]; found {
-					dstAnyInMap = true
-				}
-			}
-
-			_, isDstAnyForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-			if dstAnyInMap || isDstAnyForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DstSegments
-			// CreateSpecType
-			// true
-			{
-				dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-				dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-				if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-					dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-					// resource specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(dstSegmentsElement.GetSegments()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-						for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-							objectRefTypeModelModel := ObjectRefTypeModel{}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if segmentsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
-							}
-
-							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, segmentsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(segmentsListDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleSegmentsObjectRefModelAttributeMap})
-					}
-
-					dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-					response.Diagnostics.Append(dstSegmentsObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-				} else {
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> IntraSegment
-			var intraSegmentInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			if !intraSegmentInMap {
-				if _, found := rawSpecMap["intra_segment"]; found {
-					intraSegmentInMap = true
-				}
-			}
-
-			_, isIntraSegmentForBool := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-			if intraSegmentInMap || isIntraSegmentForBool {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-				ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				segmentPolicydstSegmentChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = finalObj
-		} else {
-			svcPolicyRuleSegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicyDstSegmentChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested OneOfField --> SrcSegmentChoice
 		// CreateSpecType: GetSrcSegmentChoice() returns the oneof interface value.
@@ -20034,6 +19617,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleSegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ServicePolicyRuleSegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
@@ -20538,6 +20122,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			svcPolicyRuleWafActionModel.ActionTypeChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			svcPolicyRuleWafActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleWafActionActionTypeModelAttributeMap)
 		}
 
@@ -20627,7 +20212,7 @@ func (r *ResourceF5XCServicePolicyRule) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "service_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "service_policy_rule", err),
 		)
 		return
 	}

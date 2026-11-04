@@ -14,18 +14,60 @@
 page_title: "f5xc_network_interface Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  Network Interface Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.
+  Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.
 ---
 
 # f5xc_network_interface (Resource)
 
-Network Interface Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.
+Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.
 
 To get more information about f5xc_network_interface, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/network-interface)
 
+## Example Usage
 
+```terraform
+# Example: Network Interface - Full
+
+resource "f5xc_network_interface" "example" {
+  name        = "example-network-interface"
+  namespace   = "system"
+  description = "Full network interface example"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "example-owner"
+  }
+
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
+
+      address_choice = {
+        dhcp_client = true
+      }
+      network_choice = {
+        site_local_network = true
+      }
+      node_choice = {
+        cluster = true
+      }
+
+      primary_choice = {
+        not_primary = true
+      }
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -70,8 +112,8 @@ Required:
 Optional:
 
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--monitoring_choice))
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
 
 <a id="nestedatt--interface_choice--dedicated_interface--node_choice"></a>
 ### Nested Schema for `interface_choice.dedicated_interface.node_choice`
@@ -111,7 +153,7 @@ Required:
 
 Optional:
 
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
 
 <a id="nestedatt--interface_choice--dedicated_management_interface--node_choice"></a>
 ### Nested Schema for `interface_choice.dedicated_management_interface.node_choice`
@@ -139,8 +181,8 @@ Optional:
 
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice))
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--monitoring_choice))
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice`
@@ -610,8 +652,8 @@ Required:
 
 Optional:
 
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
 
 <a id="nestedatt--interface_choice--tunnel_interface--network_choice"></a>
 ### Nested Schema for `interface_choice.tunnel_interface.network_choice`
@@ -709,7 +751,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -717,7 +759,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_network_interface.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

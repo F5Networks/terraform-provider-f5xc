@@ -30,6 +30,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -41,6 +42,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_segment_connection "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/segment_connection"
 )
@@ -143,8 +145,8 @@ func (r *ResourceF5XCSegmentConnection) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a segment_connection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment_connection) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a segment_connection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment_connection) etc. can be fetched",
+		MarkdownDescription: "Configure a Segment Connector to allow network traffic between Segments",
+		Description:         "Configure a Segment Connector to allow network traffic between Segments",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -188,7 +190,7 @@ func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request reso
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.<br>**Allowed Values (choose one):** `['default-segment-connection']`",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -203,7 +205,7 @@ func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request reso
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -394,9 +396,17 @@ func (r *ResourceF5XCSegmentConnection) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCSegmentConnection) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCSegmentConnectionModel
 
 	// Read Terraform plan data into the model
@@ -610,7 +620,7 @@ func (r *ResourceF5XCSegmentConnection) Create(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s via replace, got error: %s", "segment_connection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create via replace", "segment_connection", err),
 		)
 		return
 	}
@@ -668,7 +678,7 @@ func (r *ResourceF5XCSegmentConnection) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "segment_connection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "segment_connection", err),
 		)
 		return
 	}
@@ -952,14 +962,12 @@ func (r *ResourceF5XCSegmentConnection) Read(ctx context.Context, request resour
 			AttrTypes: SegmentConnectionConnectionsModelAttributeMap,
 		}
 		nullConnectionsList := basetypes.NewListNull(connectionsObjectType)
-		var priorValConnections types.List
-		_ = request.State.GetAttribute(ctx, path.Root("connections"), &priorValConnections)
-		if !priorValConnections.IsNull() && !priorValConnections.IsUnknown() {
-			data.Connections = priorValConnections
+		if !data.Connections.IsNull() && !data.Connections.IsUnknown() && len(data.Connections.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Connections = basetypes.NewListValueMust(connectionsObjectType, nil)
 		} else {
 			data.Connections = nullConnectionsList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -971,6 +979,12 @@ func (r *ResourceF5XCSegmentConnection) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCSegmentConnectionModel
@@ -1204,7 +1218,7 @@ func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "segment_connection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "segment_connection", err),
 		)
 		return
 	}
@@ -1213,7 +1227,7 @@ func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "segment_connection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "segment_connection", err),
 		)
 		return
 	}
@@ -1496,14 +1510,12 @@ func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request reso
 			AttrTypes: SegmentConnectionConnectionsModelAttributeMap,
 		}
 		nullConnectionsList := basetypes.NewListNull(connectionsObjectType)
-		var priorValConnections types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("connections"), &priorValConnections)
-		if !priorValConnections.IsNull() && !priorValConnections.IsUnknown() {
-			data.Connections = priorValConnections
+		if !data.Connections.IsNull() && !data.Connections.IsUnknown() && len(data.Connections.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Connections = basetypes.NewListValueMust(connectionsObjectType, nil)
 		} else {
 			data.Connections = nullConnectionsList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1587,7 +1599,7 @@ func (r *ResourceF5XCSegmentConnection) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "segment_connection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "segment_connection", err),
 		)
 		return
 	}

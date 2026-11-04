@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCVirtualNetwork_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckVirtualNetworkDestroyProducer(t),
@@ -39,31 +39,35 @@ func TestAccResourceAutoF5XCVirtualNetwork_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withDescription(name, namespace, "virtual network basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCVirtualNetworkConfig_basic("example-virtual-network", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCVirtualNetwork_withNetworkChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCVirtualNetwork_withNetworkChoiceTransition(t *testin
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withNetworkChoice(name, namespace, "site_local_inside_network = true"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withNetworkChoice(name, namespace, "global_network = true"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +102,7 @@ func TestAccResourceAutoF5XCVirtualNetwork_withLegacyTypeTransition(t *testing.T
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCVirtualNetwork_withLegacyTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withNetworkChoice(name, namespace, "legacy_type = [\"VIRTUAL_NETWORK_GLOBAL\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withNetworkChoice(name, namespace, "legacy_type = [\"VIRTUAL_NETWORK_SITE_LOCAL\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +137,7 @@ func TestAccResourceAutoF5XCVirtualNetwork_withStaticRoutesNextHopTransition(t *
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +148,20 @@ func TestAccResourceAutoF5XCVirtualNetwork_withStaticRoutesNextHopTransition(t *
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withStaticRoute(name, namespace, "ip_address = \"10.10.0.1\""),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withStaticRoute(name, namespace, "default_gateway = true"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +172,7 @@ func TestAccResourceAutoF5XCVirtualNetwork_withStaticV6RoutesNextHopTransition(t
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,22 +183,22 @@ func TestAccResourceAutoF5XCVirtualNetwork_withStaticV6RoutesNextHopTransition(t
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withStaticV6Route(name, namespace, "ip_address = \"2001:db8::1\""),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"static_v6_routes.0.ip_prefixes.0"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_withStaticV6Route(name, namespace, "default_gateway = true"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"static_v6_routes.0.ip_prefixes.0"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -205,9 +209,9 @@ func TestAccResourceAutoF5XCVirtualNetwork_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-vn-" + testAccRunSuffix(t)
+	name := "example-vn-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckVirtualNetworkDestroyProducer(t),
@@ -216,24 +220,28 @@ func TestAccResourceAutoF5XCVirtualNetwork_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualNetworkConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_network.test",
+				ResourceName:                         "f5xc_virtual_network.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_network.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCVirtualNetworkConfig_full("example-virtual-network", "system"),
+		})
 }
 
 func testAccCheckVirtualNetworkDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -242,7 +250,7 @@ func testAccCheckVirtualNetworkDestroyProducer(t *testing.T) func(*terraform.Sta
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = %q
 
@@ -255,7 +263,7 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -269,7 +277,7 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_withNetworkChoice(name, namespace, networkChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = %q
 
@@ -282,7 +290,7 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_withStaticRoute(name, namespace, staticRouteNextHopChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = %q
 
@@ -304,7 +312,7 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_withStaticV6Route(name, namespace, staticV6RouteNextHopChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = %q
 
@@ -326,18 +334,18 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name        = %q
   namespace   = %q
-  description = "virtual network full"
+  description = "Virtual network full example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "platform"
   }
 
   annotations = {
-    owner = "owner-a"
+    owner = "example-owner"
   }
 
   network_choice = {
@@ -359,18 +367,18 @@ resource "f5xc_virtual_network" "test" {
 
 func testAccResourceAutoF5XCVirtualNetworkConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name        = %q
   namespace   = %q
-  description = "virtual network full updated"
+  description = "virtual network updated full example"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     team = "security"
   }
 
   annotations = {
-    owner = "owner-b"
+    owner = "example-owner-alt"
   }
 
   network_choice = {

@@ -30,12 +30,12 @@ type DataSourceF5XCApiCrawler struct {
 	client *client.APIClient
 }
 
-type ApiCrawlerApiCrawlerDomainConfiguration struct {
+type ApiCrawlerDomainCfg struct {
 	Domain      types.String `tfsdk:"domain"`
 	SimpleLogin types.Object `tfsdk:"simple_login"`
 }
 
-type ApiCrawlerApiCrawlerSimpleLogin struct {
+type ApiCrawlerSimpleLogin struct {
 	Password types.Object `tfsdk:"password"`
 	User     types.String `tfsdk:"user"`
 }
@@ -44,18 +44,19 @@ type ApiCrawlerSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type ApiCrawlerSecretTypeSecretInfoChoice struct {
+type ApiCrawlerSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type ApiCrawlerSecretTypeBlindfoldSecretInfo struct {
+type ApiCrawlerBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type ApiCrawlerSecretTypeClearSecretInfo struct {
+type ApiCrawlerClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -115,6 +116,7 @@ var ApiCrawlerDomainsSimpleLoginPasswordSecretInfoOneofModelAttributeMap = map[s
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiCrawlerDomainsSimpleLoginPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -146,8 +148,8 @@ func (d *DataSourceF5XCApiCrawler) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCApiCrawler) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_crawler This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_crawler) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_crawler This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_crawler) etc. can be fetched",
+		MarkdownDescription: "This is the api crawler type",
+		Description:         "This is the api crawler type",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -262,8 +264,15 @@ func (r *DataSourceF5XCApiCrawler) Schema(ctx context.Context, request datasourc
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
+															Sensitive:   true,
 														},
 													},
+												},
+												"none": schema.BoolAttribute{
+													Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
 												},
 											},
 										},
@@ -337,7 +346,7 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_api_sec_api_crawler.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "api_crawler", err))
 		return
 	}
 
@@ -399,23 +408,23 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Domains
-	domainsElementsSpectToModel := make([]ApiCrawlerApiCrawlerDomainConfiguration, 0, len(specData.GetDomains()))
+	domainsElementsSpectToModel := make([]ApiCrawlerDomainCfg, 0, len(specData.GetDomains()))
 
 	for _, domainsElement := range specData.GetDomains() {
-		apiCrawlerApiCrawlerDomainConfigurationModel := ApiCrawlerApiCrawlerDomainConfiguration{}
+		apiCrawlerDomainCfgModel := ApiCrawlerDomainCfg{}
 
 		// data specToModelNested RequiredStringField --> Domain
 		if domainsElement.GetDomain() != "" {
-			apiCrawlerApiCrawlerDomainConfigurationModel.Domain = types.StringValue(domainsElement.GetDomain())
+			apiCrawlerDomainCfgModel.Domain = types.StringValue(domainsElement.GetDomain())
 		} else {
 			// Empty string, set to null
-			apiCrawlerApiCrawlerDomainConfigurationModel.Domain = types.StringNull()
+			apiCrawlerDomainCfgModel.Domain = types.StringNull()
 		}
 
 		// data specToModelNested PointerField --> SimpleLogin
 		if domainsElement.GetSimpleLogin() != nil {
 			// Create the nested Go struct
-			apiCrawlerApiCrawlerSimpleLoginModel := &ApiCrawlerApiCrawlerSimpleLogin{}
+			apiCrawlerSimpleLoginModel := &ApiCrawlerSimpleLogin{}
 			simpleLoginElement := domainsElement.GetSimpleLogin()
 
 			// Recursively populate the nested struct
@@ -522,6 +531,15 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 						}
 					}
 
+					// data specToModelNested BoolOfOneOfPointerField --> None
+					_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+					if isNone {
+						passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+					} else {
+						passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+					}
+
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
@@ -559,7 +577,7 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 				if response.Diagnostics.HasError() {
 					return
 				}
-				apiCrawlerApiCrawlerSimpleLoginModel.Password = apiCrawlerSecretTypeModelObj
+				apiCrawlerSimpleLoginModel.Password = apiCrawlerSecretTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -568,24 +586,24 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				apiCrawlerApiCrawlerSimpleLoginModel.Password = types.ObjectNull(ApiCrawlerDomainsSimpleLoginPasswordModelAttributeMap)
+				apiCrawlerSimpleLoginModel.Password = types.ObjectNull(ApiCrawlerDomainsSimpleLoginPasswordModelAttributeMap)
 			}
 
 			// data specToModelNested StringField --> User
 			if simpleLoginElement.GetUser() != "" {
-				apiCrawlerApiCrawlerSimpleLoginModel.User = types.StringValue(simpleLoginElement.GetUser())
+				apiCrawlerSimpleLoginModel.User = types.StringValue(simpleLoginElement.GetUser())
 			} else {
 				// Empty string, set to null
-				apiCrawlerApiCrawlerSimpleLoginModel.User = types.StringNull()
+				apiCrawlerSimpleLoginModel.User = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			apiCrawlerApiCrawlerSimpleLoginModelObj, objDiags := types.ObjectValueFrom(ctx, ApiCrawlerDomainsSimpleLoginModelAttributeMap, apiCrawlerApiCrawlerSimpleLoginModel)
+			apiCrawlerSimpleLoginModelObj, objDiags := types.ObjectValueFrom(ctx, ApiCrawlerDomainsSimpleLoginModelAttributeMap, apiCrawlerSimpleLoginModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiCrawlerApiCrawlerDomainConfigurationModel.SimpleLogin = apiCrawlerApiCrawlerSimpleLoginModelObj
+			apiCrawlerDomainCfgModel.SimpleLogin = apiCrawlerSimpleLoginModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -594,10 +612,10 @@ func (d *DataSourceF5XCApiCrawler) Read(ctx context.Context, request datasource.
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			apiCrawlerApiCrawlerDomainConfigurationModel.SimpleLogin = types.ObjectNull(ApiCrawlerDomainsSimpleLoginModelAttributeMap)
+			apiCrawlerDomainCfgModel.SimpleLogin = types.ObjectNull(ApiCrawlerDomainsSimpleLoginModelAttributeMap)
 		}
 
-		domainsElementsSpectToModel = append(domainsElementsSpectToModel, apiCrawlerApiCrawlerDomainConfigurationModel)
+		domainsElementsSpectToModel = append(domainsElementsSpectToModel, apiCrawlerDomainCfgModel)
 	}
 
 	{

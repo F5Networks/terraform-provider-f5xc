@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCUserIdentification_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-userid-" + acctest.RandString(t, 8)
+	name := "example-userid-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCUserIdentification_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCUserIdentification_basic(t *testing.T) {
 func TestAccResourceAutoF5XCUserIdentification_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-userid-" + acctest.RandString(t, 8)
+	name := "example-userid-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCUserIdentification_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCUserIdentification_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCUserIdentification_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-userid-" + acctest.RandString(t, 8)
+	name := "example-userid-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCUserIdentification_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +132,7 @@ func TestAccResourceAutoF5XCUserIdentification_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCUserIdentification_withHttpHeader(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-userid-" + acctest.RandString(t, 8)
+	name := "example-userid-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCUserIdentification_withHttpHeader(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withHttpHeader(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_withHttpHeaderUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,10 +167,10 @@ func TestAccResourceAutoF5XCUserIdentification_withHttpHeader(t *testing.T) {
 func TestAccResourceAutoF5XCUserIdentification_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-userid-" + acctest.RandString(t, 8)
+	name := "example-userid-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckUserIdentificationDestroyProducer(t),
@@ -179,24 +179,28 @@ func TestAccResourceAutoF5XCUserIdentification_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCUserIdentificationConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_user_identification.test",
+				ResourceName:                         "f5xc_user_identification.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_user_identification.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCUserIdentificationConfig_full("example-user-identification", "default"),
+		})
 }
 
 func testAccCheckUserIdentificationDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -205,55 +209,55 @@ func testAccCheckUserIdentificationDestroyProducer(t *testing.T) func(*terraform
 
 func testAccResourceAutoF5XCUserIdentificationConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test user identification"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
+  description = "User identification example"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCUserIdentificationConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test user identification updated"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
+  description = "User identification updated example"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}, {
-		identifier_choice = {
-			client_asn = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }, {
+    identifier_choice = {
+      client_asn = true
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with labels"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -261,19 +265,19 @@ resource "f5xc_user_identification" "test" {
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with labels"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 }
@@ -282,16 +286,16 @@ resource "f5xc_user_identification" "test" {
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with annotations"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }]
 
   annotations = {
     owner = "platform-team"
@@ -302,16 +306,16 @@ resource "f5xc_user_identification" "test" {
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with annotations"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }]
 
   annotations = {
     owner = "security-team"
@@ -322,55 +326,56 @@ resource "f5xc_user_identification" "test" {
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withHttpHeader(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with HTTP header"
 
-	rules = [{
-		identifier_choice = {
-			http_header_name = "X-User-ID"
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      http_header_name = "X-User-ID"
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCUserIdentificationConfig_withHttpHeaderUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
   description = "User identification with HTTP header updated"
 
-	rules = [{
-		identifier_choice = {
-			http_header_name = "X-Forwarded-User"
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      http_header_name = "X-Forwarded-User"
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCUserIdentificationConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full user identification"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
+  description = "User identification full example"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}, {
-		identifier_choice = {
-			http_header_name = "X-User-ID"
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }, 
+  {
+    identifier_choice = {
+      http_header_name = "X-User-ID"
+    }
+  }]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -382,23 +387,24 @@ resource "f5xc_user_identification" "test" {
 
 func testAccResourceAutoF5XCUserIdentificationConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_user_identification" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full user identification updated"
+resource "f5xc_user_identification" "example" {
+  name        = %q
+  namespace   = %q
+  description = "User identification updated full example"
 
-	rules = [{
-		identifier_choice = {
-			client_ip = true
-		}
-	}, {
-		identifier_choice = {
-			cookie_name = "session_id"
-		}
-	}]
+  rules = [{
+    identifier_choice = {
+      client_ip = true
+    }
+  }, 
+  {
+    identifier_choice = {
+      cookie_name = "session_id"
+    }
+  }]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 

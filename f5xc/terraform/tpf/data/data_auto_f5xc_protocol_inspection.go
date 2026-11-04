@@ -29,20 +29,20 @@ type DataSourceF5XCProtocolInspection struct {
 	client *client.APIClient
 }
 
-type ProtocolInspectionProtocolInspectionEnableDisableComplianceChecks struct {
+type ProtoInspectionEnableDisableComplianceChecks struct {
 	ComplianceCheckChoice types.Object `tfsdk:"compliance_check_choice"`
 }
 
-type ProtocolInspectionEnableDisableComplianceChecksComplianceCheckChoice struct {
+type ProtoInspectionComplianceCheckChoice struct {
 	DisableComplianceChecks types.Bool   `tfsdk:"disable_compliance_checks"`
 	EnableComplianceChecks  types.Object `tfsdk:"enable_compliance_checks"`
 }
 
-type ProtocolInspectionProtocolInspectionEnableDisableSignatures struct {
+type ProtoInspectionEnableDisableSignatures struct {
 	SignatureChoice types.Object `tfsdk:"signature_choice"`
 }
 
-type ProtocolInspectionEnableDisableSignaturesSignatureChoice struct {
+type ProtoInspectionSignatureChoice struct {
 	DisableSignature types.Bool `tfsdk:"disable_signature"`
 	EnableSignature  types.Bool `tfsdk:"enable_signature"`
 }
@@ -125,8 +125,8 @@ func (d *DataSourceF5XCProtocolInspection) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCProtocolInspection) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a protocol_inspection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protocol_inspection) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a protocol_inspection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protocol_inspection) etc. can be fetched",
+		MarkdownDescription: "Protocol Inspection view defines the required parameters that can be used in CRUD, to create and manage Protocol Inspection.<br>It can be used to create Protocol Inspection.<br><br>View will create the following child objects.<br><br>* DNS Compliance Checks",
+		Description:         "Protocol Inspection view defines the required parameters that can be used in CRUD, to create and manage Protocol Inspection. It can be used to create Protocol Inspection. View will create the following child objects. DNS Compliance Checks",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -335,7 +335,7 @@ func (d *DataSourceF5XCProtocolInspection) Read(ctx context.Context, request dat
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_inspection", err))
 		return
 	}
 
@@ -471,7 +471,7 @@ func (d *DataSourceF5XCProtocolInspection) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot RequiredPointerField --> EnableDisableComplianceChecks
 	if specData.GetEnableDisableComplianceChecks() != nil {
-		var protocolInspectionProtocolInspectionEnableDisableComplianceChecksModel = &ProtocolInspectionProtocolInspectionEnableDisableComplianceChecks{}
+		var protoInspectionEnableDisableComplianceChecksModel = &ProtoInspectionEnableDisableComplianceChecks{}
 		enableDisableComplianceChecksElement := specData.GetEnableDisableComplianceChecks()
 
 		// data specToModelNested RequiredOneOfField --> ComplianceCheckChoice
@@ -553,16 +553,16 @@ func (d *DataSourceF5XCProtocolInspection) Read(ctx context.Context, request dat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			protocolInspectionProtocolInspectionEnableDisableComplianceChecksModel.ComplianceCheckChoice = finalObj
+			protoInspectionEnableDisableComplianceChecksModel.ComplianceCheckChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			protocolInspectionProtocolInspectionEnableDisableComplianceChecksModel.ComplianceCheckChoice = types.ObjectNull(ProtocolInspectionEnableDisableComplianceChecksComplianceCheckChoiceModelAttributeMap)
+			protoInspectionEnableDisableComplianceChecksModel.ComplianceCheckChoice = types.ObjectNull(ProtocolInspectionEnableDisableComplianceChecksComplianceCheckChoiceModelAttributeMap)
 		}
 
 		enableDisableComplianceChecksObj, enableDisableComplianceChecksDiags := utils.GoStructToObjectValue(
 			ctx,
 			ProtocolInspectionEnableDisableComplianceChecksModelAttributeMap,
-			protocolInspectionProtocolInspectionEnableDisableComplianceChecksModel,
+			protoInspectionEnableDisableComplianceChecksModel,
 		)
 		response.Diagnostics.Append(enableDisableComplianceChecksDiags...)
 		if response.Diagnostics.HasError() {
@@ -575,7 +575,7 @@ func (d *DataSourceF5XCProtocolInspection) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot RequiredPointerField --> EnableDisableSignatures
 	if specData.GetEnableDisableSignatures() != nil {
-		var protocolInspectionProtocolInspectionEnableDisableSignaturesModel = &ProtocolInspectionProtocolInspectionEnableDisableSignatures{}
+		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
 		// data specToModelNested RequiredOneOfField --> SignatureChoice
@@ -621,16 +621,16 @@ func (d *DataSourceF5XCProtocolInspection) Read(ctx context.Context, request dat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			protocolInspectionProtocolInspectionEnableDisableSignaturesModel.SignatureChoice = finalObj
+			protoInspectionEnableDisableSignaturesModel.SignatureChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			protocolInspectionProtocolInspectionEnableDisableSignaturesModel.SignatureChoice = types.ObjectNull(ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap)
+			protoInspectionEnableDisableSignaturesModel.SignatureChoice = types.ObjectNull(ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap)
 		}
 
 		enableDisableSignaturesObj, enableDisableSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			ProtocolInspectionEnableDisableSignaturesModelAttributeMap,
-			protocolInspectionProtocolInspectionEnableDisableSignaturesModel,
+			protoInspectionEnableDisableSignaturesModel,
 		)
 		response.Diagnostics.Append(enableDisableSignaturesDiags...)
 		if response.Diagnostics.HasError() {

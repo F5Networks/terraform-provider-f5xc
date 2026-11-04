@@ -15,6 +15,7 @@
 package resource
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -24,11 +25,37 @@ import (
 	logReceiverSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log_receiver"
 )
 
+// testAccLogReceiverCaPEM is a minimal self-signed CA cert PEM for acceptance testing (not a real CA).
+const testAccLogReceiverCaPEM = `-----BEGIN CERTIFICATE-----
+MIIDDTCCAfWgAwIBAgIUNeJtRDyjtxNmfY6ZsFT7c9jQjoAwDQYJKoZIhvcNAQEL
+BQAwFjEUMBIGA1UEAwwLdGVzdC1hY2MtY2EwHhcNMjYwNzA2MTkzMDQ5WhcNMzYw
+NzAzMTkzMDQ5WjAWMRQwEgYDVQQDDAt0ZXN0LWFjYy1jYTCCASIwDQYJKoZIhvcN
+AQEBBQADggEPADCCAQoCggEBAKyhTVDZm7W1UmKUTFXsh6nk2YJIAi+3OkpMktjU
+ol0rs3XJ1kpETdDobSPdOUuHlusGh12z3u9GcKVXxlvHbTN/hEBmvR9nH0GlU8bv
+JNmoSjubDB5g74Ai0Pze0cPQ12JPNPNI89OhtOh6U6XOmFnO4z3pJAr9I3Cxcsiw
+YLHQuGP9VSYMR7EbQwqPH/A7lkxzX8a+OB/dcxn91eUIVWRLYI3vDUrfNnVGY479
+SYT/PpiNL6d/pQ2NvQuPRrebGuABOzkdE4rMjLBjWq5iPTO9FjW+Pmc/Uf3kPqag
+lB3g3ElGYOnMeiqOICAKcfuB/8BM85p9OuqIv8xX4ciVrLUCAwEAAaNTMFEwHQYD
+VR0OBBYEFB65bLmPNBjsZ70dMRdrvKOx+DeiMB8GA1UdIwQYMBaAFB65bLmPNBjs
+Z70dMRdrvKOx+DeiMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEB
+ACNWgpE7C/VBOpMlQIUO7syGllxXTyqBJBtYH89YU77NKRe04cmqAcunvjsF9uH0
+ifDZhcsjMfdZTbVYxdK6ChowfhN6aywHkprvDCRi2YxVym4190kN3mfVbui/3jnr
+BS2FEQ9hQRaprIA1HcE+pkRQvN5l9uQJwImi1tatWza/F6ufJ6bNyPFMXnY2eE0d
+bDh9rIgFwX48EG7fYUWV5rPPAPjYs8ZvMxzfll4QYOCnn4kIV1v9jE6O2cB+2exY
+LuxAxhNIgZhh2RREOk1hcDj+Og0dR5qEpXEccgjDQpLBRU+us2KscNM+nuLsa9Rh
+m4Fdve+FplhZa3LvCvidQgM=
+-----END CERTIFICATE-----`
+
+// testAccLogReceiverTrustedCaURL returns the truststore_url form (string:/// + base64 PEM) expected by trusted_ca_url.
+func testAccLogReceiverTrustedCaURL() string {
+	return "string:///" + base64.StdEncoding.EncodeToString([]byte(testAccLogReceiverCaPEM))
+}
+
 func TestAccResourceAutoF5XCLogReceiver_basicUdp(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +66,20 @@ func TestAccResourceAutoF5XCLogReceiver_basicUdp(t *testing.T) {
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withUDP(name, namespace, "logs-udp.example.com", 514, 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withUDP(name, namespace, "logs-udp-updated.example.com", 5514, 2097152),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +90,7 @@ func TestAccResourceAutoF5XCLogReceiver_withModeUdpToTcp(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +101,20 @@ func TestAccResourceAutoF5XCLogReceiver_withModeUdpToTcp(t *testing.T) {
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withUDP(name, namespace, "mode-udp.example.com", 514, 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTCP(name, namespace, "mode-tcp.example.com", 601, 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +125,7 @@ func TestAccResourceAutoF5XCLogReceiver_withModeTcpToTls(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +136,20 @@ func TestAccResourceAutoF5XCLogReceiver_withModeTcpToTls(t *testing.T) {
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTCP(name, namespace, "mode-tcp.example.com", 601, 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSDefaultPort(name, namespace, "mode-tls.example.com", 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +160,7 @@ func TestAccResourceAutoF5XCLogReceiver_withTLSPortChoiceTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +171,20 @@ func TestAccResourceAutoF5XCLogReceiver_withTLSPortChoiceTransition(t *testing.T
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSDefaultPort(name, namespace, "tls-port-a.example.com", 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSCustomPort(name, namespace, "tls-port-b.example.com", 7443, 2097152),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +195,7 @@ func TestAccResourceAutoF5XCLogReceiver_withTLSCaChoiceTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +206,20 @@ func TestAccResourceAutoF5XCLogReceiver_withTLSCaChoiceTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSDefaultPort(name, namespace, "tls-ca-a.example.com", 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSTrustedCA(name, namespace, "tls-ca-b.example.com", "string:///LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t", 10485760),
+				Config: testAccResourceAutoF5XCLogReceiverConfig_withTLSTrustedCA(name, namespace, "tls-ca-b.example.com", testAccLogReceiverTrustedCaURL(), 10485760),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,9 +230,9 @@ func TestAccResourceAutoF5XCLogReceiver_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-log-receiver-" + acctest.RandString(t, 8)
+	name := "example-log-receiver-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckLogReceiverDestroyProducer(t),
@@ -214,24 +241,28 @@ func TestAccResourceAutoF5XCLogReceiver_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCLogReceiverConfig_full(name, namespace, "full-a.example.com", 6514),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCLogReceiverConfig_fullUpdated(name, namespace, "full-b.example.com", 7514),
 			},
 			{
-				ResourceName:                         "f5xc_log_receiver.test",
+				ResourceName:                         "f5xc_log_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_log_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCLogReceiverConfig_full("example-log-receiver", "default", "full-a.example.com", 6514),
+		})
 }
 
 func testAccCheckLogReceiverDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -239,141 +270,11 @@ func testAccCheckLogReceiverDestroyProducer(t *testing.T) func(*terraform.State)
 }
 
 func testAccResourceAutoF5XCLogReceiverConfig_withUDP(name, namespace, serverName string, port, syslogRFC5424 int64) string {
-	modeBlock := fmt.Sprintf(`
-      udp_server = {
-        server_name = %q
-        port        = %d
-      }
-`, serverName, port)
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver udp", modeBlock, syslogRFC5424, "", "", nil, nil)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_withTCP(name, namespace, serverName string, port, syslogRFC5424 int64) string {
-	modeBlock := fmt.Sprintf(`
-      tcp_server = {
-        server_name = %q
-        port        = %d
-      }
-`, serverName, port)
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver tcp", modeBlock, syslogRFC5424, "", "", nil, nil)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_withTLSDefaultPort(name, namespace, serverName string, syslogRFC5424 int64) string {
-	modeBlock := fmt.Sprintf(`
-      tls_server = {
-        server_name = %q
-        port_choice = {
-          default_syslog_tls_port = true
-        }
-        ca_choice = {
-          volterra_ca = true
-        }
-        mtls_choice = {
-          mtls_disabled = true
-        }
-      }
-`, serverName)
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver tls default port", modeBlock, syslogRFC5424, "", "", nil, nil)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_withTLSCustomPort(name, namespace, serverName string, port, syslogRFC5424 int64) string {
-	modeBlock := fmt.Sprintf(`
-      tls_server = {
-        server_name = %q
-        port_choice = {
-          port = %d
-        }
-        ca_choice = {
-          volterra_ca = true
-        }
-        mtls_choice = {
-          mtls_disabled = true
-        }
-      }
-`, serverName, port)
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver tls custom port", modeBlock, syslogRFC5424, "", "", nil, nil)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_withTLSTrustedCA(name, namespace, serverName, trustedCAURL string, syslogRFC5424 int64) string {
-	modeBlock := fmt.Sprintf(`
-      tls_server = {
-        server_name = %q
-        port_choice = {
-          default_syslog_tls_port = true
-        }
-        ca_choice = {
-          trusted_ca_url = %q
-        }
-        mtls_choice = {
-          mtls_disabled = true
-        }
-      }
-`, serverName, trustedCAURL)
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver tls trusted ca", modeBlock, syslogRFC5424, "", "", nil, nil)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_full(name, namespace, serverName string, port int64) string {
-	modeBlock := fmt.Sprintf(`
-      udp_server = {
-        server_name = %q
-        port        = %d
-      }
-`, serverName, port)
-
-	labels := map[string]string{"env": "test", "tier": "shared"}
-	annotations := map[string]string{"owner": "platform-team"}
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver full", modeBlock, 10485760, "full metadata", "full annotations", labels, annotations)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig_fullUpdated(name, namespace, serverName string, port int64) string {
-	modeBlock := fmt.Sprintf(`
-      tcp_server = {
-        server_name = %q
-        port        = %d
-      }
-`, serverName, port)
-
-	labels := map[string]string{"env": "prod", "tier": "security"}
-	annotations := map[string]string{"owner": "secops-team"}
-
-	return testAccResourceAutoF5XCLogReceiverConfig(name, namespace, "log receiver full updated", modeBlock, 2097152, "full metadata updated", "full annotations updated", labels, annotations)
-}
-
-func testAccResourceAutoF5XCLogReceiverConfig(
-	name, namespace, description, modeBlock string,
-	syslogRFC5424 int64,
-	_, _ string,
-	labels, annotations map[string]string,
-) string {
-	labelsBlock := ""
-	if len(labels) > 0 {
-		labelsBlock = "\n  labels = {\n"
-		for k, v := range labels {
-			labelsBlock += fmt.Sprintf("    %s = %q\n", k, v)
-		}
-		labelsBlock += "  }\n"
-	}
-
-	annotationsBlock := ""
-	if len(annotations) > 0 {
-		annotationsBlock = "\n  annotations = {\n"
-		for k, v := range annotations {
-			annotationsBlock += fmt.Sprintf("    %s = %q\n", k, v)
-		}
-		annotationsBlock += "  }\n"
-	}
-
 	return fmt.Sprintf(`
-resource "f5xc_log_receiver" "test" {
+resource "f5xc_log_receiver" "example" {
   name        = %q
   namespace   = %q
-  description = %q%s%s
+  description = "UDP log receiver example"
 
   where_choice = {
     site_local = true
@@ -381,7 +282,11 @@ resource "f5xc_log_receiver" "test" {
 
   log_receiver_choice = {
     syslog = {
-      mode_choice = {%s
+      mode_choice = {
+        udp_server = {
+          server_name = %q
+          port        = %d
+        }
       }
       format_choice = {
         syslog_rfc5424 = %d
@@ -389,5 +294,215 @@ resource "f5xc_log_receiver" "test" {
     }
   }
 }
-`, name, namespace, description, labelsBlock, annotationsBlock, modeBlock, syslogRFC5424)
+`, name, namespace, serverName, port, syslogRFC5424)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_withTCP(name, namespace, serverName string, port, syslogRFC5424 int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "TCP log receiver example"
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        tcp_server = {
+          server_name = %q
+          port        = %d
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = %d
+      }
+    }
+  }
+}
+`, name, namespace, serverName, port, syslogRFC5424)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_withTLSDefaultPort(name, namespace, serverName string, syslogRFC5424 int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "TLS log receiver example with default port"
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        tls_server = {
+          server_name = %q
+          port_choice = {
+            default_syslog_tls_port = true
+          }
+          ca_choice = {
+            volterra_ca = true
+          }
+          mtls_choice = {
+            mtls_disabled = true
+          }
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = %d
+      }
+    }
+  }
+}
+`, name, namespace, serverName, syslogRFC5424)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_withTLSCustomPort(name, namespace, serverName string, port, syslogRFC5424 int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "TLS log receiver example with custom port"
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        tls_server = {
+          server_name = %q
+          port_choice = {
+            port = %d
+          }
+          ca_choice = {
+            volterra_ca = true
+          }
+          mtls_choice = {
+            mtls_disabled = true
+          }
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = %d
+      }
+    }
+  }
+}
+`, name, namespace, serverName, port, syslogRFC5424)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_withTLSTrustedCA(name, namespace, serverName, trustedCAURL string, syslogRFC5424 int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "TLS log receiver example with trusted CA"
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        tls_server = {
+          server_name = %q
+          port_choice = {
+            default_syslog_tls_port = true
+          }
+          ca_choice = {
+            trusted_ca_url = %q
+          }
+          mtls_choice = {
+            mtls_disabled = true
+          }
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = %d
+      }
+    }
+  }
+}
+`, name, namespace, serverName, trustedCAURL, syslogRFC5424)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_full(name, namespace, serverName string, port int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Full log receiver example"
+
+  labels = {
+    env  = "example"
+    tier = "shared"
+  }
+
+  annotations = {
+    owner = "platform-team"
+  }
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        udp_server = {
+          server_name = %q
+          port        = %d
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = 10485760
+      }
+    }
+  }
+}
+`, name, namespace, serverName, port)
+}
+
+func testAccResourceAutoF5XCLogReceiverConfig_fullUpdated(name, namespace, serverName string, port int64) string {
+	return fmt.Sprintf(`
+resource "f5xc_log_receiver" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated full log receiver example"
+
+  labels = {
+    env  = "example"
+    tier = "security"
+  }
+
+  annotations = {
+    owner = "netsec-team"
+  }
+
+  where_choice = {
+    site_local = true
+  }
+
+  log_receiver_choice = {
+    syslog = {
+      mode_choice = {
+        tcp_server = {
+          server_name = %q
+          port        = %d
+        }
+      }
+      format_choice = {
+        syslog_rfc5424 = 2097152
+      }
+    }
+  }
+}
+`, name, namespace, serverName, port)
 }

@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -37,10 +36,10 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -48,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_app_setting "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_setting"
 )
@@ -60,7 +60,6 @@ type ResourceF5XCAppSetting struct {
 type AppSettingAppTypeSettings struct {
 	AppTypeRef                  types.List   `tfsdk:"app_type_ref"`
 	BusinessLogicMarkupSetting  types.Object `tfsdk:"business_logic_markup_setting"`
-	TimeseriesAnalysesSetting   types.Object `tfsdk:"timeseries_analyses_setting"`
 	UserBehaviorAnalysisSetting types.Object `tfsdk:"user_behavior_analysis_setting"`
 }
 
@@ -69,16 +68,8 @@ type AppSettingBusinessLogicMarkupSetting struct {
 }
 
 type AppSettingLearnFromNsChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
-}
-
-type AppSettingTimeseriesAnalysesSetting struct {
-	MetricSelectors types.List `tfsdk:"metric_selectors"`
-}
-
-type AppSettingMetricSelector struct {
-	Metric        types.List `tfsdk:"metric"`
-	MetricsSource types.List `tfsdk:"metrics_source"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 type AppSettingUserBehaviorAnalysisSetting struct {
@@ -187,21 +178,6 @@ var AppSettingAppTypeSettingsModelAttributeMap = map[string]attr.Type{
 			"learn_from_namespace_choice": types.ObjectType{
 				AttrTypes: AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap,
 			}},
-	}, "timeseries_analyses_setting": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"metric_selectors": types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-
-						"metric": types.ListType{
-							ElemType: types.StringType,
-						},
-						"metrics_source": types.ListType{
-							ElemType: types.StringType,
-						},
-					},
-				},
-			}},
 	}, "user_behavior_analysis_setting": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"learn_from_namespace_choice": types.ObjectType{
@@ -232,36 +208,8 @@ var AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap = map[s
 // Attribute map for OneOfField --> LearnFromNamespace
 var AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
-}
-
-// Attribute map for PointerField --> TimeseriesAnalysesSetting
-var AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap = map[string]attr.Type{
-
-	"metric_selectors": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"metric": types.ListType{
-					ElemType: types.StringType,
-				},
-				"metrics_source": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> MetricSelectors
-var AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap = map[string]attr.Type{
-
-	"metric": types.ListType{
-		ElemType: types.StringType,
-	},
-	"metrics_source": types.ListType{
-		ElemType: types.StringType,
-	},
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for PointerField --> UserBehaviorAnalysisSetting
@@ -392,8 +340,8 @@ func (r *ResourceF5XCAppSetting) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Forbidden Activity Setting When L7 policy rules are set up to disallow certain types of requests, the system monitors persistent attempts from a user to send requests which result in policy denies. These settings specify how to use disallowed request activity from a user to determine suspicious behavior",
-		Description:         "Forbidden Activity Setting When L7 policy rules are set up to disallow certain types of requests, the system monitors persistent attempts from a user to send requests which result in policy denies. These settings specify how to use disallowed request activity from a user to determine suspicious behavior",
+		MarkdownDescription: "'App Setting' controls advanced monitoring of applications defined by 'App type'. This configuration is per namespace.<br>There is only one App Setting per namespace. It has list of references to 'App type' objects for which various<br>anomaly detection algorithms can be enabled.",
+		Description:         "'App Setting' controls advanced monitoring of applications defined by 'App type'. This configuration is per namespace. There is only one App Setting per namespace. It has list of references to 'App type' objects for which various anomaly detection algorithms can be enabled.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -449,7 +397,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"default"}...),
+					namespacetypevalidator.AllowedIn("user"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -505,7 +453,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -526,10 +474,21 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 									Computed:            false,
 									Validators: []validator.Object{
 										exactlyoneofvalidator.ExactlyOneOf(
+											"disable",
 											"enable",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
+										"disable": schema.BoolAttribute{
+											Description:         "Disable learning from this namespace API Endpoints are not discovered in this namespace",
+											MarkdownDescription: "Disable learning from this namespace API Endpoints are not discovered in this namespace",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.Bool{
+												boolvalidator.Equals(true),
+											},
+										},
 										"enable": schema.BoolAttribute{
 											Description:         "Enable learning from this namespace API Endpoints are discovered in this namespace",
 											MarkdownDescription: "Enable learning from this namespace API Endpoints are discovered in this namespace",
@@ -538,54 +497,6 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 											Computed:            false,
 											Validators: []validator.Bool{
 												boolvalidator.Equals(true),
-											},
-										},
-									},
-								},
-							},
-						},
-						"timeseries_analyses_setting": schema.SingleNestedAttribute{
-							Description:         "DDoS Detection Settings Time series anomaly detection is performed using advanced machine learning based on metrics such as request rate, error rate, latency, throughput etc. The clients are flagged if anomalies are observed",
-							MarkdownDescription: "DDoS Detection Settings Time series anomaly detection is performed using advanced machine learning based on metrics such as request rate, error rate, latency, throughput etc. The clients are flagged if anomalies are observed",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Attributes: map[string]schema.Attribute{
-								"metric_selectors": schema.ListNestedAttribute{
-									Description:         "Metric Selector Define the metric selection criteria, i.e. the metrics source and the actual metrics that should be included in the detection logic",
-									MarkdownDescription: "Metric Selector Define the metric selection criteria, i.e. the metrics source and the actual metrics that should be included in the detection logic",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.List{
-										listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-									},
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"metric": schema.ListAttribute{
-												Description:         "Metrics Choose one or more metrics to be included in the detection logic",
-												MarkdownDescription: "Metrics Choose one or more metrics to be included in the detection logic<br>**Valid Options:** `['ERROR_RATE', 'LATENCY', 'REQUEST_RATE', 'THROUGHPUT']` (Multiple selection allowed)<br>**Default:** `NO_METRICS`",
-												ElementType:         types.StringType,
-												Required:            false,
-												Optional:            true,
-												Computed:            true,
-												Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NO_METRICS")),
-												Validators: []validator.List{
-													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ERROR_RATE", "LATENCY", "REQUEST_RATE", "THROUGHPUT"}...)),
-												},
-											},
-											"metrics_source": schema.ListAttribute{
-												Description:         "Metrics Sources Choose the source for the metrics to be included in the detection logic",
-												MarkdownDescription: "Metrics Sources Choose the source for the metrics to be included in the detection logic<br>**Allowed Values (choose one):** `['EDGES', 'NODES', 'NONE', 'VIRTUAL_HOSTS']`<br>**Default:** `NONE`",
-												ElementType:         types.StringType,
-												Required:            false,
-												Optional:            true,
-												Computed:            true,
-												Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NONE")),
-												Validators: []validator.List{
-													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EDGES", "NODES", "NONE", "VIRTUAL_HOSTS"}...)),
-													listvalidator.SizeAtMost(1),
-												},
 											},
 										},
 									},
@@ -992,9 +903,17 @@ func (r *ResourceF5XCAppSetting) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAppSettingModel
 
 	// Read Terraform plan data into the model
@@ -1140,6 +1059,13 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						return
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Disable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						businessLogicMarkupSettingSpec.LearnFromNamespace = disableSpecBool
+					}
+
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
 						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
@@ -1147,91 +1073,6 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
 					}
 
-				}
-
-			}
-
-			// resource modelToSpecNested PointerField --> TimeseriesAnalysesSetting
-			if !appTypeSettingsElement.TimeseriesAnalysesSetting.IsNull() && !appTypeSettingsElement.TimeseriesAnalysesSetting.IsUnknown() {
-				var timeseriesAnalysesSettingModel AppSettingTimeseriesAnalysesSetting
-				response.Diagnostics.Append(appTypeSettingsElement.TimeseriesAnalysesSetting.As(ctx, &timeseriesAnalysesSettingModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				timeseriesAnalysesSettingSpec := &ves_io_schema_app_setting.TimeseriesAnalysesSetting{}
-				appTypeSettingsSpec[i].TimeseriesAnalysesSetting = timeseriesAnalysesSettingSpec
-
-				// resource modelToSpecNested ArrayOfPointerField --> MetricSelectors
-				if !timeseriesAnalysesSettingModel.MetricSelectors.IsNull() && !timeseriesAnalysesSettingModel.MetricSelectors.IsUnknown() && len(timeseriesAnalysesSettingModel.MetricSelectors.Elements()) > 0 {
-					// 1. Convert the types.List into a slice of the model's Go struct
-					var metricSelectorsElements []AppSettingMetricSelector
-					response.Diagnostics.Append(timeseriesAnalysesSettingModel.MetricSelectors.ElementsAs(ctx, &metricSelectorsElements, false)...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// 2. Initialize the spec slice
-					metricSelectorsSpec := make([]*ves_io_schema_app_setting.MetricSelector, len(metricSelectorsElements))
-					timeseriesAnalysesSettingSpec.MetricSelectors = metricSelectorsSpec
-
-					// 3. Iterate over the converted Go slice
-					for ii, metricSelectorsElement := range metricSelectorsElements {
-						// Initialize the spec struct for the current element
-						timeseriesAnalysesSettingSpec.MetricSelectors[ii] = &ves_io_schema_app_setting.MetricSelector{}
-
-						// Recursively process nested elements
-
-						// resource modelToSpecNested ArrayOfEnumField --> Metric
-						if !metricSelectorsElement.Metric.IsNull() && !metricSelectorsElement.Metric.IsUnknown() {
-							// 1. Get raw string elements
-							metricRaw := make([]types.String, 0, len(metricSelectorsElement.Metric.Elements()))
-							diags = metricSelectorsElement.Metric.ElementsAs(ctx, &metricRaw, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// 2. Iterate and Convert using Proto Value Map
-							metricSpec := make([]ves_io_schema_app_setting.Metric, 0, len(metricRaw))
-							for _, raw := range metricRaw {
-								if v, ok := ves_io_schema_app_setting.Metric_value[raw.ValueString()]; ok {
-									metricSpec = append(metricSpec, ves_io_schema_app_setting.Metric(v))
-								} else {
-									response.Diagnostics.AddError(
-										"Invalid Enum Value",
-										fmt.Sprintf("Value '%s' is not a valid member for Metric", raw.ValueString()),
-									)
-								}
-							}
-							metricSelectorsSpec[ii].Metric = metricSpec
-						}
-
-						// resource modelToSpecNested EnumField --> MetricsSource
-						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
-							var metricsSourceTfStrings []types.String
-							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							if len(metricsSourceTfStrings) > 0 {
-								valStr := metricsSourceTfStrings[0].ValueString()
-								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
-									metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-								} else {
-									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
-									return
-								}
-							}
-						} else {
-							if v, ok := ves_io_schema_app_setting.MetricsSource_value["NONE"]; ok {
-								metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-							}
-						}
-
-					}
 				}
 
 			}
@@ -1295,6 +1136,12 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						}
 						enableDetectionOneOfSpec := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection{}
 						enableDetectionOneOfSpec.EnableDetection = &ves_io_schema_app_setting.MaliciousUserDetectionSetting{}
+						enableDetectionOneOfSpec.EnableDetection.BolaActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBolaDetection{
+							ExcludeBolaDetection: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.NonExistentUrlActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeNonExistentUrlActivityAutomatic{
+							IncludeNonExistentUrlActivityAutomatic: &ves_io_schema_app_setting.NonexistentUrlAutomaticActivitySetting{},
+						}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
 						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
@@ -1490,7 +1337,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1513,7 +1360,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_app_setting.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "app_setting", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "app_setting", err),
 		)
 		return
 	}
@@ -1705,6 +1552,15 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested BoolOfOneOfPointerField --> Disable
+					_, isDisable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Disable)
+
+					if isDisable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+					} else {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+					}
+
 					// resource specToModelNested BoolOfOneOfPointerField --> Enable
 					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
@@ -1749,94 +1605,6 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
 				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-			}
-
-			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-				// Create the nested Go struct
-				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
-				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-				// Recursively populate the nested struct
-
-				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-						appSettingMetricSelectorModel := AppSettingMetricSelector{}
-
-						// resource SpecToModelNested ArrayOfEnumField --> Metric
-						{
-							if len(metricSelectorsElement.GetMetric()) > 0 {
-								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-								for _, v := range metricSelectorsElement.GetMetric() {
-									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-										metricStrings = append(metricStrings, strVal)
-									}
-								}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.Metric = listValue
-							} else {
-								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
-							}
-						}
-
-						// resource specToModelNested EnumField --> MetricsSource
-						{
-							if metricSelectorsElement.GetMetricsSource().String() != "" {
-								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-								stringSlice := []types.String{stringValue}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.MetricsSource = listValue
-							} else {
-								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
-							}
-						}
-
-						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-					response.Diagnostics.Append(metricSelectorsListDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
-				}
-
-				// This field needs to be converted to a types.ObjectValue before assignment.
-				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
-				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
-
-			} else {
-				// The source field is nil (e.g. redacted by the API).
-				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-				// because the API may always return a non-nil struct (with REDACTED values) for this field,
-				// making this else-branch unreachable. The child OneOf handles the actual healing.
-				// The target is a types.Object, so we use types.ObjectNull.
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
 			}
 
 			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
@@ -2398,7 +2166,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "app_setting", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_setting", err),
 		)
 		return
 	}
@@ -2590,6 +2358,15 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested BoolOfOneOfPointerField --> Disable
+					_, isDisable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Disable)
+
+					if isDisable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+					} else {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+					}
+
 					// resource specToModelNested BoolOfOneOfPointerField --> Enable
 					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
@@ -2634,94 +2411,6 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
 				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-			}
-
-			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-				// Create the nested Go struct
-				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
-				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-				// Recursively populate the nested struct
-
-				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-						appSettingMetricSelectorModel := AppSettingMetricSelector{}
-
-						// resource SpecToModelNested ArrayOfEnumField --> Metric
-						{
-							if len(metricSelectorsElement.GetMetric()) > 0 {
-								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-								for _, v := range metricSelectorsElement.GetMetric() {
-									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-										metricStrings = append(metricStrings, strVal)
-									}
-								}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.Metric = listValue
-							} else {
-								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
-							}
-						}
-
-						// resource specToModelNested EnumField --> MetricsSource
-						{
-							if metricSelectorsElement.GetMetricsSource().String() != "" {
-								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-								stringSlice := []types.String{stringValue}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.MetricsSource = listValue
-							} else {
-								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
-							}
-						}
-
-						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-					response.Diagnostics.Append(metricSelectorsListDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
-				}
-
-				// This field needs to be converted to a types.ObjectValue before assignment.
-				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
-				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
-
-			} else {
-				// The source field is nil (e.g. redacted by the API).
-				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-				// because the API may always return a non-nil struct (with REDACTED values) for this field,
-				// making this else-branch unreachable. The child OneOf handles the actual healing.
-				// The target is a types.Object, so we use types.ObjectNull.
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
 			}
 
 			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
@@ -2777,7 +2466,10 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, map[string]attr.Value{
+						"disable_learning": types.BoolNull(),
+						"enable_learning":  types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
@@ -2855,7 +2547,10 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_bot_defense_activity": types.BoolNull(),
+									"include_bot_defense_activity": types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
@@ -2895,7 +2590,9 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, map[string]attr.Value{
+									"cooling_off_period": types.Int64Value(20),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
@@ -2958,7 +2655,12 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
+								enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_failed_login_activity": types.BoolNull(),
+									"include_failed_login_activity": types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, map[string]attr.Value{
+										"login_failures_threshold": types.Int64Value(10),
+									}),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
@@ -3021,7 +2723,12 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
+								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_forbidden_activity": types.BoolNull(),
+									"include_forbidden_activity": types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, map[string]attr.Value{
+										"forbidden_requests_threshold": types.Int64Value(10),
+									}),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
@@ -3069,7 +2776,10 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
+								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_ip_reputation": types.BoolNull(),
+									"include_ip_reputation": types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
@@ -3117,7 +2827,10 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["rate_limit_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
+								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_rate_limit": types.BoolNull(),
+									"include_rate_limit": types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
@@ -3165,7 +2878,10 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								enableDetectionAttributeMap["waf_activity_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
+								enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectValueMust(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, map[string]attr.Value{
+									"exclude_waf_activity": types.BoolNull(),
+									"include_waf_activity": types.BoolValue(true),
+								})
 							}
 
 							enableDetectionObj, enableDetectionObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
@@ -3242,6 +2958,12 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAppSettingModel
@@ -3407,6 +3129,13 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						return
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Disable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						businessLogicMarkupSettingSpec.LearnFromNamespace = disableSpecBool
+					}
+
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
 						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
@@ -3414,91 +3143,6 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
 					}
 
-				}
-
-			}
-
-			// resource modelToSpecNested PointerField --> TimeseriesAnalysesSetting
-			if !appTypeSettingsElement.TimeseriesAnalysesSetting.IsNull() && !appTypeSettingsElement.TimeseriesAnalysesSetting.IsUnknown() {
-				var timeseriesAnalysesSettingModel AppSettingTimeseriesAnalysesSetting
-				response.Diagnostics.Append(appTypeSettingsElement.TimeseriesAnalysesSetting.As(ctx, &timeseriesAnalysesSettingModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				timeseriesAnalysesSettingSpec := &ves_io_schema_app_setting.TimeseriesAnalysesSetting{}
-				appTypeSettingsSpec[i].TimeseriesAnalysesSetting = timeseriesAnalysesSettingSpec
-
-				// resource modelToSpecNested ArrayOfPointerField --> MetricSelectors
-				if !timeseriesAnalysesSettingModel.MetricSelectors.IsNull() && !timeseriesAnalysesSettingModel.MetricSelectors.IsUnknown() && len(timeseriesAnalysesSettingModel.MetricSelectors.Elements()) > 0 {
-					// 1. Convert the types.List into a slice of the model's Go struct
-					var metricSelectorsElements []AppSettingMetricSelector
-					response.Diagnostics.Append(timeseriesAnalysesSettingModel.MetricSelectors.ElementsAs(ctx, &metricSelectorsElements, false)...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// 2. Initialize the spec slice
-					metricSelectorsSpec := make([]*ves_io_schema_app_setting.MetricSelector, len(metricSelectorsElements))
-					timeseriesAnalysesSettingSpec.MetricSelectors = metricSelectorsSpec
-
-					// 3. Iterate over the converted Go slice
-					for ii, metricSelectorsElement := range metricSelectorsElements {
-						// Initialize the spec struct for the current element
-						timeseriesAnalysesSettingSpec.MetricSelectors[ii] = &ves_io_schema_app_setting.MetricSelector{}
-
-						// Recursively process nested elements
-
-						// resource modelToSpecNested ArrayOfEnumField --> Metric
-						if !metricSelectorsElement.Metric.IsNull() && !metricSelectorsElement.Metric.IsUnknown() {
-							// 1. Get raw string elements
-							metricRaw := make([]types.String, 0, len(metricSelectorsElement.Metric.Elements()))
-							diags = metricSelectorsElement.Metric.ElementsAs(ctx, &metricRaw, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// 2. Iterate and Convert using Proto Value Map
-							metricSpec := make([]ves_io_schema_app_setting.Metric, 0, len(metricRaw))
-							for _, raw := range metricRaw {
-								if v, ok := ves_io_schema_app_setting.Metric_value[raw.ValueString()]; ok {
-									metricSpec = append(metricSpec, ves_io_schema_app_setting.Metric(v))
-								} else {
-									response.Diagnostics.AddError(
-										"Invalid Enum Value",
-										fmt.Sprintf("Value '%s' is not a valid member for Metric", raw.ValueString()),
-									)
-								}
-							}
-							metricSelectorsSpec[ii].Metric = metricSpec
-						}
-
-						// resource modelToSpecNested EnumField --> MetricsSource
-						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
-							var metricsSourceTfStrings []types.String
-							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							if len(metricsSourceTfStrings) > 0 {
-								valStr := metricsSourceTfStrings[0].ValueString()
-								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
-									metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-								} else {
-									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
-									return
-								}
-							}
-						} else {
-							if v, ok := ves_io_schema_app_setting.MetricsSource_value["NONE"]; ok {
-								metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-							}
-						}
-
-					}
 				}
 
 			}
@@ -3562,6 +3206,12 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						}
 						enableDetectionOneOfSpec := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection{}
 						enableDetectionOneOfSpec.EnableDetection = &ves_io_schema_app_setting.MaliciousUserDetectionSetting{}
+						enableDetectionOneOfSpec.EnableDetection.BolaActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBolaDetection{
+							ExcludeBolaDetection: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.NonExistentUrlActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeNonExistentUrlActivityAutomatic{
+							IncludeNonExistentUrlActivityAutomatic: &ves_io_schema_app_setting.NonexistentUrlAutomaticActivitySetting{},
+						}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
 						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
@@ -3757,7 +3407,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3773,7 +3423,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	err = r.client.ReplaceObject(ctx, ves_io_schema_app_setting.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "app_setting", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_setting", err),
 		)
 		return
 	}
@@ -3782,7 +3432,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "app_setting", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_setting", err),
 		)
 		return
 	}
@@ -3973,6 +3623,15 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested BoolOfOneOfPointerField --> Disable
+					_, isDisable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Disable)
+
+					if isDisable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+					} else {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+					}
+
 					// resource specToModelNested BoolOfOneOfPointerField --> Enable
 					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
@@ -4017,94 +3676,6 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
 				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-			}
-
-			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-				// Create the nested Go struct
-				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
-				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-				// Recursively populate the nested struct
-
-				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-						appSettingMetricSelectorModel := AppSettingMetricSelector{}
-
-						// resource SpecToModelNested ArrayOfEnumField --> Metric
-						{
-							if len(metricSelectorsElement.GetMetric()) > 0 {
-								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-								for _, v := range metricSelectorsElement.GetMetric() {
-									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-										metricStrings = append(metricStrings, strVal)
-									}
-								}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.Metric = listValue
-							} else {
-								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
-							}
-						}
-
-						// resource specToModelNested EnumField --> MetricsSource
-						{
-							if metricSelectorsElement.GetMetricsSource().String() != "" {
-								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-								stringSlice := []types.String{stringValue}
-								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(listDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								appSettingMetricSelectorModel.MetricsSource = listValue
-							} else {
-								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
-							}
-						}
-
-						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-					response.Diagnostics.Append(metricSelectorsListDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
-				}
-
-				// This field needs to be converted to a types.ObjectValue before assignment.
-				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
-				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
-
-			} else {
-				// The source field is nil (e.g. redacted by the API).
-				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-				// because the API may always return a non-nil struct (with REDACTED values) for this field,
-				// making this else-branch unreachable. The child OneOf handles the actual healing.
-				// The target is a types.Object, so we use types.ObjectNull.
-				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
 			}
 
 			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
@@ -4688,7 +4259,7 @@ func (r *ResourceF5XCAppSetting) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "app_setting", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "app_setting", err),
 		)
 		return
 	}

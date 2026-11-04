@@ -58,8 +58,8 @@ func (d *DataSourceF5XCBigipIrule) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCBigipIrule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bigip_irule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bigip_irule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bigip_irule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bigip_irule) etc. can be fetched",
+		MarkdownDescription: "BIG-IP iRule Service manages iRule Library for customers",
+		Description:         "BIG-IP iRule Service manages iRule Library for customers",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -181,7 +181,7 @@ func (d *DataSourceF5XCBigipIrule) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bigip_irule", err))
 		return
 	}
 
@@ -251,12 +251,8 @@ func (d *DataSourceF5XCBigipIrule) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot StringField --> IruleName
-	if specData.GetIruleName() != "" {
-		data.IruleName = types.StringValue(specData.GetIruleName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.IruleName = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.IruleName = types.StringValue(specData.GetIruleName())
 
 	// data SpecToModelRoot StringField --> Source
 	if specData.GetSource() != "" {

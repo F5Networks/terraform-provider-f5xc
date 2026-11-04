@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vip-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -49,7 +49,7 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_withAzTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vip-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -70,7 +70,7 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_withIPv6AndCname(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vip-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,7 +91,7 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_withMultipleAzEntries(t *testin
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vip-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vip-info-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -112,9 +112,9 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vip-info-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vip-info-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAwsTgwSiteSetVipInfoDestroyProducer(t),
@@ -126,7 +126,11 @@ func TestAccResourceAutoF5XCAwsTgwSiteSetVipInfo_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withIPv6AndCname(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_full(name, namespace),
+		})
 }
 
 func testAccCheckAwsTgwSiteSetVipInfoDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -214,7 +218,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_basic(name, namespace str
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -231,7 +235,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withVipTransition(name, n
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -248,7 +252,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withAzA(name, namespace s
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -265,7 +269,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withAzB(name, namespace s
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -282,7 +286,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withIPv6AndCname(name, na
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -303,7 +307,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_withMultipleAz(name, name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -327,7 +331,7 @@ func testAccResourceAutoF5XCAwsTgwSiteSetVipInfoConfig_full(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_tgw_site_set_vip_info" "test" {
+resource "f5xc_aws_tgw_site_set_vip_info" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 F5, Inc. All rights reserved.
+//
+
 package mapmergemodifier_test
 
 import (
@@ -7,19 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/stretchr/testify/assert"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 )
 
-// TestMapMerge_UpdateScenario simulates the exact failing scenario:
-// Step 1: Create with labels = {"env":"acceptance-test", "version":"v1"}
-// After Read, state = {"env":"acceptance-test", "version":"v1", "ves.io/cpd":"RE"}
-// Step 3: Update config to labels = {"env":"acceptance-test", "version":"v2"}
-// ProposedNewState (PlanValue) = {"env":"acceptance-test", "version":"v2", "ves.io/cpd":"RE"}
-// Expected: plan = merge(state, config) = {"env":"acceptance-test", "version":"v2", "ves.io/cpd":"RE"}
-//
-// The plan must equal the merge result so that the Update handler's restore logic
-// (which also merges state + config) produces the same value → plan == apply result.
+// TestMapMerge_UpdateScenario verifies that when a user updates a label value,
+// PlanModifyMap sets PlanValue equal to ConfigValue (never a hybrid of config and state)
+// to satisfy Terraform Core's Optional+Computed plan constraint.
 func TestMapMerge_UpdateScenario(t *testing.T) {
 	ctx := context.Background()
 
@@ -43,13 +42,6 @@ func TestMapMerge_UpdateScenario(t *testing.T) {
 		"ves.io/config-propagation-destination": types.StringValue("RE"),
 	})
 
-	// Expected: merge(state, config) — config wins on conflicts, state keys preserved.
-	expectedMerged := types.MapValueMust(types.StringType, map[string]attr.Value{
-		"env":                                   types.StringValue("acceptance-test"),
-		"version":                               types.StringValue("v2"),
-		"ves.io/config-propagation-destination": types.StringValue("RE"),
-	})
-
 	req := planmodifier.MapRequest{
 		ConfigValue: configValue,
 		StateValue:  stateValue,
@@ -63,23 +55,9 @@ func TestMapMerge_UpdateScenario(t *testing.T) {
 	modifier := mapmergemodifier.New()
 	modifier.(mapmergemodifier.MapMergeModifier).PlanModifyMap(ctx, req, resp)
 
-	t.Logf("Config:  %v", configValue)
-	t.Logf("State:   %v", stateValue)
-	t.Logf("Plan in: %v", planValue)
-	t.Logf("Plan out: %v", resp.PlanValue)
-
-	// The plan should equal merge(state, config) — user's v2 + backend ves.io/cpd
-	if !resp.PlanValue.Equal(expectedMerged) {
-		t.Errorf("Expected plan = merge(state, config) %v, got %v", expectedMerged, resp.PlanValue)
-	}
-
-	// The plan should NOT equal config alone (which would miss ves.io/cpd)
-	if resp.PlanValue.Equal(configValue) {
-		t.Error("Plan should not equal config (missing backend keys)")
-	}
-
-	// The plan should NOT equal prior state (which has stale version=v1)
-	if resp.PlanValue.Equal(stateValue) {
-		t.Error("Plan should not equal prior state (has stale user values)")
-	}
+	// When user keys change, plan must equal config (not a hybrid of config + state).
+	assert.Equal(t, configValue, resp.PlanValue,
+		"expected plan to equal config when user modifies label values")
+	assert.NotEqual(t, stateValue, resp.PlanValue,
+		"plan must not equal stale prior state")
 }

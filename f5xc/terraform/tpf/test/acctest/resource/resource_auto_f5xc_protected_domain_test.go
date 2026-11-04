@@ -29,11 +29,11 @@ func TestAccResourceAutoF5XCProtectedDomain_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-protected-domain-" + acctest.RandString(t, 8)
+	name := "example-protected-domain-" + acctest.RandString(t, 8)
 	domain := testAccGenerateETLDPlusOneDomainValue(t, "pd-basic")
 	domainUpdated := testAccGenerateETLDPlusOneDomainValue(t, "pd-basic-upd")
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtectedDomainDestroyProducer(t),
@@ -41,18 +41,24 @@ func TestAccResourceAutoF5XCProtectedDomain_basic(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCProtectedDomainConfig_basic(name, namespace, domain),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCProtectedDomainConfig_withDescription(name, namespace, domainUpdated, "protected domain basic updated"),
+				Config: testAccResourceAutoF5XCProtectedDomainConfig_withDescription(name, namespace, domainUpdated, "protected domain updated example"),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtectedDomainConfig_basic("example-protected-domain", namespace, "example-protected-domain.com"),
+		})
 }
 
 func TestAccResourceAutoF5XCProtectedDomain_withDomainTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-protected-domain-" + acctest.RandString(t, 8)
+	name := "example-protected-domain-" + acctest.RandString(t, 8)
 	domain := testAccGenerateETLDPlusOneDomainValue(t, "pd-trans")
 	domainUpdated := testAccGenerateETLDPlusOneDomainValue(t, "pd-trans-upd")
 
@@ -64,9 +70,11 @@ func TestAccResourceAutoF5XCProtectedDomain_withDomainTransition(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCProtectedDomainConfig_basic(name, namespace, domain),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCProtectedDomainConfig_basic(name, namespace, domainUpdated),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 		},
 	})
 }
@@ -75,7 +83,7 @@ func TestAccResourceAutoF5XCProtectedDomain_withMetadataTransition(t *testing.T)
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-protected-domain-" + acctest.RandString(t, 8)
+	name := "example-protected-domain-" + acctest.RandString(t, 8)
 	domain := testAccGenerateETLDPlusOneDomainValue(t, "pd-meta")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -84,11 +92,13 @@ func TestAccResourceAutoF5XCProtectedDomain_withMetadataTransition(t *testing.T)
 		CheckDestroy:             testAccCheckProtectedDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCProtectedDomainConfig_withMetadata(name, namespace, domain, "test", "platform", "owner-a"),
+				Config: testAccResourceAutoF5XCProtectedDomainConfig_withMetadata(name, namespace, domain, "example", "platform", "example-owner"),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCProtectedDomainConfig_withMetadata(name, namespace, domain, "prod", "security", "owner-b"),
+				Config: testAccResourceAutoF5XCProtectedDomainConfig_withMetadata(name, namespace, domain, "example", "security", "example-owner-alt"),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 		},
 	})
 }
@@ -97,27 +107,45 @@ func TestAccResourceAutoF5XCProtectedDomain_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-protected-domain-" + acctest.RandString(t, 8)
+	name := "example-protected-domain-" + acctest.RandString(t, 8)
 	domain := testAccGenerateETLDPlusOneDomainValue(t, "pd-full")
 	domainUpdated := testAccGenerateETLDPlusOneDomainValue(t, "pd-full-upd")
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtectedDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCProtectedDomainConfig_full(name, namespace, domain, "test", "platform", "owner-a", "protected domain full"),
+				Config: testAccResourceAutoF5XCProtectedDomainConfig_full(name, namespace, domain, "example", "platform", "example-owner", "protected domain full"),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCProtectedDomainConfig_full(name, namespace, domainUpdated, "prod", "security", "owner-b", "protected domain full updated"),
+				Config: testAccResourceAutoF5XCProtectedDomainConfig_full(name, namespace, domainUpdated, "example", "security", "example-owner-alt", "protected domain updated full example"),
 			},
+			testAccResourceAutoF5XCProtectedDomainImportStep(),
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtectedDomainConfig_full("example-protected-domain", namespace, "example-protected-domain.com", "example", "platform", "example-owner", "Full protected domain example"),
+		})
 }
 
 func testAccCheckProtectedDomainDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_protected_domain", protectedDomainSchema.ObjectType, "protected domain")
+}
+
+// testAccResourceAutoF5XCProtectedDomainImportStep imports by "namespace/protected_domain"; name, uid and description are not round-tripped.
+func testAccResourceAutoF5XCProtectedDomainImportStep() resource.TestStep {
+	return resource.TestStep{
+		ResourceName:                         "f5xc_protected_domain.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateIDWithFields("f5xc_protected_domain.example", "namespace", "protected_domain"),
+		ImportStateVerifyIdentifierAttribute: "protected_domain",
+		ImportStateVerifyIgnore:              []string{"uid", "description", "name", "labels", "annotations"},
+	}
 }
 
 // testAccGenerateETLDPlusOneDomainValue generates a unique eTLD+1 domain (e.g. "pd-basic-a1b2c3d4.com")
@@ -128,7 +156,7 @@ func testAccGenerateETLDPlusOneDomainValue(t *testing.T, prefix string) string {
 
 func testAccResourceAutoF5XCProtectedDomainConfig_basic(name, namespace, protectedDomain string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protected_domain" "test" {
+resource "f5xc_protected_domain" "example" {
   name             = %q
   namespace        = %q
   protected_domain = %q
@@ -138,7 +166,7 @@ resource "f5xc_protected_domain" "test" {
 
 func testAccResourceAutoF5XCProtectedDomainConfig_withDescription(name, namespace, protectedDomain, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protected_domain" "test" {
+resource "f5xc_protected_domain" "example" {
   name             = %q
   namespace        = %q
   protected_domain = %q
@@ -149,7 +177,7 @@ resource "f5xc_protected_domain" "test" {
 
 func testAccResourceAutoF5XCProtectedDomainConfig_withMetadata(name, namespace, protectedDomain, env, team, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protected_domain" "test" {
+resource "f5xc_protected_domain" "example" {
   name             = %q
   namespace        = %q
   protected_domain = %q
@@ -168,7 +196,7 @@ resource "f5xc_protected_domain" "test" {
 
 func testAccResourceAutoF5XCProtectedDomainConfig_full(name, namespace, protectedDomain, env, team, owner, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protected_domain" "test" {
+resource "f5xc_protected_domain" "example" {
   name             = %q
   namespace        = %q
   protected_domain = %q

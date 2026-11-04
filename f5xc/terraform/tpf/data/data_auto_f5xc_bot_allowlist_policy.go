@@ -30,42 +30,42 @@ type DataSourceF5XCBotAllowlistPolicy struct {
 	client *client.APIClient
 }
 
-type BotAllowlistPolicyBotDefenseIPAllowlists struct {
+type BotAllowlistPolicyIPAllowlists struct {
 	IpAllowlist      types.List `tfsdk:"ip_allowlist"`
 	IpRangeAllowlist types.List `tfsdk:"ip_range_allowlist"`
 }
 
-type BotAllowlistPolicyBotDefenseIPAllowlistDetail struct {
+type BotAllowlistPolicyIPAllowlistDetail struct {
 	ClientIdentifierChoice types.Object `tfsdk:"client_identifier_choice"`
 }
 
-type BotAllowlistPolicyIPAllowlistDetailClientIdentifierChoice struct {
+type BotAllowlistPolicyClientIdentifierChoice struct {
 	IpDetail       types.Object `tfsdk:"ip_detail"`
 	IpPrefixDetail types.Object `tfsdk:"ip_prefix_detail"`
 }
 
-type BotAllowlistPolicyIPAllowlistDetailIpDetail struct {
+type BotAllowlistPolicyIpDetail struct {
 	IpDescription types.String `tfsdk:"ip_description"`
 	IpValue       types.String `tfsdk:"ip_value"`
 }
 
-type BotAllowlistPolicyIPAllowlistDetailIpPrefixDetail struct {
+type BotAllowlistPolicyIpPrefixDetail struct {
 	IpDescription types.String `tfsdk:"ip_description"`
 	IpValue       types.String `tfsdk:"ip_value"`
 }
 
-type BotAllowlistPolicyBotDefenseIPRangeAllowlistDetail struct {
+type BotAllowlistPolicyIPRangeAllowlistDetail struct {
 	EndWith       types.String `tfsdk:"end_with"`
 	IpDescription types.String `tfsdk:"ip_description"`
 	StartWith     types.String `tfsdk:"start_with"`
 }
 
-type BotAllowlistPolicyBotDefenseBotInfraWithVersion struct {
+type BotAllowlistPolicyBotInfraWithVersion struct {
 	BotInfraName types.String `tfsdk:"bot_infra_name"`
 	InUseVersion types.String `tfsdk:"in_use_version"`
 }
 
-type BotAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersion struct {
+type BotAllowlistPolicyCosseBotInfraWithDeliveredVersion struct {
 	CosseBotInfraName types.String `tfsdk:"cosse_bot_infra_name"`
 	DeliveredVersion  types.String `tfsdk:"delivered_version"`
 }
@@ -183,8 +183,8 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCBotAllowlistPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bot_allowlist_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_allowlist_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bot_allowlist_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_allowlist_policy) etc. can be fetched",
+		MarkdownDescription: "Configures Bot allowlist Policy",
+		Description:         "Configures Bot allowlist Policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -232,14 +232,14 @@ func (r *DataSourceF5XCBotAllowlistPolicy) Schema(ctx context.Context, request d
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
 					"ip_allowlist": schema.ListNestedAttribute{
-						Description: "IP & IP Prefix List",
+						Description: "IP & IP Prefix List IP addresses and IP prefixes added to the allow list.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"client_identifier_choice": schema.SingleNestedAttribute{
-									Description: "client identifier choice of client identifier",
+									Description: "client identifier Choose to add an individual IP address or an IP prefix.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -251,13 +251,13 @@ func (r *DataSourceF5XCBotAllowlistPolicy) Schema(ctx context.Context, request d
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
 												"ip_description": schema.StringAttribute{
-													Description: "ip description The description for ip address",
+													Description: "ip description Information to help identify the IP allowlist entry.",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 												},
 												"ip_value": schema.StringAttribute{
-													Description: "ip value A single Ip address",
+													Description: "ip value The IP address or IP prefix you want to add.",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -290,26 +290,26 @@ func (r *DataSourceF5XCBotAllowlistPolicy) Schema(ctx context.Context, request d
 						},
 					},
 					"ip_range_allowlist": schema.ListNestedAttribute{
-						Description: "IP Range List",
+						Description: "IP Range List Ranges of IP addresses added to the allowlist.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"end_with": schema.StringAttribute{
-									Description: "IP end with value IP range end with",
+									Description: "IP end with value The end of the IP address range.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 								},
 								"ip_description": schema.StringAttribute{
-									Description: "ip description The description for IP range",
+									Description: "ip description",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 								},
 								"start_with": schema.StringAttribute{
-									Description: "IP start with value IP range start with",
+									Description: "IP start with value The beginning of the IP address range.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -444,7 +444,7 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_allowlist_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bot_allowlist_policy", err))
 		return
 	}
 
@@ -507,16 +507,16 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot PointerField --> AllowlistPolicyContent
 	if specData.GetAllowlistPolicyContent() != nil {
-		var botAllowlistPolicyBotDefenseIPAllowlistsModel = &BotAllowlistPolicyBotDefenseIPAllowlists{}
+		var botAllowlistPolicyIPAllowlistsModel = &BotAllowlistPolicyIPAllowlists{}
 		allowlistPolicyContentElement := specData.GetAllowlistPolicyContent()
 
 		// data specToModelNested ArrayOfPointerField --> IpAllowlist
 		if len(allowlistPolicyContentElement.GetIpAllowlist()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ipAllowlistElements := make([]BotAllowlistPolicyBotDefenseIPAllowlistDetail, 0, len(allowlistPolicyContentElement.GetIpAllowlist()))
+			ipAllowlistElements := make([]BotAllowlistPolicyIPAllowlistDetail, 0, len(allowlistPolicyContentElement.GetIpAllowlist()))
 			for _, ipAllowlistElement := range allowlistPolicyContentElement.GetIpAllowlist() {
-				botAllowlistPolicyBotDefenseIPAllowlistDetailModel := BotAllowlistPolicyBotDefenseIPAllowlistDetail{}
+				botAllowlistPolicyIPAllowlistDetailModel := BotAllowlistPolicyIPAllowlistDetail{}
 
 				// data specToModelNested OneOfField --> ClientIdentifierChoice
 				if ipAllowlistElement.GetClientIdentifierChoice() != nil {
@@ -616,13 +616,13 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					botAllowlistPolicyBotDefenseIPAllowlistDetailModel.ClientIdentifierChoice = finalObj
+					botAllowlistPolicyIPAllowlistDetailModel.ClientIdentifierChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					botAllowlistPolicyBotDefenseIPAllowlistDetailModel.ClientIdentifierChoice = types.ObjectNull(BotAllowlistPolicyAllowlistPolicyContentIpAllowlistClientIdentifierChoiceModelAttributeMap)
+					botAllowlistPolicyIPAllowlistDetailModel.ClientIdentifierChoice = types.ObjectNull(BotAllowlistPolicyAllowlistPolicyContentIpAllowlistClientIdentifierChoiceModelAttributeMap)
 				}
 
-				ipAllowlistElements = append(ipAllowlistElements, botAllowlistPolicyBotDefenseIPAllowlistDetailModel)
+				ipAllowlistElements = append(ipAllowlistElements, botAllowlistPolicyIPAllowlistDetailModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -631,48 +631,48 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 			if response.Diagnostics.HasError() {
 				return
 			}
-			botAllowlistPolicyBotDefenseIPAllowlistsModel.IpAllowlist = ipAllowlistListValue
+			botAllowlistPolicyIPAllowlistsModel.IpAllowlist = ipAllowlistListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			botAllowlistPolicyBotDefenseIPAllowlistsModel.IpAllowlist = types.ListNull(types.ObjectType{AttrTypes: BotAllowlistPolicyAllowlistPolicyContentIpAllowlistModelAttributeMap})
+			botAllowlistPolicyIPAllowlistsModel.IpAllowlist = types.ListNull(types.ObjectType{AttrTypes: BotAllowlistPolicyAllowlistPolicyContentIpAllowlistModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfPointerField --> IpRangeAllowlist
 		if len(allowlistPolicyContentElement.GetIpRangeAllowlist()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ipRangeAllowlistElements := make([]BotAllowlistPolicyBotDefenseIPRangeAllowlistDetail, 0, len(allowlistPolicyContentElement.GetIpRangeAllowlist()))
+			ipRangeAllowlistElements := make([]BotAllowlistPolicyIPRangeAllowlistDetail, 0, len(allowlistPolicyContentElement.GetIpRangeAllowlist()))
 			for _, ipRangeAllowlistElement := range allowlistPolicyContentElement.GetIpRangeAllowlist() {
-				botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel := BotAllowlistPolicyBotDefenseIPRangeAllowlistDetail{}
+				botAllowlistPolicyIPRangeAllowlistDetailModel := BotAllowlistPolicyIPRangeAllowlistDetail{}
 
 				// data specToModelNested RequiredStringField --> EndWith
 				if ipRangeAllowlistElement.GetEndWith() != "" {
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.EndWith = types.StringValue(ipRangeAllowlistElement.GetEndWith())
+					botAllowlistPolicyIPRangeAllowlistDetailModel.EndWith = types.StringValue(ipRangeAllowlistElement.GetEndWith())
 				} else {
 					// Empty string, set to null
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.EndWith = types.StringNull()
+					botAllowlistPolicyIPRangeAllowlistDetailModel.EndWith = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> IpDescription
 				if ipRangeAllowlistElement.GetIpDescription() != "" {
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.IpDescription = types.StringValue(ipRangeAllowlistElement.GetIpDescription())
+					botAllowlistPolicyIPRangeAllowlistDetailModel.IpDescription = types.StringValue(ipRangeAllowlistElement.GetIpDescription())
 				} else {
 					// Empty string, set to null
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.IpDescription = types.StringNull()
+					botAllowlistPolicyIPRangeAllowlistDetailModel.IpDescription = types.StringNull()
 				}
 
 				// data specToModelNested RequiredStringField --> StartWith
 				if ipRangeAllowlistElement.GetStartWith() != "" {
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.StartWith = types.StringValue(ipRangeAllowlistElement.GetStartWith())
+					botAllowlistPolicyIPRangeAllowlistDetailModel.StartWith = types.StringValue(ipRangeAllowlistElement.GetStartWith())
 				} else {
 					// Empty string, set to null
-					botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel.StartWith = types.StringNull()
+					botAllowlistPolicyIPRangeAllowlistDetailModel.StartWith = types.StringNull()
 				}
 
-				ipRangeAllowlistElements = append(ipRangeAllowlistElements, botAllowlistPolicyBotDefenseIPRangeAllowlistDetailModel)
+				ipRangeAllowlistElements = append(ipRangeAllowlistElements, botAllowlistPolicyIPRangeAllowlistDetailModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -681,19 +681,19 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 			if response.Diagnostics.HasError() {
 				return
 			}
-			botAllowlistPolicyBotDefenseIPAllowlistsModel.IpRangeAllowlist = ipRangeAllowlistListValue
+			botAllowlistPolicyIPAllowlistsModel.IpRangeAllowlist = ipRangeAllowlistListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			botAllowlistPolicyBotDefenseIPAllowlistsModel.IpRangeAllowlist = types.ListNull(types.ObjectType{AttrTypes: BotAllowlistPolicyAllowlistPolicyContentIpRangeAllowlistModelAttributeMap})
+			botAllowlistPolicyIPAllowlistsModel.IpRangeAllowlist = types.ListNull(types.ObjectType{AttrTypes: BotAllowlistPolicyAllowlistPolicyContentIpRangeAllowlistModelAttributeMap})
 		}
 
 		allowlistPolicyContentObj, allowlistPolicyContentDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotAllowlistPolicyAllowlistPolicyContentModelAttributeMap,
-			botAllowlistPolicyBotDefenseIPAllowlistsModel,
+			botAllowlistPolicyIPAllowlistsModel,
 		)
 		response.Diagnostics.Append(allowlistPolicyContentDiags...)
 		data.AllowlistPolicyContent = allowlistPolicyContentObj
@@ -703,28 +703,28 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot ArrayOfPointerField --> BotInfrasWithVersion
 	if len(specData.GetBotInfrasWithVersion()) > 0 {
-		botInfrasWithVersionElements := make([]BotAllowlistPolicyBotDefenseBotInfraWithVersion, 0, len(specData.GetBotInfrasWithVersion()))
+		botInfrasWithVersionElements := make([]BotAllowlistPolicyBotInfraWithVersion, 0, len(specData.GetBotInfrasWithVersion()))
 
 		for _, botInfrasWithVersionElement := range specData.GetBotInfrasWithVersion() {
-			botAllowlistPolicyBotDefenseBotInfraWithVersionModel := BotAllowlistPolicyBotDefenseBotInfraWithVersion{}
+			botAllowlistPolicyBotInfraWithVersionModel := BotAllowlistPolicyBotInfraWithVersion{}
 
 			// data specToModelNested StringField --> BotInfraName
 			if botInfrasWithVersionElement.GetBotInfraName() != "" {
-				botAllowlistPolicyBotDefenseBotInfraWithVersionModel.BotInfraName = types.StringValue(botInfrasWithVersionElement.GetBotInfraName())
+				botAllowlistPolicyBotInfraWithVersionModel.BotInfraName = types.StringValue(botInfrasWithVersionElement.GetBotInfraName())
 			} else {
 				// Empty string, set to null
-				botAllowlistPolicyBotDefenseBotInfraWithVersionModel.BotInfraName = types.StringNull()
+				botAllowlistPolicyBotInfraWithVersionModel.BotInfraName = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> InUseVersion
 			if botInfrasWithVersionElement.GetInUseVersion() != "" {
-				botAllowlistPolicyBotDefenseBotInfraWithVersionModel.InUseVersion = types.StringValue(botInfrasWithVersionElement.GetInUseVersion())
+				botAllowlistPolicyBotInfraWithVersionModel.InUseVersion = types.StringValue(botInfrasWithVersionElement.GetInUseVersion())
 			} else {
 				// Empty string, set to null
-				botAllowlistPolicyBotDefenseBotInfraWithVersionModel.InUseVersion = types.StringNull()
+				botAllowlistPolicyBotInfraWithVersionModel.InUseVersion = types.StringNull()
 			}
 
-			botInfrasWithVersionElements = append(botInfrasWithVersionElements, botAllowlistPolicyBotDefenseBotInfraWithVersionModel)
+			botInfrasWithVersionElements = append(botInfrasWithVersionElements, botAllowlistPolicyBotInfraWithVersionModel)
 		}
 
 		{
@@ -759,28 +759,28 @@ func (d *DataSourceF5XCBotAllowlistPolicy) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot ArrayOfPointerField --> CosseBotInfrasWithDeliveredVersion
 	if len(specData.GetCosseBotInfrasWithDeliveredVersion()) > 0 {
-		cosseBotInfrasWithDeliveredVersionElements := make([]BotAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersion, 0, len(specData.GetCosseBotInfrasWithDeliveredVersion()))
+		cosseBotInfrasWithDeliveredVersionElements := make([]BotAllowlistPolicyCosseBotInfraWithDeliveredVersion, 0, len(specData.GetCosseBotInfrasWithDeliveredVersion()))
 
 		for _, cosseBotInfrasWithDeliveredVersionElement := range specData.GetCosseBotInfrasWithDeliveredVersion() {
-			botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel := BotAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersion{}
+			botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel := BotAllowlistPolicyCosseBotInfraWithDeliveredVersion{}
 
 			// data specToModelNested StringField --> CosseBotInfraName
 			if cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName() != "" {
-				botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName())
+				botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName())
 			} else {
 				// Empty string, set to null
-				botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringNull()
+				botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> DeliveredVersion
 			if cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion() != "" {
-				botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion())
+				botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion())
 			} else {
 				// Empty string, set to null
-				botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringNull()
+				botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringNull()
 			}
 
-			cosseBotInfrasWithDeliveredVersionElements = append(cosseBotInfrasWithDeliveredVersionElements, botAllowlistPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel)
+			cosseBotInfrasWithDeliveredVersionElements = append(cosseBotInfrasWithDeliveredVersionElements, botAllowlistPolicyCosseBotInfraWithDeliveredVersionModel)
 		}
 
 		{

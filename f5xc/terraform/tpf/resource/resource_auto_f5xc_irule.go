@@ -13,14 +13,11 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
@@ -32,6 +29,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -59,7 +57,6 @@ type ResourceF5XCIruleModel struct {
 	Namespace        types.String   `tfsdk:"namespace"`
 	Uid              types.String   `tfsdk:"uid"`
 	IruleDescription types.String   `tfsdk:"irule_description"`
-	DnsProxies       types.List     `tfsdk:"dns_proxies"`
 	Irule            types.String   `tfsdk:"irule"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 }
@@ -74,13 +71,6 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> DnsProxies
-var IruleDnsProxiesObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
 
 func NewResourceF5XCIrule() resource.Resource {
 	return &ResourceF5XCIrule{}
@@ -93,8 +83,8 @@ func (r *ResourceF5XCIrule) Metadata(ctx context.Context, request resource.Metad
 func (r *ResourceF5XCIrule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "iRule iRule object defines a traffic rule for BigIP. An iRule is a script that runs in response to network traffic coming via a BigIP iRules can be used to route, re-route, redirect, examine, modify, discard, or reject network traffic etc. going through a BIG-IP",
-		Description:         "iRule iRule object defines a traffic rule for BigIP. An iRule is a script that runs in response to network traffic coming via a BigIP iRules can be used to route, re-route, redirect, examine, modify, discard, or reject network traffic etc. going through a BIG-IP",
+		MarkdownDescription: "iRule object defines the iRule that can be used in CRUD, to create and manage iRule for manipulating the application traffic.",
+		Description:         "iRule object defines the iRule that can be used in CRUD, to create and manage iRule for manipulating the application traffic.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -170,44 +160,6 @@ func (r *ResourceF5XCIrule) Schema(ctx context.Context, request resource.SchemaR
 					stringvalidator.LengthAtMost(256),
 				},
 			},
-			"dns_proxies": schema.ListNestedAttribute{
-				Description:         "backref_obj The DNS proxy associated with iRule",
-				MarkdownDescription: "backref_obj The DNS proxy associated with iRule",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(16),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            false,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
 			"irule": schema.StringAttribute{
 				Description:         "irule irule content",
 				MarkdownDescription: "irule irule content<br>**Validation:** `Length LengthAtMost(24576)`",
@@ -280,9 +232,17 @@ func (r *ResourceF5XCIrule) ModifyPlan(ctx context.Context, req resource.ModifyP
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCIrule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCIruleModel
 
 	// Read Terraform plan data into the model
@@ -372,7 +332,7 @@ func (r *ResourceF5XCIrule) Create(ctx context.Context, request resource.CreateR
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -395,7 +355,7 @@ func (r *ResourceF5XCIrule) Create(ctx context.Context, request resource.CreateR
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_bigcne_irule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "irule", err),
 		)
 		return
 	}
@@ -521,68 +481,6 @@ func (r *ResourceF5XCIrule) Create(ctx context.Context, request resource.CreateR
 		data.IruleDescription = types.StringNull()
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				IruleDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: IruleDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Irule
 	if specData.GetIrule() != "" {
 		data.Irule = types.StringValue(specData.GetIrule())
@@ -641,7 +539,7 @@ func (r *ResourceF5XCIrule) Read(ctx context.Context, request resource.ReadReque
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigcne_irule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "irule", err),
 		)
 		return
 	}
@@ -767,68 +665,6 @@ func (r *ResourceF5XCIrule) Read(ctx context.Context, request resource.ReadReque
 		data.IruleDescription = types.StringNull()
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				IruleDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: IruleDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Irule
 	if specData.GetIrule() != "" {
 		data.Irule = types.StringValue(specData.GetIrule())
@@ -846,6 +682,12 @@ func (r *ResourceF5XCIrule) Read(ctx context.Context, request resource.ReadReque
 }
 
 func (r *ResourceF5XCIrule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCIruleModel
@@ -955,7 +797,7 @@ func (r *ResourceF5XCIrule) Update(ctx context.Context, request resource.UpdateR
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -971,7 +813,7 @@ func (r *ResourceF5XCIrule) Update(ctx context.Context, request resource.UpdateR
 	err = r.client.ReplaceObject(ctx, ves_io_schema_bigcne_irule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "irule", err),
 		)
 		return
 	}
@@ -980,7 +822,7 @@ func (r *ResourceF5XCIrule) Update(ctx context.Context, request resource.UpdateR
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigcne_irule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "irule", err),
 		)
 		return
 	}
@@ -1105,68 +947,6 @@ func (r *ResourceF5XCIrule) Update(ctx context.Context, request resource.UpdateR
 		data.IruleDescription = types.StringNull()
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				IruleDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: IruleDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Irule
 	if specData.GetIrule() != "" {
 		data.Irule = types.StringValue(specData.GetIrule())
@@ -1247,7 +1027,7 @@ func (r *ResourceF5XCIrule) Delete(ctx context.Context, request resource.DeleteR
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "irule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "irule", err),
 		)
 		return
 	}

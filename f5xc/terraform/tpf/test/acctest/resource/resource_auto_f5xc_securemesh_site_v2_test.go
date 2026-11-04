@@ -25,12 +25,11 @@ import (
 )
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_basic(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecuremeshSiteV2DestroyProducer(t),
@@ -39,33 +38,36 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withDescription(name, namespace, "securemesh basic updated"),
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withDescription(name, namespace, "securemesh updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSecuremeshSiteV2Config_basic("example-securemesh-site-v2", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withTunnelTypeTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,22 +78,22 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withTunnelTypeTransition(t *testing
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelType(name, namespace, "SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelType(name, namespace, "SITE_TO_SITE_TUNNEL_SSL"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -99,10 +101,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withTunnelTypeTransition(t *testing
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withUrlCategorizationChoiceTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,22 +114,22 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withUrlCategorizationChoiceTransiti
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withUrlCategorization(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withUrlCategorization(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -136,10 +137,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withUrlCategorizationChoiceTransiti
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withOfflineSurvivabilityModeTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -150,22 +150,22 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withOfflineSurvivabilityModeTransit
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withOfflineSurvivability(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withOfflineSurvivability(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -173,10 +173,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withOfflineSurvivabilityModeTransit
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withBlockedServicesChoiceTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -187,22 +186,22 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withBlockedServicesChoiceTransition
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withBlockedServiceDns(name, namespace, "VIRTUAL_NETWORK_SITE_LOCAL"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -210,47 +209,49 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withBlockedServicesChoiceTransition
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_full(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecuremeshSiteV2DestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_full(name, namespace, "test", "platform", "owner-a", "SITE_TO_SITE_TUNNEL_IPSEC"),
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_full(name, namespace, "example", "platform", "example-owner", "SITE_TO_SITE_TUNNEL_IPSEC"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_full(name, namespace, "prod", "security", "owner-b", "SITE_TO_SITE_TUNNEL_SSL"),
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_full(name, namespace, "example", "security", "example-owner-alt", "SITE_TO_SITE_TUNNEL_SSL"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSecuremeshSiteV2Config_full("example-securemesh-site-v2", "system", "example", "platform", "example-owner", "SITE_TO_SITE_TUNNEL_IPSEC"),
+		})
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withRegionalEdgeSelection(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -261,11 +262,11 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withRegionalEdgeSelection(t *testin
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withRegionalEdge(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -273,10 +274,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withRegionalEdgeSelection(t *testin
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHa(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -287,11 +287,11 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHa(t *testing.T) {
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withNodeHa(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -299,10 +299,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHa(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHaDisabled(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -313,11 +312,11 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHaDisabled(t *testing.T) {
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withNodeHa(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -325,10 +324,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withNodeHaDisabled(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withPerformanceEnhancement(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -339,22 +337,22 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withPerformanceEnhancement(t *testi
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withPerformanceMode(name, namespace, "L3"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withPerformanceMode(name, namespace, "L7"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -362,10 +360,9 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withPerformanceEnhancement(t *testi
 }
 
 func TestAccResourceAutoF5XCSecuremeshSiteV2_withTunnelDeadTimeout(t *testing.T) {
-	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-securemesh-site-v2-" + acctest.RandString(t, 6)
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -376,22 +373,130 @@ func TestAccResourceAutoF5XCSecuremeshSiteV2_withTunnelDeadTimeout(t *testing.T)
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelDeadTimeout(name, namespace, 5000),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelDeadTimeout(name, namespace, 15000),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site_v2.test",
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.test"),
-				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCSecuremeshSiteV2_withNetworkPolicyAndProxy covers network_policy_choice,
+// forward_proxy_choice, log_anonymization_choice, and proxy_bypass_choice. It transitions
+// log_anonymization_choice (disable → enable) and proxy_bypass_choice (no bypass → custom bypass)
+// within a single test to verify both oneofs persist correctly through state transitions.
+func TestAccResourceAutoF5XCSecuremeshSiteV2_withNetworkPolicyAndProxy(t *testing.T) {
+
+	namespace := "system"
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecuremeshSiteV2DestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withNetworkPolicy(name, namespace, false, false),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withNetworkPolicy(name, namespace, true, true),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCSecuremeshSiteV2_withEnterpriseProxyAndDns covers enterprise_proxy_choice,
+// dns_ntp_config, and management_network_choice. It transitions dns_ntp_config from F5-managed
+// defaults to custom DNS/NTP server lists within a single test.
+func TestAccResourceAutoF5XCSecuremeshSiteV2_withEnterpriseProxyAndDns(t *testing.T) {
+
+	namespace := "system"
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecuremeshSiteV2DestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withEnterpriseProxy(name, namespace, false),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withEnterpriseProxy(name, namespace, true),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCSecuremeshSiteV2_withS2SConnectivityChoices covers
+// s2s_connectivity_sli_choice and s2s_connectivity_slo_choice. These oneofs only support
+// "no connectivity" without references to external dc_cluster_group or site_mesh_group
+// objects, so this test verifies the schema attributes are set and round-trip correctly.
+func TestAccResourceAutoF5XCSecuremeshSiteV2_withS2SConnectivityChoices(t *testing.T) {
+
+	namespace := "system"
+	name := "example-securemesh-site-v2-" + acctest.RandString(t, 6)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecuremeshSiteV2DestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteV2Config_withS2SConnectivity(name, namespace),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site_v2.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site_v2.example"),
+				ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider", "tunnel_dead_timeout"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -404,7 +509,7 @@ func testAccCheckSecuremeshSiteV2DestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -429,7 +534,7 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -455,7 +560,7 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelType(name, namespace, tunnelType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name        = %q
   namespace   = %q
   tunnel_type = [%q]
@@ -486,7 +591,7 @@ func testAccResourceAutoF5XCSecuremeshSiteV2Config_withUrlCategorization(name, n
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -520,7 +625,7 @@ func testAccResourceAutoF5XCSecuremeshSiteV2Config_withOfflineSurvivability(name
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -551,7 +656,7 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_withBlockedServiceDns(name, namespace, networkType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -585,10 +690,10 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_full(name, namespace, env, team, owner, tunnelType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name        = %q
   namespace   = %q
-  description = "securemesh full"
+  description = "securemesh full example"
   tunnel_type = [%q]
 
   labels = {
@@ -598,6 +703,22 @@ resource "f5xc_securemesh_site_v2" "test" {
 
   annotations = {
     owner = %q
+  }
+
+  network_policy_choice = {
+    no_network_policy = true
+  }
+
+  forward_proxy_choice = {
+    no_forward_proxy = true
+  }
+
+  proxy_bypass_choice = {
+    no_proxy_bypass = true
+  }
+
+  log_anonymization_choice = {
+    disable_log_anonymization = true
   }
 
   url_categorization_choice = {
@@ -631,7 +752,7 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_withRegionalEdge(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -667,7 +788,7 @@ func testAccResourceAutoF5XCSecuremeshSiteV2Config_withNodeHa(name, namespace st
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -717,7 +838,7 @@ func testAccResourceAutoF5XCSecuremeshSiteV2Config_withPerformanceMode(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name      = %q
   namespace = %q
 
@@ -746,7 +867,7 @@ resource "f5xc_securemesh_site_v2" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteV2Config_withTunnelDeadTimeout(name, namespace string, timeout int) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site_v2" "test" {
+resource "f5xc_securemesh_site_v2" "example" {
   name                 = %q
   namespace            = %q
   tunnel_dead_timeout  = %d
@@ -768,4 +889,163 @@ resource "f5xc_securemesh_site_v2" "test" {
   }
 }
 `, name, namespace, timeout)
+}
+
+// testAccResourceAutoF5XCSecuremeshSiteV2Config_withNetworkPolicy covers:
+//   - network_policy_choice (no_network_policy)
+//   - forward_proxy_choice  (no_forward_proxy)
+//   - log_anonymization_choice: enableLogAnonymize=false → disable_log_anonymization; true → enable_log_anonymization
+//   - proxy_bypass_choice: customBypass=false → no_proxy_bypass; true → custom_proxy_bypass with domains
+func testAccResourceAutoF5XCSecuremeshSiteV2Config_withNetworkPolicy(name, namespace string, enableLogAnonymize, customBypass bool) string {
+	logAnonBlock := "disable_log_anonymization = true"
+	if enableLogAnonymize {
+		logAnonBlock = "enable_log_anonymization = true"
+	}
+
+	proxyBypassBlock := "no_proxy_bypass = true"
+	if customBypass {
+		proxyBypassBlock = `custom_proxy_bypass = {
+      domains = ["internal.example.com", "corp.example.org"]
+    }`
+	}
+
+	return fmt.Sprintf(`
+resource "f5xc_securemesh_site_v2" "example" {
+  name      = %q
+  namespace = %q
+
+  network_policy_choice = {
+    no_network_policy = true
+  }
+
+  forward_proxy_choice = {
+    no_forward_proxy = true
+  }
+
+  log_anonymization_choice = {
+    %s
+  }
+
+  proxy_bypass_choice = {
+    %s
+  }
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  blocked_services_choice = {
+    block_all_services = true
+  }
+
+  provider_choice = {
+    kvm = {
+      orchestration_choice = {
+        not_managed = {}
+      }
+    }
+  }
+}
+`, name, namespace, logAnonBlock, proxyBypassBlock)
+}
+
+// testAccResourceAutoF5XCSecuremeshSiteV2Config_withEnterpriseProxy covers:
+//   - enterprise_proxy_choice (f5_proxy)
+//   - dns_ntp_config: customDns=false → F5 defaults; true → custom DNS/NTP servers
+//   - management_network_choice (disable_management_network)
+func testAccResourceAutoF5XCSecuremeshSiteV2Config_withEnterpriseProxy(name, namespace string, customDns bool) string {
+	dnsNtpBlock := `dns_ntp_config = {
+    dns_choice = {
+      f5_dns_default = true
+    }
+    ntp_choice = {
+      f5_ntp_default = true
+    }
+  }`
+	if customDns {
+		dnsNtpBlock = `dns_ntp_config = {
+    dns_choice = {
+      custom_dns = {
+        dns_servers = ["8.8.8.8", "8.8.4.4"]
+      }
+    }
+    ntp_choice = {
+      custom_ntp = {
+        ntp_servers = ["time.cloudflare.com", "time.google.com"]
+      }
+    }
+  }`
+	}
+
+	return fmt.Sprintf(`
+resource "f5xc_securemesh_site_v2" "example" {
+  name      = %q
+  namespace = %q
+
+  enterprise_proxy_choice = {
+    f5_proxy = true
+  }
+
+  management_network_choice = {
+    disable_management_network = true
+  }
+
+  %s
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  blocked_services_choice = {
+    block_all_services = true
+  }
+
+  provider_choice = {
+    kvm = {
+      orchestration_choice = {
+        not_managed = {}
+      }
+    }
+  }
+}
+`, name, namespace, dnsNtpBlock)
+}
+
+// testAccResourceAutoF5XCSecuremeshSiteV2Config_withS2SConnectivity covers:
+//   - s2s_connectivity_sli_choice (no_s2s_connectivity_sli)
+//   - s2s_connectivity_slo_choice (no_s2s_connectivity_slo)
+//
+// dc_cluster_group and site_mesh_group variants require external object references
+// and are not covered here; those require dedicated integration test environments.
+func testAccResourceAutoF5XCSecuremeshSiteV2Config_withS2SConnectivity(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_securemesh_site_v2" "example" {
+  name      = %q
+  namespace = %q
+
+  s2s_connectivity_sli_choice = {
+    no_s2s_connectivity_sli = true
+  }
+
+  s2s_connectivity_slo_choice = {
+    no_s2s_connectivity_slo = true
+  }
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  blocked_services_choice = {
+    block_all_services = true
+  }
+
+  provider_choice = {
+    kvm = {
+      orchestration_choice = {
+        not_managed = {}
+      }
+    }
+  }
+}
+`, name, namespace)
 }

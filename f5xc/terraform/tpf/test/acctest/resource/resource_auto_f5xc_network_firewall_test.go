@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCNetworkFirewall_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,10 +37,10 @@ func TestAccResourceAutoF5XCNetworkFirewall_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -51,40 +51,44 @@ func TestAccResourceAutoF5XCNetworkFirewall_withEnhancedFirewallDependency(t *te
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkFirewallDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withEnhancedFirewallDependency(name, namespace, "test", "platform", "owner-a")},
+			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withEnhancedFirewallDependency(name, namespace, "example", "platform", "example-owner")},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"labels"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withEnhancedFirewallDependency(name, namespace, "prod", "security", "owner-b")},
+			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withEnhancedFirewallDependency(name, namespace, "example", "security", "example-owner-alt")},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"labels"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkFirewallConfig_withEnhancedFirewallDependency("example-network-firewall", namespace, "example", "platform", "example-owner"),
+		})
 }
 
 func TestAccResourceAutoF5XCNetworkFirewall_withFirewallPolicyDependency(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 	depName := name + "-np"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -94,10 +98,10 @@ func TestAccResourceAutoF5XCNetworkFirewall_withFirewallPolicyDependency(t *test
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withFirewallPolicyDependency(name, namespace, depName)},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -108,7 +112,7 @@ func TestAccResourceAutoF5XCNetworkFirewall_withForwardProxyPolicyDependency(t *
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 	depName := name + "-fpp"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -118,10 +122,10 @@ func TestAccResourceAutoF5XCNetworkFirewall_withForwardProxyPolicyDependency(t *
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withForwardProxyDependency(name, namespace, depName)},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +136,7 @@ func TestAccResourceAutoF5XCNetworkFirewall_withFastAclDependency(t *testing.T) 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 	fastACLName := name + "-fast-acl"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -142,10 +146,10 @@ func TestAccResourceAutoF5XCNetworkFirewall_withFastAclDependency(t *testing.T) 
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withFastAclDependency(name, namespace, fastACLName)},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -156,54 +160,58 @@ func TestAccResourceAutoF5XCNetworkFirewall_withForwardProxyAndFastAclDependenci
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 	fppName := name + "-fpp"
 	fastACLName := name + "-fast-acl"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkFirewallDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_withForwardProxyAndFastAclDependencies(name, namespace, fppName, fastACLName)},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkFirewallConfig_withForwardProxyAndFastAclDependencies("example-network-firewall", namespace, fppName, fastACLName),
+		})
 }
 
 func TestAccResourceAutoF5XCNetworkFirewall_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-firewall-" + testAccRunSuffix(t)
+	name := "example-network-firewall-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkFirewallDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_full(name, namespace, "description one", "test", "platform", "owner-a")},
+			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_full(name, namespace, "Full network firewall example", "example", "platform", "example-owner")},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"labels"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_full(name, namespace, "description two", "prod", "security", "owner-b")},
+			{Config: testAccResourceAutoF5XCNetworkFirewallConfig_full(name, namespace, "Updated full network firewall example", "example", "security", "example-owner-alt")},
 			{
-				ResourceName:                         "f5xc_network_firewall.test",
+				ResourceName:                         "f5xc_network_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"labels"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -216,7 +224,7 @@ func testAccCheckNetworkFirewallDestroyProducer(t *testing.T) func(*terraform.St
 
 func testAccResourceAutoF5XCNetworkFirewallConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_firewall" "test" {
+resource "f5xc_network_firewall" "example" {
   name      = %q
   namespace = %q
 }
@@ -236,7 +244,7 @@ resource "f5xc_enhanced_firewall_policy" "dep" {
   }
 }
 
-resource "f5xc_network_firewall" "test" {
+resource "f5xc_network_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -258,62 +266,62 @@ resource "f5xc_network_firewall" "test" {
 func testAccResourceAutoF5XCNetworkFirewallConfig_withFirewallPolicyDependency(name, namespace, depName string) string {
 	return fmt.Sprintf(`
 resource "f5xc_network_policy" "dep" {
-	name      = %q
-	namespace = "shared"
+  name      = %q
+  namespace = "shared"
 
-	endpoint = {
-		endpoint_choice = {
-			prefix_list = {
-				prefixes = ["10.0.0.0/8"]
-			}
-		}
-	}
+  endpoint = {
+    endpoint_choice = {
+      prefix_list = {
+        prefixes = ["10.0.0.0/8"]
+      }
+    }
+  }
 
-	rule_choice = {
-		rules = {
-			egress_rules = [
-				{
-					metadata = { name = "allow-all-egress" }
-					other_endpoint = {
-						prefix_list = {
-							prefixes = ["0.0.0.0/0"]
-						}
-					}
-					traffic_choice = {
-						all_traffic = true
-					}
-					action = ["ALLOW"]
-				}
-			]
-			ingress_rules = [
-				{
-					metadata = { name = "allow-all-ingress" }
-					other_endpoint = {
-						prefix_list = {
-							prefixes = ["0.0.0.0/0"]
-						}
-					}
-					traffic_choice = {
-						all_traffic = true
-					}
-					action = ["ALLOW"]
-				}
-			]
-		}
-	}
+  rule_choice = {
+    rules = {
+      egress_rules = [
+        {
+          metadata = { name = "allow-all-egress" }
+          other_endpoint = {
+            prefix_list = {
+              prefixes = ["0.0.0.0/0"]
+            }
+          }
+          traffic_choice = {
+            all_traffic = true
+          }
+          action = ["ALLOW"]
+        }
+      ]
+      ingress_rules = [
+        {
+          metadata = { name = "allow-all-ingress" }
+          other_endpoint = {
+            prefix_list = {
+              prefixes = ["0.0.0.0/0"]
+            }
+          }
+          traffic_choice = {
+            all_traffic = true
+          }
+          action = ["ALLOW"]
+        }
+      ]
+    }
+  }
 }
 
-resource "f5xc_network_firewall" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_firewall" "example" {
+  name      = %q
+  namespace = %q
 
-	description = "depends on firewall policy"
+  description = "Network firewall example depending on a firewall policy"
 
-	annotations = {
-		firewall_policy_dependency = f5xc_network_policy.dep.name
-	}
+  annotations = {
+    firewall_policy_dependency = f5xc_network_policy.dep.name
+  }
 
-	depends_on = [f5xc_network_policy.dep]
+  depends_on = [f5xc_network_policy.dep]
 }
 `, depName, name, namespace)
 }
@@ -333,11 +341,11 @@ resource "f5xc_forward_proxy_policy" "dep" {
   }
 }
 
-resource "f5xc_network_firewall" "test" {
+resource "f5xc_network_firewall" "example" {
   name      = %q
   namespace = %q
 
-  description = "depends on forward proxy policy"
+  description = "Network firewall example depending on a forward proxy policy"
 
   annotations = {
     forward_proxy_dependency = f5xc_forward_proxy_policy.dep.name
@@ -379,11 +387,11 @@ resource "f5xc_fast_acl" "dep" {
   }
 }
 
-resource "f5xc_network_firewall" "test" {
+resource "f5xc_network_firewall" "example" {
   name      = %q
   namespace = %q
 
-  description = "depends on forward proxy and fast acl"
+  description = "Network firewall example depending on forward proxy and fast ACL"
 
   annotations = {
     forward_proxy_dependency = f5xc_forward_proxy_policy.dep.name
@@ -401,32 +409,32 @@ resource "f5xc_network_firewall" "test" {
 func testAccResourceAutoF5XCNetworkFirewallConfig_withFastAclDependency(name, namespace, fastACLName string) string {
 	return fmt.Sprintf(`
 resource "f5xc_fast_acl" "dep" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 
-	site_choice = {
-		site_acl = {
-			network_choice = {
-				outside_network = true
-			}
-			vip_choice = {
-				all_services = true
-			}
-		}
-	}
+  site_choice = {
+    site_acl = {
+      network_choice = {
+        outside_network = true
+      }
+      vip_choice = {
+        all_services = true
+      }
+    }
+  }
 }
 
-resource "f5xc_network_firewall" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_firewall" "example" {
+  name      = %q
+  namespace = %q
 
-	description = "depends on fast acl"
+  description = "Network firewall example depending on a fast ACL"
 
-	annotations = {
-		fast_acl_dependency = f5xc_fast_acl.dep.name
-	}
+  annotations = {
+    fast_acl_dependency = f5xc_fast_acl.dep.name
+  }
 
-	depends_on = [f5xc_fast_acl.dep]
+  depends_on = [f5xc_fast_acl.dep]
 }
 `, fastACLName, namespace, name, namespace)
 }
@@ -444,7 +452,7 @@ resource "f5xc_enhanced_firewall_policy" "dep" {
   }
 }
 
-resource "f5xc_network_firewall" "test" {
+resource "f5xc_network_firewall" "example" {
   name        = %q
   namespace   = %q
   description = %q

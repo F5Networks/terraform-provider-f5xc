@@ -1,0 +1,125 @@
+# Binaries are published to the Terraform Registry (F5Networks/f5xc).
+# This nightly workflow verifies the published Registry binary via `terraform test`
+# without compiling Go code, and triggers the live acceptance test suite in GitLab CI
+# using a project-scoped GitLab Pipeline Trigger Token (no PAT required).
+name: nightly-test
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      acc_test_name:
+        description: 'Regex filter for GitLab acceptance-test trigger'
+        required: false
+        default: 'TestAccNamespaceResource|TestAccNamespacesDataSource'
+      gitlab_ref:
+        description: 'GitLab branch or ref to trigger'
+        required: false
+        default: 'main'
+
+permissions:
+  contents: read
+
+jobs:
+  registry-binary-test:
+    name: Terraform Test (Published Registry Binary)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Set up Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "latest"
+          terraform_wrapper: false
+
+      - name: Prepare native Terraform test suite (.tftest.hcl)
+        run: |
+          mkdir -p /tmp/nightly-tf-test
+          cat << 'EOF' > /tmp/nightly-tf-test/main.tf
+          terraform {
+            required_version = ">= 1.7.0"
+            required_providers {
+              f5xc = {
+                source = "F5Networks/f5xc"
+              }
+            }
+          }
+
+          variable "namespace_name" {
+            type    = string
+            default = "nightly-verify-ns"
+          }
+
+          resource "f5xc_namespace" "this" {
+            name = var.namespace_name
+          }
+          EOF
+
+          cat << 'EOF' > /tmp/nightly-tf-test/nightly.tftest.hcl
+          mock_provider "f5xc" {}
+
+          run "verify_namespace_plan_with_published_binary" {
+            command = plan
+
+            variables {
+              namespace_name = "nightly-schema-check"
+            }
+
+            assert {
+              condition     = f5xc_namespace.this.name == "nightly-schema-check"
+              error_message = "Expected f5xc_namespace name to match input variable"
+            }
+          }
+          EOF
+
+      - name: Download provider binary from Terraform Registry & validate schema
+        working-directory: /tmp/nightly-tf-test
+        run: |
+          terraform init
+          terraform version
+          terraform providers schema -json > schema.json
+          jq -e '.provider_schemas["registry.terraform.io/f5networks/f5xc"]' schema.json > /dev/null
+          rm -f schema.json
+
+      - name: Execute native Terraform tests (.tftest.hcl)
+        working-directory: /tmp/nightly-tf-test
+        run: terraform test -verbose
+
+  # Note: GitLab Pipeline Trigger Tokens (glptt-...) are write-only and cannot poll pipeline
+  # status. This job triggers the pipeline asynchronously; pass/fail results are monitored
+  # directly in GitLab CI under the f5xc-acceptance-tenant resource group.
+  gitlab-acceptance-trigger:
+    name: Trigger GitLab Acceptance Suite (terraform-plugin-testing)
+    runs-on: ubuntu-latest
+    needs: registry-binary-test
+    timeout-minutes: 10
+    steps:
+      - name: Trigger GitLab acceptance-test pipeline via Trigger Token
+        env:
+          GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
+          GITLAB_PROJECT_ID: "50750365"
+          GITLAB_REF: ${{ inputs.gitlab_ref || 'main' }}
+          ACC_TEST_NAME: ${{ inputs.acc_test_name || 'TestAccNamespaceResource|TestAccNamespacesDataSource' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GITLAB_TRIGGER_TOKEN}" ]; then
+            echo "::error::GITLAB_TRIGGER_TOKEN secret is missing or empty!"
+            exit 1
+          fi
+
+          HTTP_CODE=$(curl -sSL -o /tmp/gl_resp.json -w "%{http_code}" -X POST \
+            -F "token=${GITLAB_TRIGGER_TOKEN}" \
+            -F "ref=${GITLAB_REF}" \
+            -F "variables[ACC_TEST_NAME]=${ACC_TEST_NAME}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline")
+
+          if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+            echo "::error::GitLab trigger failed (HTTP ${HTTP_CODE}): $(cat /tmp/gl_resp.json)"
+            exit 1
+          fi
+
+          RESPONSE=$(cat /tmp/gl_resp.json)
+          PIPELINE_ID=$(echo "$RESPONSE" | jq -er '.id')
+          WEB_URL=$(echo "$RESPONSE" | jq -er '.web_url')
+          echo "Successfully triggered GitLab acceptance-test pipeline #${PIPELINE_ID}: ${WEB_URL}"

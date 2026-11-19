@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	err := providerserver.Serve(context.Background(), provider.New("2.0.0"), providerserver.ServeOpts{
-		Address:         "registry.terraform.io/f5/f5xc",
+		Address:         "registry.terraform.io/F5Networks/f5xc",
 		Debug:           debug,
 		ProtocolVersion: 6,
 	})
